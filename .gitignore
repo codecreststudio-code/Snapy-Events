@@ -29,11 +29,8 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # Environment files - NEVER commit these
-.env
-.env.local
-.env.*.local
-.env.production
-.env.production.local
+.env*
+!.env.example
 
 # Prisma
 prisma/migrations/*.sql
@@ -81,3 +78,16 @@ google-credentials.json
 **/secrets/
 **/keys/
 **/credentials/
+
+# Claude local configs
+.claude/
+
+# Documents & Roadmap
+*.docx
+*.doc
+*.pdf
+
+# Markdown files (except README)
+**/*.md
+!**/README.md
+!**/readme.md
