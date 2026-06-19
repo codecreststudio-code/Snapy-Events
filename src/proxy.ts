@@ -1,4 +1,4 @@
-// proxy.ts (project root)
+// src/proxy.ts
 // Renamed from middleware.ts in Next.js 16. Runs on the edge before each
 // request. Used here for: auth refresh, security headers, request ID,
 // and the `/admin` and `/dashboard` route guards (optimistic check — the
