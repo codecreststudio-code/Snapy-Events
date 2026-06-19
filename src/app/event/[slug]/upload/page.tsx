@@ -5,30 +5,29 @@ import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
-import { createClient as createUploadClient } from "@/lib/supabase/client"
 import { Button } from "@/lib/components/ui/button"
 import { Card, CardContent } from "@/lib/components/ui/card"
-import { Progress } from "@/lib/components/ui/progress"
-import { Skeleton } from "@/lib/components/ui/skeleton"
+import { Input } from "@/lib/components/ui/input"
+import { Label } from "@/lib/components/ui/label"
 import { toast } from "@/lib/components/ui/toaster"
+import { PLAN_LIMITS } from "@/lib/constants"
 import {
   ArrowLeft,
   Camera,
   Check,
   Cloud,
   CloudUpload,
-  Image,
   Loader2,
-  Upload,
   X,
+  AlertTriangle,
 } from "lucide-react"
-import type { Gallery, Event } from "@/lib/types"
+import type { Gallery } from "@/lib/types"
 
 async function getEvent(slug: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, slug, settings")
+    .select("id, name, slug, settings, organization_id, organization:organizations(plan, settings)")
     .eq("slug", slug)
     .eq("status", "published")
     .single()
@@ -70,6 +69,9 @@ export default function GuestUploadPage({ params }: { params: { slug: string } }
   const [files, setFiles] = useState<UploadFile[]>([])
   const [selectedGallery, setSelectedGallery] = useState<string>("")
   const [isUploading, setIsUploading] = useState(false)
+  const [guestName, setGuestName] = useState("")
+  const [guestEmail, setGuestEmail] = useState("")
+  const [limitError, setLimitError] = useState<string | null>(null)
 
   const { data: event, isLoading: eventLoading } = useQuery({
     queryKey: ["event", params.slug],
@@ -114,90 +116,157 @@ export default function GuestUploadPage({ params }: { params: { slug: string } }
   }
 
   async function uploadFiles() {
-    if (files.length === 0 || !selectedGallery) return
+    if (files.length === 0 || !selectedGallery || !event) return
+    setLimitError(null)
 
-    setIsUploading(true)
-
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    for (const uploadFile of files) {
-      if (uploadFile.status === "done") continue
-
-      try {
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.id === uploadFile.id ? { ...f, status: "uploading" as const } : f
-          )
-        )
-
-        const filename = `${Date.now()}-${uploadFile.file.name}`
-        const { error: uploadError } = await supabase.storage
-          .from("photos")
-          .upload(filename, uploadFile.file, {
-            contentType: uploadFile.file.type,
-            upsert: false,
-          })
-
-        if (uploadError) throw uploadError
-
-        const { data: publicUrl } = supabase.storage
-          .from("photos")
-          .getPublicUrl(filename)
-
-        const photoData = {
-          gallery_id: selectedGallery,
-          event_id: event!.id,
-          uploader_id: user?.id || null,
-          storage_path: filename,
-          thumbnail_path: null,
-          original_filename: uploadFile.file.name,
-          mime_type: uploadFile.file.type,
-          file_size: uploadFile.file.size,
-          width: null,
-          height: null,
-          metadata: {},
-          is_approved: settings.auto_approve_photos,
-          is_featured: false,
-          face_count: 0,
-          download_count: 0,
-        }
-
-        const { error: dbError } = await supabase.from("photos").insert(photoData)
-
-        if (dbError) throw dbError
-
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.id === uploadFile.id
-              ? { ...f, progress: 100, status: "done" as const }
-              : f
-          )
-        )
-      } catch (err) {
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.id === uploadFile.id
-              ? { ...f, status: "error" as const, error: (err as Error).message }
-              : f
-          )
-        )
-      }
+    // Validations: require a name to upload
+    const cleanName = guestName.trim()
+    const cleanEmail = guestEmail.trim().toLowerCase()
+    
+    if (!cleanName) {
+      toast({
+        title: "Name Required",
+        description: "Please enter your name so the host knows who uploaded the photos.",
+        variant: "destructive",
+      })
+      return
     }
 
-    setIsUploading(false)
+    setIsUploading(true)
+    const supabase = createClient()
+
+    try {
+      // 1. Quota checks
+      const orgPlan = (event.organization as any)?.plan || "free"
+      const orgSettings = (event.organization as any)?.settings || {}
+      
+      const guestBoost = orgSettings.guest_boost || 0
+      const shotsBoost = orgSettings.shots_boost || 0
+
+      const baseLimits = PLAN_LIMITS[orgPlan as keyof typeof PLAN_LIMITS] || PLAN_LIMITS.free
+      const maxGuests = baseLimits.guests_limit + guestBoost
+      const maxShots = baseLimits.shots_limit + shotsBoost
+
+      // Fetch uploads list to calculate current usage
+      const { data: currentUploads, error: uploadsErr } = await supabase
+        .from("photos")
+        .select("uploader_email, uploader_name")
+        .eq("event_id", event.id)
+
+      if (uploadsErr) throw uploadsErr
+
+      const uniqueGuests = new Set(
+        (currentUploads || [])
+          .map((p) => p.uploader_email?.toLowerCase() || p.uploader_name?.toLowerCase())
+          .filter(Boolean)
+      )
+
+      const guestIdentifier = cleanEmail || cleanName.toLowerCase()
+      const isNewGuest = !uniqueGuests.has(guestIdentifier)
+
+      // A: Guest limit check
+      if (isNewGuest && uniqueGuests.size >= maxGuests) {
+        setLimitError(`This event has reached its limit of ${maxGuests} guests. The host needs to upgrade their plan to accept more guest uploads.`)
+        setIsUploading(false)
+        return
+      }
+
+      // B: Shots limit check
+      const currentGuestShotsCount = (currentUploads || []).filter(
+        (p) => (p.uploader_email?.toLowerCase() === guestIdentifier || p.uploader_name?.toLowerCase() === guestIdentifier)
+      ).length
+
+      if (currentGuestShotsCount + files.length > maxShots) {
+        setLimitError(`You can upload at most ${maxShots} photos. You have already uploaded ${currentGuestShotsCount} photos, and are trying to upload ${files.length} more.`)
+        setIsUploading(false)
+        return
+      }
+
+      // 2. Perform uploads
+      const { data: { user } } = await supabase.auth.getUser()
+
+      for (const uploadFile of files) {
+        if (uploadFile.status === "done") continue
+
+        try {
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === uploadFile.id ? { ...f, status: "uploading" as const } : f
+            )
+          )
+
+          const filename = `${Date.now()}-${uploadFile.file.name}`
+          const { error: uploadError } = await supabase.storage
+            .from("photos")
+            .upload(filename, uploadFile.file, {
+              contentType: uploadFile.file.type,
+              upsert: false,
+            })
+
+          if (uploadError) throw uploadError
+
+          const photoData = {
+            gallery_id: selectedGallery,
+            event_id: event.id,
+            uploader_id: user?.id || null,
+            uploader_name: cleanName,
+            uploader_email: cleanEmail || null,
+            storage_path: filename,
+            thumbnail_path: null,
+            original_filename: uploadFile.file.name,
+            mime_type: uploadFile.file.type,
+            file_size: uploadFile.file.size,
+            width: null,
+            height: null,
+            metadata: {},
+            is_approved: settings.auto_approve_photos,
+            is_featured: false,
+            face_count: 0,
+            download_count: 0,
+          }
+
+          const { error: dbError } = await supabase.from("photos").insert(photoData)
+
+          if (dbError) throw dbError
+
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === uploadFile.id
+                ? { ...f, progress: 100, status: "done" as const }
+                : f
+            )
+          )
+        } catch (err) {
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === uploadFile.id
+                ? { ...f, status: "error" as const, error: (err as Error).message }
+                : f
+            )
+          )
+        }
+      }
+    } catch (err: any) {
+      toast({
+        title: "Upload Failed",
+        description: err.message || "An unexpected error occurred during upload.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsUploading(false)
+    }
 
     const successCount = files.filter((f) => f.status === "done").length
     const errorCount = files.filter((f) => f.status === "error").length
 
-    if (errorCount === 0) {
+    if (successCount > 0 && errorCount === 0) {
       toast({
         title: "Upload Complete",
-        description: `${successCount} photo(s) uploaded successfully`,
+        description: `${successCount} photo(s) uploaded successfully!`,
       })
-    } else {
+    } else if (errorCount > 0) {
       toast({
-        title: "Upload Complete",
+        title: "Upload Complete with errors",
         description: `${successCount} uploaded, ${errorCount} failed`,
         variant: "destructive",
       })
@@ -206,20 +275,20 @@ export default function GuestUploadPage({ params }: { params: { slug: string } }
 
   if (eventLoading || galleriesLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
       </div>
     )
   }
 
   if (!event) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-semibold mb-2">Event Not Found</h1>
-        <p className="text-muted-foreground mb-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-slate-50">
+        <h1 className="text-2xl font-semibold mb-2 text-slate-200">Event Not Found</h1>
+        <p className="text-slate-400 mb-4">
           The event you're looking for doesn't exist or uploads are disabled.
         </p>
-        <Button asChild>
+        <Button asChild className="bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold">
           <Link href="/">Go Home</Link>
         </Button>
       </div>
@@ -228,13 +297,13 @@ export default function GuestUploadPage({ params }: { params: { slug: string } }
 
   if (!settings.allow_guest_uploads) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <Camera className="h-12 w-12 text-muted-foreground mb-4" />
-        <h1 className="text-2xl font-semibold mb-2">Uploads Disabled</h1>
-        <p className="text-muted-foreground mb-4 text-center max-w-md">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-slate-50">
+        <Camera className="h-12 w-12 text-slate-500 mb-4 animate-bounce" />
+        <h1 className="text-2xl font-semibold mb-2 text-slate-200">Uploads Disabled</h1>
+        <p className="text-slate-400 mb-4 text-center max-w-md">
           This event is not accepting photo uploads at the moment.
         </p>
-        <Button asChild variant="outline">
+        <Button asChild variant="outline" className="border-slate-800">
           <Link href={`/event/${params.slug}`}>Back to Event</Link>
         </Button>
       </div>
@@ -242,62 +311,98 @@ export default function GuestUploadPage({ params }: { params: { slug: string } }
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
-        <div className="container flex h-14 items-center justify-between">
+    <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col">
+      <header className="sticky top-0 z-40 border-b border-slate-900 bg-slate-950/80 backdrop-blur">
+        <div className="container flex h-14 items-center justify-between px-4">
           <Link
             href={`/event/${params.slug}`}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-2 text-slate-400 hover:text-slate-200 text-sm"
           >
             <ArrowLeft className="h-5 w-5" />
             <span>Back to Event</span>
           </Link>
-          <span className="font-semibold">Upload Photos</span>
+          <span className="font-semibold text-slate-200">Upload Photos</span>
           <div className="w-20" />
         </div>
       </header>
 
-      <main className="flex-1 container py-6 space-y-6">
+      <main className="flex-1 container py-6 space-y-6 max-w-3xl mx-auto px-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{event.name}</h1>
-          <p className="text-muted-foreground">Upload photos to share with other guests</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-100">{event.name}</h1>
+          <p className="text-sm text-slate-400">Share your moments with other guests instantly.</p>
         </div>
 
-        <Card>
+        {limitError && (
+          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-start gap-2.5">
+            <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <span className="font-bold">Limit Reached:</span> {limitError}
+            </div>
+          </div>
+        )}
+
+        {/* Guest Details Form */}
+        <Card className="bg-slate-900 border-slate-800 p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="guestName" className="text-slate-300">Your Name *</Label>
+              <Input
+                id="guestName"
+                placeholder="Enter your name"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                disabled={isUploading}
+                className="bg-slate-950 border-slate-850 text-slate-200 focus:border-orange-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="guestEmail" className="text-slate-300">Email Address (Optional)</Label>
+              <Input
+                id="guestEmail"
+                type="email"
+                placeholder="For finding your photos via AI search"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                disabled={isUploading}
+                className="bg-slate-950 border-slate-850 text-slate-200 focus:border-orange-500"
+              />
+            </div>
+          </div>
+        </Card>
+
+        <Card className="bg-slate-900 border-slate-800">
           <CardContent className="p-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Select Gallery</label>
-                <select
-                  value={selectedGallery}
-                  onChange={(e) => setSelectedGallery(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                >
-                  <option value="">Choose a gallery...</option>
-                  {uploadGalleries.map((gallery) => (
-                    <option key={gallery.id} value={gallery.id}>
-                      {gallery.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-300">Select Gallery</label>
+              <select
+                value={selectedGallery}
+                onChange={(e) => setSelectedGallery(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-orange-500"
+              >
+                <option value="">Choose a gallery...</option>
+                {uploadGalleries.map((gallery) => (
+                  <option key={gallery.id} value={gallery.id}>
+                    {gallery.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </CardContent>
         </Card>
 
         <div
-          className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer"
+          className="border-2 border-dashed border-slate-800 rounded-2xl p-8 text-center hover:border-slate-700 transition-colors cursor-pointer bg-slate-900/20"
           onClick={() => fileInputRef.current?.click()}
           onDragOver={(e) => {
             e.preventDefault()
-            e.currentTarget.classList.add("border-primary")
+            e.currentTarget.classList.add("border-orange-500")
           }}
           onDragLeave={(e) => {
-            e.currentTarget.classList.remove("border-primary")
+            e.currentTarget.classList.remove("border-orange-500")
           }}
           onDrop={(e) => {
             e.preventDefault()
-            e.currentTarget.classList.remove("border-primary")
+            e.currentTarget.classList.remove("border-orange-500")
             handleFileSelect(e.dataTransfer.files)
           }}
         >
@@ -309,22 +414,23 @@ export default function GuestUploadPage({ params }: { params: { slug: string } }
             className="hidden"
             onChange={(e) => handleFileSelect(e.target.files)}
           />
-          <div className="flex flex-col items-center gap-2 text-muted-foreground">
-            <CloudUpload className="h-12 w-12" />
-            <p className="text-lg font-medium">Click to upload or drag and drop</p>
-            <p className="text-sm">PNG, JPG, WEBP, HEIC up to 50MB</p>
+          <div className="flex flex-col items-center gap-2 text-slate-400">
+            <CloudUpload className="h-12 w-12 text-slate-500" />
+            <p className="text-lg font-medium text-slate-300">Click to upload or drag and drop</p>
+            <p className="text-xs text-slate-500">PNG, JPG, WEBP, HEIC up to 50MB</p>
           </div>
         </div>
 
         {files.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-medium">
+              <h2 className="text-lg font-medium text-slate-200">
                 {files.length} file(s) selected
               </h2>
               <Button
                 variant="outline"
                 size="sm"
+                className="border-slate-800 hover:bg-slate-800"
                 onClick={() => {
                   files.forEach((f) => URL.revokeObjectURL(f.preview))
                   setFiles([])
@@ -334,11 +440,11 @@ export default function GuestUploadPage({ params }: { params: { slug: string } }
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
               {files.map((file) => (
                 <div
                   key={file.id}
-                  className="relative aspect-square rounded-lg overflow-hidden bg-muted"
+                  className="relative aspect-square rounded-xl overflow-hidden bg-slate-900 border border-slate-850"
                 >
                   <img
                     src={file.preview}
@@ -366,7 +472,7 @@ export default function GuestUploadPage({ params }: { params: { slug: string } }
                         e.stopPropagation()
                         removeFile(file.id)
                       }}
-                      className="absolute top-1 right-1 p-1 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
+                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 hover:bg-black/85 text-white transition-colors"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -379,6 +485,7 @@ export default function GuestUploadPage({ params }: { params: { slug: string } }
               <Button
                 onClick={uploadFiles}
                 disabled={!selectedGallery || isUploading || files.length === 0}
+                className="bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold px-6 py-5 rounded-xl shadow-[0_0_15px_rgba(249,115,22,0.25)]"
               >
                 {isUploading ? (
                   <>
@@ -396,23 +503,21 @@ export default function GuestUploadPage({ params }: { params: { slug: string } }
           </div>
         )}
 
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="font-medium mb-2">Upload Guidelines</h3>
-            <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• Photos will be reviewed before appearing in the gallery</li>
-              <li>• Please only upload photos from the event</li>
-              <li>• Ensure you have permission from people in your photos</li>
-              <li>• High-quality photos are encouraged</li>
-            </ul>
-          </CardContent>
+        <Card className="bg-slate-900 border-slate-800 p-6">
+          <h3 className="font-semibold text-slate-200 mb-2">Upload Guidelines</h3>
+          <ul className="text-sm text-slate-400 space-y-1">
+            <li>• Photos will be reviewed before appearing in the gallery</li>
+            <li>• Please only upload photos from the event</li>
+            <li>• Ensure you have permission from people in your photos</li>
+            <li>• High-quality photos are encouraged</li>
+          </ul>
         </Card>
       </main>
 
-      <footer className="border-t py-4">
-        <div className="container text-center text-xs text-muted-foreground">
+      <footer className="border-t border-slate-900 py-6 mt-12 bg-slate-950">
+        <div className="container text-center text-xs text-slate-600">
           Powered by{" "}
-          <a href="/" className="underline hover:text-foreground">
+          <a href="/" className="underline hover:text-slate-400">
             Snapsy
           </a>
         </div>

@@ -2,7 +2,8 @@ import { z } from "zod"
 import { defineRoute, ok, fail, created } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { subscribeSchema } from "@/lib/validators"
-import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder, planCurrency } from "@/lib/integrations/razorpay"
+import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder, planCurrency, cancelRazorpaySubscription } from "@/lib/integrations/razorpay"
+import { logger } from "@/lib/logger"
 
 export const POST = defineRoute({
   method: "POST",
@@ -34,3 +35,43 @@ export const POST = defineRoute({
     return created({ customer_id: customerId, order_id: order.id, amount, currency, plan: body.plan_id })
   },
 }).POST
+
+export const DELETE = defineRoute({
+  method: "DELETE",
+  requireAuth: true,
+  audit: "billing.unsubscribe.started",
+  handler: async ({ auth }) => {
+    const supabase = await createClient()
+    const { data: sub, error } = await supabase
+      .from("subscriptions")
+      .select("id, razorpay_subscription_id")
+      .eq("organization_id", auth.organization!.id)
+      .eq("status", "active")
+      .single()
+
+    if (error || !sub) return fail("NO_ACTIVE_SUBSCRIPTION", "No active subscription found to cancel", 400)
+
+    if (sub.razorpay_subscription_id) {
+      try {
+        await cancelRazorpaySubscription(sub.razorpay_subscription_id, true)
+      } catch (err: any) {
+        logger.error("Failed to cancel in Razorpay", { error: err.message })
+      }
+    }
+
+    // Update locally
+    await supabase
+      .from("subscriptions")
+      .update({ status: "cancelled" })
+      .eq("id", sub.id)
+
+    // Reset organization plan back to free
+    await supabase
+      .from("organizations")
+      .update({ plan: "free" })
+      .eq("id", auth.organization!.id)
+
+    return ok({ success: true })
+  },
+}).DELETE
+

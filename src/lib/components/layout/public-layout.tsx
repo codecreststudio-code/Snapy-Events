@@ -1,45 +1,121 @@
+"use client"
+
+import { useState } from "react"
 import Link from "next/link"
-import { Camera, ArrowRight } from "lucide-react"
+import { Camera, ArrowRight, Menu, X } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
+import { motion, AnimatePresence } from "framer-motion"
 
 export function PublicNavbar() {
+  const [isOpen, setIsOpen] = useState(false)
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Camera className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="font-semibold text-lg">Snapsy</span>
+          <span className="font-semibold text-lg bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Snapsy</span>
         </Link>
 
+        {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6">
-          <Link href="/features" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+          <Link href="/features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Features
           </Link>
-          <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+          <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Pricing
           </Link>
-          <Link href="/faq" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+          <Link href="/faq" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             FAQ
           </Link>
-          <Link href="/contact" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+          <Link href="/contact" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Contact
           </Link>
         </nav>
 
-        <div className="flex items-center gap-4">
-          <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        {/* Desktop CTAs */}
+        <div className="hidden md:flex items-center gap-4">
+          <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Sign in
           </Link>
           <Link href="/signup">
-            <Button>
+            <Button className="hover:scale-[1.02] active:scale-[0.98] transition-transform">
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
         </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex md:hidden p-2 text-muted-foreground hover:text-foreground focus:outline-none"
+          aria-label="Toggle menu"
+        >
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
       </div>
+
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="md:hidden border-b bg-background overflow-hidden"
+          >
+            <div className="px-4 pt-2 pb-6 space-y-3">
+              <Link
+                href="/features"
+                onClick={() => setIsOpen(false)}
+                className="block py-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Features
+              </Link>
+              <Link
+                href="/pricing"
+                onClick={() => setIsOpen(false)}
+                className="block py-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Pricing
+              </Link>
+              <Link
+                href="/faq"
+                onClick={() => setIsOpen(false)}
+                className="block py-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                FAQ
+              </Link>
+              <Link
+                href="/contact"
+                onClick={() => setIsOpen(false)}
+                className="block py-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Contact
+              </Link>
+              <div className="pt-4 border-t flex flex-col gap-3">
+                <Link
+                  href="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="flex justify-center py-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Sign in
+                </Link>
+                <Link href="/signup" onClick={() => setIsOpen(false)}>
+                  <Button className="w-full">
+                    Get Started
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query"
 import Link from "next/link"
-import { Plus, Calendar, MapPin, Image, MoreVertical, Camera } from "lucide-react"
+import { Plus, Calendar, MapPin, Image as ImageIcon, MoreVertical, Camera, ExternalLink, QrCode, Images, Eye } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { Card, CardContent } from "@/lib/components/ui/card"
 import {
@@ -34,126 +34,169 @@ export default function EventsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-extrabold tracking-tight">Events</h1>
+            <p className="text-muted-foreground text-sm">Manage your event hubs</p>
+          </div>
+          <Button disabled>
+            <Plus className="mr-2 h-4 w-4" /> Create Event
+          </Button>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-72 w-full rounded-xl border bg-muted/40 animate-pulse" />
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/40 pb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Events</h1>
-          <p className="text-muted-foreground">Manage your events</p>
+          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+            Your Events
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Create and manage live media sharing pages for your clients and guests.
+          </p>
         </div>
         <Link href="/dashboard/events/new">
-          <Button>
+          <Button className="shadow-lg shadow-primary/10 hover:shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all">
             <Plus className="mr-2 h-4 w-4" />
             Create Event
           </Button>
         </Link>
       </div>
 
+      {/* Main Grid List */}
       {events && events.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
-            <Card key={event.id} className="overflow-hidden">
-              <div className="aspect-video bg-muted relative">
-                {event.cover_image_url ? (
-                  <img
-                    src={event.cover_image_url}
-                    alt={event.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Camera className="h-12 w-12 text-muted-foreground/50" />
+            <Card key={event.id} className="overflow-hidden border border-border/40 bg-card/60 backdrop-blur-md hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group flex flex-col justify-between">
+              <div>
+                {/* Event Cover Image */}
+                <div className="aspect-video bg-muted relative overflow-hidden">
+                  {event.cover_image_url ? (
+                    <img
+                      src={event.cover_image_url}
+                      alt={event.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-indigo-500/5 flex items-center justify-center">
+                      <Camera className="h-10 w-10 text-muted-foreground/40 group-hover:text-primary/45 transition-colors" />
+                    </div>
+                  )}
+
+                  {/* Actions Dropdown */}
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="secondary" size="icon" className="h-8 w-8 rounded-full border shadow-sm cursor-pointer">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem asChild className="gap-2 cursor-pointer">
+                          <Link href={`/dashboard/events/${event.slug}`}>
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                            View Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild className="gap-2 cursor-pointer">
+                          <Link href={`/event/${event.slug}`} target="_blank">
+                            <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                            Public Gallery
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild className="gap-2 cursor-pointer">
+                          <Link href={`/dashboard/events/${event.slug}/qr`}>
+                            <QrCode className="h-4 w-4 text-muted-foreground" />
+                            QR Setup
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild className="gap-2 cursor-pointer">
+                          <Link href={`/dashboard/events/${event.slug}/gallery`}>
+                            <Images className="h-4 w-4 text-muted-foreground" />
+                            Galleries
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                )}
-                <div className="absolute top-2 right-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="secondary" size="icon" className="h-8 w-8">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link href={`/dashboard/events/${event.slug}`}>Edit</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href={`/event/${event.slug}`} target="_blank">
-                          View Public Page
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href={`/dashboard/events/${event.slug}/qr`}>QR Codes</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href={`/dashboard/events/${event.slug}/gallery`}>Galleries</Link>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                </div>
+
+                {/* Event Details Content */}
+                <div className="p-5 space-y-4">
+                  <div className="space-y-1">
+                    <Link href={`/dashboard/events/${event.slug}`}>
+                      <h3 className="font-semibold text-lg hover:text-primary transition-colors line-clamp-1 leading-snug">
+                        {event.name}
+                      </h3>
+                    </Link>
+                  </div>
+
+                  <div className="space-y-2 text-xs text-muted-foreground">
+                    {event.event_date && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-slate-400" />
+                        <span>{formatDate(event.event_date)}</span>
+                      </div>
+                    )}
+                    {event.venue && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-slate-400" />
+                        <span className="truncate">{event.venue}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <CardContent className="p-4">
-                <Link href={`/dashboard/events/${event.slug}`}>
-                  <h3 className="font-semibold text-lg hover:underline">{event.name}</h3>
-                </Link>
+              {/* Status and views footer */}
+              <div className="px-5 py-4 border-t border-border/30 bg-muted/10 flex items-center justify-between">
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase border flex items-center gap-1.5 ${
+                    event.status === "published"
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600"
+                      : "bg-amber-500/10 border-amber-500/20 text-amber-600"
+                  }`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${event.status === "published" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
+                  {event.status}
+                </span>
 
-                <div className="mt-2 space-y-1 text-sm text-muted-foreground">
-                  {event.event_date && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {formatDate(event.event_date)}
-                    </div>
-                  )}
-                  {event.venue && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      {event.venue}
-                    </div>
-                  )}
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <ImageIcon className="h-4 w-4 text-slate-400" />
+                  <span>{event.view_count || 0} views</span>
                 </div>
-
-                <div className="mt-4 flex items-center justify-between">
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      event.status === "published"
-                        ? "bg-green-100 text-green-700"
-                        : event.status === "draft"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    {event.status}
-                  </span>
-
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Image className="h-4 w-4" />
-                    <span>{event.view_count || 0} views</span>
-                  </div>
-                </div>
-              </CardContent>
+              </div>
             </Card>
           ))}
         </div>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <Camera className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="font-medium mb-2">No events yet</h3>
-            <p className="text-sm text-muted-foreground mb-4 text-center max-w-md">
-              Create your first event to start collecting photos from your guests.
+        <Card className="border border-dashed border-border/60 bg-card/20 py-20">
+          <CardContent className="flex flex-col items-center justify-center text-center">
+            <div className="p-4 bg-muted/40 rounded-full mb-4 border shadow-inner">
+              <Camera className="h-10 w-10 text-muted-foreground/60" />
+            </div>
+            <h3 className="text-xl font-bold tracking-tight">No events yet</h3>
+            <p className="text-sm text-muted-foreground mt-2 max-w-sm">
+              Create your first photography event to instantly collect guest pictures via QR codes and manage photo galleries.
             </p>
-            <Link href="/dashboard/events/new">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Your First Event
-              </Button>
-            </Link>
+            <div className="mt-6">
+              <Link href="/dashboard/events/new">
+                <Button className="shadow-lg shadow-primary/10 hover:shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Your First Event
+                </Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       )}

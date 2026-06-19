@@ -14,6 +14,7 @@ import { Button } from "@/lib/components/ui/button"
 import { Switch } from "@/lib/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/lib/components/ui/select"
 import { toast } from "@/lib/components/ui/toaster"
+import { useAuth } from "@/lib/hooks"
 
 const TIMEZONES = [
   "America/New_York",
@@ -50,12 +51,14 @@ interface EventFormData {
   countdown_date: string
 }
 
-async function createEvent(data: EventFormData) {
+async function createEvent(data: EventFormData & { organization_id: string; host_id: string }) {
   const supabase = createClient()
 
   const slug = `${slugify(data.name)}-${Date.now().toString(36)}`
 
   const eventData = {
+    organization_id: data.organization_id,
+    host_id: data.host_id,
     name: data.name,
     slug,
     description: data.description || null,
@@ -80,15 +83,26 @@ async function createEvent(data: EventFormData) {
   const { data: event, error } = await supabase
     .from("events")
     .insert(eventData)
-    .select("slug")
+    .select("id, slug")
     .single()
 
   if (error) throw new Error(error.message)
+
+  // Default gallery
+  const { error: galleryError } = await supabase.from("galleries").insert({
+    event_id: event.id,
+    name: "All Photos",
+    slug: "all-photos",
+  })
+
+  if (galleryError) throw new Error(galleryError.message)
+
   return event
 }
 
 export function NewEventForm() {
   const router = useRouter()
+  const { profile, user } = useAuth()
   const [formData, setFormData] = useState<EventFormData>({
     name: "",
     description: "",
@@ -120,7 +134,27 @@ export function NewEventForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    mutation.mutate(formData)
+    if (!profile?.organization_id) {
+      toast({
+        title: "Workspace Error",
+        description: "Your active workspace could not be determined. Please refresh or try again.",
+        variant: "destructive",
+      })
+      return
+    }
+    if (!user?.id) {
+      toast({
+        title: "Authentication Error",
+        description: "You must be signed in to create an event.",
+        variant: "destructive",
+      })
+      return
+    }
+    mutation.mutate({
+      ...formData,
+      organization_id: profile.organization_id,
+      host_id: user.id,
+    })
   }
 
   function updateField(field: keyof EventFormData, value: string | boolean) {
@@ -344,7 +378,7 @@ export function NewEventForm() {
         <Button type="button" variant="outline" onClick={() => router.back()}>
           Cancel
         </Button>
-        <Button type="submit" disabled={mutation.isPending}>
+        <Button type="submit" disabled={mutation.isPending || !profile?.organization_id}>
           {mutation.isPending ? "Creating..." : "Create Event"}
         </Button>
       </div>
