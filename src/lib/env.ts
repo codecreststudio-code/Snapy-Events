@@ -27,7 +27,7 @@ const serverSchema = z.object({
   UPSTASH_REDIS_REST_URL: z.string().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
   // App
-  APP_URL: z.string().url().default("http://localhost:3000"),
+  APP_URL: z.string().url().default("https://snapy-events.vercel.app"),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 })
 
@@ -70,7 +70,7 @@ function parseServer() {
   return parsed.success
     ? parsed.data
     : ({
-        APP_URL: process.env.APP_URL ?? "http://localhost:3000",
+        APP_URL: process.env.APP_URL ?? "https://snapy-events.vercel.app",
         NODE_ENV: (process.env.NODE_ENV as "development" | "production" | "test") ?? "development",
       } as z.infer<typeof serverSchema>)
 }
