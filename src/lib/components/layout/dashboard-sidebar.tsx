@@ -30,6 +30,8 @@ import {
 import { createClient } from "@/lib/supabase/client"
 import { useState } from "react"
 
+import { useAuth } from "@/lib/hooks"
+
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Events", href: "/dashboard/events", icon: Camera },
@@ -47,10 +49,10 @@ const secondaryNavigation = [
 export function DashboardSidebar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const supabase = createClient()
+  const { user, profile, signOut } = useAuth()
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
+    await signOut()
     window.location.href = "/login"
   }
 
@@ -146,14 +148,22 @@ export function DashboardSidebar() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="w-full justify-start gap-3 h-auto py-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/placeholder-avatar.jpg" />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarImage src={profile?.avatar_url || undefined} />
+                  <AvatarFallback>
+                    {profile?.full_name?.substring(0, 2).toUpperCase() || 
+                     user?.email?.substring(0, 2).toUpperCase() || 
+                     "US"}
+                  </AvatarFallback>
                 </Avatar>
-                <div className="flex flex-col items-start text-sm">
-                  <span className="font-medium">John Doe</span>
-                  <span className="text-xs text-muted-foreground">john@example.com</span>
+                <div className="flex flex-col items-start text-sm overflow-hidden">
+                  <span className="font-medium truncate max-w-[150px]">
+                    {profile?.full_name || user?.email?.split("@")[0] || "User"}
+                  </span>
+                  <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+                    {user?.email || ""}
+                  </span>
                 </div>
-                <ChevronDown className="h-4 w-4 ml-auto" />
+                <ChevronDown className="h-4 w-4 ml-auto flex-shrink-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">

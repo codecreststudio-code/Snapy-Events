@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Camera, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
@@ -17,7 +17,6 @@ export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { updatePassword } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {

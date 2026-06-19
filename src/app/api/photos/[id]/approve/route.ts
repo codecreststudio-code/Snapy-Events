@@ -5,13 +5,13 @@ import { createClient } from "@/lib/supabase/server"
 const params = z.object({ id: z.string().uuid() })
 const body = z.object({ approved: z.boolean().optional(), featured: z.boolean().optional() })
 
-export const POST = defineRoute({
+export const POST = defineRoute<z.infer<typeof body>, unknown, { id: string }>({
   method: "POST",
   body,
   requireAuth: true,
   audit: "photo.moderated",
   handler: async ({ params, body }) => {
-    const { id } = await params
+    const { id } = params
     const supabase = await createClient()
     const { data, error } = await supabase
       .from("photos")

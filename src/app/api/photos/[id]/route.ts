@@ -6,11 +6,11 @@ import { logAudit } from "@/lib/audit/log"
 
 const params = z.object({ id: z.string().uuid() })
 
-export const GET = defineRoute({
+export const GET = defineRoute<unknown, unknown, { id: string }>({
   method: "GET",
   requireAuth: true,
   handler: async ({ params }) => {
-    const { id } = await params
+    const { id } = params
     const supabase = await createClient()
     const { data, error } = await supabase.from("photos").select("*, gallery:galleries(*), event:events(id, name)").eq("id", id).single()
     if (error || !data) return ApiErrors.notFound("Photo")
@@ -22,12 +22,12 @@ export const GET = defineRoute({
   },
 }).GET
 
-export const DELETE = defineRoute({
+export const DELETE = defineRoute<unknown, unknown, { id: string }>({
   method: "DELETE",
   requireAuth: true,
   audit: "photo.deleted",
   handler: async ({ params, auth, request }) => {
-    const { id } = await params
+    const { id } = params
     const supabase = await createClient()
     const { data: photo } = await supabase.from("photos").select("storage_path, event_id, gallery_id").eq("id", id).single()
     if (photo?.storage_path) await deleteFile("PHOTOS", photo.storage_path).catch(() => null)

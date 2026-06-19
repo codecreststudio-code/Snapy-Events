@@ -69,7 +69,7 @@ export function defineRoute<TBody = unknown, TQuery = unknown, C = unknown>(opts
         }
 
         // Auth
-        let auth: AuthContext = { user: null, organization: null, role: "viewer" }
+        let auth: AuthContext = { user: null, organization: null, role: "viewer", permissions: [], isAdmin: false }
         if (opts.requireAuth === "admin") {
           auth = await requireAdmin()
         } else if (opts.requireAuth) {
@@ -183,7 +183,7 @@ export class HttpError extends Error {
   }
 }
 
-export { paginate, ok, fail, created, ApiErrors }
+export { pagination as paginate, ok, fail, created, ApiErrors }
 
 export function redirect(url: string | URL, status = 302): NextResponse {
   return NextResponse.redirect(url, status)

@@ -5,11 +5,11 @@ import { headers } from "next/headers"
 
 const params = z.object({ code: z.string().min(4) })
 
-export const GET = defineRoute({
+export const GET = defineRoute<unknown, unknown, { code: string }>({
   method: "GET",
   rateLimit: { key: "qr:scan", limit: 600, windowSeconds: 60 },
   handler: async ({ params, request }) => {
-    const { code } = await params
+    const { code } = params
     const supabase = await createServiceClient()
     const { data: qr, error } = await supabase
       .from("qr_codes")
@@ -24,19 +24,24 @@ export const GET = defineRoute({
     const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || null
     const ua = h.get("user-agent") ?? null
 
-    await supabase.rpc("increment_qr_scan", {
-      qr_uuid: qr.id,
-      scan_ip: ip,
-      scan_ua: ua,
-      scan_country: h.get("x-vercel-ip-country"),
-      scan_city: h.get("x-vercel-ip-city"),
-      scan_device: ua?.includes("Mobile") ? "mobile" : "desktop",
-      scan_referrer: h.get("referer"),
-    }).then(() => null).catch(() => null)
+    try {
+      await supabase.rpc("increment_qr_scan", {
+        qr_uuid: qr.id,
+        scan_ip: ip,
+        scan_ua: ua,
+        scan_country: h.get("x-vercel-ip-country"),
+        scan_city: h.get("x-vercel-ip-city"),
+        scan_device: ua?.includes("Mobile") ? "mobile" : "desktop",
+        scan_referrer: h.get("referer"),
+      })
+    } catch {
+      // ignore
+    }
 
     // Server-side redirect to the event page.
-    const ev = qr.event as { slug: string; status: string } | null
+    const event = qr.event as any
+    const ev = Array.isArray(event) ? event[0] : event
     if (!ev) return fail("NOT_FOUND", "Event missing", 404)
-    return redirect(302, `/event/${ev.slug}`)
+    return redirect(`/event/${ev.slug}`, 302)
   },
 }).GET

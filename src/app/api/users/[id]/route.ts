@@ -5,11 +5,11 @@ import { updateUserSchema } from "@/lib/validators"
 
 const params = z.object({ id: z.string().uuid() })
 
-export const GET = defineRoute({
+export const GET = defineRoute<unknown, unknown, { id: string }>({
   method: "GET",
   requireAuth: true,
   handler: async ({ params }) => {
-    const { id } = await params
+    const { id } = params
     const supabase = await createClient()
     const { data, error } = await supabase
       .from("users")
@@ -21,13 +21,13 @@ export const GET = defineRoute({
   },
 }).GET
 
-export const PATCH = defineRoute({
+export const PATCH = defineRoute<z.infer<typeof updateUserSchema>, unknown, { id: string }>({
   method: "PATCH",
   body: updateUserSchema,
   requireAuth: true,
   audit: "user.updated",
   handler: async ({ params, body }) => {
-    const { id } = await params
+    const { id } = params
     const supabase = await createClient()
     const { data, error } = await supabase.from("users").update(body).eq("id", id).select().single()
     if (error) return fail("DB_ERROR", error.message, 400)
@@ -35,12 +35,12 @@ export const PATCH = defineRoute({
   },
 }).PATCH
 
-export const DELETE = defineRoute({
+export const DELETE = defineRoute<unknown, unknown, { id: string }>({
   method: "DELETE",
   requireAuth: true,
   audit: "user.deleted",
   handler: async ({ params, auth }) => {
-    const { id } = await params
+    const { id } = params
     if (id === auth.user!.id) return fail("CONFLICT", "Cannot delete yourself", 409)
     const supabase = await createClient()
     const { error } = await supabase.from("users").update({ organization_id: null, role: "viewer" }).eq("id", id)

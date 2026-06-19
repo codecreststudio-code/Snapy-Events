@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
   if (!(await verifyRazorpaySignature({ body, signature: sig }))) {
     return NextResponse.json({ success: false, error: "Invalid signature" }, { status: 400 })
   }
-  const evt = JSON.parse(body) as { event: string; payload: { payment?: { entity: unknown }; subscription?: { entity: unknown } } }
+  const evt = JSON.parse(body) as { event: string; payload: any }
   const supabase = await createServiceClient()
   await supabase.from("webhook_events").insert({
     source: "razorpay",

@@ -5,11 +5,11 @@ import { updateOrganizationSchema } from "@/lib/validators"
 
 const params = z.object({ id: z.string().uuid() })
 
-export const GET = defineRoute({
+export const GET = defineRoute<unknown, unknown, { id: string }>({
   method: "GET",
   requireAuth: true,
   handler: async ({ params, auth }) => {
-    const { id } = await params
+    const { id } = params
     if (id !== auth.organization!.id) return ApiErrors.forbidden("Cross-org access denied")
     const supabase = await createClient()
     const { data, error } = await supabase.from("organizations").select("*").eq("id", id).single()
@@ -18,13 +18,13 @@ export const GET = defineRoute({
   },
 }).GET
 
-export const PATCH = defineRoute({
+export const PATCH = defineRoute<z.infer<typeof updateOrganizationSchema>, unknown, { id: string }>({
   method: "PATCH",
   body: updateOrganizationSchema,
   requireAuth: true,
   audit: "org.updated",
   handler: async ({ params, body, auth }) => {
-    const { id } = await params
+    const { id } = params
     if (id !== auth.organization!.id) return ApiErrors.forbidden()
     const supabase = await createClient()
     const { data, error } = await supabase.from("organizations").update(body).eq("id", id).select().single()
@@ -33,12 +33,12 @@ export const PATCH = defineRoute({
   },
 }).PATCH
 
-export const DELETE = defineRoute({
+export const DELETE = defineRoute<unknown, unknown, { id: string }>({
   method: "DELETE",
   requireAuth: true,
   audit: "org.deleted",
   handler: async ({ params, auth }) => {
-    const { id } = await params
+    const { id } = params
     if (id !== auth.organization!.id) return ApiErrors.forbidden()
     if (auth.role !== "owner") return ApiErrors.forbidden("Only owners can delete the organization")
     const supabase = await createClient()

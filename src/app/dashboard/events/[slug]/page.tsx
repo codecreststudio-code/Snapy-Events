@@ -239,7 +239,7 @@ export default function EventDetailPage({ params }: { params: { slug: string } }
 
   const tabs = [
     { value: "overview", label: "Overview", icon: Eye },
-    { value: "galleries", label: "Galleries", icon: Gallery },
+    { value: "galleries", label: "Galleries", icon: Images },
     { value: "qr", label: "QR Codes", icon: QrCode },
     { value: "guests", label: "Guests", icon: Users },
     { value: "analytics", label: "Analytics", icon: BarChart3 },
@@ -271,7 +271,7 @@ export default function EventDetailPage({ params }: { params: { slug: string } }
         </Button>
         <Button asChild variant="outline">
           <Link href={`/dashboard/events/${event.slug}/gallery`}>
-            <Gallery className="h-4 w-4" />
+            <Images className="h-4 w-4" />
           </Link>
         </Button>
       </div>

@@ -86,7 +86,7 @@ export const updateUserSchema = z.object({
 
 export const updateOrganizationSchema = z.object({
   name: z.string().min(2).optional(),
-  settings: z.record(z.unknown()).optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const subscribeSchema = z.object({

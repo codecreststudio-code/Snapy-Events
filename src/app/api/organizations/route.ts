@@ -1,8 +1,6 @@
 import { z } from "zod"
 import { defineRoute, ok, fail, created, ApiErrors, paginate } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
-import { createOrgSchema } from "@/lib/validators"
-import { defaultOrgFlags } from "@/lib/feature-flags"
 
 const listQ = z.object({ page: z.coerce.number().min(1).default(1), pageSize: z.coerce.number().min(1).max(100).default(20) })
 
