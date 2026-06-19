@@ -25,7 +25,7 @@ export const GET = defineRoute<unknown, unknown, { id: string }>({
   },
 }).GET
 
-export const POST = defineRoute<unknown, z.infer<typeof createQRCodeSchema>, { id: string }>({
+export const POST = defineRoute<z.infer<typeof createQRCodeSchema>, unknown, { id: string }>({
   method: "POST",
   body: createQRCodeSchema,
   requireAuth: true,

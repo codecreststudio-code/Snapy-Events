@@ -3,7 +3,8 @@
 // resolve the current user, organization, role, and permissions.
 
 import { createClient } from "@/lib/supabase/server"
-import { hasPermission, type Permission, type UserRole } from "@/lib/auth/rbac"
+import { hasPermission } from "@/lib/auth/rbac"
+import type { Permission, UserRole } from "@/lib/types"
 import { HttpError } from "@/lib/api/handler"
 
 export interface AuthContext {
@@ -38,7 +39,7 @@ export async function getAuthContext(): Promise<AuthContext> {
 
   if (!profile) return emptyAuth()
   // Supabase returns the joined organization; suppress TS about possibly-null
-  const org = (profile as { organizations?: { id: string; name: string; slug: string; plan: string; feature_flags: Record<string, boolean> } | null }).organizations
+  const org = (profile as any).organizations
   const role = (profile.role as UserRole) ?? "viewer"
   const permissions = ((profile.permissions as Permission[]) ?? []).filter(Boolean)
   // Built-in role grants

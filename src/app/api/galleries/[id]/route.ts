@@ -5,11 +5,11 @@ import { updateGallerySchema } from "@/lib/validators"
 
 const params = z.object({ id: z.string().uuid() })
 
-export const GET = defineRoute({
+export const GET = defineRoute<unknown, unknown, { id: string }>({
   method: "GET",
   requireAuth: true,
   handler: async ({ params, auth }) => {
-    const { id } = await params
+    const { id } = params
     const supabase = await createClient()
     const { data, error } = await supabase
       .from("galleries")
@@ -21,12 +21,12 @@ export const GET = defineRoute({
   },
 }).GET
 
-export const PATCH = defineRoute({
+export const PATCH = defineRoute<z.infer<typeof updateGallerySchema>, unknown, { id: string }>({
   method: "PATCH",
   body: updateGallerySchema,
   requireAuth: true,
   handler: async ({ params, body }) => {
-    const { id } = await params
+    const { id } = params
     const supabase = await createClient()
     const { data, error } = await supabase.from("galleries").update(body).eq("id", id).select().single()
     if (error) return fail("DB_ERROR", error.message, 400)
@@ -34,12 +34,12 @@ export const PATCH = defineRoute({
   },
 }).PATCH
 
-export const DELETE = defineRoute({
+export const DELETE = defineRoute<unknown, unknown, { id: string }>({
   method: "DELETE",
   requireAuth: true,
   audit: "gallery.deleted",
   handler: async ({ params }) => {
-    const { id } = await params
+    const { id } = params
     const supabase = await createClient()
     const { error } = await supabase.from("galleries").delete().eq("id", id)
     if (error) return fail("DB_ERROR", error.message, 400)

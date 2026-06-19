@@ -13,7 +13,7 @@ const SECURITY_HEADERS: Record<string, string> = {
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
 }
 
-function withSecurity(res: NextResponse) {
+function withSecurity<T>(res: NextResponse<T>): NextResponse<T> {
   for (const [k, v] of Object.entries(SECURITY_HEADERS)) res.headers.set(k, v)
   return res
 }
@@ -22,7 +22,7 @@ export function ok<T>(data: T, init?: ResponseInit & { pagination?: Pagination }
   const { pagination, ...rest } = init ?? {}
   const body: ApiResponse<T> = { success: true, data }
   if (pagination) body.meta = { pagination }
-  return withSecurity(NextResponse.json(body, rest))
+  return withSecurity(NextResponse.json<ApiResponse<T>>(body, rest))
 }
 
 export function created<T>(data: T): NextResponse<ApiResponse<T>> {

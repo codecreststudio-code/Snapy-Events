@@ -135,8 +135,7 @@ async function getOrganization() {
     .select("organization:organizations(*)")
     .eq("id", user.id)
     .single()
-
-  return (data?.organization as { id: string; name: string; plan: PlanId } | null)
+  return (data?.organization as any as { id: string; name: string; plan: PlanId } | null)
 }
 
 async function createSubscription(planId: PlanId) {

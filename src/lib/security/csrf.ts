@@ -14,8 +14,8 @@ function secret(): string {
   return serverEnv.SUPABASE_SERVICE_ROLE_KEY ?? "csrf-dev-secret"
 }
 
-export function ensureCsrfCookie(): string {
-  const store = cookies()
+export async function ensureCsrfCookie(): Promise<string> {
+  const store = await cookies()
   const existing = store.get(COOKIE)?.value
   if (existing) return existing
   const token = sign(randomBytes(16).toString("hex"))
@@ -28,9 +28,9 @@ export function ensureCsrfCookie(): string {
   return token
 }
 
-export function verifyCsrf(headerToken: string | null | undefined): boolean {
+export async function verifyCsrf(headerToken: string | null | undefined): Promise<boolean> {
   if (!headerToken) return false
-  const cookie = cookies().get(COOKIE)?.value
+  const cookie = (await cookies()).get(COOKIE)?.value
   if (!cookie) return false
   return safeEqual(cookie, headerToken)
 }

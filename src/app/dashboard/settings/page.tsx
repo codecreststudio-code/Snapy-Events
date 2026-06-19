@@ -200,7 +200,7 @@ export default function SettingsPage() {
               <Input
                 id="full-name"
                 value={profileForm.full_name}
-                onChange={(e) => setProfileForm({ full_name: e.target.value })}
+                onChange={(e) => setProfileForm((prev) => ({ ...prev, full_name: e.target.value }))}
                 placeholder="John Smith"
               />
             </div>

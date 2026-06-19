@@ -242,7 +242,7 @@ export default function GalleriesPage() {
       ) : (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <Gallery className="h-12 w-12 text-muted-foreground mb-4" />
+            <Images className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="font-medium mb-2">No galleries yet</h3>
             <p className="text-sm text-muted-foreground mb-4 text-center max-w-md">
               Galleries are created within events. Create an event first to start building your

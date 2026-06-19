@@ -24,7 +24,7 @@ export const GET = defineRoute<unknown, unknown, { id: string }>({
   },
 }).GET
 
-export const PATCH = defineRoute<unknown, z.infer<typeof updateEventSchema>, { id: string }>({
+export const PATCH = defineRoute<z.infer<typeof updateEventSchema>, unknown, { id: string }>({
   method: "PATCH",
   body: updateEventSchema,
   requireAuth: true,

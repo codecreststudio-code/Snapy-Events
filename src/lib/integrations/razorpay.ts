@@ -67,7 +67,7 @@ export async function createRazorpaySubscription(opts: {
     start_at: opts.startAt,
     notes: opts.notes,
     customer_id: opts.customerId,
-  })
+  } as any)
 }
 
 export async function cancelRazorpaySubscription(subscriptionId: string, cancelAtCycleEnd = true) {

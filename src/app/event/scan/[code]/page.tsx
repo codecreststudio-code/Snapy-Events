@@ -18,7 +18,8 @@ export default async function ScanRedirectPage({ params }: PageProps<"/event/sca
   const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || null
   const ua = h.get("user-agent") ?? null
   void increment_qr_scan({ qr_id: qr.id, ip, ua, country: h.get("x-vercel-ip-country"), city: h.get("x-vercel-ip-city"), device: ua?.includes("Mobile") ? "mobile" : "desktop", referrer: h.get("referer") }).catch(() => null)
-  const ev = qr.event as { slug: string } | null
+  const event = qr.event as any
+  const ev = Array.isArray(event) ? event[0] : event
   if (ev) redirect(`/event/${ev.slug}`)
   redirect(qr.redirect_url ?? "/")
 }

@@ -6,15 +6,16 @@ import { uploadFile } from "@/lib/integrations/storage"
 import { MAX_FILE_SIZES, ALLOWED_MIME_TYPES, API_RATE_LIMITS } from "@/lib/constants"
 import { trackEvent } from "@/lib/analytics/track"
 
-const params = z.object({ id: z.string().uuid() })
+const querySchema = z.object({ gallery_id: z.string().uuid() })
 
-export const POST = defineRoute({
+export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
   method: "POST",
+  query: querySchema,
   requireAuth: true,
   rateLimit: { key: "photos:upload", limit: API_RATE_LIMITS.UPLOAD_PHOTOS, windowSeconds: 60 },
   audit: "photo.uploaded",
-  handler: async ({ request, params, auth }) => {
-    const { id } = await params
+  handler: async ({ request, query, auth }) => {
+    const id = query.gallery_id
     const supabase = await createClient()
     const fd = await request.formData()
     const file = fd.get("file") as File | null
@@ -29,7 +30,9 @@ export const POST = defineRoute({
     const { data: gallery } = await supabase.from("galleries").select("event_id, event:events(organization_id, settings)").eq("id", id).single()
     if (!gallery) return ApiErrors.notFound("Gallery")
     const ext = file.name.split(".").pop() ?? "jpg"
-    const path = `${(gallery.event as { organization_id: string }).organization_id}/${gallery.event_id}/${id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+    const event = gallery.event as any
+    const orgId = Array.isArray(event) ? event[0]?.organization_id : event?.organization_id
+    const path = `${orgId}/${gallery.event_id}/${id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
     const up = await uploadFile({ bucket: "PHOTOS", path, file, contentType: file.type, cacheControl: "31536000" })
     const { data, error } = await supabase
       .from("photos")

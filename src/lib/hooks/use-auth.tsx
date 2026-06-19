@@ -12,6 +12,7 @@ interface AuthContextType {
   isLoading: boolean
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signUp: (email: string, password: string, fullName: string, orgName: string) => Promise<{ error: Error | null }>
+  signInWithGoogle: () => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: Error | null }>
   updatePassword: (password: string) => Promise<{ error: Error | null }>
@@ -34,6 +35,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .single()
 
     if (!error && data) {
+      if (!data.organization_id) {
+        const userEmail = data.email || ""
+        const fullName = data.full_name || userEmail.split("@")[0] || "User"
+        const orgName = `${fullName}'s Workspace`
+        const orgSlug = `${orgName.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${Date.now().toString(36).slice(-4)}`
+
+        const { data: org, error: orgError } = await supabase
+          .from("organizations")
+          .insert({ name: orgName, slug: orgSlug, plan: "free" })
+          .select()
+          .single()
+
+        if (!orgError && org) {
+          const { error: updateError } = await supabase
+            .from("users")
+            .update({ organization_id: org.id, role: "owner", permissions: ["*"] })
+            .eq("id", userId)
+
+          if (!updateError) {
+            const { data: updatedData } = await supabase
+              .from("users")
+              .select("*, organization:organizations(*)")
+              .eq("id", userId)
+              .single()
+            if (updatedData) {
+              setProfile(updatedData as UserWithOrganization)
+              return
+            }
+          }
+        }
+      }
       setProfile(data as UserWithOrganization)
     }
   }, [supabase])
@@ -133,6 +165,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: error ? new Error(error.message) : null }
   }
 
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/api/auth/callback`,
+      },
+    })
+    return { error: error ? new Error(error.message) : null }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -142,6 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         signIn,
         signUp,
+        signInWithGoogle,
         signOut,
         resetPassword,
         updatePassword,

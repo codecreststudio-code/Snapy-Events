@@ -29,7 +29,6 @@ import { toast } from "@/lib/components/ui/toaster"
 import {
   ArrowLeft,
   Crown,
-  Invite,
   MoreVertical,
   Shield,
   Trash2,
@@ -38,6 +37,7 @@ import {
 } from "lucide-react"
 import { getInitials } from "@/lib/utils"
 import type { UserRole, UserWithOrganization } from "@/lib/types"
+import { inviteTeamMemberAction } from "./actions"
 
 interface TeamMember extends UserWithOrganization {
   invited_at?: string
@@ -67,15 +67,7 @@ async function getTeamMembers(): Promise<TeamMember[]> {
 }
 
 async function inviteTeamMember(email: string, role: UserRole) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Not authenticated")
-
-  const { error } = await supabase.auth.inviteUserByEmail(email, {
-    data: { role, invited_by: user.id },
-  })
-
-  if (error) throw new Error(error.message)
+  await inviteTeamMemberAction(email, role)
 }
 
 async function updateMemberRole(memberId: string, role: UserRole) {

@@ -65,7 +65,7 @@ async function getQRCodes(eventId: string): Promise<QRCode[]> {
   return data || []
 }
 
-async function getGalleries(eventId: string): Promise<Gallery[]> {
+async function getGalleries(eventId: string): Promise<any[]> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("galleries")
@@ -212,7 +212,7 @@ function CreateQRDialog({
 }: {
   eventId: string
   eventSlug: string
-  galleries: Gallery[]
+  galleries: any[]
   onSuccess: () => void
 }) {
   const [open, setOpen] = useState(false)
