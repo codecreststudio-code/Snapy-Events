@@ -1,12 +1,5 @@
-// src/proxy.ts
-// Renamed from middleware.ts in Next.js 16. Runs on the edge before each
-// request. Used here for: auth refresh, security headers, request ID,
-// and the `/admin` and `/dashboard` route guards (optimistic check — the
-// page is the source of truth, this just short-circuits unauthenticated
-// traffic).
-
 import { NextResponse, type NextRequest } from "next/server"
-import { serverEnv } from "@/lib/env"
+import { createServerClient } from "@supabase/ssr"
 
 const PUBLIC_PATHS = new Set<string>([
   "/",
@@ -21,11 +14,14 @@ const PUBLIC_PATHS = new Set<string>([
   "/signup",
   "/forgot-password",
   "/reset-password",
+  "/admin/login",
 ])
 
 function isPublic(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true
   if (pathname.startsWith("/event/")) return true
+  if (pathname.startsWith("/api/auth/")) return true
+  if (pathname.startsWith("/api/admin/auth/")) return true
   if (pathname.startsWith("/api/qr/scan")) return true
   if (pathname.startsWith("/api/payments/webhooks")) return true
   if (pathname.startsWith("/api/ai/webhooks")) return true
@@ -35,27 +31,55 @@ function isPublic(pathname: string): boolean {
   return false
 }
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-
-  // 1. Request ID
   const reqId = request.headers.get("x-request-id") ?? crypto.randomUUID()
 
-  // 2. Supabase auth — handled by `@supabase/ssr`'s session refresh in
-  // route handlers/server components. Nothing to do here besides pass
-  // through cookies, which Next.js does automatically.
+  // 1. Create response
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
 
-  // 3. Security headers
-  const res = NextResponse.next()
-  res.headers.set("X-Frame-Options", "DENY")
-  res.headers.set("X-Content-Type-Options", "nosniff")
-  res.headers.set("X-XSS-Protection", "1; mode=block")
-  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
-  res.headers.set("Permissions-Policy", "camera=(self), microphone=(self), geolocation=()")
-  res.headers.set("X-Request-Id", reqId)
-  res.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
-  if (serverEnv.NODE_ENV === "production") {
-    res.headers.set(
+  // 2. Initialize Supabase SSR client for cookie refresh
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // 3. Trigger session refresh to write updated cookies to response
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // 4. Set security headers
+  response.headers.set("X-Frame-Options", "DENY")
+  response.headers.set("X-Content-Type-Options", "nosniff")
+  response.headers.set("X-XSS-Protection", "1; mode=block")
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
+  response.headers.set("Permissions-Policy", "camera=(self), microphone=(self), geolocation=()")
+  response.headers.set("X-Request-Id", reqId)
+  response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
+
+  if (process.env.NODE_ENV === "production") {
+    response.headers.set(
       "Content-Security-Policy",
       [
         "default-src 'self'",
@@ -68,31 +92,41 @@ export function proxy(request: NextRequest) {
         "frame-ancestors 'none'",
         "base-uri 'self'",
         "form-action 'self'",
-      ].join("; "),
+      ].join("; ")
     )
   }
 
-  // 4. Optimistic auth gate
+  // 5. Auth route guards
   if (!isPublic(pathname)) {
-    const hasAuthCookie = Boolean(
-      request.cookies.get("sb-access-token")?.value ||
-        request.cookies.get("supabase-auth-token")?.value,
-    )
-    if (!hasAuthCookie && (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))) {
+    if (!user) {
       const url = request.nextUrl.clone()
       const target = pathname.startsWith("/admin") ? "/admin/login" : "/login"
       url.pathname = target
       url.searchParams.set("next", pathname)
       return NextResponse.redirect(url)
     }
+
+    // Admin guard
+    if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+      const { data: profile } = await supabase
+        .from("users")
+        .select("is_admin, role")
+        .eq("id", user.id)
+        .single()
+
+      if (!profile?.is_admin && profile?.role !== "owner") {
+        const url = request.nextUrl.clone()
+        url.pathname = "/"
+        return NextResponse.redirect(url)
+      }
+    }
   }
 
-  return res
+  return response
 }
 
 export const config = {
   matcher: [
-    // Run on everything except static assets and image optimization.
     "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
   ],
 }

@@ -9,7 +9,9 @@ export const PLAN_LIMITS = {
   [PLANS.FREE]: {
     events_limit: 1,
     storage_limit_gb: 1,
-    photo_limit: 100,
+    photo_limit: 25,
+    guests_limit: 5,
+    shots_limit: 5,
     qr_codes_per_event: 1,
     galleries_per_event: 1,
     ai_searches: 0,
@@ -19,7 +21,9 @@ export const PLAN_LIMITS = {
   [PLANS.STARTER]: {
     events_limit: 5,
     storage_limit_gb: 10,
-    photo_limit: 5000,
+    photo_limit: 100,
+    guests_limit: 10,
+    shots_limit: 10,
     qr_codes_per_event: 10,
     galleries_per_event: 5,
     ai_searches: 50,
@@ -29,7 +33,9 @@ export const PLAN_LIMITS = {
   [PLANS.STANDARD]: {
     events_limit: 25,
     storage_limit_gb: 100,
-    photo_limit: 50000,
+    photo_limit: 750,
+    guests_limit: 50,
+    shots_limit: 15,
     qr_codes_per_event: 50,
     galleries_per_event: 20,
     ai_searches: 500,
@@ -39,7 +45,9 @@ export const PLAN_LIMITS = {
   [PLANS.PREMIUM]: {
     events_limit: -1, // unlimited
     storage_limit_gb: 1000,
-    photo_limit: -1,
+    photo_limit: 2500,
+    guests_limit: 100,
+    shots_limit: 25,
     qr_codes_per_event: -1,
     galleries_per_event: -1,
     ai_searches: -1,
@@ -50,9 +58,9 @@ export const PLAN_LIMITS = {
 
 export const PLAN_PRICES = {
   [PLANS.FREE]: { inr: 0, usd: 0 },
-  [PLANS.STARTER]: { inr: 499, usd: 6 },
-  [PLANS.STANDARD]: { inr: 1499, usd: 18 },
-  [PLANS.PREMIUM]: { inr: 3999, usd: 48 },
+  [PLANS.STARTER]: { inr: 99, usd: 1.5 },
+  [PLANS.STANDARD]: { inr: 499, usd: 6 },
+  [PLANS.PREMIUM]: { inr: 1499, usd: 18 },
 } as const
 
 export const EVENT_TYPES = [

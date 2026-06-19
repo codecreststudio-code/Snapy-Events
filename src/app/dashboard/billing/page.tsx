@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/lib/hooks"
 import { createClient } from "@/lib/supabase/client"
 import { PLANS, PLAN_LIMITS, PLAN_PRICES } from "@/lib/constants"
 import { formatDate } from "@/lib/utils"
@@ -138,35 +140,24 @@ async function getOrganization() {
   return (data?.organization as any as { id: string; name: string; plan: PlanId } | null)
 }
 
-async function createSubscription(planId: PlanId) {
-  const supabase = createClient()
-  const response = await fetch("/api/billing/create-subscription", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ plan_id: planId }),
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if ((window as any).Razorpay) {
+      resolve(true)
+      return
+    }
+    const script = document.createElement("script")
+    script.src = "https://checkout.razorpay.com/v1/checkout.js"
+    script.onload = () => resolve(true)
+    script.onerror = () => resolve(false)
+    document.body.appendChild(script)
   })
-
-  const data = await response.json()
-  if (!response.ok) throw new Error(data.error || "Failed to create subscription")
-
-  if (data.checkout_url) {
-    window.location.href = data.checkout_url
-  }
-}
-
-async function cancelSubscription() {
-  const supabase = createClient()
-  const response = await fetch("/api/billing/cancel-subscription", {
-    method: "POST",
-  })
-
-  const data = await response.json()
-  if (!response.ok) throw new Error(data.error || "Failed to cancel subscription")
-  toast({ title: "Subscription cancelled", description: "Your subscription will remain active until the end of the billing period." })
 }
 
 export default function BillingPage() {
   const queryClient = useQueryClient()
+  const router = useRouter()
+  const { profile, user } = useAuth()
   const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">("monthly")
 
   const { data: subscription, isLoading: subLoading } = useQuery({
@@ -180,16 +171,81 @@ export default function BillingPage() {
   })
 
   const upgradeMutation = useMutation({
-    mutationFn: (planId: PlanId) => createSubscription(planId),
+    mutationFn: async (planId: PlanId) => {
+      const response = await fetch("/api/payments/subscriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan_id: planId }),
+      })
+
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "Failed to create subscription")
+      const checkoutData = result.data
+
+      const scriptLoaded = await loadRazorpayScript()
+      if (!scriptLoaded) {
+        throw new Error("Razorpay SDK failed to load. Please check your connection.")
+      }
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_Stre2LIpvla35v",
+        amount: checkoutData.amount,
+        currency: checkoutData.currency,
+        name: "Snapy",
+        description: `Upgrade to ${checkoutData.plan} plan`,
+        order_id: checkoutData.order_id,
+        customer_id: checkoutData.customer_id,
+        prefill: {
+          email: user?.email || "",
+          name: profile?.full_name || "",
+        },
+        theme: {
+          color: "#4f46e5",
+        },
+        handler: async function (response: any) {
+          toast({
+            title: "Payment captured successfully",
+            description: "Your workspace is being upgraded. Please wait...",
+          })
+          setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ["subscription"] })
+            queryClient.invalidateQueries({ queryKey: ["organization"] })
+            router.refresh()
+          }, 2000)
+        },
+        modal: {
+          ondismiss: function () {
+            toast({
+              title: "Payment cancelled",
+              description: "You cancelled the payment process.",
+              variant: "destructive",
+            })
+          },
+        },
+      }
+
+      const rzp = new (window as any).Razorpay(options)
+      rzp.open()
+    },
     onError: (error: Error) => {
       toast({ title: "Failed to upgrade", description: error.message, variant: "destructive" })
     },
   })
 
   const cancelMutation = useMutation({
-    mutationFn: cancelSubscription,
+    mutationFn: async () => {
+      const response = await fetch("/api/payments/subscriptions", {
+        method: "DELETE",
+      })
+
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Failed to cancel subscription")
+      toast({ title: "Subscription cancelled", description: "Your subscription has been successfully cancelled." })
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subscription"] })
+      queryClient.invalidateQueries({ queryKey: ["organization"] })
+      router.refresh()
     },
     onError: (error: Error) => {
       toast({ title: "Failed to cancel", description: error.message, variant: "destructive" })

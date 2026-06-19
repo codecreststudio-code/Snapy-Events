@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   try {
     switch (evt.event) {
       case "payment.captured": {
-        const p = evt.payload.payment as { id: string; amount: number; currency: string; notes?: { organization_id?: string; plan_id?: string } }
+        const p = evt.payload.payment as { id: string; amount: number; currency: string; notes?: { organization_id?: string; plan_id?: string; guest_boost?: string; shots_boost?: string } }
         if (p.notes?.organization_id && p.notes?.plan_id) {
           const sub = await supabase
             .from("subscriptions")
@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
             )
             .select()
             .single()
+          
           await supabase.from("transactions").insert({
             organization_id: p.notes.organization_id,
             subscription_id: sub.data?.id,
@@ -47,7 +48,19 @@ export async function POST(request: NextRequest) {
             payment_method: "razorpay",
             gateway_response: evt,
           })
-          await supabase.from("organizations").update({ plan: p.notes.plan_id }).eq("id", p.notes.organization_id)
+
+          const { data: org } = await supabase.from("organizations").select("settings").eq("id", p.notes.organization_id).single()
+          const currentSettings = (org?.settings as Record<string, any>) || {}
+          const newSettings = {
+            ...currentSettings,
+            guest_boost: p.notes.guest_boost ? parseInt(p.notes.guest_boost) : 0,
+            shots_boost: p.notes.shots_boost ? parseInt(p.notes.shots_boost) : 0,
+          }
+
+          await supabase.from("organizations").update({ 
+            plan: p.notes.plan_id,
+            settings: newSettings
+          }).eq("id", p.notes.organization_id)
         }
         break
       }

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server"
 import { createEventSchema } from "@/lib/validators"
 import { slugify } from "@/lib/utils"
 import { logAudit } from "@/lib/audit/log"
+import { PLAN_LIMITS } from "@/lib/constants"
 
 const listQuery = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -41,6 +42,24 @@ export const POST = defineRoute({
   audit: "event.created",
   handler: async ({ body, auth, request }) => {
     const supabase = await createClient()
+
+    // Enforce Event Limit
+    const plan = auth.organization?.plan || "free"
+    const limits = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS] || PLAN_LIMITS.free
+    const maxEvents = limits.events_limit
+
+    if (maxEvents !== -1) {
+      const { count, error: countError } = await supabase
+        .from("events")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", auth.organization!.id)
+
+      if (countError) return fail("DB_ERROR", countError.message, 500)
+      if (count !== null && count >= maxEvents) {
+        return fail("PLAN_LIMIT_REACHED", `Event creation limit reached. You can create at most ${maxEvents} events on the ${plan} plan. Please upgrade to create more.`, 403)
+      }
+    }
+
     const slug = `${slugify(body.name)}-${Date.now().toString(36).slice(-4)}`
     const { data, error } = await supabase
       .from("events")
