@@ -117,17 +117,20 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     if (error) return fail("DB_ERROR", error.message, 500)
     
     // Update storage usage
-    await supabase
-      .from("storage_usage")
-      .upsert({
-        organization_id: orgId,
-        total_bytes: (currentStorageBytes + BigInt(file.size)).toString(),
-        photo_count: currentPhotoCount + 1,
-      })
-      .catch((err) => {
-        // Log but don't fail the request
-        console.error("Failed to update storage usage:", err)
-      })
+    try {
+      const { error: upsertError } = await supabase
+        .from("storage_usage")
+        .upsert({
+          organization_id: orgId,
+          total_bytes: (currentStorageBytes + BigInt(file.size)).toString(),
+          photo_count: currentPhotoCount + 1,
+        })
+      if (upsertError) {
+        console.error("Failed to update storage usage:", upsertError.message)
+      }
+    } catch (err) {
+      console.error("Failed to update storage usage:", err)
+    }
     
     void trackEvent({ organization_id: auth.organization?.id ?? null, user_id: auth.user?.id ?? null, event_type: "photo.uploaded", event_data: { gallery_id: id }, request })
     return created(data)
