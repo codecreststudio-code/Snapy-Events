@@ -17,7 +17,6 @@ export function PublicNavbar() {
           <Logo />
         </Link>
 
-        {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6">
           <Link href="/features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Features
@@ -27,6 +26,9 @@ export function PublicNavbar() {
           </Link>
           <Link href="/faq" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             FAQ
+          </Link>
+          <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            About
           </Link>
           <Link href="/contact" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Contact
@@ -89,6 +91,13 @@ export function PublicNavbar() {
                 FAQ
               </Link>
               <Link
+                href="/about"
+                onClick={() => setIsOpen(false)}
+                className="block py-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                About
+              </Link>
+              <Link
                 href="/contact"
                 onClick={() => setIsOpen(false)}
                 className="block py-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -138,6 +147,7 @@ export function PublicFooter() {
               <li><Link href="/features" className="hover:text-foreground">Features</Link></li>
               <li><Link href="/pricing" className="hover:text-foreground">Pricing</Link></li>
               <li><Link href="/faq" className="hover:text-foreground">FAQ</Link></li>
+              <li><Link href="/about" className="hover:text-foreground">About</Link></li>
             </ul>
           </div>
 
