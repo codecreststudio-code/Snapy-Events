@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, use } from "react"
 import { useRouter } from "next/navigation"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
@@ -145,15 +145,16 @@ async function getEventQRCodes(eventId: string) {
   return data || []
 }
 
-export default function EventDetailPage({ params }: { params: { slug: string } }) {
+export default function EventDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params)
   const router = useRouter()
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState("overview")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const { data: event, isLoading } = useQuery({
-    queryKey: ["event", params.slug],
-    queryFn: () => getEvent(params.slug),
+    queryKey: ["event", slug],
+    queryFn: () => getEvent(slug),
   })
 
   const { data: galleries } = useQuery({
@@ -169,9 +170,9 @@ export default function EventDetailPage({ params }: { params: { slug: string } }
   })
 
   const updateMutation = useMutation({
-    mutationFn: (data: Partial<EventFormData>) => updateEvent(params.slug, data),
+    mutationFn: (data: Partial<EventFormData>) => updateEvent(slug, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["event", params.slug] })
+      queryClient.invalidateQueries({ queryKey: ["event", slug] })
       toast({ title: "Event updated successfully" })
     },
     onError: (error: Error) => {
@@ -556,7 +557,7 @@ export default function EventDetailPage({ params }: { params: { slug: string } }
                     </Button>
                     <Button
                       variant="destructive"
-                      onClick={() => deleteMutation.mutate(params.slug)}
+                      onClick={() => deleteMutation.mutate(slug)}
                       disabled={deleteMutation.isPending}
                     >
                       {deleteMutation.isPending ? "Deleting..." : "Delete Event"}
@@ -577,7 +578,7 @@ export default function EventDetailPage({ params }: { params: { slug: string } }
               </p>
             </div>
             <Button asChild>
-              <Link href={`/dashboard/events/${params.slug}/gallery`}>Manage Galleries</Link>
+              <Link href={`/dashboard/events/${slug}/gallery`}>Manage Galleries</Link>
             </Button>
           </div>
 
@@ -627,7 +628,7 @@ export default function EventDetailPage({ params }: { params: { slug: string } }
                   Create galleries to organize photos from your event.
                 </p>
                 <Button asChild>
-                  <Link href={`/dashboard/events/${params.slug}/gallery`}>Create Gallery</Link>
+                  <Link href={`/dashboard/events/${slug}/gallery`}>Create Gallery</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -643,7 +644,7 @@ export default function EventDetailPage({ params }: { params: { slug: string } }
               </p>
             </div>
             <Button asChild>
-              <Link href={`/dashboard/events/${params.slug}/qr`}>Manage QR Codes</Link>
+              <Link href={`/dashboard/events/${slug}/qr`}>Manage QR Codes</Link>
             </Button>
           </div>
 
@@ -672,7 +673,7 @@ export default function EventDetailPage({ params }: { params: { slug: string } }
                   Generate QR codes for guests to scan and access your event.
                 </p>
                 <Button asChild>
-                  <Link href={`/dashboard/events/${params.slug}/qr`}>Generate QR Code</Link>
+                  <Link href={`/dashboard/events/${slug}/qr`}>Generate QR Code</Link>
                 </Button>
               </CardContent>
             </Card>

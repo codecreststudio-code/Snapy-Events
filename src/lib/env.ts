@@ -64,15 +64,17 @@ function parseClient() {
 
 function parseServer() {
   const parsed = serverSchema.safeParse(process.env)
-  if (!parsed.success && process.env.NODE_ENV === "production") {
-    console.warn("[env] server env validation failed", parsed.error.flatten().fieldErrors)
+  if (!parsed.success) {
+    if (process.env.NODE_ENV === "production") {
+      console.warn("[env] server env validation failed", parsed.error.flatten().fieldErrors)
+    }
+    return {
+      ...process.env,
+      APP_URL: process.env.APP_URL ?? "https://snapsy-events.vercel.app",
+      NODE_ENV: process.env.NODE_ENV ?? "development",
+    } as any
   }
-  return parsed.success
-    ? parsed.data
-    : ({
-        APP_URL: process.env.APP_URL ?? "https://snapsy-events.vercel.app",
-        NODE_ENV: (process.env.NODE_ENV as "development" | "production" | "test") ?? "development",
-      } as z.infer<typeof serverSchema>)
+  return parsed.data
 }
 
 export const clientEnv = parseClient()

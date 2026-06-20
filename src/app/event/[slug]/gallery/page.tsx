@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { useQuery } from "@tanstack/react-query"
 import Link from "next/link"
 import Image from "next/image"
@@ -250,12 +250,13 @@ function PhotoGrid({
   )
 }
 
-export default function GuestGalleryPage({ params }: { params: { slug: string } }) {
+export default function GuestGalleryPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params)
   const [selectedGallery, setSelectedGallery] = useState<Gallery | null>(null)
 
   const { data: event, isLoading: eventLoading } = useQuery({
-    queryKey: ["event", params.slug],
-    queryFn: () => getEvent(params.slug),
+    queryKey: ["event", slug],
+    queryFn: () => getEvent(slug),
   })
 
   const { data: galleries, isLoading: galleriesLoading } = useQuery({
@@ -308,7 +309,7 @@ export default function GuestGalleryPage({ params }: { params: { slug: string } 
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
         <div className="container flex h-14 items-center justify-between">
-          <Link href={`/event/${params.slug}`} className="flex items-center gap-2">
+          <Link href={`/event/${slug}`} className="flex items-center gap-2">
             <ImageIcon className="h-5 w-5" />
             <span className="font-semibold">{event.name}</span>
           </Link>
@@ -319,7 +320,7 @@ export default function GuestGalleryPage({ params }: { params: { slug: string } 
               </span>
             )}
             <Button asChild size="sm" variant="ghost">
-              <Link href={`/event/${params.slug}/upload`}>
+              <Link href={`/event/${slug}/upload`}>
                 <Camera className="h-4 w-4" />
                 Upload
               </Link>

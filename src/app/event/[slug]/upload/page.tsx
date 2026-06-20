@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, use } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -63,7 +63,8 @@ interface EventSettings {
   auto_approve_photos: boolean
 }
 
-export default function GuestUploadPage({ params }: { params: { slug: string } }) {
+export default function GuestUploadPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params)
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [files, setFiles] = useState<UploadFile[]>([])
@@ -74,8 +75,8 @@ export default function GuestUploadPage({ params }: { params: { slug: string } }
   const [limitError, setLimitError] = useState<string | null>(null)
 
   const { data: event, isLoading: eventLoading } = useQuery({
-    queryKey: ["event", params.slug],
-    queryFn: () => getEvent(params.slug),
+    queryKey: ["event", slug],
+    queryFn: () => getEvent(slug),
   })
 
   const { data: galleries, isLoading: galleriesLoading } = useQuery({
@@ -304,7 +305,7 @@ export default function GuestUploadPage({ params }: { params: { slug: string } }
           This event is not accepting photo uploads at the moment.
         </p>
         <Button asChild variant="outline" className="border-slate-800">
-          <Link href={`/event/${params.slug}`}>Back to Event</Link>
+          <Link href={`/event/${slug}`}>Back to Event</Link>
         </Button>
       </div>
     )
@@ -315,7 +316,7 @@ export default function GuestUploadPage({ params }: { params: { slug: string } }
       <header className="sticky top-0 z-40 border-b border-slate-900 bg-slate-950/80 backdrop-blur">
         <div className="container flex h-14 items-center justify-between px-4">
           <Link
-            href={`/event/${params.slug}`}
+            href={`/event/${slug}`}
             className="flex items-center gap-2 text-slate-400 hover:text-slate-200 text-sm"
           >
             <ArrowLeft className="h-5 w-5" />
