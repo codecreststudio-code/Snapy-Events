@@ -2,46 +2,89 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 import { ArrowRight, Menu, X } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { Logo } from "./logo"
 
 export function PublicNavbar() {
+  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-xl shadow-sm border-b border-slate-200/70">
-      <div className="container flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2">
+    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl shadow-sm shadow-slate-900/5">
+      <div className="container flex h-20 items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/95 px-4 py-2 shadow-sm shadow-slate-900/5">
           <Logo />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
-          <Link href="/features" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+        <nav className="hidden flex-1 justify-center md:flex items-center gap-10">
+          <Link
+            href="/features"
+            className={cn(
+              "text-sm font-medium transition-colors pb-1",
+              pathname === "/features"
+                ? "text-slate-950 border-b-2 border-slate-950"
+                : "text-slate-600 hover:text-slate-900",
+            )}
+          >
             Features
           </Link>
-          <Link href="/pricing" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+          <Link
+            href="/pricing"
+            className={cn(
+              "text-sm font-medium transition-colors pb-1",
+              pathname === "/pricing"
+                ? "text-slate-950 border-b-2 border-slate-950"
+                : "text-slate-600 hover:text-slate-900",
+            )}
+          >
             Pricing
           </Link>
-          <Link href="/faq" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+          <Link
+            href="/faq"
+            className={cn(
+              "text-sm font-medium transition-colors pb-1",
+              pathname === "/faq"
+                ? "text-slate-950 border-b-2 border-slate-950"
+                : "text-slate-600 hover:text-slate-900",
+            )}
+          >
             FAQ
           </Link>
-          <Link href="/about" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+          <Link
+            href="/about"
+            className={cn(
+              "text-sm font-medium transition-colors pb-1",
+              pathname === "/about"
+                ? "text-slate-950 border-b-2 border-slate-950"
+                : "text-slate-600 hover:text-slate-900",
+            )}
+          >
             About
           </Link>
-          <Link href="/contact" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+          <Link
+            href="/contact"
+            className={cn(
+              "text-sm font-medium transition-colors pb-1",
+              pathname === "/contact"
+                ? "text-slate-950 border-b-2 border-slate-950"
+                : "text-slate-600 hover:text-slate-900",
+            )}
+          >
             Contact
           </Link>
         </nav>
 
         {/* Desktop CTAs */}
-        <div className="hidden md:flex items-center gap-4">
-          <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+        <div className="hidden md:flex items-center gap-5">
+          <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-950 transition-colors">
             Sign in
           </Link>
           <Link href="/signup">
-            <Button className="bg-slate-950 text-white hover:bg-slate-900 shadow-sm shadow-slate-900/10 hover:scale-[1.02] active:scale-[0.98] transition-transform">
+            <Button className="rounded-full bg-slate-950 px-7 py-2.5 text-white hover:bg-slate-900 shadow-sm shadow-slate-900/10 hover:scale-[1.02] active:scale-[0.98] transition-transform">
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

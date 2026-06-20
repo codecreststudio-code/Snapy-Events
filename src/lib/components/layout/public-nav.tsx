@@ -22,13 +22,13 @@ export function PublicNav() {
   const [open, setOpen] = React.useState(false)
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-xl shadow-sm border-b border-slate-200/70">
-      <div className="container flex h-20 items-center justify-between px-4 sm:px-6">
-        <Link href="/" aria-label="Snapsy home">
+    <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-xl shadow-sm shadow-slate-900/5">
+      <div className="container flex h-20 items-center justify-between gap-6 px-4 sm:px-6">
+        <Link href="/" aria-label="Snapsy home" className="flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/95 px-4 py-2 shadow-sm shadow-slate-900/5">
           <Logo />
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex" aria-label="Main">
+        <nav className="hidden flex-1 justify-center items-center gap-10 md:flex" aria-label="Main">
           {NAV.map((item) => (
             <Link
               key={item.href}
@@ -43,11 +43,11 @@ export function PublicNav() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-5 md:flex">
           <Button asChild variant="ghost" size="sm" className="text-slate-600 hover:text-slate-950">
             <Link href="/login">Sign in</Link>
           </Button>
-          <Button asChild size="sm" className="bg-slate-950 text-white hover:bg-slate-900 shadow-sm shadow-slate-900/10">
+          <Button asChild size="sm" className="rounded-full bg-slate-950 px-7 py-2.5 text-white hover:bg-slate-900 shadow-sm shadow-slate-900/10">
             <Link href="/signup">Get started</Link>
           </Button>
         </div>
