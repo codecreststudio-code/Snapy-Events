@@ -82,7 +82,12 @@ export async function proxy(request: NextRequest) {
   )
 
   // 3. Trigger session refresh to write updated cookies to response
-  const { data: { user } } = await supabase.auth.getUser()
+  console.log(`[Proxy Request] Pathname: ${pathname}, Cookies: ${request.cookies.getAll().map(c => `${c.name}=${c.value.substring(0, 15)}...`).join(', ')}`)
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError) {
+    console.error(`[Proxy Auth Error] Pathname: ${pathname}, Error:`, authError.message)
+  }
+  console.log(`[Proxy Auth Result] Pathname: ${pathname}, User:`, user ? user.email : "null")
 
   // 4. Set security headers
   response.headers.set("X-Frame-Options", "DENY")

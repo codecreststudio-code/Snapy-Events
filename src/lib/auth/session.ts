@@ -29,6 +29,7 @@ export interface AuthContext {
 export async function getAuthContext(): Promise<AuthContext> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  console.log(`[getAuthContext] User resolved: ${user ? user.email : "null"}`)
   if (!user) return emptyAuth()
 
   const { data: profile } = await supabase
@@ -37,7 +38,66 @@ export async function getAuthContext(): Promise<AuthContext> {
     .eq("id", user.id)
     .single()
 
-  if (!profile) return emptyAuth()
+  if (!profile) {
+    console.log(`[getAuthContext] Profile not found for user: ${user.id}`)
+    return emptyAuth()
+  }
+
+  // Server-side auto-provisioning of organization if it is missing
+  if (!profile.organization_id) {
+    console.log(`[getAuthContext] User ${user.email} is missing organization_id. Auto-provisioning...`)
+    const { createServiceClient } = await import("@/lib/supabase/server")
+    const { slugify } = await import("@/lib/utils")
+    const svc = await createServiceClient()
+    
+    const userEmail = profile.email || user.email || ""
+    const fullName = profile.full_name || userEmail.split("@")[0] || "User"
+    const orgName = `${fullName}'s Workspace`
+    const orgSlug = `${slugify(orgName)}-${Date.now().toString(36).slice(-4)}`
+
+    const { data: org, error: orgError } = await svc
+      .from("organizations")
+      .insert({
+        name: orgName,
+        slug: orgSlug,
+        plan: "free",
+      })
+      .select()
+      .single()
+
+    if (!orgError && org) {
+      const { error: updateError } = await svc
+        .from("users")
+        .update({
+          organization_id: org.id,
+          role: "owner",
+          permissions: ["*"],
+        })
+        .eq("id", user.id)
+
+      if (!updateError) {
+        // Re-fetch profile with the new organization linked
+        const { data: updatedProfile } = await supabase
+          .from("users")
+          .select("id, email, full_name, avatar_url, role, permissions, organization_id, organizations:organizations(id, name, slug, plan, feature_flags)")
+          .eq("id", user.id)
+          .single()
+        
+        if (updatedProfile) {
+          profile.organization_id = updatedProfile.organization_id
+          ;(profile as any).organizations = (updatedProfile as any).organizations
+          profile.role = updatedProfile.role
+          profile.permissions = updatedProfile.permissions
+          console.log(`[getAuthContext] Auto-provisioned workspace ${org.name} successfully for ${user.email}`)
+        }
+      } else {
+        console.error(`[getAuthContext] Failed to update user organization_id:`, updateError.message)
+      }
+    } else {
+      console.error(`[getAuthContext] Failed to create organization:`, orgError?.message)
+    }
+  }
+
   // Supabase returns the joined organization; suppress TS about possibly-null
   const org = (profile as any).organizations
   const role = (profile.role as UserRole) ?? "viewer"
