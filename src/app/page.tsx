@@ -12,6 +12,7 @@ import {
   Shield,
   Zap,
   ArrowRight,
+  Play,
   Check,
   Calendar,
   Lock,
@@ -582,7 +583,7 @@ export default function HomePage() {
                 className="rounded-full font-medium hover:bg-slate-50 text-slate-700 border border-slate-200"
               >
                 See How It Works
-                <span className={`inline-block ml-2 text-xs font-normal italic text-slate-400 ${playfair.className}`}>play</span>
+                <Play className="ml-2 h-4 w-4 text-slate-700" />
               </Button>
             </motion.div>
 
@@ -749,8 +750,8 @@ export default function HomePage() {
                 {orbitPhotos.map((photo, index) => {
                   const angle = (index / orbitPhotos.length) * 2 * Math.PI
                   const radius = isSmallOrbit ? 160 : 210
-                  const x = Math.cos(angle) * radius
-                  const y = Math.sin(angle) * radius
+                  const x = Math.round(Math.cos(angle) * radius * 100) / 100
+                  const y = Math.round(Math.sin(angle) * radius * 100) / 100
                   return (
                     <div
                       key={index}
