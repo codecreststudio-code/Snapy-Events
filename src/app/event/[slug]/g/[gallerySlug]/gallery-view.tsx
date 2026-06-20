@@ -9,6 +9,24 @@ type Photo = { id: string; storage_path: string; original_filename: string; uplo
 
 export function GalleryGallery({ eventName, galleryName, galleryDescription, photos }: { eventName: string; galleryName: string; galleryDescription: string | null; photos: Photo[] }) {
   const [active, setActive] = useState<Photo | null>(null)
+
+  async function downloadPhoto(url: string, filename: string) {
+    try {
+      const response = await fetch(url)
+      const blob = await response.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = blobUrl
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(blobUrl)
+    } catch {
+      window.open(url, "_blank")
+    }
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       <p className="text-sm text-muted-foreground">{eventName}</p>
@@ -28,10 +46,32 @@ export function GalleryGallery({ eventName, galleryName, galleryDescription, pho
       )}
       {active && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setActive(null)}>
-          <div className="relative max-h-full max-w-3xl">
+          <div className="relative max-h-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
             {active.url && <img src={active.url} alt={active.original_filename} className="max-h-[85vh] rounded-lg" />}
-            <Button asChild className="absolute right-2 top-2" size="icon" variant="secondary"><a href={active.url ?? "#"} download><Download className="h-4 w-4" /></a></Button>
-            <Button onClick={() => setActive(null)} className="absolute left-2 top-2" size="icon" variant="secondary"><X className="h-4 w-4" /></Button>
+            <Button
+              className="absolute right-2 top-2"
+              size="icon"
+              variant="secondary"
+              onClick={(e) => {
+                e.stopPropagation()
+                if (active.url) {
+                  downloadPhoto(active.url, active.original_filename || "photo.jpg")
+                }
+              }}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            <Button
+              onClick={(e) => {
+                e.stopPropagation()
+                setActive(null)
+              }}
+              className="absolute left-2 top-2"
+              size="icon"
+              variant="secondary"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       )}

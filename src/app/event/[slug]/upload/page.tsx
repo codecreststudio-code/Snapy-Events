@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback, use } from "react"
+import { useState, useEffect, useRef, useCallback, use } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -42,7 +42,6 @@ async function getGalleries(eventId: string): Promise<Gallery[]> {
     .from("galleries")
     .select("*")
     .eq("event_id", eventId)
-    .eq("settings->allow_uploads", true)
     .order("created_at", { ascending: false })
 
   if (error) throw error
@@ -91,6 +90,12 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     const gallerySettings = g.settings as { allow_uploads?: boolean }
     return gallerySettings?.allow_uploads !== false
   }) || []
+
+  useEffect(() => {
+    if (uploadGalleries.length > 0 && !selectedGallery) {
+      setSelectedGallery(uploadGalleries[0].id)
+    }
+  }, [uploadGalleries, selectedGallery])
 
   const handleFileSelect = useCallback((selectedFiles: FileList | null) => {
     if (!selectedFiles) return

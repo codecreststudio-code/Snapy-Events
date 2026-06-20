@@ -200,7 +200,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
               {visibleGalleries.map((gallery) => (
                 <Link
                   key={gallery.id}
-                  href={`/event/${event.slug}/gallery`}
+                  href={`/event/${event.slug}/g/${gallery.slug}`}
                   className="group block overflow-hidden rounded-2xl border bg-card transition hover:shadow-md"
                 >
                   <div

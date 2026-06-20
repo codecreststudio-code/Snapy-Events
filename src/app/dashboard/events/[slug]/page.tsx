@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, use } from "react"
+import { useState, useEffect, useRef, use } from "react"
 import { useRouter } from "next/navigation"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
@@ -94,45 +94,35 @@ async function getEvent(slug: string, orgId: string): Promise<Event> {
   return data
 }
 
-async function updateEvent(slug: string, data: Partial<EventFormData>) {
+async function updateEvent(slug: string, data: Partial<EventFormData>, currentSettings: EventSettings) {
   const supabase = createClient()
 
-  // Fetch current event to merge settings and prevent overwriting not-null fields
-  const { data: existing, error: fetchError } = await supabase
-    .from("events")
-    .select("*")
-    .eq("slug", slug)
-    .single()
-
-  if (fetchError) throw new Error(fetchError.message)
-
-  const existingSettings = (existing.settings || {}) as EventSettings
-
   const mergedSettings = {
-    is_public: data.is_public !== undefined ? data.is_public : existingSettings.is_public,
-    password_protected: data.password_protected !== undefined ? data.password_protected : existingSettings.password_protected,
+    is_public: data.is_public !== undefined ? data.is_public : currentSettings.is_public,
+    password_protected: data.password_protected !== undefined ? data.password_protected : currentSettings.password_protected,
     password: data.password_protected !== undefined 
-      ? (data.password_protected ? (data.password !== undefined ? data.password : existingSettings.password) : undefined)
-      : (data.password !== undefined ? data.password : existingSettings.password),
-    allow_guest_uploads: data.allow_guest_uploads !== undefined ? data.allow_guest_uploads : existingSettings.allow_guest_uploads,
-    auto_approve_photos: data.auto_approve_photos !== undefined ? data.auto_approve_photos : existingSettings.auto_approve_photos,
-    enable_countdown: data.enable_countdown !== undefined ? data.enable_countdown : existingSettings.enable_countdown,
+      ? (data.password_protected ? (data.password !== undefined ? data.password : currentSettings.password) : undefined)
+      : (data.password !== undefined ? data.password : currentSettings.password),
+    allow_guest_uploads: data.allow_guest_uploads !== undefined ? data.allow_guest_uploads : currentSettings.allow_guest_uploads,
+    auto_approve_photos: data.auto_approve_photos !== undefined ? data.auto_approve_photos : currentSettings.auto_approve_photos,
+    enable_countdown: data.enable_countdown !== undefined ? data.enable_countdown : currentSettings.enable_countdown,
     countdown_date: data.enable_countdown !== undefined 
-      ? (data.enable_countdown ? (data.countdown_date !== undefined ? data.countdown_date : existingSettings.countdown_date) : undefined)
-      : (data.countdown_date !== undefined ? data.countdown_date : existingSettings.countdown_date),
+      ? (data.enable_countdown ? (data.countdown_date !== undefined ? data.countdown_date : currentSettings.countdown_date) : undefined)
+      : (data.countdown_date !== undefined ? data.countdown_date : currentSettings.countdown_date),
   }
 
-  const eventData = {
-    name: data.name !== undefined ? data.name : existing.name,
-    description: data.description !== undefined ? (data.description || null) : existing.description,
-    event_type: data.event_type !== undefined ? (data.event_type || null) : existing.event_type,
-    event_date: data.event_date !== undefined ? (data.event_date ? new Date(data.event_date).toISOString() : null) : existing.event_date,
-    end_date: data.end_date !== undefined ? (data.end_date ? new Date(data.end_date).toISOString() : null) : existing.end_date,
-    venue: data.venue !== undefined ? (data.venue || null) : existing.venue,
-    timezone: data.timezone !== undefined ? data.timezone : existing.timezone,
-    status: data.status !== undefined ? data.status : existing.status,
+  const eventData: any = {
     settings: mergedSettings,
   }
+
+  if (data.name !== undefined) eventData.name = data.name
+  if (data.description !== undefined) eventData.description = data.description || null
+  if (data.event_type !== undefined) eventData.event_type = data.event_type || null
+  if (data.event_date !== undefined) eventData.event_date = data.event_date ? new Date(data.event_date).toISOString() : null
+  if (data.end_date !== undefined) eventData.end_date = data.end_date ? new Date(data.end_date).toISOString() : null
+  if (data.venue !== undefined) eventData.venue = data.venue || null
+  if (data.timezone !== undefined) eventData.timezone = data.timezone
+  if (data.status !== undefined) eventData.status = data.status
 
   const { error } = await supabase.from("events").update(eventData).eq("slug", slug)
   if (error) throw new Error(error.message)
@@ -194,7 +184,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const isLoading = authLoading || (!!orgId && eventLoading)
 
   const updateMutation = useMutation({
-    mutationFn: (data: Partial<EventFormData>) => updateEvent(slug, data),
+    mutationFn: (data: Partial<EventFormData>) => {
+      const currentSettings = (event?.settings || {}) as EventSettings
+      return updateEvent(slug, data, currentSettings)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event", slug] })
       toast({ title: "Event updated successfully" })
@@ -215,6 +208,47 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       toast({ title: "Failed to delete event", description: error.message, variant: "destructive" })
     },
   })
+
+  // Local form state to prevent typing lag and database mutation storms
+  const [formData, setFormData] = useState<EventFormData | null>(null)
+  const activeFieldRef = useRef<keyof EventFormData | null>(null)
+
+  // Initialize and synchronize local state with server state
+  useEffect(() => {
+    if (event) {
+      const s = (event.settings || {}) as EventSettings
+      const serverData: EventFormData = {
+        name: event.name,
+        description: event.description || "",
+        event_type: event.event_type || "",
+        event_date: event.event_date ? new Date(event.event_date).toISOString().slice(0, 16) : "",
+        end_date: event.end_date ? new Date(event.end_date).toISOString().slice(0, 16) : "",
+        venue: event.venue || "",
+        timezone: event.timezone,
+        status: event.status,
+        is_public: s.is_public ?? true,
+        password_protected: s.password_protected ?? false,
+        password: s.password || "",
+        allow_guest_uploads: s.allow_guest_uploads ?? true,
+        auto_approve_photos: s.auto_approve_photos ?? true,
+        enable_countdown: s.enable_countdown ?? false,
+        countdown_date: s.countdown_date ? new Date(s.countdown_date).toISOString().slice(0, 16) : "",
+      }
+
+      setFormData((prev) => {
+        if (!prev) return serverData
+        const updated = { ...prev }
+        // Only update fields that the user is not actively editing/focusing
+        Object.keys(serverData).forEach((k) => {
+          const key = k as keyof EventFormData
+          if (activeFieldRef.current !== key) {
+            (updated as any)[key] = serverData[key]
+          }
+        })
+        return updated
+      })
+    }
+  }, [event])
 
   if (isLoading) {
     return (
@@ -237,8 +271,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     )
   }
 
-  const settings = event.settings as EventSettings
-  const formData: EventFormData = {
+  const settings = (event.settings || {}) as EventSettings
+
+  // Initialize formData inline if it's null to avoid empty render on initial mount
+  const currentForm = formData || {
     name: event.name,
     description: event.description || "",
     event_type: event.event_type || "",
@@ -247,19 +283,21 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     venue: event.venue || "",
     timezone: event.timezone,
     status: event.status,
-    is_public: settings.is_public,
-    password_protected: settings.password_protected,
+    is_public: settings.is_public ?? true,
+    password_protected: settings.password_protected ?? false,
     password: settings.password || "",
-    allow_guest_uploads: settings.allow_guest_uploads,
-    auto_approve_photos: settings.auto_approve_photos,
-    enable_countdown: settings.enable_countdown,
+    allow_guest_uploads: settings.allow_guest_uploads ?? true,
+    auto_approve_photos: settings.auto_approve_photos ?? true,
+    enable_countdown: settings.enable_countdown ?? false,
     countdown_date: settings.countdown_date ? new Date(settings.countdown_date).toISOString().slice(0, 16) : "",
   }
 
-  function updateField(field: keyof EventFormData, value: string | boolean) {
-    const newData = { ...formData, [field]: value }
+  function handleFieldChange(field: keyof EventFormData, value: any) {
+    setFormData((prev) => (prev ? { ...prev, [field]: value } : { ...currentForm, [field]: value }))
+  }
+
+  function handleFieldCommit(field: keyof EventFormData, value: any) {
     updateMutation.mutate({ [field]: value } as Partial<EventFormData>)
-    return newData
   }
 
   const tabs = [
@@ -323,17 +361,24 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   <Label htmlFor="name">Event Name</Label>
                   <Input
                     id="name"
-                    value={formData.name}
-                    onChange={(e) => updateField("name", e.target.value)}
-                    onBlur={(e) => updateMutation.mutate({ name: e.target.value })}
+                    value={currentForm.name}
+                    onFocus={() => { activeFieldRef.current = "name" }}
+                    onChange={(e) => handleFieldChange("name", e.target.value)}
+                    onBlur={(e) => {
+                      activeFieldRef.current = null
+                      handleFieldCommit("name", e.target.value)
+                    }}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
                   <Select
-                    value={formData.status}
-                    onValueChange={(v) => updateMutation.mutate({ status: v })}
+                    value={currentForm.status}
+                    onValueChange={(v) => {
+                      handleFieldChange("status", v)
+                      handleFieldCommit("status", v)
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -352,8 +397,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 <div className="space-y-2">
                   <Label htmlFor="event_type">Event Type</Label>
                   <Select
-                    value={formData.event_type}
-                    onValueChange={(v) => updateMutation.mutate({ event_type: v })}
+                    value={currentForm.event_type}
+                    onValueChange={(v) => {
+                      handleFieldChange("event_type", v)
+                      handleFieldCommit("event_type", v)
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select event type" />
@@ -371,8 +419,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 <div className="space-y-2">
                   <Label htmlFor="timezone">Timezone</Label>
                   <Select
-                    value={formData.timezone}
-                    onValueChange={(v) => updateMutation.mutate({ timezone: v })}
+                    value={currentForm.timezone}
+                    onValueChange={(v) => {
+                      handleFieldChange("timezone", v)
+                      handleFieldCommit("timezone", v)
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -392,9 +443,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
-                  value={formData.description}
-                  onChange={(e) => updateField("description", e.target.value)}
-                  onBlur={(e) => updateMutation.mutate({ description: e.target.value })}
+                  value={currentForm.description}
+                  onFocus={() => { activeFieldRef.current = "description" }}
+                  onChange={(e) => handleFieldChange("description", e.target.value)}
+                  onBlur={(e) => {
+                    activeFieldRef.current = null
+                    handleFieldCommit("description", e.target.value)
+                  }}
                   rows={3}
                 />
               </div>
@@ -405,13 +460,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   <Input
                     id="event_date"
                     type="datetime-local"
-                    value={formData.event_date}
-                    onChange={(e) => updateField("event_date", e.target.value)}
-                    onBlur={(e) =>
-                      updateMutation.mutate({
-                        event_date: new Date(e.target.value).toISOString(),
-                      })
-                    }
+                    value={currentForm.event_date}
+                    onFocus={() => { activeFieldRef.current = "event_date" }}
+                    onChange={(e) => handleFieldChange("event_date", e.target.value)}
+                    onBlur={(e) => {
+                      activeFieldRef.current = null;
+                      const isoVal = e.target.value ? new Date(e.target.value).toISOString() : "";
+                      handleFieldCommit("event_date", isoVal)
+                    }}
                   />
                 </div>
 
@@ -420,13 +476,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   <Input
                     id="end_date"
                     type="datetime-local"
-                    value={formData.end_date}
-                    onChange={(e) => updateField("end_date", e.target.value)}
-                    onBlur={(e) =>
-                      updateMutation.mutate({
-                        end_date: new Date(e.target.value).toISOString(),
-                      })
-                    }
+                    value={currentForm.end_date}
+                    onFocus={() => { activeFieldRef.current = "end_date" }}
+                    onChange={(e) => handleFieldChange("end_date", e.target.value)}
+                    onBlur={(e) => {
+                      activeFieldRef.current = null;
+                      const isoVal = e.target.value ? new Date(e.target.value).toISOString() : "";
+                      handleFieldCommit("end_date", isoVal)
+                    }}
                   />
                 </div>
               </div>
@@ -435,9 +492,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 <Label htmlFor="venue">Venue</Label>
                 <Input
                   id="venue"
-                  value={formData.venue}
-                  onChange={(e) => updateField("venue", e.target.value)}
-                  onBlur={(e) => updateMutation.mutate({ venue: e.target.value })}
+                  value={currentForm.venue}
+                  onFocus={() => { activeFieldRef.current = "venue" }}
+                  onChange={(e) => handleFieldChange("venue", e.target.value)}
+                  onBlur={(e) => {
+                    activeFieldRef.current = null
+                    handleFieldCommit("venue", e.target.value)
+                  }}
                 />
               </div>
             </CardContent>
@@ -457,8 +518,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   </p>
                 </div>
                 <Switch
-                  checked={formData.is_public}
-                  onCheckedChange={(checked) => updateMutation.mutate({ is_public: checked })}
+                  checked={currentForm.is_public}
+                  onCheckedChange={(checked) => {
+                    handleFieldChange("is_public", checked)
+                    handleFieldCommit("is_public", checked)
+                  }}
                 />
               </div>
 
@@ -470,22 +534,27 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   </p>
                 </div>
                 <Switch
-                  checked={formData.password_protected}
-                  onCheckedChange={(checked) =>
-                    updateMutation.mutate({ password_protected: checked })
-                  }
+                  checked={currentForm.password_protected}
+                  onCheckedChange={(checked) => {
+                    handleFieldChange("password_protected", checked)
+                    handleFieldCommit("password_protected", checked)
+                  }}
                 />
               </div>
 
-              {formData.password_protected && (
+              {currentForm.password_protected && (
                 <div className="space-y-2">
                   <Label htmlFor="password">Access Password</Label>
                   <Input
                     id="password"
                     type="password"
-                    value={formData.password}
-                    onChange={(e) => updateField("password", e.target.value)}
-                    onBlur={(e) => updateMutation.mutate({ password: e.target.value })}
+                    value={currentForm.password}
+                    onFocus={() => { activeFieldRef.current = "password" }}
+                    onChange={(e) => handleFieldChange("password", e.target.value)}
+                    onBlur={(e) => {
+                      activeFieldRef.current = null
+                      handleFieldCommit("password", e.target.value)
+                    }}
                   />
                 </div>
               )}
@@ -498,10 +567,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   </p>
                 </div>
                 <Switch
-                  checked={formData.allow_guest_uploads}
-                  onCheckedChange={(checked) =>
-                    updateMutation.mutate({ allow_guest_uploads: checked })
-                  }
+                  checked={currentForm.allow_guest_uploads}
+                  onCheckedChange={(checked) => {
+                    handleFieldChange("allow_guest_uploads", checked)
+                    handleFieldCommit("allow_guest_uploads", checked)
+                  }}
                 />
               </div>
 
@@ -513,10 +583,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   </p>
                 </div>
                 <Switch
-                  checked={formData.auto_approve_photos}
-                  onCheckedChange={(checked) =>
-                    updateMutation.mutate({ auto_approve_photos: checked })
-                  }
+                  checked={currentForm.auto_approve_photos}
+                  onCheckedChange={(checked) => {
+                    handleFieldChange("auto_approve_photos", checked)
+                    handleFieldCommit("auto_approve_photos", checked)
+                  }}
                 />
               </div>
 
@@ -528,26 +599,28 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   </p>
                 </div>
                 <Switch
-                  checked={formData.enable_countdown}
-                  onCheckedChange={(checked) =>
-                    updateMutation.mutate({ enable_countdown: checked })
-                  }
+                  checked={currentForm.enable_countdown}
+                  onCheckedChange={(checked) => {
+                    handleFieldChange("enable_countdown", checked)
+                    handleFieldCommit("enable_countdown", checked)
+                  }}
                 />
               </div>
 
-              {formData.enable_countdown && (
+              {currentForm.enable_countdown && (
                 <div className="space-y-2">
                   <Label htmlFor="countdown_date">Reveal Date & Time</Label>
                   <Input
                     id="countdown_date"
                     type="datetime-local"
-                    value={formData.countdown_date}
-                    onChange={(e) => updateField("countdown_date", e.target.value)}
-                    onBlur={(e) =>
-                      updateMutation.mutate({
-                        countdown_date: new Date(e.target.value).toISOString(),
-                      })
-                    }
+                    value={currentForm.countdown_date}
+                    onFocus={() => { activeFieldRef.current = "countdown_date" }}
+                    onChange={(e) => handleFieldChange("countdown_date", e.target.value)}
+                    onBlur={(e) => {
+                      activeFieldRef.current = null;
+                      const isoVal = e.target.value ? new Date(e.target.value).toISOString() : "";
+                      handleFieldCommit("countdown_date", isoVal)
+                    }}
                   />
                 </div>
               )}

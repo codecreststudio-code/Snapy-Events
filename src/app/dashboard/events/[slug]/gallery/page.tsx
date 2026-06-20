@@ -137,17 +137,179 @@ async function deleteGallery(id: string) {
   if (error) throw new Error(error.message)
 }
 
+function EditGalleryDialog({
+  gallery,
+  onSuccess,
+  open,
+  onOpenChange,
+}: {
+  gallery: Gallery
+  onSuccess: () => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  const settings = gallery.settings as GallerySettings
+  const [formData, setFormData] = useState<GalleryFormData>({
+    name: gallery.name,
+    description: gallery.description || "",
+    is_public: gallery.is_public,
+    reveal_enabled: gallery.reveal_enabled,
+    reveal_at: gallery.reveal_at ? new Date(gallery.reveal_at).toISOString().slice(0, 16) : "",
+    allow_uploads: settings?.allow_uploads !== false,
+    allow_downloads: settings?.allow_downloads !== false,
+  })
+  const [loading, setLoading] = useState(false)
+
+  const mutation = useMutation({
+    mutationFn: () => updateGallery(gallery.id, formData),
+    onSuccess: () => {
+      toast({ title: "Gallery updated successfully" })
+      onOpenChange(false)
+      onSuccess()
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update gallery", description: error.message, variant: "destructive" })
+    },
+  })
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    mutation.mutate()
+    setLoading(false)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Edit Gallery</DialogTitle>
+          <DialogDescription>Modify gallery settings</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="edit-gallery-name">Gallery Name *</Label>
+            <Input
+              id="edit-gallery-name"
+              value={formData.name}
+              onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+              placeholder="Ceremony, Reception, Candid Shots..."
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="edit-gallery-description">Description</Label>
+            <Textarea
+              id="edit-gallery-description"
+              value={formData.description}
+              onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
+              placeholder="What's in this gallery?"
+              rows={2}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Public Gallery</Label>
+              <p className="text-sm text-muted-foreground">
+                Make this gallery visible to everyone
+              </p>
+            </div>
+            <Switch
+              checked={formData.is_public}
+              onCheckedChange={(checked) =>
+                setFormData((p) => ({ ...p, is_public: checked }))
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Allow Guest Uploads</Label>
+              <p className="text-sm text-muted-foreground">
+                Let guests upload photos to this gallery
+              </p>
+            </div>
+            <Switch
+              checked={formData.allow_uploads}
+              onCheckedChange={(checked) =>
+                setFormData((p) => ({ ...p, allow_uploads: checked }))
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Allow Downloads</Label>
+              <p className="text-sm text-muted-foreground">
+                Allow guests to download photos
+              </p>
+            </div>
+            <Switch
+              checked={formData.allow_downloads}
+              onCheckedChange={(checked) =>
+                setFormData((p) => ({ ...p, allow_downloads: checked }))
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Scheduled Reveal</Label>
+              <p className="text-sm text-muted-foreground">
+                Set a date/time when photos will be revealed
+              </p>
+            </div>
+            <Switch
+              checked={formData.reveal_enabled}
+              onCheckedChange={(checked) =>
+                setFormData((p) => ({ ...p, reveal_enabled: checked }))
+              }
+            />
+          </div>
+
+          {formData.reveal_enabled && (
+            <div className="space-y-2">
+              <Label htmlFor="edit-reveal_at">Reveal Date & Time</Label>
+              <Input
+                id="edit-reveal_at"
+                type="datetime-local"
+                value={formData.reveal_at}
+                onChange={(e) => setFormData((p) => ({ ...p, reveal_at: e.target.value }))}
+                required={formData.reveal_enabled}
+              />
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 function GalleryCard({
   gallery,
   eventSlug,
   onDelete,
+  onUpdate,
 }: {
   gallery: Gallery
   eventSlug: string
   onDelete: (id: string) => void
+  onUpdate: () => void
 }) {
   const settings = gallery.settings as GallerySettings
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
 
   return (
     <>
@@ -172,23 +334,21 @@ function GalleryCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/events/${eventSlug}/gallery/${gallery.id}`}>
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </Link>
+                <DropdownMenuItem onSelect={() => setEditDialogOpen(true)} className="cursor-pointer">
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/event/${eventSlug}/gallery`} target="_blank">
-                    <Eye className="h-4 w-4" />
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href={`/event/${eventSlug}/g/${gallery.slug}`} target="_blank">
+                    <Eye className="h-4 w-4 mr-2" />
                     View
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setDeleteDialogOpen(true)}
-                  className="text-destructive"
+                  className="text-destructive cursor-pointer"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4 mr-2" />
                   Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -244,11 +404,18 @@ function GalleryCard({
               Delete
             </Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
-  )
-}
+          </DialogContent>
+        </Dialog>
+
+        <EditGalleryDialog
+          gallery={gallery}
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          onSuccess={onUpdate}
+        />
+      </>
+    )
+  }
 
 function CreateGalleryDialog({
   eventId,
@@ -511,6 +678,7 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
               gallery={gallery}
               eventSlug={event.slug}
               onDelete={(id) => deleteMutation.mutate(id)}
+              onUpdate={() => queryClient.invalidateQueries({ queryKey: ["event-galleries", event.id] })}
             />
           ))}
         </div>
