@@ -26,8 +26,10 @@ interface EventData {
   }
   organization: {
     name: string
-    brand_color: string | null
-    logo_url: string | null
+    branding: {
+      brand_color?: string | null
+      logo_url?: string | null
+    }
   } | null
   galleries: Array<{
     id: string
@@ -65,7 +67,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
     .from("events")
     .select(`
       *,
-      organization:organizations(name, brand_color, logo_url),
+      organization:organizations(name, branding),
       galleries(*)
     `)
     .eq("slug", slug)
@@ -102,9 +104,9 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            {event.organization?.logo_url ? (
+            {event.organization?.branding?.logo_url ? (
               <img
-                src={event.organization.logo_url}
+                src={event.organization.branding.logo_url}
                 alt={event.organization.name}
                 className="h-8 w-auto"
               />
@@ -132,9 +134,9 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
             />
           )}
           <div className="mx-auto max-w-5xl px-6 py-20 text-center">
-            {event.organization?.logo_url && (
+            {event.organization?.branding?.logo_url && (
               <img
-                src={event.organization.logo_url}
+                src={event.organization.branding.logo_url}
                 alt={event.organization.name}
                 className="mx-auto mb-4 h-10"
               />
