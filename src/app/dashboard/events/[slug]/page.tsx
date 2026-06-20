@@ -97,24 +97,41 @@ async function getEvent(slug: string, orgId: string): Promise<Event> {
 async function updateEvent(slug: string, data: Partial<EventFormData>) {
   const supabase = createClient()
 
+  // Fetch current event to merge settings and prevent overwriting not-null fields
+  const { data: existing, error: fetchError } = await supabase
+    .from("events")
+    .select("*")
+    .eq("slug", slug)
+    .single()
+
+  if (fetchError) throw new Error(fetchError.message)
+
+  const existingSettings = (existing.settings || {}) as EventSettings
+
+  const mergedSettings = {
+    is_public: data.is_public !== undefined ? data.is_public : existingSettings.is_public,
+    password_protected: data.password_protected !== undefined ? data.password_protected : existingSettings.password_protected,
+    password: data.password_protected !== undefined 
+      ? (data.password_protected ? (data.password !== undefined ? data.password : existingSettings.password) : undefined)
+      : (data.password !== undefined ? data.password : existingSettings.password),
+    allow_guest_uploads: data.allow_guest_uploads !== undefined ? data.allow_guest_uploads : existingSettings.allow_guest_uploads,
+    auto_approve_photos: data.auto_approve_photos !== undefined ? data.auto_approve_photos : existingSettings.auto_approve_photos,
+    enable_countdown: data.enable_countdown !== undefined ? data.enable_countdown : existingSettings.enable_countdown,
+    countdown_date: data.enable_countdown !== undefined 
+      ? (data.enable_countdown ? (data.countdown_date !== undefined ? data.countdown_date : existingSettings.countdown_date) : undefined)
+      : (data.countdown_date !== undefined ? data.countdown_date : existingSettings.countdown_date),
+  }
+
   const eventData = {
-    name: data.name,
-    description: data.description || null,
-    event_type: data.event_type || null,
-    event_date: data.event_date ? new Date(data.event_date).toISOString() : null,
-    end_date: data.end_date ? new Date(data.end_date).toISOString() : null,
-    venue: data.venue || null,
-    timezone: data.timezone,
-    status: data.status,
-    settings: {
-      is_public: data.is_public,
-      password_protected: data.password_protected,
-      password: data.password_protected ? data.password : undefined,
-      allow_guest_uploads: data.allow_guest_uploads,
-      auto_approve_photos: data.auto_approve_photos,
-      enable_countdown: data.enable_countdown,
-      countdown_date: data.enable_countdown ? data.countdown_date : undefined,
-    } as EventSettings,
+    name: data.name !== undefined ? data.name : existing.name,
+    description: data.description !== undefined ? (data.description || null) : existing.description,
+    event_type: data.event_type !== undefined ? (data.event_type || null) : existing.event_type,
+    event_date: data.event_date !== undefined ? (data.event_date ? new Date(data.event_date).toISOString() : null) : existing.event_date,
+    end_date: data.end_date !== undefined ? (data.end_date ? new Date(data.end_date).toISOString() : null) : existing.end_date,
+    venue: data.venue !== undefined ? (data.venue || null) : existing.venue,
+    timezone: data.timezone !== undefined ? data.timezone : existing.timezone,
+    status: data.status !== undefined ? data.status : existing.status,
+    settings: mergedSettings,
   }
 
   const { error } = await supabase.from("events").update(eventData).eq("slug", slug)
