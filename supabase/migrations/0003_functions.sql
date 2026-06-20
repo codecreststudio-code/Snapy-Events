@@ -178,25 +178,40 @@ INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 -- Storage policies are intentionally permissive (object-level) since the
 -- public bucket is served via signed URLs from the application layer.
 
+DROP POLICY IF EXISTS "org_event_covers_write" ON storage.objects;
 CREATE POLICY "org_event_covers_write" ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (bucket_id = 'event-covers' AND auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS "org_event_covers_read" ON storage.objects;
 CREATE POLICY "org_event_covers_read" ON storage.objects FOR SELECT TO public
   USING (bucket_id = 'event-covers');
 
+DROP POLICY IF EXISTS "org_photos_write" ON storage.objects;
 CREATE POLICY "org_photos_write" ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (bucket_id IN ('photos','photos-public') AND auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS "org_photos_read" ON storage.objects;
 CREATE POLICY "org_photos_read" ON storage.objects FOR SELECT TO authenticated
   USING (bucket_id IN ('photos','photos-public'));
 
+DROP POLICY IF EXISTS "faces_write" ON storage.objects;
 CREATE POLICY "faces_write" ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (bucket_id = 'faces' AND auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS "faces_read" ON storage.objects;
 CREATE POLICY "faces_read" ON storage.objects FOR SELECT TO authenticated
   USING (bucket_id = 'faces');
 
+DROP POLICY IF EXISTS "avatars_write" ON storage.objects;
 CREATE POLICY "avatars_write" ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (bucket_id = 'avatars' AND auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS "avatars_read" ON storage.objects;
 CREATE POLICY "avatars_read" ON storage.objects FOR SELECT TO public USING (bucket_id = 'avatars');
 
+DROP POLICY IF EXISTS "qr_write" ON storage.objects;
 CREATE POLICY "qr_write" ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (bucket_id = 'qr-codes' AND auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS "qr_read" ON storage.objects;
 CREATE POLICY "qr_read" ON storage.objects FOR SELECT TO public USING (bucket_id = 'qr-codes');

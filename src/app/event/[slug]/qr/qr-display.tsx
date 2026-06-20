@@ -9,7 +9,7 @@ export function QrDisplay({ eventName, url }: { eventName: string; url: string }
   const [png, setPng] = useState<string | null>(null)
   useEffect(() => {
     let cancelled = false
-    fetch("/api/qr/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ data: url, size: 1024 }) })
+    fetch("/api/qr/render", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ data: url, size: 1024 }) })
       .then((r) => r.json())
       .then((d) => { if (!cancelled) setPng(d.data?.png ?? null) })
       .catch(() => null)
