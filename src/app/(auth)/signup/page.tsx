@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Check, ArrowRight, ShieldCheck, Sparkles, HelpCircle } from "lucide-react"
@@ -103,7 +103,17 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const { signUp, signInWithGoogle } = useAuth()
+  const { signUp, signInWithGoogle, user } = useAuth()
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      const planParam = params.get("plan")
+      if (planParam && PLANS_DATA.some((p) => p.id === planParam)) {
+        setSelectedPlan(planParam)
+      }
+    }
+  }, [])
 
   const activePlanDetails = PLANS_DATA.find((p) => p.id === selectedPlan) || PLANS_DATA[0]
   
@@ -115,6 +125,18 @@ export default function SignupPage() {
 
   const handleNextStep = () => {
     setStep(2)
+  }
+
+  const handleContinue = () => {
+    if (user) {
+      if (selectedPlan === "free") {
+        router.push("/dashboard?welcome=true")
+      } else {
+        router.push(`/checkout?plan=${selectedPlan}&guests=${guestBoost}&shots=${shotBoost}`)
+      }
+    } else {
+      setStep(2)
+    }
   }
 
   const handleGoogleSignIn = async () => {
@@ -331,10 +353,16 @@ export default function SignupPage() {
               </p>
             </div>
             <Button
-              onClick={handleNextStep}
+              onClick={handleContinue}
               className="w-full sm:w-auto bg-orange-500 text-white hover:bg-orange-600 font-bold px-8 py-6 rounded-xl flex items-center justify-center gap-2 text-base shadow-[0_0_12px_rgba(249,115,22,0.2)] border-none"
             >
-              <span>Continue to Registration</span>
+              <span>
+                {user
+                  ? selectedPlan === "free"
+                    ? "Go to Dashboard"
+                    : "Proceed to Payment"
+                  : "Continue to Registration"}
+              </span>
               <ArrowRight className="h-5 w-5" />
             </Button>
           </div>
