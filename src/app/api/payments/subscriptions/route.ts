@@ -116,29 +116,3 @@ export const DELETE = defineRoute({
   },
 }).DELETE
 
-    if (error || !sub) return fail("NO_ACTIVE_SUBSCRIPTION", "No active subscription found to cancel", 400)
-
-    if (sub.razorpay_subscription_id) {
-      try {
-        await cancelRazorpaySubscription(sub.razorpay_subscription_id, true)
-      } catch (err: any) {
-        logger.error("Failed to cancel in Razorpay", { error: err.message })
-      }
-    }
-
-    // Update locally
-    await supabase
-      .from("subscriptions")
-      .update({ status: "cancelled" })
-      .eq("id", sub.id)
-
-    // Reset organization plan back to free
-    await supabase
-      .from("organizations")
-      .update({ plan: "free" })
-      .eq("id", auth.organization!.id)
-
-    return ok({ success: true })
-  },
-}).DELETE
-
