@@ -78,7 +78,16 @@ ALTER TABLE public.download_bundles ENABLE ROW LEVEL SECURITY;
 -- organizations --------------------------------------------------------------
 DROP POLICY IF EXISTS "org_select" ON public.organizations;
 CREATE POLICY "org_select" ON public.organizations FOR SELECT
-  USING (public.is_platform_admin() OR public.same_org(id));
+  USING (
+    public.is_platform_admin()
+    OR public.same_org(id)
+    OR EXISTS (
+      SELECT 1 FROM public.events e
+      WHERE e.organization_id = organizations.id
+        AND e.status = 'published'
+        AND COALESCE((e.settings->>'is_public')::boolean, true)
+    )
+  );
 
 DROP POLICY IF EXISTS "org_insert" ON public.organizations;
 CREATE POLICY "org_insert" ON public.organizations FOR INSERT
