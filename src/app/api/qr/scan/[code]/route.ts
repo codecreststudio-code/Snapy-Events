@@ -38,10 +38,16 @@ export const GET = defineRoute<unknown, unknown, { code: string }>({
       // ignore
     }
 
-    // Server-side redirect to the event page.
     const event = qr.event as any
     const ev = Array.isArray(event) ? event[0] : event
-    if (!ev) return fail("NOT_FOUND", "Event missing", 404)
-    return redirect(`/event/${ev.slug}`, 302)
+    const isCustomUrl = qr.redirect_url && !qr.redirect_url.includes(`/event/scan/${code}`)
+
+    if (isCustomUrl) {
+      return redirect(qr.redirect_url, 302)
+    } else if (ev) {
+      return redirect(`/event/${ev.slug}`, 302)
+    } else {
+      return fail("NOT_FOUND", "Destination not found", 404)
+    }
   },
 }).GET

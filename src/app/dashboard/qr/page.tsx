@@ -117,7 +117,7 @@ async function deleteQRCode(id: string) {
 
 async function generateQRImage(data: string): Promise<string | null> {
   try {
-    const response = await fetch("/api/qr/generate", {
+    const response = await fetch("/api/qr/render", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data, size: 512 }),
