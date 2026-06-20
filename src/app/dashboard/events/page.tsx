@@ -14,12 +14,14 @@ import {
 import { createClient } from "@/lib/supabase/client"
 import { formatDate } from "@/lib/utils"
 import type { Event } from "@/lib/types"
+import { useAuth } from "@/lib/hooks"
 
-async function getEvents(): Promise<Event[]> {
+async function getEvents(orgId: string): Promise<Event[]> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("events")
     .select("*")
+    .eq("organization_id", orgId)
     .order("created_at", { ascending: false })
 
   if (error) throw error
@@ -27,10 +29,16 @@ async function getEvents(): Promise<Event[]> {
 }
 
 export default function EventsPage() {
-  const { data: events, isLoading } = useQuery({
-    queryKey: ["events"],
-    queryFn: getEvents,
+  const { profile, isLoading: authLoading } = useAuth()
+  const orgId = profile?.organization_id
+
+  const { data: events, isLoading: eventsLoading } = useQuery({
+    queryKey: ["events", orgId],
+    queryFn: () => getEvents(orgId!),
+    enabled: !!orgId,
   })
+
+  const isLoading = authLoading || (!!orgId && eventsLoading)
 
   if (isLoading) {
     return (

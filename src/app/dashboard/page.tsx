@@ -21,6 +21,7 @@ import { Button } from "@/lib/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { createClient } from "@/lib/supabase/client"
 import { formatDate } from "@/lib/utils"
+import { useAuth } from "@/lib/hooks"
 
 interface DashboardStats {
   totalEvents: number
@@ -37,26 +38,48 @@ interface DashboardStats {
   }>
 }
 
-async function getDashboardStats(): Promise<DashboardStats> {
+async function getDashboardStats(orgId: string): Promise<DashboardStats> {
   const supabase = createClient()
 
+  // Get recent events for this organization
   const { data: events } = await supabase
     .from("events")
     .select("id, name, slug, event_date, status")
+    .eq("organization_id", orgId)
     .order("created_at", { ascending: false })
     .limit(5)
 
-  const { count: photoCount } = await supabase
-    .from("photos")
-    .select("*", { count: "exact", head: true })
+  // Get all event IDs for this organization to correctly filter photos, galleries, and QR codes counts
+  const { data: allEvents } = await supabase
+    .from("events")
+    .select("id")
+    .eq("organization_id", orgId)
 
-  const { count: galleryCount } = await supabase
-    .from("galleries")
-    .select("*", { count: "exact", head: true })
+  const allEventIds = allEvents?.map((e) => e.id) || []
 
-  const { count: qrCount } = await supabase
-    .from("qr_codes")
-    .select("*", { count: "exact", head: true })
+  let photoCount = 0
+  let galleryCount = 0
+  let qrCount = 0
+
+  if (allEventIds.length > 0) {
+    const { count: pCount } = await supabase
+      .from("photos")
+      .select("*", { count: "exact", head: true })
+      .in("event_id", allEventIds)
+    photoCount = pCount || 0
+
+    const { count: gCount } = await supabase
+      .from("galleries")
+      .select("*", { count: "exact", head: true })
+      .in("event_id", allEventIds)
+    galleryCount = gCount || 0
+
+    const { count: qCount } = await supabase
+      .from("qr_codes")
+      .select("*", { count: "exact", head: true })
+      .in("event_id", allEventIds)
+    qrCount = qCount || 0
+  }
 
   const recentEventsWithCounts = await Promise.all(
     (events || []).map(async (event) => {
@@ -69,19 +92,25 @@ async function getDashboardStats(): Promise<DashboardStats> {
   )
 
   return {
-    totalEvents: events?.length || 0,
-    totalPhotos: photoCount || 0,
-    totalGalleries: galleryCount || 0,
-    totalQRCodes: qrCount || 0,
+    totalEvents: allEventIds.length,
+    totalPhotos: photoCount,
+    totalGalleries: galleryCount,
+    totalQRCodes: qrCount,
     recentEvents: recentEventsWithCounts,
   }
 }
 
 export default function DashboardPage() {
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ["dashboard-stats"],
-    queryFn: getDashboardStats,
+  const { profile, isLoading: authLoading } = useAuth()
+  const orgId = profile?.organization_id
+
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ["dashboard-stats", orgId],
+    queryFn: () => getDashboardStats(orgId!),
+    enabled: !!orgId,
   })
+
+  const isLoading = authLoading || (!!orgId && statsLoading)
 
   if (isLoading) {
     return (

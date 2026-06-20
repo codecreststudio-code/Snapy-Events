@@ -7,6 +7,7 @@ import Link from "next/link"
 import { formatDateTime } from "@/lib/utils"
 import { EVENT_TYPES } from "@/lib/constants"
 import { createClient } from "@/lib/supabase/client"
+import { useAuth } from "@/lib/hooks"
 import type { Event, EventSettings } from "@/lib/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { Input } from "@/lib/components/ui/input"
@@ -80,12 +81,13 @@ const TIMEZONES = [
   "Pacific/Auckland",
 ]
 
-async function getEvent(slug: string): Promise<Event> {
+async function getEvent(slug: string, orgId: string): Promise<Event> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("events")
     .select("*")
     .eq("slug", slug)
+    .eq("organization_id", orgId)
     .single()
 
   if (error) throw error
@@ -149,12 +151,15 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const { slug } = use(params)
   const router = useRouter()
   const queryClient = useQueryClient()
+  const { profile, isLoading: authLoading } = useAuth()
+  const orgId = profile?.organization_id
   const [activeTab, setActiveTab] = useState("overview")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
-  const { data: event, isLoading } = useQuery({
-    queryKey: ["event", slug],
-    queryFn: () => getEvent(slug),
+  const { data: event, isLoading: eventLoading } = useQuery({
+    queryKey: ["event", slug, orgId],
+    queryFn: () => getEvent(slug, orgId!),
+    enabled: !!orgId,
   })
 
   const { data: galleries } = useQuery({
@@ -168,6 +173,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     queryFn: () => getEventQRCodes(event!.id),
     enabled: !!event?.id,
   })
+
+  const isLoading = authLoading || (!!orgId && eventLoading)
 
   const updateMutation = useMutation({
     mutationFn: (data: Partial<EventFormData>) => updateEvent(slug, data),
