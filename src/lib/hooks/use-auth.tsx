@@ -107,43 +107,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, fullName: string, orgName: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
           full_name: fullName,
-        },
-      },
-    })
+          organization_name: orgName,
+        }),
+      })
 
-    if (error) return { error: new Error(error.message) }
+      const resData = await res.json()
+      if (!res.ok) {
+        throw new Error(resData.error?.message ?? resData.error ?? "Failed to sign up")
+      }
 
-    if (data.user) {
-      const slug = orgName.toLowerCase().replace(/[^a-z0-9]/g, "-")
+      // Explicitly sign in using client-side to set session and cookies in the browser
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-      const { data: org, error: orgError } = await supabase
-        .from("organizations")
-        .insert({ name: orgName, slug })
-        .select()
-        .single()
+      if (signInError) {
+        return { error: new Error(signInError.message) }
+      }
 
-      if (orgError) return { error: new Error(orgError.message) }
-
-      const { error: userError } = await supabase
-        .from("users")
-        .upsert({
-          id: data.user.id,
-          organization_id: org.id,
-          full_name: fullName,
-          role: "owner",
-          permissions: ["*"],
-        })
-
-      if (userError) return { error: new Error(userError.message) }
+      return { error: null }
+    } catch (err: any) {
+      return { error: err instanceof Error ? err : new Error(err.message ?? "Failed to sign up") }
     }
-
-    return { error: null }
   }
 
   const signOut = async () => {

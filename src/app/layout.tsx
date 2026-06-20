@@ -17,7 +17,12 @@ export const metadata: Metadata = {
     description: "The complete event photography platform for hosts and guests.",
     type: "website",
     locale: "en_US",
-    siteName: "Snapsy",
+    siteName: "Snapy",
+  },
+  icons: {
+    icon: "/Favicon.png",
+    shortcut: "/Favicon.png",
+    apple: "/Favicon.png",
   },
   twitter: {
     card: "summary_large_image",

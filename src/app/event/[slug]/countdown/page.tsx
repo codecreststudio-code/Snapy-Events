@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { PublicFooter } from "@/lib/components/layout/public-footer"
 import { Button } from "@/lib/components/ui/button"
 import { Camera, Calendar, Clock, Mail } from "lucide-react"
+import { Logo } from "@/lib/components/layout/logo"
 import { CountdownTimer } from "./countdown-timer"
 
 interface EventData {
@@ -66,11 +67,8 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Camera className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="font-semibold text-lg">Snapsy</span>
+          <Link href="/">
+            <Logo />
           </Link>
           <Button asChild variant="outline" size="sm">
             <Link href={`/event/${event.slug}/upload`}>

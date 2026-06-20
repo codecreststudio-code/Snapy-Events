@@ -3,12 +3,13 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Camera, Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
 import { Label } from "@/lib/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { useAuth } from "@/lib/hooks"
+import { Logo } from "@/lib/components/layout/logo"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -41,6 +42,7 @@ export default function LoginPage() {
       setIsLoading(false)
     } else {
       router.push("/dashboard")
+      router.refresh()
     }
   }
 
@@ -48,10 +50,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-muted/50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <Link href="/" className="flex items-center justify-center gap-2 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <Camera className="h-6 w-6 text-primary-foreground" />
-            </div>
+          <Link href="/" className="flex items-center justify-center mb-4">
+            <Logo />
           </Link>
           <CardTitle className="text-2xl">Welcome back</CardTitle>
           <CardDescription>Sign in to your Snapsy account</CardDescription>

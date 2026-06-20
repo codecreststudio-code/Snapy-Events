@@ -52,7 +52,7 @@ export function defineRoute<TBody = unknown, TQuery = unknown, C = unknown>(opts
 
         // CORS preflight
         if (m === "OPTIONS") {
-          return new NextResponse(null, { status: 204, headers: corsHeaders() })
+          return new NextResponse(null, { status: 204, headers: corsHeaders(request) })
         }
 
         // Rate limit
@@ -130,11 +130,17 @@ export function defineRoute<TBody = unknown, TQuery = unknown, C = unknown>(opts
   return out
 }
 
-function corsHeaders() {
+function corsHeaders(request?: NextRequest) {
+  const defaultOrigin = process.env.NEXT_PUBLIC_APP_URL || "https://snapsy-events.vercel.app"
+  let origin = defaultOrigin
+  if (process.env.NODE_ENV !== "production") {
+    origin = request?.headers.get("origin") ?? "*"
+  }
   return {
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization, x-api-key",
+    "Access-Control-Allow-Credentials": "true",
   }
 }
 

@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Camera, ArrowRight, Menu, X } from "lucide-react"
+import { ArrowRight, Menu, X } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
+import { Logo } from "./logo"
 
 export function PublicNavbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -13,10 +14,7 @@ export function PublicNavbar() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Camera className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="font-semibold text-lg bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Snapsy</span>
+          <Logo />
         </Link>
 
         {/* Desktop Nav */}
@@ -126,11 +124,8 @@ export function PublicFooter() {
       <div className="container py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <Camera className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="font-semibold text-lg">Snapsy</span>
+            <div className="mb-4">
+              <Logo />
             </div>
             <p className="text-sm text-muted-foreground">
               The complete event photography platform for hosts and guests.
