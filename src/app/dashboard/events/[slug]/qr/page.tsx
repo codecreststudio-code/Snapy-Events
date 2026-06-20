@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { generateCode } from "@/lib/utils"
+import { useAuth } from "@/lib/hooks"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
@@ -41,12 +42,13 @@ import {
 } from "lucide-react"
 import type { QRCode, Gallery } from "@/lib/types"
 
-async function getEvent(eventSlug: string) {
+async function getEvent(eventSlug: string, orgId: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("events")
     .select("id, name, slug")
     .eq("slug", eventSlug)
+    .eq("organization_id", orgId)
     .single()
 
   if (error) throw error
@@ -334,10 +336,13 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
   const { slug } = use(params)
   const router = useRouter()
   const queryClient = useQueryClient()
+  const { profile, isLoading: authLoading } = useAuth()
+  const orgId = profile?.organization_id
 
   const { data: event, isLoading: eventLoading } = useQuery({
-    queryKey: ["event", slug],
-    queryFn: () => getEvent(slug),
+    queryKey: ["event", slug, orgId],
+    queryFn: () => getEvent(slug, orgId!),
+    enabled: !!orgId,
   })
 
   const { data: qrCodes, isLoading: qrLoading } = useQuery({
@@ -363,7 +368,9 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
     },
   })
 
-  if (eventLoading || qrLoading) {
+  const isLoading = authLoading || (!!orgId && (eventLoading || qrLoading))
+
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-12 w-1/3" />

@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { useAuth } from "@/lib/hooks"
 import { generateCode } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
@@ -48,22 +49,25 @@ interface QRCodeWithEvent extends QRCode {
   }
 }
 
-async function getAllQRCodes(): Promise<QRCodeWithEvent[]> {
+async function getAllQRCodes(eventIds: string[]): Promise<QRCodeWithEvent[]> {
+  if (eventIds.length === 0) return []
   const supabase = createClient()
   const { data, error } = await supabase
     .from("qr_codes")
     .select("*, event:events(name, slug)")
+    .in("event_id", eventIds)
     .order("created_at", { ascending: false })
 
   if (error) throw error
   return data || []
 }
 
-async function getEvents() {
+async function getEvents(orgId: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("events")
     .select("id, name, slug")
+    .eq("organization_id", orgId)
     .order("created_at", { ascending: false })
 
   if (error) throw error
@@ -389,17 +393,23 @@ function CreateQRDialog({
 
 export default function ConsolidatedQRPage() {
   const queryClient = useQueryClient()
+  const { profile, isLoading: authLoading } = useAuth()
+  const orgId = profile?.organization_id
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedEventId, setSelectedEventId] = useState("all")
 
-  const { data: qrCodes, isLoading: qrLoading } = useQuery({
-    queryKey: ["all-qrcodes"],
-    queryFn: getAllQRCodes,
+  const { data: events, isLoading: eventsLoading } = useQuery({
+    queryKey: ["events-list", orgId],
+    queryFn: () => getEvents(orgId!),
+    enabled: !!orgId,
   })
 
-  const { data: events, isLoading: eventsLoading } = useQuery({
-    queryKey: ["events-list"],
-    queryFn: getEvents,
+  const eventIds = events?.map((e: any) => e.id) || []
+
+  const { data: qrCodes, isLoading: qrLoading } = useQuery({
+    queryKey: ["all-qrcodes", eventIds],
+    queryFn: () => getAllQRCodes(eventIds),
+    enabled: !!events,
   })
 
   const deleteMutation = useMutation({
@@ -426,7 +436,9 @@ export default function ConsolidatedQRPage() {
     return matchesSearch && matchesEvent
   })
 
-  if (qrLoading || eventsLoading) {
+  const isLoading = authLoading || (!!orgId && (eventsLoading || qrLoading))
+
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">

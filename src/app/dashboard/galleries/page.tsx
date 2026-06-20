@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { useAuth } from "@/lib/hooks"
 import { formatDate } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
@@ -41,12 +42,25 @@ import {
 } from "lucide-react"
 import type { Gallery as GalleryType } from "@/lib/types"
 
-async function getGalleries(): Promise<GalleryType[]> {
+async function getGalleries(eventIds: string[]): Promise<GalleryType[]> {
+  if (eventIds.length === 0) return []
   const supabase = createClient()
   const { data, error } = await supabase
     .from("galleries")
     .select("*, event:events(name, slug)")
+    .in("event_id", eventIds)
     .order("created_at", { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+async function getEvents(orgId: string) {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from("events")
+    .select("id")
+    .eq("organization_id", orgId)
 
   if (error) throw error
   return data || []
@@ -196,12 +210,23 @@ function GalleryCard({
 
 export default function GalleriesPage() {
   const queryClient = useQueryClient()
+  const { profile, isLoading: authLoading } = useAuth()
+  const orgId = profile?.organization_id
   const [searchQuery, setSearchQuery] = useState("")
   const [filterType, setFilterType] = useState("all")
 
-  const { data: galleries, isLoading } = useQuery({
-    queryKey: ["galleries"],
-    queryFn: getGalleries,
+  const { data: events, isLoading: eventsLoading } = useQuery({
+    queryKey: ["events-list", orgId],
+    queryFn: () => getEvents(orgId!),
+    enabled: !!orgId,
+  })
+
+  const eventIds = events?.map((e: any) => e.id) || []
+
+  const { data: galleries, isLoading: galleriesLoading } = useQuery({
+    queryKey: ["galleries", eventIds],
+    queryFn: () => getGalleries(eventIds),
+    enabled: !!events,
   })
 
   const deleteMutation = useMutation({
@@ -228,6 +253,8 @@ export default function GalleriesPage() {
 
     return matchesSearch && matchesFilter
   })
+
+  const isLoading = authLoading || (!!orgId && (eventsLoading || galleriesLoading))
 
   if (isLoading) {
     return (

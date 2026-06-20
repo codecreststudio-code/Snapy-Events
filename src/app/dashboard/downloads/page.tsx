@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useQuery, useMutation } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase/client"
+import { useAuth } from "@/lib/hooks"
 import { formatDate, formatBytes } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
@@ -33,11 +34,9 @@ interface DownloadItem {
   storage_path: string
 }
 
-async function getDownloads(): Promise<DownloadItem[]> {
+async function getDownloads(eventIds: string[]): Promise<DownloadItem[]> {
+  if (eventIds.length === 0) return []
   const supabase = createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Not authenticated")
 
   const { data: photos, error } = await supabase
     .from("photos")
@@ -49,6 +48,7 @@ async function getDownloads(): Promise<DownloadItem[]> {
       created_at,
       gallery:galleries(name, event:events(name))
     `)
+    .in("event_id", eventIds)
     .order("created_at", { ascending: false })
     .limit(100)
 
@@ -63,6 +63,17 @@ async function getDownloads(): Promise<DownloadItem[]> {
     created_at: p.created_at as string,
     storage_path: p.storage_path as string,
   }))
+}
+
+async function getEvents(orgId: string) {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from("events")
+    .select("id")
+    .eq("organization_id", orgId)
+
+  if (error) throw error
+  return data || []
 }
 
 async function getDownloadHistory() {
@@ -100,13 +111,24 @@ async function downloadMultiple(items: DownloadItem[]) {
 }
 
 export default function DownloadsPage() {
+  const { profile, isLoading: authLoading } = useAuth()
+  const orgId = profile?.organization_id
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isDownloading, setIsDownloading] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState(0)
 
-  const { data: downloads, isLoading } = useQuery({
-    queryKey: ["downloads"],
-    queryFn: getDownloads,
+  const { data: events, isLoading: eventsLoading } = useQuery({
+    queryKey: ["events-list", orgId],
+    queryFn: () => getEvents(orgId!),
+    enabled: !!orgId,
+  })
+
+  const eventIds = events?.map((e: any) => e.id) || []
+
+  const { data: downloads, isLoading: downloadsLoading } = useQuery({
+    queryKey: ["downloads", eventIds],
+    queryFn: () => getDownloads(eventIds),
+    enabled: !!events,
   })
 
   const totalSize = downloads?.reduce((acc, d) => acc + d.size, 0) || 0
@@ -159,6 +181,8 @@ export default function DownloadsPage() {
     setDownloadProgress(0)
     toast({ title: `Downloaded ${selectedItems.length} file(s)` })
   }
+
+  const isLoading = authLoading || (!!orgId && (eventsLoading || downloadsLoading))
 
   if (isLoading) {
     return (

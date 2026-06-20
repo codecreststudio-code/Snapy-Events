@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { slugify } from "@/lib/utils"
+import { useAuth } from "@/lib/hooks"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
@@ -53,9 +54,14 @@ interface GalleryFormData {
   allow_downloads: boolean
 }
 
-async function getEvent(slug: string): Promise<Event> {
+async function getEvent(slug: string, orgId: string): Promise<Event> {
   const supabase = createClient()
-  const { data, error } = await supabase.from("events").select("*").eq("slug", slug).single()
+  const { data, error } = await supabase
+    .from("events")
+    .select("*")
+    .eq("slug", slug)
+    .eq("organization_id", orgId)
+    .single()
   if (error) throw error
   return data
 }
@@ -418,10 +424,13 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
   const { slug } = use(params)
   const router = useRouter()
   const queryClient = useQueryClient()
+  const { profile, isLoading: authLoading } = useAuth()
+  const orgId = profile?.organization_id
 
   const { data: event, isLoading: eventLoading } = useQuery({
-    queryKey: ["event", slug],
-    queryFn: () => getEvent(slug),
+    queryKey: ["event", slug, orgId],
+    queryFn: () => getEvent(slug, orgId!),
+    enabled: !!orgId,
   })
 
   const { data: galleries, isLoading: galleriesLoading } = useQuery({
@@ -441,7 +450,9 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
     },
   })
 
-  if (eventLoading || galleriesLoading) {
+  const isLoading = authLoading || (!!orgId && (eventLoading || galleriesLoading))
+
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-12 w-1/3" />
