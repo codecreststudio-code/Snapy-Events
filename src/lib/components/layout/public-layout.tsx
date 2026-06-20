@@ -11,37 +11,37 @@ export function PublicNavbar() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-xl shadow-sm border-b border-slate-200/70">
+      <div className="container flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
           <Logo />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6">
-          <Link href="/features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+        <nav className="hidden md:flex items-center gap-8">
+          <Link href="/features" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
             Features
           </Link>
-          <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/pricing" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
             Pricing
           </Link>
-          <Link href="/faq" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/faq" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
             FAQ
           </Link>
-          <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/about" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
             About
           </Link>
-          <Link href="/contact" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/contact" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
             Contact
           </Link>
         </nav>
 
         {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-4">
-          <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
             Sign in
           </Link>
           <Link href="/signup">
-            <Button className="hover:scale-[1.02] active:scale-[0.98] transition-transform">
+            <Button className="bg-slate-950 text-white hover:bg-slate-900 shadow-sm shadow-slate-900/10 hover:scale-[1.02] active:scale-[0.98] transition-transform">
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -49,71 +49,73 @@ export function PublicNavbar() {
         </div>
 
         {/* Mobile Menu Button */}
-        <button
+        <motion.button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex md:hidden p-2 text-muted-foreground hover:text-foreground focus:outline-none"
+          whileTap={{ scale: 0.94 }}
+          className="flex md:hidden p-2 rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-slate-300"
           aria-label="Toggle menu"
         >
           {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        </motion.button>
       </div>
 
       {/* Mobile Drawer */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="md:hidden border-b bg-background overflow-hidden"
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.28, ease: "easeOut" }}
+            className="md:hidden border-t border-slate-200/70 bg-white/95 backdrop-blur-xl overflow-hidden"
           >
-            <div className="px-4 pt-2 pb-6 space-y-3">
+            <div className="px-4 pt-4 pb-6 space-y-3">
               <Link
                 href="/features"
                 onClick={() => setIsOpen(false)}
-                className="block py-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="block rounded-full px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950 transition"
               >
                 Features
               </Link>
               <Link
                 href="/pricing"
                 onClick={() => setIsOpen(false)}
-                className="block py-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="block rounded-full px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950 transition"
               >
                 Pricing
               </Link>
               <Link
                 href="/faq"
                 onClick={() => setIsOpen(false)}
-                className="block py-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="block rounded-full px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950 transition"
               >
                 FAQ
               </Link>
               <Link
                 href="/about"
                 onClick={() => setIsOpen(false)}
-                className="block py-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="block rounded-full px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950 transition"
               >
                 About
               </Link>
               <Link
                 href="/contact"
                 onClick={() => setIsOpen(false)}
-                className="block py-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="block rounded-full px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950 transition"
               >
                 Contact
               </Link>
-              <div className="pt-4 border-t flex flex-col gap-3">
+              <div className="pt-4 border-t border-slate-200/70 flex flex-col gap-3">
                 <Link
                   href="/login"
                   onClick={() => setIsOpen(false)}
-                  className="flex justify-center py-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex justify-center rounded-full border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 transition"
                 >
                   Sign in
                 </Link>
                 <Link href="/signup" onClick={() => setIsOpen(false)}>
-                  <Button className="w-full">
+                  <Button className="w-full rounded-full bg-slate-950 text-white hover:bg-slate-900 shadow-sm shadow-slate-900/10">
                     Get Started
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
