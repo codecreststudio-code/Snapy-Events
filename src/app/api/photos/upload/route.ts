@@ -56,7 +56,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       .eq("organization_id", orgId)
       .single()
 
-    const currentStorageBytes = storageUsage?.total_bytes ? BigInt(storageUsage.total_bytes) : 0n
+    const currentStorageBytes = storageUsage?.total_bytes ? BigInt(storageUsage.total_bytes) : BigInt(0)
     const currentPhotoCount = storageUsage?.photo_count || 0
     if (currentStorageBytes + BigInt(file.size) > BigInt(maxStorageBytes)) {
       return fail(
