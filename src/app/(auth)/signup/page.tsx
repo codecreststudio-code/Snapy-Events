@@ -3,12 +3,13 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Camera, Eye, EyeOff, Check, ArrowRight, ShieldCheck, Sparkles, HelpCircle } from "lucide-react"
+import { Eye, EyeOff, Check, ArrowRight, ShieldCheck, Sparkles, HelpCircle } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
 import { Label } from "@/lib/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { useAuth } from "@/lib/hooks"
+import { Logo } from "@/lib/components/layout/logo"
 
 const PLANS_DATA = [
   {
@@ -158,13 +159,8 @@ export default function SignupPage() {
         <div className="max-w-6xl mx-auto w-full">
           {/* Header */}
           <div className="text-center mb-10">
-            <Link href="/" className="inline-flex items-center gap-2 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500">
-                <Camera className="h-6 w-6 text-white" />
-              </div>
-              <span className="font-bold text-2xl tracking-tight bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
-                Snapsy
-              </span>
+            <Link href="/" className="inline-flex items-center justify-center mb-4">
+              <Logo />
             </Link>
             <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
               Choose Your Perfect Plan

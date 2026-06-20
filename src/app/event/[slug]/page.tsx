@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { PublicFooter } from "@/lib/components/layout/public-footer"
 import { Button } from "@/lib/components/ui/button"
 import { Camera, Calendar, MapPin, QrCode, Lock, Image, Upload } from "lucide-react"
+import { Logo } from "@/lib/components/layout/logo"
 
 interface EventData {
   id: string
@@ -110,12 +111,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                 className="h-8 w-auto"
               />
             ) : (
-              <>
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                  <Camera className="h-5 w-5 text-primary-foreground" />
-                </div>
-                <span className="font-semibold text-lg">Snapsy</span>
-              </>
+              <Logo />
             )}
           </Link>
           <div className="flex items-center gap-4">

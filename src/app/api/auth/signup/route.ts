@@ -13,16 +13,17 @@ export const POST = defineRoute({
   rateLimit: { key: "auth:signup", limit: 5, windowSeconds: 60 },
   audit: "auth.signup",
   handler: async ({ body, request }) => {
-    const supabase = await createClient()
-    const { data, error } = await supabase.auth.signUp({
+    const svc = await createServiceClient()
+    
+    const { data, error } = await svc.auth.admin.createUser({
       email: body.email,
       password: body.password,
-      options: { data: { full_name: body.full_name } },
+      email_confirm: true,
+      user_metadata: { full_name: body.full_name },
     })
     if (error || !data.user) return fail("AUTH_ERROR", error?.message ?? "Sign up failed", 400)
 
     // Create the organization + link the user
-    const svc = await createServiceClient()
     const orgSlug = `${slugify(body.organization_name)}-${Date.now().toString(36).slice(-4)}`
     const { data: org, error: orgError } = await svc
       .from("organizations")

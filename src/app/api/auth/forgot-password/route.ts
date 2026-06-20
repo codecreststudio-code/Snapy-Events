@@ -12,7 +12,7 @@ export const POST = defineRoute({
   handler: async ({ body }) => {
     const supabase = await createClient()
     const { error } = await supabase.auth.resetPasswordForEmail(body.email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://snapy-events.vercel.app"}/reset-password`,
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://snapsy-events.vercel.app"}/reset-password`,
     })
     if (error) return fail("AUTH_ERROR", error.message, 400)
     return ok({ sent: true })

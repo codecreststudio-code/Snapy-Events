@@ -4,7 +4,8 @@ import { useEffect, useState, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Script from "next/script"
-import { Camera, Check, ShieldCheck, AlertCircle, CreditCard, Loader2 } from "lucide-react"
+import { Check, ShieldCheck, AlertCircle, CreditCard, Loader2 } from "lucide-react"
+import { Logo } from "@/lib/components/layout/logo"
 import { Button } from "@/lib/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { useAuth } from "@/lib/hooks"
@@ -163,13 +164,8 @@ function CheckoutForm() {
 
       <div className="max-w-4xl mx-auto w-full flex flex-col items-center">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 mb-8">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500">
-            <Camera className="h-6 w-6 text-white" />
-          </div>
-          <span className="font-bold text-2xl tracking-tight bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
-            Snapsy
-          </span>
+        <Link href="/" className="mb-8">
+          <Logo />
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8 w-full">

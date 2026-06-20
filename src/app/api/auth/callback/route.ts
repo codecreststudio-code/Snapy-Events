@@ -1,6 +1,6 @@
 // src/app/api/auth/callback/route.ts
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { slugify } from "@/lib/utils"
 
 export async function GET(request: NextRequest) {
@@ -23,13 +23,15 @@ export async function GET(request: NextRequest) {
         .single()
 
       if (profile && !profile.organization_id) {
+        const svc = await createServiceClient()
+        
         // Automatically create a default organization for new OAuth users
         const userEmail = profile.email || data.user.email || ""
         const fullName = profile.full_name || userEmail.split("@")[0] || "User"
         const orgName = `${fullName}'s Workspace`
         const orgSlug = `${slugify(orgName)}-${Date.now().toString(36).slice(-4)}`
 
-        const { data: org, error: orgError } = await supabase
+        const { data: org, error: orgError } = await svc
           .from("organizations")
           .insert({
             name: orgName,
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
           .single()
 
         if (!orgError && org) {
-          await supabase
+          await svc
             .from("users")
             .update({
               organization_id: org.id,

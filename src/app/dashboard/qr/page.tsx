@@ -90,7 +90,7 @@ async function createQRCode(data: {
 }) {
   const supabase = createClient()
   const code = generateCode(8)
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://snapy-events.vercel.app"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://snapsy-events.vercel.app"
   const redirectUrl = data.redirect_url || `${baseUrl}/event/scan/${code}`
 
   const qrData = {
@@ -133,7 +133,7 @@ function QRCodeCard({ qr, onDelete }: { qr: QRCodeWithEvent; onDelete: (id: stri
   const [qrImage, setQrImage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const scanUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://snapy-events.vercel.app"}/event/scan/${qr.code}`
+  const scanUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://snapsy-events.vercel.app"}/event/scan/${qr.code}`
 
   async function loadQRImage() {
     if (qrImage) return
