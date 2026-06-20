@@ -47,6 +47,24 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const baseLimits = PLAN_LIMITS[orgPlan as keyof typeof PLAN_LIMITS] || PLAN_LIMITS.free
     const maxGuests = baseLimits.guests_limit + guestBoost
     const maxShots = baseLimits.shots_limit + shotsBoost
+    const maxStorageBytes = (baseLimits.storage_limit_gb || 1) * 1024 * 1024 * 1024
+
+    // Check storage quota
+    const { data: storageUsage } = await supabase
+      .from("storage_usage")
+      .select("total_bytes, photo_count")
+      .eq("organization_id", orgId)
+      .single()
+
+    const currentStorageBytes = storageUsage?.total_bytes ? BigInt(storageUsage.total_bytes) : 0n
+    const currentPhotoCount = storageUsage?.photo_count || 0
+    if (currentStorageBytes + BigInt(file.size) > BigInt(maxStorageBytes)) {
+      return fail(
+        "STORAGE_QUOTA_EXCEEDED",
+        `Storage quota exceeded. You are using ${Math.round(Number(currentStorageBytes) / (1024 * 1024))}MB of ${baseLimits.storage_limit_gb}GB. Please upgrade your plan.`,
+        403
+      )
+    }
 
     const { data: currentUploads } = await supabase
       .from("photos")
@@ -97,6 +115,20 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       .select()
       .single()
     if (error) return fail("DB_ERROR", error.message, 500)
+    
+    // Update storage usage
+    await supabase
+      .from("storage_usage")
+      .upsert({
+        organization_id: orgId,
+        total_bytes: (currentStorageBytes + BigInt(file.size)).toString(),
+        photo_count: currentPhotoCount + 1,
+      })
+      .catch((err) => {
+        // Log but don't fail the request
+        console.error("Failed to update storage usage:", err)
+      })
+    
     void trackEvent({ organization_id: auth.organization?.id ?? null, user_id: auth.user?.id ?? null, event_type: "photo.uploaded", event_data: { gallery_id: id }, request })
     return created(data)
   },

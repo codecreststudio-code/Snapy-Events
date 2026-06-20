@@ -26,6 +26,11 @@ model Organization {
   analyticsEvents AnalyticsEvent[]
   auditLogs       AuditLog[]
   storageUsage    StorageUsage[]
+  invitations     OrganizationInvitation[] @relation("Invitations")
+  watermarks      Watermark[]      @relation("Watermarks")
+  customDomains   CustomDomain[]   @relation("CustomDomains")
+  supportTickets  SupportTicket[]  @relation("SupportTickets")
+  couponRedemptions CouponRedemption[] @relation("CouponRedemptions")
 
   @@map("organizations")
 }
@@ -37,6 +42,7 @@ model User {
   fullName       String?  @map("full_name")
   avatarUrl      String?  @map("avatar_url")
   role           String   @default("member")
+  isAdmin        Boolean  @default(false) @map("is_admin")
   permissions    Json     @default("[]")
   preferences    Json     @default("{}")
   createdAt      DateTime @default(now()) @map("created_at")
@@ -74,8 +80,14 @@ model Event {
   host          User?         @relation("EventHost", fields: [hostId], references: [id])
   galleries     Gallery[]
   qrCodes       QrCode[]
+  qrScans       QrScan[]
   photos        Photo[]
   photoAccesses PhotoAccess[]
+  faces         Face[]
+  faceClusters  FaceCluster[]
+  liveWallItems LiveWallItem[]
+  slideshows    Slideshow[]
+  downloadBundles DownloadBundle[]
 
   @@unique([organizationId, slug])
   @@map("events")
@@ -240,6 +252,8 @@ model Transaction {
   currency          String   @default("INR")
   status            String   @default("pending")
   paymentMethod     String?  @map("payment_method")
+  errorCode         String?  @map("error_code")
+  errorDescription  String?  @map("error_description")
   gatewayResponse   Json?    @map("gateway_response")
   createdAt         DateTime @default(now()) @map("created_at")
 
@@ -263,6 +277,7 @@ model Coupon {
   createdAt             DateTime  @default(now()) @map("created_at")
 
   referrals Referral[]
+  redemptions CouponRedemption[]
 
   @@map("coupons")
 }
@@ -285,12 +300,14 @@ model Referral {
 
 model Face {
   id            String   @id @default(uuid())
+  eventId       String   @map("event_id")
   photoId       String   @map("photo_id")
   boundingBox   Json     @map("bounding_box")
   confidence    Float
   embeddingPath String?  @map("embedding_path")
   createdAt     DateTime @default(now()) @map("created_at")
 
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   photo Photo @relation(fields: [photoId], references: [id], onDelete: Cascade)
 
   @@map("faces")
@@ -298,6 +315,7 @@ model Face {
 
 model FaceSearchLog {
   id               String   @id @default(uuid())
+  organizationId   String?  @map("organization_id")
   userId           String?  @map("user_id")
   searchType       String   @map("search_type")
   queryPhotoId     String?  @map("query_photo_id")
@@ -305,6 +323,7 @@ model FaceSearchLog {
   searchDurationMs Int?     @map("search_duration_ms")
   createdAt        DateTime @default(now()) @map("created_at")
 
+  organization Organization? @relation(fields: [organizationId], references: [id])
   user         User?   @relation(fields: [userId], references: [id])
   queryPhoto   Photo?  @relation("FaceSearchQuery", fields: [queryPhotoId], references: [id])
   resultPhotos Photo[] @relation("FaceSearchResults")
@@ -355,4 +374,206 @@ model StorageUsage {
   organization Organization @relation(fields: [organizationId], references: [id])
 
   @@map("storage_usage")
+}
+
+model WebhookEvent {
+  id           String   @id @default(uuid())
+  source       String
+  eventType    String   @map("event_type")
+  externalId   String?  @map("external_id")
+  payload      Json
+  processed    Boolean  @default(false)
+  processedAt  DateTime? @map("processed_at")
+  error        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("webhook_events")
+}
+
+model OrganizationInvitation {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  email          String
+  role           String   @default("member")
+  token          String   @unique
+  acceptedAt     DateTime? @map("accepted_at")
+  expiresAt      DateTime @map("expires_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation("Invitations", fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("organization_invitations")
+}
+
+model QrScan {
+  id        String   @id @default(uuid())
+  eventId   String   @map("event_id")
+  qrCodeId  String?  @map("qr_code_id")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  referer   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("qr_scans")
+}
+
+model CouponRedemption {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  couponId       String   @map("coupon_id")
+  discountAmount Int      @map("discount_amount")
+  redemptionDate DateTime @default(now()) @map("redemption_date")
+
+  organization Organization @relation("CouponRedemptions", fields: [organizationId], references: [id])
+  coupon       Coupon       @relation(fields: [couponId], references: [id])
+
+  @@unique([organizationId, couponId])
+  @@map("coupon_redemptions")
+}
+
+model FaceCluster {
+  id            String   @id @default(uuid())
+  eventId       String   @map("event_id")
+  name          String?
+  representativeFaceId String? @map("representative_face_id")
+  description   String?
+  faceCount     Int      @default(0) @map("face_count")
+  metadata      Json     @default("{}")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("face_clusters")
+}
+
+model LiveWallItem {
+  id        String   @id @default(uuid())
+  eventId   String   @map("event_id")
+  photoId   String   @map("photo_id")
+  order     Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("live_wall_items")
+}
+
+model Slideshow {
+  id         String    @id @default(uuid())
+  eventId    String    @map("event_id")
+  name       String
+  settings   Json      @default("{}")
+  isActive   Boolean   @default(true) @map("is_active")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("slideshows")
+}
+
+model Watermark {
+  id         String    @id @default(uuid())
+  organizationId String @map("organization_id")
+  name       String
+  imageUrl   String    @map("image_url")
+  position   String    @default("bottom_right")
+  opacity    Float     @default(0.5)
+  isActive   Boolean   @default(true) @map("is_active")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  organization Organization @relation("Watermarks", fields: [organizationId], references: [id])
+
+  @@map("watermarks")
+}
+
+model CustomDomain {
+  id         String    @id @default(uuid())
+  organizationId String @map("organization_id")
+  domain     String    @unique
+  isVerified Boolean   @default(false) @map("is_verified")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  organization Organization @relation("CustomDomains", fields: [organizationId], references: [id])
+
+  @@map("custom_domains")
+}
+
+model SupportTicket {
+  id              String   @id @default(uuid())
+  organizationId  String?  @map("organization_id")
+  subject         String
+  description     String
+  status          String   @default("open")
+  priority        String   @default("normal")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  organization Organization? @relation("SupportTickets", fields: [organizationId], references: [id])
+  messages       SupportTicketMessage[]
+
+  @@map("support_tickets")
+}
+
+model SupportTicketMessage {
+  id       String   @id @default(uuid())
+  ticketId String   @map("ticket_id")
+  message  String
+  author   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@map("support_ticket_messages")
+}
+
+model DownloadBundle {
+  id         String   @id @default(uuid())
+  eventId    String   @map("event_id")
+  galleryId  String?  @map("gallery_id")
+  title      String
+  status     String   @default("pending")
+  zipUrl     String?  @map("zip_url")
+  expiresAt  DateTime? @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("download_bundles")
+}
+
+model AiUsage {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  feature        String
+  tokensUsed     Int      @map("tokens_used")
+  costUsd        Float    @map("cost_usd")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("ai_usage")
+}
+
+model PlatformSettings {
+  id    String @id @default(uuid())
+  key   String @unique
+  value Json
+
+  @@map("platform_settings")
+}
+
+model NotificationQueue {
+  id           String   @id @default(uuid())
+  organizationId String? @map("organization_id")
+  type         String
+  recipient    String
+  payload      Json
+  status       String   @default("pending")
+  retryCount   Int      @default(0) @map("retry_count")
+  lastError    String?  @map("last_error")
+  scheduledFor DateTime @default(now()) @map("scheduled_for")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("notification_queue")
 }

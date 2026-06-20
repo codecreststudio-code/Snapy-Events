@@ -14,33 +14,30 @@ export async function POST(request: NextRequest) {
   await supabase.from("webhook_events").insert({
     source: "razorpay",
     event_type: evt.event,
-    external_id: (evt.payload?.payment as { id?: string } | undefined)?.id,
+    external_id: (evt.payload?.payment as { id?: string } | undefined)?.id ?? 
+                 (evt.payload?.subscription as { id?: string } | undefined)?.id,
     payload: evt,
   })
   try {
     switch (evt.event) {
       case "payment.captured": {
-        const p = evt.payload.payment as { id: string; amount: number; currency: string; notes?: { organization_id?: string; plan_id?: string; guest_boost?: string; shots_boost?: string } }
-        if (p.notes?.organization_id && p.notes?.plan_id) {
-          const sub = await supabase
-            .from("subscriptions")
-            .upsert(
-              {
-                organization_id: p.notes.organization_id,
-                plan_id: p.notes.plan_id,
-                status: "active",
-                razorpay_subscription_id: p.id,
-                current_period_start: new Date().toISOString(),
-                current_period_end: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
-              },
-              { onConflict: "organization_id" },
-            )
-            .select()
-            .single()
-          
+        const p = evt.payload.payment as { 
+          id: string
+          amount: number
+          currency: string
+          subscription_id?: string
+          notes?: { 
+            organization_id?: string
+            plan_id?: string
+            guest_boost?: string
+            shots_boost?: string
+          }
+        }
+        
+        if (p.notes?.organization_id) {
+          // First, create transaction record for this payment
           await supabase.from("transactions").insert({
             organization_id: p.notes.organization_id,
-            subscription_id: sub.data?.id,
             razorpay_payment_id: p.id,
             amount: p.amount,
             currency: p.currency,
@@ -49,18 +46,43 @@ export async function POST(request: NextRequest) {
             gateway_response: evt,
           })
 
-          const { data: org } = await supabase.from("organizations").select("settings").eq("id", p.notes.organization_id).single()
-          const currentSettings = (org?.settings as Record<string, any>) || {}
-          const newSettings = {
-            ...currentSettings,
-            guest_boost: p.notes.guest_boost ? parseInt(p.notes.guest_boost) : 0,
-            shots_boost: p.notes.shots_boost ? parseInt(p.notes.shots_boost) : 0,
+          // If this is a subscription payment, update/create subscription
+          if (p.subscription_id && p.notes.plan_id) {
+            await supabase
+              .from("subscriptions")
+              .upsert(
+                {
+                  organization_id: p.notes.organization_id,
+                  plan_id: p.notes.plan_id,
+                  status: "active",
+                  razorpay_subscription_id: p.subscription_id,
+                  current_period_start: new Date().toISOString(),
+                  current_period_end: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
+                },
+                { onConflict: "razorpay_subscription_id" },
+              )
           }
 
-          await supabase.from("organizations").update({ 
-            plan: p.notes.plan_id,
-            settings: newSettings
-          }).eq("id", p.notes.organization_id)
+          // Update organization plan and settings
+          if (p.notes.plan_id) {
+            const { data: org } = await supabase
+              .from("organizations")
+              .select("settings")
+              .eq("id", p.notes.organization_id)
+              .single()
+            
+            const currentSettings = (org?.settings as Record<string, any>) || {}
+            const newSettings = {
+              ...currentSettings,
+              guest_boost: p.notes.guest_boost ? parseInt(p.notes.guest_boost) : 0,
+              shots_boost: p.notes.shots_boost ? parseInt(p.notes.shots_boost) : 0,
+            }
+
+            await supabase.from("organizations").update({ 
+              plan: p.notes.plan_id,
+              settings: newSettings
+            }).eq("id", p.notes.organization_id)
+          }
         }
         break
       }
@@ -71,8 +93,26 @@ export async function POST(request: NextRequest) {
         break
       }
       case "payment.failed": {
-        const p = evt.payload.payment as { id: string; error_code?: string; error_description?: string }
-        await supabase.from("transactions").update({ status: "failed", error_code: p.error_code, error_description: p.error_description }).eq("razorpay_payment_id", p.id)
+        const p = evt.payload.payment as { 
+          id: string
+          error_code?: string
+          error_description?: string
+          notes?: { organization_id?: string }
+        }
+        
+        if (p.notes?.organization_id) {
+          // Create transaction record for failed payment
+          await supabase.from("transactions").insert({
+            organization_id: p.notes.organization_id,
+            razorpay_payment_id: p.id,
+            status: "failed",
+            error_code: p.error_code,
+            error_description: p.error_description,
+            gateway_response: evt,
+            amount: evt.payload.payment.amount || 0,
+            currency: evt.payload.payment.currency || "INR",
+          })
+        }
         break
       }
     }
