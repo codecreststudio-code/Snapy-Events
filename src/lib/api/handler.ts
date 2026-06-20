@@ -9,6 +9,7 @@ import type { NextRequest } from "next/server"
 import { ok, fail, ApiErrors, created, pagination } from "./response"
 import { requireAuth, requireAdmin, type AuthContext } from "@/lib/auth/session"
 import { rateLimit } from "@/lib/security/rate-limit"
+import { verifyCsrf } from "@/lib/security/csrf"
 import { trackEvent } from "@/lib/analytics/track"
 import { logAudit } from "@/lib/audit/log"
 
@@ -65,6 +66,15 @@ export function defineRoute<TBody = unknown, TQuery = unknown, C = unknown>(opts
           })
           if (!r.allowed) {
             return fail("RATE_LIMITED", "Too many requests", 429, { retry_after: r.resetIn })
+          }
+        }
+
+        // CSRF protection for state-changing requests
+        if (["POST", "PUT", "PATCH", "DELETE"].includes(m)) {
+          const csrfToken = request.headers.get("x-csrf-token")
+          const isValid = await verifyCsrf(csrfToken)
+          if (!isValid) {
+            return fail("CSRF_INVALID", "Invalid or missing CSRF token", 403)
           }
         }
 
@@ -139,7 +149,7 @@ function corsHeaders(request?: NextRequest) {
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, x-api-key",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, x-api-key, x-csrf-token",
     "Access-Control-Allow-Credentials": "true",
   }
 }

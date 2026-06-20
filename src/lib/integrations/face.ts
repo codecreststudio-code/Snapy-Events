@@ -1,11 +1,18 @@
 // src/lib/integrations/face.ts
 // Face detection + embedding + search abstraction.
 //
-// In production, this points at a hosted face API (e.g. AWS Rekognition,
-// a self-hosted FaceNet endpoint, or OpenAI Vision). For local dev and
-// testing, we ship a deterministic stub that hashes the photo URL to a
-// 128-dim "embedding" — enough to exercise the API surface end-to-end
-// without a real model.
+// ⚠️  STUB IMPLEMENTATION - NOT FOR PRODUCTION
+//
+// This is a deterministic stub that hashes photo URLs to fake embeddings.
+// For production deployment, implement one of:
+// - AWS Rekognition API
+// - Azure Computer Vision
+// - Google Cloud Vision API
+// - Self-hosted FaceNet/ArcFace model
+// - CloudFlare Workers with ONNX runtime
+//
+// The FACE_API_KEY env var is currently unused. Set it to enable
+// real face detection when you've implemented a proper backend.
 
 import "server-only"
 import { serverEnv } from "@/lib/env"
@@ -25,9 +32,10 @@ export interface DetectionResult {
 }
 
 const EMBEDDING_DIM = 128
+const IS_PRODUCTION = process.env.NODE_ENV === "production"
 
 function hashEmbedding(input: string): number[] {
-  // Deterministic 128-dim pseudo-embedding in [-1, 1].
+  // ⚠️  STUB: Deterministic 128-dim pseudo-embedding, NOT real ML
   const out: number[] = new Array(EMBEDDING_DIM)
   let seed = 0
   for (let i = 0; i < input.length; i++) seed = (seed * 31 + input.charCodeAt(i)) >>> 0
@@ -58,8 +66,20 @@ export interface DetectInput {
 }
 
 export async function detectFaces(input: DetectInput): Promise<DetectionResult> {
+  // ⚠️  PRODUCTION GUARD
+  if (IS_PRODUCTION && !serverEnv.FACE_API_KEY) {
+    logger.error(
+      "Face detection disabled: FACE_API_KEY not configured in production. " +
+      "Set FACE_API_KEY environment variable to enable face detection."
+    )
+    return { model: "disabled", faces: [] }
+  }
+
   const seed = input.imageUrl ?? input.imageBase64 ?? ""
+  
+  // Use stub if no real API configured
   if (!serverEnv.FACE_API_KEY) {
+    logger.debug("Face detection using stub (development mode)")
     return {
       model: "stub",
       faces: [
@@ -71,34 +91,15 @@ export async function detectFaces(input: DetectInput): Promise<DetectionResult> 
       ],
     }
   }
-  try {
-    const res = await fetch("https://api.face-api.example/v1/detect", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${serverEnv.FACE_API_KEY}`,
-      },
-      body: JSON.stringify({ image: input.imageBase64 ?? input.imageUrl, max_faces: input.maxFaces ?? 10 }),
-    })
-    if (!res.ok) {
-      logger.warn("face api non-ok; falling back to stub", { status: res.status })
-      return {
-        model: "stub",
-        faces: [
-          {
-            boundingBox: { x: 0, y: 0, width: 0, height: 0 },
-            confidence: 0,
-            embedding: hashEmbedding(seed),
-          },
-        ],
-      }
-    }
-    const data = (await res.json()) as { faces: DetectedFace[]; width: number; height: number; model: string }
-    return { faces: data.faces, model: data.model, width: data.width, height: data.height }
-  } catch (e) {
-    logger.error("face api error", { error: String(e) })
-    return { model: "stub", faces: [] }
-  }
+
+  // TODO: Implement real face detection API call here
+  // For now, log a warning that production API is not implemented
+  logger.warn(
+    "Face API integration incomplete. " +
+    "TODO: Implement real face detection API call to " + serverEnv.FACE_API_KEY
+  )
+  
+  return { model: "not-implemented", faces: [] }
 }
 
 export interface SearchInput {
@@ -114,6 +115,7 @@ export interface SearchHit {
 }
 
 export function searchByEmbedding(input: SearchInput): SearchHit[] {
+  // ⚠️  STUB: Only works if both embeddings are from same stub function
   const k = input.topK ?? 20
   const threshold = input.threshold ?? 0.6
   return input.candidates
@@ -138,6 +140,13 @@ export interface BatchProcessResult {
 
 export async function batchProcessFaces(input: BatchProcessInput): Promise<BatchProcessResult> {
   const out: BatchProcessResult = { processed: 0, facesDetected: 0, errors: [] }
+  
+  if (IS_PRODUCTION && !serverEnv.FACE_API_KEY) {
+    const error = "Face detection disabled in production"
+    logger.warn(error)
+    return out
+  }
+  
   for (let i = 0; i < input.photoIds.length; i++) {
     try {
       const r = await detectFaces({ imageUrl: input.imageUrls[i] })

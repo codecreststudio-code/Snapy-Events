@@ -41,18 +41,25 @@ interface DashboardStats {
 async function getDashboardStats(orgId: string): Promise<DashboardStats> {
   const supabase = createClient()
 
-  // Get recent events for this organization
+  // Get recent events for this organization with aggregated photo counts from galleries
   const { data: events } = await supabase
     .from("events")
-    .select("id, name, slug, event_date, status")
+    .select(`
+      id, 
+      name, 
+      slug, 
+      event_date, 
+      status,
+      galleries(id, photo_count)
+    `)
     .eq("organization_id", orgId)
     .order("created_at", { ascending: false })
     .limit(5)
 
-  // Get all event IDs for this organization to correctly filter photos, galleries, and QR codes counts
-  const { data: allEvents } = await supabase
+  // Get all event IDs for this organization
+  const { data: allEvents, count: totalEventCount } = await supabase
     .from("events")
-    .select("id")
+    .select("id", { count: "exact", head: true })
     .eq("organization_id", orgId)
 
   const allEventIds = allEvents?.map((e) => e.id) || []
@@ -62,37 +69,41 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
   let qrCount = 0
 
   if (allEventIds.length > 0) {
-    const { count: pCount } = await supabase
-      .from("photos")
-      .select("*", { count: "exact", head: true })
-      .in("event_id", allEventIds)
-    photoCount = pCount || 0
+    // Get photo count from storage_usage for the organization (more efficient than counting)
+    const { data: storageData } = await supabase
+      .from("storage_usage")
+      .select("photo_count")
+      .eq("organization_id", orgId)
+      .single()
+    photoCount = storageData?.photo_count || 0
 
+    // Get gallery count
     const { count: gCount } = await supabase
       .from("galleries")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .in("event_id", allEventIds)
     galleryCount = gCount || 0
 
+    // Get QR code count
     const { count: qCount } = await supabase
       .from("qr_codes")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .in("event_id", allEventIds)
     qrCount = qCount || 0
   }
 
-  const recentEventsWithCounts = await Promise.all(
-    (events || []).map(async (event) => {
-      const { count } = await supabase
-        .from("photos")
-        .select("*", { count: "exact", head: true })
-        .eq("event_id", event.id)
-      return { ...event, photo_count: count || 0 }
-    })
-  )
+  // Aggregate photo counts from galleries (use photo_count rollup instead of querying photos table)
+  const recentEventsWithCounts = (events || []).map((event: any) => ({
+    id: event.id,
+    name: event.name,
+    slug: event.slug,
+    event_date: event.event_date,
+    status: event.status,
+    photo_count: (event.galleries as any[])?.reduce((sum, g) => sum + (g.photo_count || 0), 0) || 0,
+  }))
 
   return {
-    totalEvents: allEventIds.length,
+    totalEvents: totalEventCount || 0,
     totalPhotos: photoCount,
     totalGalleries: galleryCount,
     totalQRCodes: qrCount,

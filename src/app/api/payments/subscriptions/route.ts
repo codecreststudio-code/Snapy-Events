@@ -5,6 +5,47 @@ import { subscribeSchema } from "@/lib/validators"
 import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder, planCurrency, cancelRazorpaySubscription } from "@/lib/integrations/razorpay"
 import { logger } from "@/lib/logger"
 
+export const GET = defineRoute({
+  method: "GET",
+  requireAuth: true,
+  audit: "billing.subscription.viewed",
+  handler: async ({ auth }) => {
+    const supabase = await createClient()
+    
+    // Get active or recent subscription
+    const { data: subscription } = await supabase
+      .from("subscriptions")
+      .select(`
+        id,
+        plan_id,
+        status,
+        current_period_start,
+        current_period_end,
+        razorpay_subscription_id,
+        plan:plans(id, name, price_inr, price_usd, features, limits)
+      `)
+      .eq("organization_id", auth.organization!.id)
+      .in("status", ["active", "past_due"])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single()
+    
+    if (!subscription) {
+      return ok({
+        subscription: null,
+        plan: "free",
+        status: "free",
+      })
+    }
+    
+    return ok({
+      subscription,
+      plan: subscription.plan_id,
+      status: subscription.status,
+    })
+  },
+}).GET
+
 export const POST = defineRoute({
   method: "POST",
   body: subscribeSchema,
@@ -48,6 +89,32 @@ export const DELETE = defineRoute({
       .eq("organization_id", auth.organization!.id)
       .eq("status", "active")
       .single()
+
+    if (error || !sub) return fail("NO_ACTIVE_SUBSCRIPTION", "No active subscription found to cancel", 400)
+
+    if (sub.razorpay_subscription_id) {
+      try {
+        await cancelRazorpaySubscription(sub.razorpay_subscription_id, true)
+      } catch (err: any) {
+        logger.error("Failed to cancel in Razorpay", { error: err.message })
+      }
+    }
+
+    // Update locally
+    await supabase
+      .from("subscriptions")
+      .update({ status: "cancelled" })
+      .eq("id", sub.id)
+
+    // Reset organization plan back to free
+    await supabase
+      .from("organizations")
+      .update({ plan: "free" })
+      .eq("id", auth.organization!.id)
+
+    return ok({ success: true })
+  },
+}).DELETE
 
     if (error || !sub) return fail("NO_ACTIVE_SUBSCRIPTION", "No active subscription found to cancel", 400)
 
