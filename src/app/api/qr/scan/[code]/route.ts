@@ -16,7 +16,20 @@ export const GET = defineRoute<unknown, unknown, { code: string }>({
       .select("id, event_id, redirect_url, is_active, expires_at, event:events(slug, status)")
       .eq("code", code)
       .single()
-    if (error || !qr) return fail("NOT_FOUND", "QR code not found", 404)
+
+    if (error || !qr) {
+      // Fallback check for event slug
+      const { data: ev } = await supabase
+        .from("events")
+        .select("slug, status")
+        .eq("slug", code)
+        .single()
+      
+      if (ev && ev.status === "published") {
+        return redirect(`/event/${ev.slug}`, 302)
+      }
+      return fail("NOT_FOUND", "QR code or event not found", 404)
+    }
     if (!qr.is_active) return fail("GONE", "QR code is inactive", 410)
     if (qr.expires_at && new Date(qr.expires_at) < new Date()) return fail("GONE", "QR code expired", 410)
 

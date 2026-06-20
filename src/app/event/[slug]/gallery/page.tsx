@@ -67,9 +67,11 @@ interface GallerySettings {
 function PhotoGrid({
   photos,
   allowDownloads,
+  eventSlug,
 }: {
   photos: Photo[]
   allowDownloads: boolean
+  eventSlug: string
 }) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -103,22 +105,31 @@ function PhotoGrid({
   }
 
   async function downloadPhoto(photo: Photo) {
-    const supabase = createClient()
-    const { data, error } = await supabase.storage
-      .from("photos")
-      .createSignedUrl(photo.storage_path, 3600)
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase.storage
+        .from("photos")
+        .createSignedUrl(photo.storage_path, 3600)
 
-    if (error || !data?.signedUrl) {
+      if (error || !data?.signedUrl) {
+        toast({ title: "Failed to download", variant: "destructive" })
+        return
+      }
+
+      const response = await fetch(data.signedUrl)
+      const blob = await response.blob()
+      const blobUrl = URL.createObjectURL(blob)
+
+      const link = document.createElement("a")
+      link.href = blobUrl
+      link.download = photo.original_filename || "photo.jpg"
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(blobUrl)
+    } catch {
       toast({ title: "Failed to download", variant: "destructive" })
-      return
     }
-
-    const link = document.createElement("a")
-    link.href = data.signedUrl
-    link.download = photo.original_filename || "photo.jpg"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
   }
 
   useEffect(() => {
@@ -142,7 +153,7 @@ function PhotoGrid({
           Be the first to upload photos to this gallery!
         </p>
         <Button asChild className="mt-4">
-          <Link href={`/upload`}>
+          <Link href={`/event/${eventSlug}/upload`}>
             <Camera className="h-4 w-4" />
             Upload Photos
           </Link>
@@ -364,7 +375,7 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
                 ))}
               </div>
             ) : (
-              <PhotoGrid photos={photos || []} allowDownloads={allowDownloads} />
+              <PhotoGrid photos={photos || []} allowDownloads={allowDownloads} eventSlug={slug} />
             )}
           </div>
         )}
