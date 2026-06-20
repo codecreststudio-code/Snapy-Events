@@ -322,6 +322,14 @@ const orbitPhotos = [
 
 export default function HomePage() {
   const [activeRoadmap, setActiveRoadmap] = useState("step1")
+  const [pointer, setPointer] = useState({ x: 0, y: 0 })
+  const [scrollY, setScrollY] = useState(0)
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY)
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const plans: PricingPlan[] = [
     {
@@ -460,10 +468,55 @@ export default function HomePage() {
 
       <main className="flex-1 overflow-hidden">
         {/* --- SECTION 1: HERO --- */}
-        <section className="relative w-full min-h-[92vh] flex items-center justify-center py-20 px-6">
-          {/* Subtle Lavender mesh glow */}
-          <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-30 blur-3xl">
-            <div className="h-[500px] w-[600px] rounded-full bg-gradient-to-tr from-violet-200 via-fuchsia-100 to-pink-100" />
+        <section
+          className="relative w-full min-h-[92vh] flex items-center justify-center py-20 px-6 overflow-hidden"
+          onPointerMove={(event) => {
+            const rect = event.currentTarget.getBoundingClientRect()
+            setPointer({
+              x: (event.clientX - rect.left - rect.width / 2) / rect.width,
+              y: (event.clientY - rect.top - rect.height / 2) / rect.height,
+            })
+          }}
+        >
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.24),transparent_18%),radial-gradient(circle_at_20%_20%,rgba(236,72,153,0.16),transparent_20%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.12),transparent_25%),linear-gradient(180deg,rgba(255,255,255,0.94),rgba(244,240,255,0.82))]" />
+          <div className="absolute inset-0 -z-10 overflow-hidden">
+            <motion.div
+              animate={{ x: pointer.x * 24, y: pointer.y * 24 }}
+              transition={{ type: "spring", stiffness: 40, damping: 16 }}
+              className="absolute -left-16 top-12 h-80 w-80 rounded-full bg-violet-200/30 blur-3xl"
+            />
+            <motion.div
+              animate={{ x: pointer.x * -18, y: pointer.y * -18 }}
+              transition={{ type: "spring", stiffness: 40, damping: 16 }}
+              className="absolute right-10 bottom-10 h-64 w-64 rounded-full bg-fuchsia-200/30 blur-3xl"
+            />
+            <motion.div
+              animate={{ y: scrollY * 0.08 }}
+              transition={{ ease: "easeOut", duration: 0.4 }}
+              className="absolute left-1/2 top-1/4 h-[420px] w-[420px] -translate-x-1/2 rounded-full border border-white/50 bg-white/5 shadow-[0_0_120px_rgba(255,255,255,0.42)]"
+            />
+            <div className="pointer-events-none absolute inset-0">
+              <motion.div
+                animate={{ opacity: [0, 0.4, 0], x: [0, 10, 0], y: [0, -10, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute left-16 top-24 h-2 w-2 rounded-full bg-white/80 blur-sm"
+              />
+              <motion.div
+                animate={{ opacity: [0, 0.35, 0], x: [0, -10, 0], y: [0, 12, 0] }}
+                transition={{ duration: 7.2, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute right-20 top-32 h-2 w-2 rounded-full bg-slate-100/90 blur-sm"
+              />
+              <motion.div
+                animate={{ opacity: [0, 0.4, 0], x: [0, 14, 0], y: [0, 8, 0] }}
+                transition={{ duration: 5.8, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute left-1/2 top-10 h-1.5 w-1.5 rounded-full bg-fuchsia-100/90 blur-sm"
+              />
+              <motion.div
+                animate={{ opacity: [0, 0.35, 0], x: [0, -14, 0], y: [0, -8, 0] }}
+                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute right-1/3 bottom-24 h-1.5 w-1.5 rounded-full bg-violet-100/90 blur-sm"
+              />
+            </div>
           </div>
 
           {/* Centered Hero Content */}
@@ -472,7 +525,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-violet-600 bg-violet-50/80 border border-violet-100/50"
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-violet-600 bg-violet-50/80 border border-violet-100/50 backdrop-blur"
             >
               <Sparkles className="h-3.5 w-3.5 text-violet-500" />
               <span>THE #1 EVENT PHOTO SHARING PLATFORM</span>
@@ -482,10 +535,17 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className={`text-5xl font-normal tracking-tight md:text-8xl text-slate-900 leading-[1.05] ${playfair.className}`}
+              className={`relative overflow-hidden text-5xl font-normal tracking-tight md:text-8xl text-slate-900 leading-[1.05] ${playfair.className}`}
             >
               Capture Every Moment. <br />
               <span className="italic font-normal bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">Reveal Together.</span>
+              <motion.span
+                aria-hidden="true"
+                initial={{ x: -200, opacity: 0 }}
+                animate={{ x: 200, opacity: [0, 0.6, 0] }}
+                transition={{ delay: 0.6, duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                className="pointer-events-none absolute left-0 top-0 h-full w-20 bg-gradient-to-r from-white/0 via-white/70 to-white/0"
+              />
             </motion.h1>
 
             <motion.p
@@ -503,7 +563,7 @@ export default function HomePage() {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="flex flex-wrap justify-center items-center gap-4 pt-4"
             >
-              <Button asChild size="lg" className="rounded-full bg-slate-950 hover:bg-slate-800 text-white font-medium px-8 hover:scale-[1.02] active:scale-[0.98] transition-transform">
+              <Button asChild size="lg" className="rounded-full bg-slate-950 hover:bg-slate-800 text-white font-medium px-8 hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-lg shadow-slate-950/10">
                 <Link href="/signup">Get Started Free</Link>
               </Button>
               <Button
@@ -519,7 +579,7 @@ export default function HomePage() {
 
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.6 }}
+              animate={{ opacity: 0.8 }}
               transition={{ duration: 1, delay: 0.5 }}
               className="pt-10 flex flex-wrap justify-center gap-x-8 gap-y-3 text-xs text-slate-400 font-light"
             >
