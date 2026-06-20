@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, use } from "react"
 import { useRouter } from "next/navigation"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
@@ -414,13 +414,14 @@ function CreateGalleryDialog({
   )
 }
 
-export default function EventGalleriesPage({ params }: { params: { slug: string } }) {
+export default function EventGalleriesPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params)
   const router = useRouter()
   const queryClient = useQueryClient()
 
   const { data: event, isLoading: eventLoading } = useQuery({
-    queryKey: ["event", params.slug],
-    queryFn: () => getEvent(params.slug),
+    queryKey: ["event", slug],
+    queryFn: () => getEvent(slug),
   })
 
   const { data: galleries, isLoading: galleriesLoading } = useQuery({
@@ -469,7 +470,7 @@ export default function EventGalleriesPage({ params }: { params: { slug: string 
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" asChild>
-          <Link href={`/dashboard/events/${params.slug}`}>
+          <Link href={`/dashboard/events/${slug}`}>
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>

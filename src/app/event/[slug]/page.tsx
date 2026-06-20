@@ -47,7 +47,6 @@ export async function generateMetadata({ params }: PageProps<"/event/[slug]">) {
     .from("events")
     .select("name, description, cover_image_url")
     .eq("slug", slug)
-    .eq("status", "published")
     .single()
 
   if (!ev) return { title: "Event Not Found" }
@@ -70,7 +69,6 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
       galleries(*)
     `)
     .eq("slug", slug)
-    .eq("status", "published")
     .single()
 
   if (!ev) notFound()
