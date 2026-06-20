@@ -324,11 +324,20 @@ export default function HomePage() {
   const [activeRoadmap, setActiveRoadmap] = useState("step1")
   const [pointer, setPointer] = useState({ x: 0, y: 0 })
   const [scrollY, setScrollY] = useState(0)
+  const [isSmallOrbit, setIsSmallOrbit] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY)
     window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+
+    setIsSmallOrbit(window.innerWidth < 768)
+    const handleResize = () => setIsSmallOrbit(window.innerWidth < 768)
+    window.addEventListener("resize", handleResize, { passive: true })
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("resize", handleResize)
+    }
   }, [])
 
   const plans: PricingPlan[] = [
@@ -739,14 +748,14 @@ export default function HomePage() {
               >
                 {orbitPhotos.map((photo, index) => {
                   const angle = (index / orbitPhotos.length) * 2 * Math.PI
-                  const radius = typeof window !== "undefined" && window.innerWidth < 768 ? 160 : 210
+                  const radius = isSmallOrbit ? 160 : 210
                   const x = Math.cos(angle) * radius
                   const y = Math.sin(angle) * radius
                   return (
                     <div
                       key={index}
                       className="absolute"
-                      style={{ x, y }}
+                      style={{ transform: `translate(${x}px, ${y}px)` }}
                     >
                       <motion.div
                         whileHover={{ scale: 1.25, zIndex: 40, transition: { duration: 0.2 } }}

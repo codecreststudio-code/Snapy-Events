@@ -27,6 +27,7 @@ export function PublicNav() {
         <Link href="/" aria-label="Snapsy home">
           <Logo />
         </Link>
+
         <nav className="hidden items-center gap-8 md:flex" aria-label="Main">
           {NAV.map((item) => (
             <Link
@@ -41,6 +42,7 @@ export function PublicNav() {
             </Link>
           ))}
         </nav>
+
         <div className="hidden items-center gap-3 md:flex">
           <Button asChild variant="ghost" size="sm" className="text-slate-600 hover:text-slate-950">
             <Link href="/login">Sign in</Link>
@@ -49,6 +51,7 @@ export function PublicNav() {
             <Link href="/signup">Get started</Link>
           </Button>
         </div>
+
         <motion.button
           type="button"
           whileTap={{ scale: 0.94 }}
@@ -60,6 +63,7 @@ export function PublicNav() {
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </motion.button>
       </div>
+
       <AnimatePresence>
         {open && (
           <motion.div
@@ -68,28 +72,31 @@ export function PublicNav() {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.28, ease: "easeOut" }}
             className="border-t border-slate-200/70 bg-white/95 backdrop-blur-xl md:hidden"
-          >          <nav className="container flex flex-col gap-3 py-4" aria-label="Mobile">
-            {NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="block rounded-full px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950 transition"
-                onClick={() => setOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="mt-2 flex flex-col gap-3 px-3">
-              <Button asChild variant="outline" size="sm" className="w-full rounded-full border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-950">
-                <Link href="/login">Sign in</Link>
-              </Button>
-              <Button asChild size="sm" className="w-full rounded-full bg-slate-950 text-white hover:bg-slate-900 shadow-sm shadow-slate-900/10">
-                <Link href="/signup">Get started</Link>
-              </Button>
-            </div>
-          </nav>
-        </div>
-      )}
+          >
+            <nav className="container flex flex-col gap-3 py-4" aria-label="Mobile">
+              {NAV.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="block rounded-full px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950 transition"
+                  onClick={() => setOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+
+              <div className="mt-2 flex flex-col gap-3 px-3">
+                <Button asChild variant="outline" size="sm" className="w-full rounded-full border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-950">
+                  <Link href="/login">Sign in</Link>
+                </Button>
+                <Button asChild size="sm" className="w-full rounded-full bg-slate-950 text-white hover:bg-slate-900 shadow-sm shadow-slate-900/10">
+                  <Link href="/signup">Get started</Link>
+                </Button>
+              </div>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }
