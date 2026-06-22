@@ -20,10 +20,20 @@ export function AdminLoginForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: fd.get("email"), password: fd.get("password") }),
       })
-      if (!res.ok) throw new Error((await res.json()).error ?? "Failed")
+      if (!res.ok) {
+        const data = await res.json()
+        const errMsg = typeof data.error === "object" && data.error?.message 
+          ? data.error.message 
+          : (data.error ?? "Failed")
+        throw new Error(errMsg)
+      }
       router.push("/admin")
       router.refresh()
-    } catch (e) { setError(e instanceof Error ? e.message : "Failed") } finally { setPending(false) }
+    } catch (e: any) {
+      setError(e instanceof Error ? e.message : "Failed")
+    } finally {
+      setPending(false)
+    }
   }
   return (
     <form onSubmit={onSubmit} className="space-y-4">
