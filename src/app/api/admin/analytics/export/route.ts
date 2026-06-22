@@ -41,14 +41,20 @@ export const GET = defineRoute({
       currOrgsRes, prevOrgsRes,
       currEventsRes, prevEventsRes,
       currPhotosRes, prevPhotosRes,
+      currVideosRes, prevVideosRes,
+      currVoiceNotesRes, prevVoiceNotesRes,
       currSearchesRes, prevSearchesRes,
       currStorageRes, prevStorageRes,
+      currUsersRes, prevUsersRes,
       allRevenueRes,
       allOrgsRes,
       allEventsRes,
       allPhotosRes,
+      allVideosRes,
+      allVoiceNotesRes,
       allSearchesRes,
-      allStorageUsage
+      allStorageUsage,
+      allUsersRes
     ] = await Promise.all([
       sb.from("transactions").select("amount").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
       sb.from("transactions").select("amount").eq("status", "success").gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
@@ -58,16 +64,25 @@ export const GET = defineRoute({
       sb.from("events").select("id", { count: "exact" }).gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
       sb.from("photos").select("id", { count: "exact" }).or("mime_type.is.null,mime_type.ilike.image/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
       sb.from("photos").select("id", { count: "exact" }).or("mime_type.is.null,mime_type.ilike.image/%").gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
+      sb.from("photos").select("id", { count: "exact" }).ilike("mime_type", "video/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
+      sb.from("photos").select("id", { count: "exact" }).ilike("mime_type", "video/%").gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
+      sb.from("photos").select("id", { count: "exact" }).ilike("mime_type", "audio/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
+      sb.from("photos").select("id", { count: "exact" }).ilike("mime_type", "audio/%").gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
       sb.from("face_search_logs").select("id", { count: "exact" }).gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
       sb.from("face_search_logs").select("id", { count: "exact" }).gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
       sb.from("photos").select("file_size").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
       sb.from("photos").select("file_size").gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
+      sb.from("users").select("id", { count: "exact" }).gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
+      sb.from("users").select("id", { count: "exact" }).gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
       sb.from("transactions").select("amount").eq("status", "success").lte("created_at", endDate.toISOString()),
       sb.from("organizations").select("id", { count: "exact" }).lte("created_at", endDate.toISOString()),
       sb.from("events").select("id", { count: "exact" }).lte("created_at", endDate.toISOString()),
       sb.from("photos").select("id", { count: "exact" }).or("mime_type.is.null,mime_type.ilike.image/%").lte("created_at", endDate.toISOString()),
+      sb.from("photos").select("id", { count: "exact" }).ilike("mime_type", "video/%").lte("created_at", endDate.toISOString()),
+      sb.from("photos").select("id", { count: "exact" }).ilike("mime_type", "audio/%").lte("created_at", endDate.toISOString()),
       sb.from("face_search_logs").select("id", { count: "exact" }).lte("created_at", endDate.toISOString()),
-      sb.from("storage_usage").select("total_bytes")
+      sb.from("storage_usage").select("total_bytes"),
+      sb.from("users").select("id", { count: "exact" }).lte("created_at", endDate.toISOString())
     ])
 
     const currRevenueSum = (currRevenueRes.data || []).reduce((s, t) => s + (t.amount || 0), 0) / 100
@@ -78,38 +93,52 @@ export const GET = defineRoute({
     const prevEventsSum = prevEventsRes.count ?? 0
     const currPhotosSum = currPhotosRes.count ?? 0
     const prevPhotosSum = prevPhotosRes.count ?? 0
+    const currVideosSum = currVideosRes.count ?? 0
+    const prevVideosSum = prevVideosRes.count ?? 0
+    const currVoiceNotesSum = currVoiceNotesRes.count ?? 0
+    const prevVoiceNotesSum = prevVoiceNotesRes.count ?? 0
     const currSearchesSum = currSearchesRes.count ?? 0
     const prevSearchesSum = prevSearchesRes.count ?? 0
     const currStorageSum = (currStorageRes.data || []).reduce((s, p) => s + Number(p.file_size || 0), 0)
     const prevStorageSum = (prevStorageRes.data || []).reduce((s, p) => s + Number(p.file_size || 0), 0)
+    const currUsersSum = currUsersRes.count ?? 0
+    const prevUsersSum = prevUsersRes.count ?? 0
 
     const revenueGrowth = calculateGrowth(currRevenueSum, prevRevenueSum)
     const orgsGrowth = calculateGrowth(currOrgsSum, prevOrgsSum)
     const eventsGrowth = calculateGrowth(currEventsSum, prevEventsSum)
     const photosGrowth = calculateGrowth(currPhotosSum, prevPhotosSum)
+    const videosGrowth = calculateGrowth(currVideosSum, prevVideosSum)
+    const voiceNotesGrowth = calculateGrowth(currVoiceNotesSum, prevVoiceNotesSum)
     const searchesGrowth = calculateGrowth(currSearchesSum, prevSearchesSum)
     const storageGrowth = calculateGrowth(currStorageSum, prevStorageSum)
+    const usersGrowth = calculateGrowth(currUsersSum, prevUsersSum)
 
     const totalRevenueCumulative = (allRevenueRes.data || []).reduce((s, t) => s + (t.amount || 0), 0) / 100
     const totalOrgsCumulative = allOrgsRes.count ?? 0
     const totalEventsCumulative = allEventsRes.count ?? 0
     const totalPhotosCumulative = allPhotosRes.count ?? 0
+    const totalVideosCumulative = allVideosRes.count ?? 0
+    const totalVoiceNotesCumulative = allVoiceNotesRes.count ?? 0
     const totalSearchesCumulative = allSearchesRes.count ?? 0
     const totalStorageCumulative = (allStorageUsage.data || []).reduce((s, su) => s + Number(su.total_bytes || 0), 0)
+    const totalUsersCumulative = allUsersRes.count ?? 0
 
     // Load recent events
     const { data: eventsList } = await sb
       .from("events")
       .select("id, name, venue, status, created_at, organization_id, organization:organizations(name)")
+      .gte("created_at", startDate.toISOString())
+      .lte("created_at", endDate.toISOString())
       .order("created_at", { ascending: false })
       .limit(15)
 
     const richEvents = await Promise.all((eventsList || []).map(async (e: any) => {
       const [guestsCountRes, photosCountRes, videosCountRes, organizationRevenueRes] = await Promise.all([
-        sb.from("photo_access").select("id", { count: "exact", head: true }).eq("event_id", e.id),
-        sb.from("photos").select("id", { count: "exact", head: true }).eq("event_id", e.id).or("mime_type.is.null,mime_type.ilike.image/%"),
-        sb.from("photos").select("id", { count: "exact", head: true }).eq("event_id", e.id).ilike("mime_type", "video/%"),
-        sb.from("transactions").select("amount").eq("organization_id", e.organization_id || "").eq("status", "success")
+        sb.from("photo_access").select("id", { count: "exact", head: true }).eq("event_id", e.id).gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
+        sb.from("photos").select("id", { count: "exact", head: true }).eq("event_id", e.id).or("mime_type.is.null,mime_type.ilike.image/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
+        sb.from("photos").select("id", { count: "exact", head: true }).eq("event_id", e.id).ilike("mime_type", "video/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
+        sb.from("transactions").select("amount").eq("organization_id", e.organization_id || "").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
       ])
 
       const orgRevenue = (organizationRevenueRes.data || []).reduce((sum, t) => sum + (t.amount || 0), 0) / 100
@@ -130,13 +159,13 @@ export const GET = defineRoute({
     // Load top performing lists
     const { data: orgsTopList } = await sb.from("organizations").select("id, name")
     const topOrgsRevenue = await Promise.all((orgsTopList || []).map(async (org) => {
-      const { data: txs } = await sb.from("transactions").select("amount").eq("organization_id", org.id).eq("status", "success")
+      const { data: txs } = await sb.from("transactions").select("amount").eq("organization_id", org.id).eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
       const sum = (txs || []).reduce((s, t) => s + (t.amount || 0), 0) / 100
       return { name: org.name, revenue: sum }
     }))
     const sortedTopOrgs = topOrgsRevenue.sort((a, b) => b.revenue - a.revenue).slice(0, 5)
 
-    const { data: successTxsList } = await sb.from("transactions").select("amount, notes").eq("status", "success")
+    const { data: successTxsList } = await sb.from("transactions").select("amount, notes").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
     let planRevenue = 0;
     let addonRevenue = 0;
     
@@ -167,7 +196,7 @@ export const GET = defineRoute({
       }
     })
 
-    const { data: activeOrgsPlans } = await sb.from("organizations").select("plan")
+    const { data: activeOrgsPlans } = await sb.from("organizations").select("plan").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
     const planDistribution: Record<string, number> = { free: 0, starter: 0, standard: 0, premium: 0 }
     let totalActiveOrgs = 0;
     
@@ -185,12 +214,14 @@ export const GET = defineRoute({
       csvContent += `"Export Range","${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}"\n`
       csvContent += `"Generated On","${new Date().toLocaleString()}"\n\n`
 
-      csvContent += `"KPI SUMMARY METRICS"\n`
       csvContent += `"Metric","Cumulative Total","Period Value","Previous Period Value","Growth Rate"\n`
       csvContent += `"Total Revenue","₹${totalRevenueCumulative}","₹${currRevenueSum}","₹${prevRevenueSum}","${revenueGrowth}%"\n`
       csvContent += `"Total Organizations","${totalOrgsCumulative}","${currOrgsSum}","${prevOrgsSum}","${orgsGrowth}%"\n`
+      csvContent += `"Total Users","${totalUsersCumulative}","${currUsersSum}","${prevUsersSum}","${usersGrowth}%"\n`
       csvContent += `"Total Events","${totalEventsCumulative}","${currEventsSum}","${prevEventsSum}","${eventsGrowth}%"\n`
       csvContent += `"Total Photos","${totalPhotosCumulative}","${currPhotosSum}","${prevPhotosSum}","${photosGrowth}%"\n`
+      csvContent += `"Total Videos","${totalVideosCumulative}","${currVideosSum}","${prevVideosSum}","${videosGrowth}%"\n`
+      csvContent += `"Total Voice Notes","${totalVoiceNotesCumulative}","${currVoiceNotesSum}","${prevVoiceNotesSum}","${voiceNotesGrowth}%"\n`
       csvContent += `"AI Searches","${totalSearchesCumulative}","${currSearchesSum}","${prevSearchesSum}","${searchesGrowth}%"\n`
       csvContent += `"Storage Size","${(totalStorageCumulative/(1024*1024*1024)).toFixed(2)} GB","${(currStorageSum/(1024*1024*1024)).toFixed(2)} GB","${(prevStorageSum/(1024*1024*1024)).toFixed(2)} GB","${storageGrowth}%"\n\n`
 
@@ -366,7 +397,7 @@ export const GET = defineRoute({
   </div>
 
   <div class="executive-summary">
-    <strong>Executive Report Summary:</strong> During this reporting period, the Snapsy platform hosted a total of <strong>${currEventsSum}</strong> new events. The platform registered <strong>${currOrgsSum}</strong> new organization sign-ups, generating a total subscription billing amount of <strong>₹${currRevenueSum.toLocaleString()}</strong>. Media traffic was active with <strong>${currPhotosSum}</strong> photo and video uploads.
+    <strong>Executive Report Summary:</strong> During this reporting period, the Snapsy platform hosted a total of <strong>${currEventsSum}</strong> new events. The platform registered <strong>${currOrgsSum}</strong> new organization sign-ups, <strong>${currUsersSum}</strong> new user accounts, generating a total subscription billing amount of <strong>₹${currRevenueSum.toLocaleString()}</strong>. Media traffic was active with <strong>${currPhotosSum}</strong> photo, <strong>${currVideosSum}</strong> video, and <strong>${currVoiceNotesSum}</strong> voice note uploads.
   </div>
 
   <div class="section-title">Key Performance Indicators</div>
@@ -386,6 +417,13 @@ export const GET = defineRoute({
       </div>
     </div>
     <div class="card">
+      <div class="card-label font-bold">New Users</div>
+      <div class="card-value">${currUsersSum}</div>
+      <div class="card-growth ${usersGrowth >= 0 ? 'growth-positive' : 'growth-negative'}">
+        ${usersGrowth >= 0 ? '▲' : '▼'} ${Math.abs(usersGrowth)}% <span style="color:#64748b; font-weight:normal;">vs prev period</span>
+      </div>
+    </div>
+    <div class="card">
       <div class="card-label">New Events</div>
       <div class="card-value">${currEventsSum}</div>
       <div class="card-growth ${eventsGrowth >= 0 ? 'growth-positive' : 'growth-negative'}">
@@ -393,10 +431,24 @@ export const GET = defineRoute({
       </div>
     </div>
     <div class="card">
-      <div class="card-label">Media Uploads</div>
+      <div class="card-label">Media Uploads (Photos)</div>
       <div class="card-value">${currPhotosSum}</div>
       <div class="card-growth ${photosGrowth >= 0 ? 'growth-positive' : 'growth-negative'}">
         ${photosGrowth >= 0 ? '▲' : '▼'} ${Math.abs(photosGrowth)}% <span style="color:#64748b; font-weight:normal;">vs prev period</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Video Uploads</div>
+      <div class="card-value">${currVideosSum}</div>
+      <div class="card-growth ${videosGrowth >= 0 ? 'growth-positive' : 'growth-negative'}">
+        ${videosGrowth >= 0 ? '▲' : '▼'} ${Math.abs(videosGrowth)}% <span style="color:#64748b; font-weight:normal;">vs prev period</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Voice Notes Uploads</div>
+      <div class="card-value">${currVoiceNotesSum}</div>
+      <div class="card-growth ${voiceNotesGrowth >= 0 ? 'growth-positive' : 'growth-negative'}">
+        ${voiceNotesGrowth >= 0 ? '▲' : '▼'} ${Math.abs(voiceNotesGrowth)}% <span style="color:#64748b; font-weight:normal;">vs prev period</span>
       </div>
     </div>
     <div class="card">

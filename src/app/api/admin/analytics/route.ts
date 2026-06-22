@@ -83,8 +83,11 @@ export const GET = defineRoute({
       currOrgsRes, prevOrgsRes,
       currEventsRes, prevEventsRes,
       currPhotosRes, prevPhotosRes,
+      currVideosRes, prevVideosRes,
+      currVoiceNotesRes, prevVoiceNotesRes,
       currSearchesRes, prevSearchesRes,
-      currStorageRes, prevStorageRes
+      currStorageRes, prevStorageRes,
+      currUsersRes, prevUsersRes
     ] = await Promise.all([
       sb.from("transactions").select("amount").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
       sb.from("transactions").select("amount").eq("status", "success").gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
@@ -94,10 +97,16 @@ export const GET = defineRoute({
       sb.from("events").select("id", { count: "exact" }).gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
       sb.from("photos").select("id", { count: "exact" }).or("mime_type.is.null,mime_type.ilike.image/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
       sb.from("photos").select("id", { count: "exact" }).or("mime_type.is.null,mime_type.ilike.image/%").gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
+      sb.from("photos").select("id", { count: "exact" }).ilike("mime_type", "video/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
+      sb.from("photos").select("id", { count: "exact" }).ilike("mime_type", "video/%").gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
+      sb.from("photos").select("id", { count: "exact" }).ilike("mime_type", "audio/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
+      sb.from("photos").select("id", { count: "exact" }).ilike("mime_type", "audio/%").gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
       sb.from("face_search_logs").select("id", { count: "exact" }).gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
       sb.from("face_search_logs").select("id", { count: "exact" }).gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
       sb.from("photos").select("file_size").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
-      sb.from("photos").select("file_size").gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString())
+      sb.from("photos").select("file_size").gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
+      sb.from("users").select("id", { count: "exact" }).gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
+      sb.from("users").select("id", { count: "exact" }).gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString())
     ])
 
     // KPI current sums
@@ -109,18 +118,27 @@ export const GET = defineRoute({
     const prevEventsSum = prevEventsRes.count ?? 0
     const currPhotosSum = currPhotosRes.count ?? 0
     const prevPhotosSum = prevPhotosRes.count ?? 0
+    const currVideosSum = currVideosRes.count ?? 0
+    const prevVideosSum = prevVideosRes.count ?? 0
+    const currVoiceNotesSum = currVoiceNotesRes.count ?? 0
+    const prevVoiceNotesSum = prevVoiceNotesRes.count ?? 0
     const currSearchesSum = currSearchesRes.count ?? 0
     const prevSearchesSum = prevSearchesRes.count ?? 0
     const currStorageSum = (currStorageRes.data || []).reduce((s, p) => s + Number(p.file_size || 0), 0)
     const prevStorageSum = (prevStorageRes.data || []).reduce((s, p) => s + Number(p.file_size || 0), 0)
+    const currUsersSum = currUsersRes.count ?? 0
+    const prevUsersSum = prevUsersRes.count ?? 0
 
     // Calculate growth percentages
     const revenueGrowth = calculateGrowth(currRevenueSum, prevRevenueSum)
     const orgsGrowth = calculateGrowth(currOrgsSum, prevOrgsSum)
     const eventsGrowth = calculateGrowth(currEventsSum, prevEventsSum)
     const photosGrowth = calculateGrowth(currPhotosSum, prevPhotosSum)
+    const videosGrowth = calculateGrowth(currVideosSum, prevVideosSum)
+    const voiceNotesGrowth = calculateGrowth(currVoiceNotesSum, prevVoiceNotesSum)
     const searchesGrowth = calculateGrowth(currSearchesSum, prevSearchesSum)
     const storageGrowth = calculateGrowth(currStorageSum, prevStorageSum)
+    const usersGrowth = calculateGrowth(currUsersSum, prevUsersSum)
 
     // 2. Fetch Cumulative absolute totals to display on Cards
     const [
@@ -128,23 +146,32 @@ export const GET = defineRoute({
       allOrgsRes,
       allEventsRes,
       allPhotosRes,
+      allVideosRes,
+      allVoiceNotesRes,
       allSearchesRes,
-      allStorageUsage
+      allStorageUsage,
+      allUsersRes
     ] = await Promise.all([
       sb.from("transactions").select("amount").eq("status", "success").lte("created_at", endDate.toISOString()),
       sb.from("organizations").select("id", { count: "exact" }).lte("created_at", endDate.toISOString()),
       sb.from("events").select("id", { count: "exact" }).lte("created_at", endDate.toISOString()),
       sb.from("photos").select("id", { count: "exact" }).or("mime_type.is.null,mime_type.ilike.image/%").lte("created_at", endDate.toISOString()),
+      sb.from("photos").select("id", { count: "exact" }).ilike("mime_type", "video/%").lte("created_at", endDate.toISOString()),
+      sb.from("photos").select("id", { count: "exact" }).ilike("mime_type", "audio/%").lte("created_at", endDate.toISOString()),
       sb.from("face_search_logs").select("id", { count: "exact" }).lte("created_at", endDate.toISOString()),
-      sb.from("storage_usage").select("total_bytes")
+      sb.from("storage_usage").select("total_bytes"),
+      sb.from("users").select("id", { count: "exact" }).lte("created_at", endDate.toISOString())
     ])
 
     const totalRevenueCumulative = (allRevenueRes.data || []).reduce((s, t) => s + (t.amount || 0), 0) / 100
     const totalOrgsCumulative = allOrgsRes.count ?? 0
     const totalEventsCumulative = allEventsRes.count ?? 0
     const totalPhotosCumulative = allPhotosRes.count ?? 0
+    const totalVideosCumulative = allVideosRes.count ?? 0
+    const totalVoiceNotesCumulative = allVoiceNotesRes.count ?? 0
     const totalSearchesCumulative = allSearchesRes.count ?? 0
     const totalStorageCumulative = (allStorageUsage.data || []).reduce((s, su) => s + Number(su.total_bytes || 0), 0)
+    const totalUsersCumulative = allUsersRes.count ?? 0
 
     // 3. Fetch detailed datasets to group into buckets for trends
     const [
@@ -155,7 +182,7 @@ export const GET = defineRoute({
     ] = await Promise.all([
       sb.from("transactions").select("amount, created_at").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
       sb.from("events").select("created_at").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
-      sb.from("photos").select("created_at").or("mime_type.is.null,mime_type.ilike.image/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
+      sb.from("photos").select("created_at").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
       sb.from("users").select("created_at").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
     ])
 
@@ -211,15 +238,17 @@ export const GET = defineRoute({
     const { data: eventsList } = await sb
       .from("events")
       .select("id, name, venue, status, created_at, organization_id, organization:organizations(name)")
+      .gte("created_at", startDate.toISOString())
+      .lte("created_at", endDate.toISOString())
       .order("created_at", { ascending: false })
       .limit(10)
 
     const richEvents = await Promise.all((eventsList || []).map(async (e: any) => {
       const [guestsCountRes, photosCountRes, videosCountRes, organizationRevenueRes] = await Promise.all([
-        sb.from("photo_access").select("id", { count: "exact", head: true }).eq("event_id", e.id),
-        sb.from("photos").select("id", { count: "exact", head: true }).eq("event_id", e.id).or("mime_type.is.null,mime_type.ilike.image/%"),
-        sb.from("photos").select("id", { count: "exact", head: true }).eq("event_id", e.id).ilike("mime_type", "video/%"),
-        sb.from("transactions").select("amount").eq("organization_id", e.organization_id || "").eq("status", "success")
+        sb.from("photo_access").select("id", { count: "exact", head: true }).eq("event_id", e.id).gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
+        sb.from("photos").select("id", { count: "exact", head: true }).eq("event_id", e.id).or("mime_type.is.null,mime_type.ilike.image/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
+        sb.from("photos").select("id", { count: "exact", head: true }).eq("event_id", e.id).ilike("mime_type", "video/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
+        sb.from("transactions").select("amount").eq("organization_id", e.organization_id || "").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
       ])
 
       const orgRevenue = (organizationRevenueRes.data || []).reduce((sum, t) => sum + (t.amount || 0), 0) / 100
@@ -240,10 +269,10 @@ export const GET = defineRoute({
 
     // 6. Live activity feed generated dynamically from actual DB updates
     const [recentOrgs, recentEventsList, recentPhotos, recentSuccessTxs] = await Promise.all([
-      sb.from("organizations").select("name, created_at").order("created_at", { ascending: false }).limit(4),
-      sb.from("events").select("name, created_at").order("created_at", { ascending: false }).limit(4),
-      sb.from("photos").select("mime_type, created_at, uploader_name").order("created_at", { ascending: false }).limit(4),
-      sb.from("transactions").select("amount, created_at, organization:organizations(name)").eq("status", "success").order("created_at", { ascending: false }).limit(4),
+      sb.from("organizations").select("name, created_at").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()).order("created_at", { ascending: false }).limit(10),
+      sb.from("events").select("name, created_at").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()).order("created_at", { ascending: false }).limit(10),
+      sb.from("photos").select("mime_type, created_at, uploader_name").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()).order("created_at", { ascending: false }).limit(10),
+      sb.from("transactions").select("amount, created_at, organization:organizations(name)").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()).order("created_at", { ascending: false }).limit(10),
     ])
 
     const dynamicFeed: any[] = []
@@ -273,9 +302,14 @@ export const GET = defineRoute({
     if (recentPhotos.data) {
       recentPhotos.data.forEach(ph => {
         const isVid = ph.mime_type && ph.mime_type.startsWith("video/")
+        const isAudio = ph.mime_type && ph.mime_type.startsWith("audio/")
+        let mediaType = "photo"
+        if (isVid) mediaType = "video"
+        else if (isAudio) mediaType = "voice note"
+        
         dynamicFeed.push({
           type: "photo",
-          message: `${ph.uploader_name || "Guest"} uploaded a new ${isVid ? 'video' : 'photo'}.`,
+          message: `${ph.uploader_name || "Guest"} uploaded a new ${mediaType}.`,
           time: new Date(ph.created_at).toLocaleDateString(),
           rawTime: new Date(ph.created_at).getTime(),
         })
@@ -299,21 +333,21 @@ export const GET = defineRoute({
     // 7. Advanced Analytics (Top Organization revenue, plans, etc.)
     const { data: orgsTopList } = await sb.from("organizations").select("id, name")
     const topOrgsRevenue = await Promise.all((orgsTopList || []).map(async (org) => {
-      const { data: txs } = await sb.from("transactions").select("amount").eq("organization_id", org.id).eq("status", "success")
+      const { data: txs } = await sb.from("transactions").select("amount").eq("organization_id", org.id).eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
       const sum = (txs || []).reduce((s, t) => s + (t.amount || 0), 0) / 100
       return { name: org.name, revenue: sum }
     }))
     const sortedTopOrgs = topOrgsRevenue.sort((a, b) => b.revenue - a.revenue).slice(0, 5)
 
-    const { data: topEventsList } = await sb.from("events").select("id, name, organization:organizations(name)")
+    const { data: topEventsList } = await sb.from("events").select("id, name, organization:organizations(name)").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
     const topEventsMedia = await Promise.all((topEventsList || []).map(async (ev) => {
-      const { count } = await sb.from("photos").select("id", { count: "exact", head: true }).eq("event_id", ev.id)
+      const { count } = await sb.from("photos").select("id", { count: "exact", head: true }).eq("event_id", ev.id).gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
       return { name: ev.name, org: (ev.organization as any)?.name || "N/A", count: count ?? 0 }
     }))
     const sortedTopEvents = topEventsMedia.sort((a, b) => b.count - a.count).slice(0, 5)
 
     // Attributing top revenue sources
-    const { data: successTxsList } = await sb.from("transactions").select("amount, notes").eq("status", "success")
+    const { data: successTxsList } = await sb.from("transactions").select("amount, notes").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
     let planRevenue = 0;
     let addonRevenue = 0;
     
@@ -345,7 +379,7 @@ export const GET = defineRoute({
     })
 
     // Plan count distributions
-    const { data: activeOrgsPlans } = await sb.from("organizations").select("plan")
+    const { data: activeOrgsPlans } = await sb.from("organizations").select("plan").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
     const planDistribution: Record<string, number> = { free: 0, starter: 0, standard: 0, premium: 0 }
     let totalActiveOrgs = 0;
     
@@ -367,8 +401,11 @@ export const GET = defineRoute({
         orgs: { total: totalOrgsCumulative, current: currOrgsSum, previous: prevOrgsSum, growth: orgsGrowth },
         events: { total: totalEventsCumulative, current: currEventsSum, previous: prevEventsSum, growth: eventsGrowth },
         photos: { total: totalPhotosCumulative, current: currPhotosSum, previous: prevPhotosSum, growth: photosGrowth },
+        videos: { total: totalVideosCumulative, current: currVideosSum, previous: prevVideosSum, growth: videosGrowth },
+        voiceNotes: { total: totalVoiceNotesCumulative, current: currVoiceNotesSum, previous: prevVoiceNotesSum, growth: voiceNotesGrowth },
         searches: { total: totalSearchesCumulative, current: currSearchesSum, previous: prevSearchesSum, growth: searchesGrowth },
-        storage: { total: totalStorageCumulative, current: currStorageSum, previous: prevStorageSum, growth: storageGrowth }
+        storage: { total: totalStorageCumulative, current: currStorageSum, previous: prevStorageSum, growth: storageGrowth },
+        users: { total: totalUsersCumulative, current: currUsersSum, previous: prevUsersSum, growth: usersGrowth }
       },
       trends: {
         revenue: revenueTrend,
