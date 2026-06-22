@@ -178,3 +178,18 @@ export const ALLOWED_MIME_TYPES = {
   PHOTO: ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"],
   COVER: ["image/jpeg", "image/png", "image/webp"],
 } as const
+
+export const DEFAULT_GUEST_BOOSTS = [
+  { label: "No extra", value: 0, price: 0 },
+  { label: "+10 guests", value: 10, price: 199 },
+  { label: "+25 guests", value: 25, price: 399 },
+  { label: "+50 guests", value: 50, price: 699 },
+  { label: "+100 guests", value: 100, price: 1199 },
+]
+
+export const DEFAULT_SHOT_BOOSTS = [
+  { label: "No extra", value: 0, price: 0 },
+  { label: "+5 shots/guest", value: 5, price: 99 },
+  { label: "+10 shots/guest", value: 10, price: 179 },
+  { label: "+15 shots/guest", value: 15, price: 249 },
+]

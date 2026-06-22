@@ -281,6 +281,8 @@ export default function SignupPage() {
   const router = useRouter()
   const { signUp, signInWithGoogle, user } = useAuth()
   const [plansList, setPlansList] = useState<PricingPlan[]>(PLANS_DATA)
+  const [guestBoostsList, setGuestBoostsList] = useState(GUEST_BOOSTS)
+  const [shotBoostsList, setShotBoostsList] = useState(SHOT_BOOSTS)
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -320,7 +322,22 @@ export default function SignupPage() {
         console.error("Failed to fetch dynamic plans for signup:", e)
       }
     }
+
+    const fetchAddons = async () => {
+      try {
+        const res = await fetch("/api/payments/addons")
+        if (res.ok) {
+          const result = await res.json()
+          if (result.guest_boosts) setGuestBoostsList(result.guest_boosts)
+          if (result.shot_boosts) setShotBoostsList(result.shot_boosts)
+        }
+      } catch (e) {
+        console.error("Failed to fetch dynamic addon pricing:", e)
+      }
+    }
+
     fetchPlans()
+    fetchAddons()
 
     // Immediate local URL check for zero-latency default select on mount
     if (typeof window !== "undefined") {
@@ -336,8 +353,8 @@ export default function SignupPage() {
   
   // Calculate pricing
   const basePrice = activePlanDetails.price
-  const guestAddOnPrice = GUEST_BOOSTS.find((b) => b.value === guestBoost)?.price || 0
-  const shotAddOnPrice = SHOT_BOOSTS.find((b) => b.value === shotBoost)?.price || 0
+  const guestAddOnPrice = guestBoostsList.find((b) => b.value === guestBoost)?.price || 0
+  const shotAddOnPrice = shotBoostsList.find((b) => b.value === shotBoost)?.price || 0
   const totalPrice = basePrice + guestAddOnPrice + shotAddOnPrice
 
   const handleNextStep = () => {
@@ -520,7 +537,7 @@ export default function SignupPage() {
                       <span className="text-xs text-slate-400 font-normal">(Base: {baseGuestLimitStr})</span>
                     </Label>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                      {GUEST_BOOSTS.map((boost) => (
+                      {guestBoostsList.map((boost) => (
                         <button
                           key={boost.value}
                           type="button"
@@ -547,7 +564,7 @@ export default function SignupPage() {
                       <span className="text-xs text-slate-400 font-normal">(Base: {baseShotLimitStr})</span>
                     </Label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {SHOT_BOOSTS.map((boost) => (
+                      {shotBoostsList.map((boost) => (
                         <button
                           key={boost.value}
                           type="button"
