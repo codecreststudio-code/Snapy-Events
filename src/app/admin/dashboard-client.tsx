@@ -195,8 +195,11 @@ const defaultData = {
   metrics: {
     revenue: { total: 0, current: 0, previous: 0, growth: 0 },
     orgs: { total: 0, current: 0, previous: 0, growth: 0 },
+    users: { total: 0, current: 0, previous: 0, growth: 0 },
     events: { total: 0, current: 0, previous: 0, growth: 0 },
     photos: { total: 0, current: 0, previous: 0, growth: 0 },
+    videos: { total: 0, current: 0, previous: 0, growth: 0 },
+    voiceNotes: { total: 0, current: 0, previous: 0, growth: 0 },
     searches: { total: 0, current: 0, previous: 0, growth: 0 },
     storage: { total: 0, current: 0, previous: 0, growth: 0 }
   },
@@ -316,6 +319,12 @@ export default function DashboardClient() {
         loadAnalytics(selectedPreset, customStart, customEnd)
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, () => {
+        loadAnalytics(selectedPreset, customStart, customEnd)
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "users" }, () => {
+        loadAnalytics(selectedPreset, customStart, customEnd)
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "face_search_logs" }, () => {
         loadAnalytics(selectedPreset, customStart, customEnd)
       })
       .subscribe()
@@ -495,7 +504,21 @@ export default function DashboardClient() {
                     <Building2 className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="mt-4 flex justify-end">
+                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-500">
+                  <div>
+                    <span className="text-[8px] text-slate-400 uppercase block">Organizations</span>
+                    <span className="text-slate-800 font-extrabold block">
+                      {data.metrics?.orgs.total} <span className={cn("font-bold text-[9px]", data.metrics?.orgs.growth >= 0 ? "text-emerald-600" : "text-rose-600")}>(+{data.metrics?.orgs.growth}%)</span>
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[8px] text-slate-400 uppercase block">User Members</span>
+                    <span className="text-slate-800 font-extrabold block">
+                      {data.metrics?.users.total} <span className={cn("font-bold text-[9px]", data.metrics?.users.growth >= 0 ? "text-emerald-600" : "text-rose-600")}>(+{data.metrics?.users.growth}%)</span>
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-3 flex justify-end">
                   <Sparkline data={usersTrend.map((t: any) => t.value)} color="#8B5CF6" />
                 </div>
               </CardContent>
@@ -529,14 +552,14 @@ export default function DashboardClient() {
               </CardContent>
             </Card>
 
-            {/* Total Photos */}
+            {/* Total Media Uploads */}
             <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Photos</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Media Uploads</span>
                     <span className="text-2xl font-bold text-slate-900 mt-1.5 block">
-                      {data.metrics?.photos.total >= 1000000 ? `${(data.metrics?.photos.total / 1000000).toFixed(1)}M` : data.metrics?.photos.total.toLocaleString()}
+                      {((data.metrics?.photos.total || 0) + (data.metrics?.videos.total || 0) + (data.metrics?.voiceNotes.total || 0)).toLocaleString()}
                     </span>
                     <div className="mt-2 flex items-center gap-1 text-[10px] font-bold">
                       <span className={cn(
@@ -546,14 +569,34 @@ export default function DashboardClient() {
                         {data.metrics?.photos.growth >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
                         <span>{data.metrics?.photos.growth >= 0 ? `+${data.metrics?.photos.growth}` : data.metrics?.photos.growth}%</span>
                       </span>
-                      <span className="text-slate-400 font-semibold">period uploads (+{data.metrics?.photos.current})</span>
+                      <span className="text-slate-400 font-semibold">period uploads (+{((data.metrics?.photos.current || 0) + (data.metrics?.videos.current || 0) + (data.metrics?.voiceNotes.current || 0)).toLocaleString()})</span>
                     </div>
                   </div>
                   <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600 border border-orange-100">
                     <Image className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="mt-4 flex justify-end">
+                <div className="mt-3 grid grid-cols-3 gap-2 border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-500">
+                  <div>
+                    <span className="text-[8px] text-slate-400 uppercase block">Photos</span>
+                    <span className="text-slate-800 font-extrabold block">
+                      {data.metrics?.photos.current} <span className={cn("font-bold text-[8px]", data.metrics?.photos.growth >= 0 ? "text-emerald-600" : "text-rose-600")}>(+{data.metrics?.photos.growth}%)</span>
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[8px] text-slate-400 uppercase block">Videos</span>
+                    <span className="text-slate-800 font-extrabold block">
+                      {data.metrics?.videos.current} <span className={cn("font-bold text-[8px]", data.metrics?.videos.growth >= 0 ? "text-emerald-600" : "text-rose-600")}>(+{data.metrics?.videos.growth}%)</span>
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[8px] text-slate-400 uppercase block">Voice</span>
+                    <span className="text-slate-800 font-extrabold block">
+                      {data.metrics?.voiceNotes.current} <span className={cn("font-bold text-[8px]", data.metrics?.voiceNotes.growth >= 0 ? "text-emerald-600" : "text-rose-600")}>(+{data.metrics?.voiceNotes.growth}%)</span>
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-3 flex justify-end">
                   <Sparkline data={photosTrend.map((t: any) => t.value)} color="#F97316" />
                 </div>
               </CardContent>
