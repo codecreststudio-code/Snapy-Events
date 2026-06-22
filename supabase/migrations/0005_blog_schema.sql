@@ -4,7 +4,7 @@
 -- ============================================
 
 -- Blog Categories
-CREATE TABLE blog_categories (
+CREATE TABLE IF NOT EXISTS blog_categories (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
@@ -15,20 +15,20 @@ CREATE TABLE blog_categories (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_blog_categories_slug ON blog_categories(slug);
+CREATE INDEX IF NOT EXISTS idx_blog_categories_slug ON blog_categories(slug);
 
 -- Blog Tags
-CREATE TABLE blog_tags (
+CREATE TABLE IF NOT EXISTS blog_tags (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_blog_tags_slug ON blog_tags(slug);
+CREATE INDEX IF NOT EXISTS idx_blog_tags_slug ON blog_tags(slug);
 
 -- Blog Authors (extends users)
-CREATE TABLE blog_authors (
+CREATE TABLE IF NOT EXISTS blog_authors (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
@@ -41,10 +41,10 @@ CREATE TABLE blog_authors (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_blog_authors_slug ON blog_authors(slug);
+CREATE INDEX IF NOT EXISTS idx_blog_authors_slug ON blog_authors(slug);
 
 -- Blog Posts
-CREATE TABLE blog_posts (
+CREATE TABLE IF NOT EXISTS blog_posts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
@@ -71,24 +71,24 @@ CREATE TABLE blog_posts (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_blog_posts_slug ON blog_posts(slug);
-CREATE INDEX idx_blog_posts_status ON blog_posts(status);
-CREATE INDEX idx_blog_posts_author ON blog_posts(author_id);
-CREATE INDEX idx_blog_posts_category ON blog_posts(category_id);
-CREATE INDEX idx_blog_posts_featured ON blog_posts(is_featured);
-CREATE INDEX idx_blog_posts_trending ON blog_posts(is_trending);
-CREATE INDEX idx_blog_posts_published_at ON blog_posts(published_at DESC);
-CREATE INDEX idx_blog_posts_created ON blog_posts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_author ON blog_posts(author_id);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_category ON blog_posts(category_id);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_featured ON blog_posts(is_featured);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_trending ON blog_posts(is_trending);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_published_at ON blog_posts(published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_created ON blog_posts(created_at DESC);
 
 -- Blog Post Tags Junction
-CREATE TABLE blog_post_tags (
+CREATE TABLE IF NOT EXISTS blog_post_tags (
   post_id UUID REFERENCES blog_posts(id) ON DELETE CASCADE,
   tag_id UUID REFERENCES blog_tags(id) ON DELETE CASCADE,
   PRIMARY KEY (post_id, tag_id)
 );
 
 -- Newsletter Subscribers
-CREATE TABLE blog_subscribers (
+CREATE TABLE IF NOT EXISTS blog_subscribers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   email TEXT UNIQUE NOT NULL,
   name TEXT,
@@ -98,8 +98,8 @@ CREATE TABLE blog_subscribers (
   unsubscribed_at TIMESTAMPTZ
 );
 
-CREATE INDEX idx_blog_subscribers_email ON blog_subscribers(email);
-CREATE INDEX idx_blog_subscribers_status ON blog_subscribers(status);
+CREATE INDEX IF NOT EXISTS idx_blog_subscribers_email ON blog_subscribers(email);
+CREATE INDEX IF NOT EXISTS idx_blog_subscribers_status ON blog_subscribers(status);
 
 -- ============================================
 -- ROW LEVEL SECURITY
@@ -113,52 +113,63 @@ ALTER TABLE blog_post_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE blog_subscribers ENABLE ROW LEVEL SECURITY;
 
 -- Public read for published posts
+DROP POLICY IF EXISTS "Anyone can read published blog posts" ON blog_posts;
 CREATE POLICY "Anyone can read published blog posts"
   ON blog_posts FOR SELECT
   USING (status = 'published');
 
 -- Admin full access for blog posts
+DROP POLICY IF EXISTS "Admins can manage all blog posts" ON blog_posts;
 CREATE POLICY "Admins can manage all blog posts"
   ON blog_posts FOR ALL
   USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND is_admin = true));
 
 -- Public read for categories
+DROP POLICY IF EXISTS "Anyone can read blog categories" ON blog_categories;
 CREATE POLICY "Anyone can read blog categories"
   ON blog_categories FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage blog categories" ON blog_categories;
 CREATE POLICY "Admins can manage blog categories"
   ON blog_categories FOR ALL
   USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND is_admin = true));
 
 -- Public read for tags
+DROP POLICY IF EXISTS "Anyone can read blog tags" ON blog_tags;
 CREATE POLICY "Anyone can read blog tags"
   ON blog_tags FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage blog tags" ON blog_tags;
 CREATE POLICY "Admins can manage blog tags"
   ON blog_tags FOR ALL
   USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND is_admin = true));
 
 -- Public read for authors
+DROP POLICY IF EXISTS "Anyone can read blog authors" ON blog_authors;
 CREATE POLICY "Anyone can read blog authors"
   ON blog_authors FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage blog authors" ON blog_authors;
 CREATE POLICY "Admins can manage blog authors"
   ON blog_authors FOR ALL
   USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND is_admin = true));
 
 -- Public read for post tags
+DROP POLICY IF EXISTS "Anyone can read blog post tags" ON blog_post_tags;
 CREATE POLICY "Anyone can read blog post tags"
   ON blog_post_tags FOR SELECT
   USING (true);
 
 -- Newsletter subscribers - insert only for public
+DROP POLICY IF EXISTS "Anyone can subscribe to newsletter" ON blog_subscribers;
 CREATE POLICY "Anyone can subscribe to newsletter"
   ON blog_subscribers FOR INSERT
   WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Admins can manage subscribers" ON blog_subscribers;
 CREATE POLICY "Admins can manage subscribers"
   ON blog_subscribers FOR ALL
   USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND is_admin = true));
@@ -167,6 +178,7 @@ CREATE POLICY "Admins can manage subscribers"
 -- UPDATE TRIGGER
 -- ============================================
 
+DROP TRIGGER IF EXISTS update_blog_posts_updated_at ON blog_posts;
 CREATE TRIGGER update_blog_posts_updated_at
   BEFORE UPDATE ON blog_posts
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -186,14 +198,23 @@ INSERT INTO blog_categories (name, slug, description, emoji, color) VALUES
   ('AI Face Search', 'ai-face-search', 'How AI powers instant face recognition in events', '🤖', '#f59e0b'),
   ('Event Planning', 'event-planning', 'Complete guides for planning unforgettable events', '📅', '#14b8a6'),
   ('Photography Business', 'photography-business', 'Grow your photography business with Snapsy', '💼', '#64748b'),
-  ('Product Updates', 'product-updates', 'Latest features and updates from the Snapsy team', '🚀', '#7c3aed');
+  ('Product Updates', 'product-updates', 'Latest features and updates from the Snapsy team', '🚀', '#7c3aed')
+ON CONFLICT (slug) DO UPDATE
+  SET name = EXCLUDED.name,
+      description = EXCLUDED.description,
+      emoji = EXCLUDED.emoji,
+      color = EXCLUDED.color;
 
--- Default author
+-- Default authors
 INSERT INTO blog_authors (name, slug, bio, avatar_url) VALUES
   ('Snapsy Team', 'snapsy-team', 'The Snapsy product and content team, sharing expert tips on event photography and photo sharing.', 'https://ui-avatars.com/api/?name=Snapsy+Team&background=7c3aed&color=fff&size=200'),
   ('Ananya Sharma', 'ananya-sharma', 'Wedding photographer and event storyteller. Passionate about capturing authentic moments.', 'https://ui-avatars.com/api/?name=Ananya+Sharma&background=ec4899&color=fff&size=200'),
   ('Rahit Verma', 'rahit-verma', 'Event technology enthusiast and QR gallery pioneer.', 'https://ui-avatars.com/api/?name=Rahit+Verma&background=3b82f6&color=fff&size=200'),
-  ('Deo Malik', 'deo-malik', 'AI researcher specializing in computer vision for event photography.', 'https://ui-avatars.com/api/?name=Deo+Malik&background=10b981&color=fff&size=200');
+  ('Deo Malik', 'deo-malik', 'AI researcher specializing in computer vision for event photography.', 'https://ui-avatars.com/api/?name=Deo+Malik&background=10b981&color=fff&size=200')
+ON CONFLICT (slug) DO UPDATE
+  SET name = EXCLUDED.name,
+      bio = EXCLUDED.bio,
+      avatar_url = EXCLUDED.avatar_url;
 
 -- Default tags
 INSERT INTO blog_tags (name, slug) VALUES
@@ -211,4 +232,6 @@ INSERT INTO blog_tags (name, slug) VALUES
   ('Birthday', 'birthday'),
   ('Guest Photos', 'guest-photos'),
   ('Digital Camera', 'digital-camera'),
-  ('Photo Sharing', 'photo-sharing');
+  ('Photo Sharing', 'photo-sharing')
+ON CONFLICT (slug) DO UPDATE
+  SET name = EXCLUDED.name;
