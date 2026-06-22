@@ -52,20 +52,25 @@ export default function AdminPaymentsPage() {
   }, [])
 
   const handleRefund = async (txId: string) => {
-    if (!confirm("Are you sure you want to trigger a refund for this transaction?")) return
+    if (!confirm("Are you sure you want to trigger a refund for this transaction? This will call Razorpay's refund API.")) return
     setActioningId(txId)
     try {
-      // Simulate Razorpay refund process
-      const { error } = await supabase
-        .from("transactions")
-        .update({ status: "refunded" })
-        .eq("id", txId)
-
-      if (error) throw error
-      toast({ title: "Refund Triggered", description: "Successfully initiated refund on transaction." })
+      const res = await fetch("/api/admin/payments/refund", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transactionId: txId, reason: "admin_initiated_refund" }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error?.message || "Refund failed")
+      toast({
+        title: "Refund Initiated",
+        description: data.data?.refund_id
+          ? `Refund ID: ${data.data.refund_id} — ${data.data.status}`
+          : "Refund recorded successfully.",
+      })
       fetchPayments()
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" })
+      toast({ title: "Refund Failed", description: err.message, variant: "destructive" })
     } finally {
       setActioningId(null)
     }
