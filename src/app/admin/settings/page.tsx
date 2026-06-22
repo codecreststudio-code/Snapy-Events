@@ -8,7 +8,7 @@ import { Input } from "@/lib/components/ui/input"
 import { Switch } from "@/lib/components/ui/switch"
 import { Label } from "@/lib/components/ui/label"
 import { toast } from "@/lib/components/ui/toaster"
-import { Settings, Save, Shield, Key, Eye, HelpCircle, Mail, Bell, Sparkles } from "lucide-react"
+import { Settings, Save, Shield, Key, Eye, Mail, Sparkles } from "lucide-react"
 
 export default function AdminSettingsPage() {
   // Feature Flags state
@@ -39,63 +39,68 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <main className="px-6 py-8 space-y-6 max-w-5xl">
-      <PageHeader title="Platform Controls & Settings" description="Configure global variables, toggle feature flags, manage API integrations, and edit templates." />
+    <main className="px-6 py-8 space-y-6 max-w-5xl bg-slate-50 min-h-full">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Platform Controls & Settings</h1>
+          <p className="text-sm text-slate-500 mt-1">Configure global variables, toggle feature flags, manage API integrations, and edit templates.</p>
+        </div>
+      </div>
 
       <form onSubmit={handleSaveSettings} className="space-y-6">
         {/* Feature Flags */}
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-white border-slate-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-slate-100 flex items-center gap-2 text-base">
-              <Shield className="h-5 w-5 text-orange-500" />
+            <CardTitle className="text-slate-800 flex items-center gap-2 text-base font-bold">
+              <Shield className="h-5 w-5 text-violet-650" />
               <span>Global Feature Flags</span>
             </CardTitle>
-            <CardDescription className="text-slate-400 text-xs">
+            <CardDescription className="text-slate-400 text-xs font-semibold leading-relaxed">
               Toggle specific features instantly across all user organizations.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Payments flag */}
-            <div className="flex items-center justify-between py-2 border-b border-slate-800/40">
+            <div className="flex items-center justify-between py-3 border-b border-slate-100">
               <div className="space-y-0.5">
-                <Label className="text-slate-200">Enable Billing & Paid Plans</Label>
-                <p className="text-xs text-slate-500">Require paid checkout redirects for non-free tiers.</p>
+                <Label className="text-slate-800 text-sm font-bold block">Enable Billing & Paid Plans</Label>
+                <p className="text-xs text-slate-400 font-semibold leading-relaxed">Require paid checkout redirects for non-free tiers.</p>
               </div>
               <Switch checked={paymentsEnabled} onCheckedChange={setPaymentsEnabled} />
             </div>
 
             {/* AI flag */}
-            <div className="flex items-center justify-between py-2 border-b border-slate-800/40">
+            <div className="flex items-center justify-between py-3 border-b border-slate-100">
               <div className="space-y-0.5">
-                <Label className="text-slate-200">AI Face Search Engine</Label>
-                <p className="text-xs text-slate-500">Run facial vectorization embeddings models on new photo uploads.</p>
+                <Label className="text-slate-800 text-sm font-bold block">AI Face Search Engine</Label>
+                <p className="text-xs text-slate-400 font-semibold leading-relaxed">Run facial vectorization embeddings models on new photo uploads.</p>
               </div>
               <Switch checked={aiSearchEnabled} onCheckedChange={setAiSearchEnabled} />
             </div>
 
             {/* Live Wall flag */}
-            <div className="flex items-center justify-between py-2 border-b border-slate-800/40">
+            <div className="flex items-center justify-between py-3 border-b border-slate-100">
               <div className="space-y-0.5">
-                <Label className="text-slate-200">Live Photo Wall Stream</Label>
-                <p className="text-xs text-slate-500">Allows Premium organizers to stream a real-time event photo wall.</p>
+                <Label className="text-slate-800 text-sm font-bold block">Live Photo Wall Stream</Label>
+                <p className="text-xs text-slate-400 font-semibold leading-relaxed">Allows Premium organizers to stream a real-time event photo wall.</p>
               </div>
               <Switch checked={liveWallEnabled} onCheckedChange={setLiveWallEnabled} />
             </div>
 
             {/* Watermark flag */}
-            <div className="flex items-center justify-between py-2 border-b border-slate-800/40">
+            <div className="flex items-center justify-between py-3 border-b border-slate-100">
               <div className="space-y-0.5">
-                <Label className="text-slate-200">Automated Image Watermarking</Label>
-                <p className="text-xs text-slate-500">Apply a default Snapsy branding overlay on guest-downloaded files.</p>
+                <Label className="text-slate-800 text-sm font-bold block">Automated Image Watermarking</Label>
+                <p className="text-xs text-slate-400 font-semibold leading-relaxed">Apply a default Snapsy branding overlay on guest-downloaded files.</p>
               </div>
               <Switch checked={watermarkEnabled} onCheckedChange={setWatermarkEnabled} />
             </div>
 
             {/* White label flag */}
-            <div className="flex items-center justify-between py-2">
+            <div className="flex items-center justify-between py-3">
               <div className="space-y-0.5">
-                <Label className="text-slate-200">White Label Branding Options</Label>
-                <p className="text-xs text-slate-500">Allows Enterprise/Premium accounts to hide Snapsy footer branding.</p>
+                <Label className="text-slate-800 text-sm font-bold block">White Label Branding Options</Label>
+                <p className="text-xs text-slate-400 font-semibold leading-relaxed">Allows Enterprise/Premium accounts to hide Snapsy footer branding.</p>
               </div>
               <Switch checked={whiteLabelEnabled} onCheckedChange={setWhiteLabelEnabled} />
             </div>
@@ -103,15 +108,15 @@ export default function AdminSettingsPage() {
         </Card>
 
         {/* API Credentials */}
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-white border-slate-200 shadow-sm">
           <CardHeader>
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle className="text-slate-100 flex items-center gap-2 text-base">
-                  <Key className="h-5 w-5 text-orange-500" />
+                <CardTitle className="text-slate-800 flex items-center gap-2 text-base font-bold">
+                  <Key className="h-5 w-5 text-violet-650" />
                   <span>Integration Keys</span>
                 </CardTitle>
-                <CardDescription className="text-slate-400 text-xs">
+                <CardDescription className="text-slate-400 text-xs font-semibold leading-relaxed">
                   Credentials for Resend email and Razorpay payment gateway APIs.
                 </CardDescription>
               </div>
@@ -120,7 +125,7 @@ export default function AdminSettingsPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowKeys(!showKeys)}
-                className="text-slate-400 hover:text-slate-200"
+                className="text-slate-500 hover:bg-slate-100 rounded-lg text-xs font-bold"
               >
                 <Eye className="h-4 w-4 mr-1.5" />
                 <span>{showKeys ? "Hide Keys" : "Reveal Keys"}</span>
@@ -129,52 +134,52 @@ export default function AdminSettingsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <Label className="text-slate-350 text-xs">Razorpay Key ID</Label>
+              <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">Razorpay Key ID</Label>
               <Input
                 type={showKeys ? "text" : "password"}
                 value={razorpayKey}
                 onChange={(e) => setRazorpayKey(e.target.value)}
-                className="bg-slate-950 border-slate-800 text-slate-200"
+                className="bg-white border-slate-200 text-slate-800 shadow-sm"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-slate-355 text-xs">Resend API Key</Label>
+              <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">Resend API Key</Label>
               <Input
                 type={showKeys ? "text" : "password"}
                 value={resendKey}
                 onChange={(e) => setResendKey(e.target.value)}
-                className="bg-slate-950 border-slate-800 text-slate-200"
+                className="bg-white border-slate-200 text-slate-800 shadow-sm"
               />
             </div>
           </CardContent>
         </Card>
 
         {/* Email Templates */}
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-white border-slate-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-slate-100 flex items-center gap-2 text-base">
-              <Mail className="h-5 w-5 text-orange-500" />
+            <CardTitle className="text-slate-800 flex items-center gap-2 text-base font-bold">
+              <Mail className="h-5 w-5 text-violet-650" />
               <span>Email Templates Config</span>
             </CardTitle>
-            <CardDescription className="text-slate-400 text-xs">
+            <CardDescription className="text-slate-400 text-xs font-semibold leading-relaxed">
               Customize subject lines and layouts for outbound transaction notifications.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <Label className="text-slate-350 text-xs">Welcome Email Subject</Label>
+              <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">Welcome Email Subject</Label>
               <Input
                 value={welcomeSubject}
                 onChange={(e) => setWelcomeSubject(e.target.value)}
-                className="bg-slate-950 border-slate-800 text-slate-200"
+                className="bg-white border-slate-200 text-slate-800 shadow-sm"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-slate-355 text-xs">Photo Activity Notification Subject</Label>
+              <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">Photo Activity Notification Subject</Label>
               <Input
                 value={notifySubject}
                 onChange={(e) => setNotifySubject(e.target.value)}
-                className="bg-slate-950 border-slate-800 text-slate-200"
+                className="bg-white border-slate-200 text-slate-800 shadow-sm"
               />
             </div>
           </CardContent>
@@ -185,7 +190,7 @@ export default function AdminSettingsPage() {
           <Button
             type="submit"
             disabled={saving}
-            className="bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold px-8 py-5 rounded-xl flex items-center gap-1.5 shadow-[0_0_15px_rgba(249,115,22,0.25)]"
+            className="bg-violet-600 hover:bg-violet-750 text-white font-bold px-8 py-5 rounded-xl flex items-center gap-1.5 shadow-md transition-shadow"
           >
             <Save className="h-4 w-4" />
             <span>{saving ? "Saving Changes..." : "Save Configuration"}</span>
@@ -195,3 +200,4 @@ export default function AdminSettingsPage() {
     </main>
   )
 }
+
