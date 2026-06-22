@@ -9,11 +9,22 @@ const checkoutBodySchema = z.object({
   shots_boost: z.number().default(0),
 })
 
-export function calculatePrice(planId: string, guestBoost: number, shotsBoost: number) {
+export async function calculatePrice(supabase: any, planId: string, guestBoost: number, shotsBoost: number) {
   let price = 0
-  if (planId === "starter") price = 99
-  else if (planId === "standard") price = 499
-  else if (planId === "premium") price = 1499
+  const { data: planRecord } = await supabase
+    .from("plans")
+    .select("price_inr")
+    .eq("id", planId)
+    .single()
+
+  if (planRecord) {
+    price = planRecord.price_inr
+  } else {
+    // Fallback if not found in db
+    if (planId === "starter") price = 499
+    else if (planId === "standard") price = 1499
+    else if (planId === "premium") price = 3999
+  }
 
   // Guest boost
   if (guestBoost === 10) price += 199
@@ -38,10 +49,10 @@ export const POST = defineRoute({
       return fail("BILLING_UNAVAILABLE", "Razorpay is not configured", 503)
     }
 
-    const price = calculatePrice(body.plan_id, body.guest_boost, body.shots_boost)
-    const amountInPaise = price * 100
-
     const supabase = await createClient()
+
+    const price = await calculatePrice(supabase, body.plan_id, body.guest_boost, body.shots_boost)
+    const amountInPaise = price * 100
 
     // 1. Fetch or create Customer ID
     const { data: org } = await supabase
@@ -63,7 +74,8 @@ export const POST = defineRoute({
           .update({ razorpay_customer_id: customerId })
           .eq("id", auth.organization!.id)
       } catch (err: any) {
-        return fail("PAYMENT_ERROR", `Failed to register billing customer: ${err.message}`, 500)
+        const msg = err.error?.description || err.description || err.message || JSON.stringify(err)
+        return fail("PAYMENT_ERROR", `Failed to register billing customer: ${msg}`, 500)
       }
     }
 
@@ -72,7 +84,7 @@ export const POST = defineRoute({
       const order = await createRazorpayOrder({
         amount: amountInPaise,
         currency: "INR",
-        receipt: `checkout_${auth.organization!.id}_${Date.now()}`,
+        receipt: `chk_${Date.now().toString(36)}_${auth.organization!.id.slice(0, 8)}`,
         notes: {
           organization_id: auth.organization!.id,
           plan_id: body.plan_id,
@@ -90,7 +102,8 @@ export const POST = defineRoute({
         total_price: price,
       })
     } catch (err: any) {
-      return fail("PAYMENT_ERROR", `Failed to create payment order: ${err.message}`, 500)
+      const msg = err.error?.description || err.description || err.message || JSON.stringify(err)
+      return fail("PAYMENT_ERROR", `Failed to create payment order: ${msg}`, 500)
     }
   },
 }).POST

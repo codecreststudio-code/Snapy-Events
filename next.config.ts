@@ -7,6 +7,26 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   async headers() {
+    const isDev = process.env.NODE_ENV !== "production";
+    
+    if (isDev) {
+      return [
+        {
+          source: "/:path*",
+          headers: [
+            {
+              key: "X-Frame-Options",
+              value: "SAMEORIGIN",
+            },
+            {
+              key: "Content-Security-Policy",
+              value: "default-src 'self' * data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://*.razorpay.com; frame-src 'self' https://checkout.razorpay.com https://*.razorpay.com; img-src 'self' data: blob: *; connect-src 'self' *;",
+            },
+          ],
+        },
+      ];
+    }
+
     return [
       {
         source: "/:path*",

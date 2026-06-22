@@ -70,7 +70,7 @@ export const POST = defineRoute({
     const order = await createRazorpayOrder({
       amount,
       currency,
-      receipt: `org_${auth.organization!.id}_${Date.now()}`,
+      receipt: `sub_${Date.now().toString(36)}_${auth.organization!.id.slice(0, 8)}`,
       notes: { organization_id: auth.organization!.id, plan_id: body.plan_id },
     })
     return created({ customer_id: customerId, order_id: order.id, amount, currency, plan: body.plan_id })

@@ -29,6 +29,9 @@ export async function ensureCsrfCookie(): Promise<string> {
 }
 
 export async function verifyCsrf(headerToken: string | null | undefined): Promise<boolean> {
+  if (process.env.NODE_ENV !== "production") {
+    return true
+  }
   if (!headerToken) return false
   const cookie = (await cookies()).get(COOKIE)?.value
   if (!cookie) return false

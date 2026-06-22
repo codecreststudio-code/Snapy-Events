@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Playfair_Display, Inter } from "next/font/google"
 import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
-import { Check, Sparkles } from "lucide-react"
+import { Check, Sparkles, Crown } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { motion } from "framer-motion"
 
@@ -27,6 +27,7 @@ interface PricingPlan {
   cta: string
   features: string[]
   popular?: boolean
+  bestValue?: boolean
 }
 
 const plans: PricingPlan[] = [
@@ -84,6 +85,7 @@ const plans: PricingPlan[] = [
       "WhatsApp notification alerts",
       "24/7 Priority support",
     ],
+    bestValue: true,
   },
 ]
 
@@ -108,32 +110,43 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
-      className={`relative overflow-hidden rounded-3xl border bg-white p-8 flex flex-col justify-between transition-all duration-300 ${
+      className={`relative rounded-3xl border bg-white p-8 flex flex-col justify-between transition-all duration-300 ${
         plan.popular
           ? "border-violet-500 shadow-[0_20px_50px_rgba(139,92,246,0.15)] ring-1 ring-violet-500 md:scale-[1.04] z-10"
           : "border-slate-200 hover:border-slate-350 hover:shadow-xl"
       }`}
     >
-      {/* Background Spotlight Glow */}
-      {isHovered && (
-        <div
-          className="pointer-events-none absolute -inset-px transition duration-300 opacity-100"
-          style={{
-            background: `radial-gradient(350px circle at ${coords.x}px ${coords.y}px, ${
-              plan.popular ? "rgba(139, 92, 246, 0.12)" : "rgba(139, 92, 246, 0.06)"
-            }, transparent 80%)`,
-          }}
-        />
+      {/* Background Spotlight Glow Wrapper */}
+      <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+        {isHovered && (
+          <div
+            className="absolute -inset-px transition duration-300 opacity-100"
+            style={{
+              background: `radial-gradient(350px circle at ${coords.x}px ${coords.y}px, ${
+                plan.popular ? "rgba(139, 92, 246, 0.12)" : "rgba(139, 92, 246, 0.06)"
+              }, transparent 80%)`,
+            }}
+          />
+        )}
+      </div>
+
+      {/* Badges Container */}
+      {plan.popular && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-1.5 text-[10px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
+          <Sparkles className="h-3 w-3" />
+          POPULAR
+        </div>
+      )}
+
+      {plan.bestValue && (
+        <div className="absolute -top-4 right-6 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1.5 text-[10px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
+          <Crown className="h-3.5 w-3.5" />
+          BEST VALUE
+        </div>
       )}
 
       {/* Plan Header */}
-      <div>
-        {plan.popular && (
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-1 text-[10px] font-bold text-white tracking-widest uppercase shadow-md">
-            Most Popular
-          </div>
-        )}
-
+      <div className="relative z-10">
         <div className="flex justify-between items-start">
           <div>
             <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
@@ -181,6 +194,40 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 }
 
 export default function PricingPage() {
+  const [plansList, setPlansList] = useState<PricingPlan[]>(plans)
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const res = await fetch("/api/payments/plans")
+        if (res.ok) {
+          const result = await res.json()
+          if (result.success && Array.isArray(result.data)) {
+            const mapped = result.data.map((p: any) => ({
+              id: p.id,
+              name: p.name,
+              price: p.price_inr,
+              period: p.billing_interval === "monthly" ? "month" : "per event",
+              description: p.description || "",
+              cta: p.id === "free" ? "Start free" : `Choose ${p.name}`,
+              features: Array.isArray(p.features) ? p.features : [],
+              popular: p.id === "standard",
+              bestValue: p.id === "premium",
+            }))
+            // Add free tier if not returned in API to preserve basic signup
+            if (!mapped.find((m: any) => m.id === "free")) {
+              mapped.unshift(plans[0])
+            }
+            setPlansList(mapped)
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch dynamic plans:", e)
+      }
+    }
+    fetchPlans()
+  }, [])
+
   return (
     <div className={`flex min-h-screen flex-col bg-white text-slate-900 selection:bg-violet-100 ${inter.className}`}>
       <PublicNavbar />
@@ -222,7 +269,7 @@ export default function PricingPage() {
 
         <section className="mx-auto max-w-7xl px-6 pb-24">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
-            {plans.map((p) => (
+            {plansList.map((p) => (
               <PricingCard key={p.id} plan={p} />
             ))}
           </div>

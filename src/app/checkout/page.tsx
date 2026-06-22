@@ -32,10 +32,10 @@ const PLAN_NAMES: Record<string, string> = {
   premium: "Premium Plan",
 }
 
-const PLAN_BASE_PRICES: Record<string, number> = {
-  starter: 99,
-  standard: 499,
-  premium: 1499,
+const PLAN_DEFAULT_PRICES: Record<string, number> = {
+  starter: 499,
+  standard: 1499,
+  premium: 3999,
 }
 
 function CheckoutForm() {
@@ -49,12 +49,35 @@ function CheckoutForm() {
 
   const [initiating, setInitiating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [planPrices, setPlanPrices] = useState<Record<string, number>>(PLAN_DEFAULT_PRICES)
 
   // Calculations
-  const basePrice = PLAN_BASE_PRICES[plan] || 99
+  const basePrice = planPrices[plan] || PLAN_DEFAULT_PRICES[plan] || 0
   const guestAddonPrice = GUEST_PRICES[guests] || 0
   const shotAddonPrice = SHOT_PRICES[shots] || 0
   const totalPrice = basePrice + guestAddonPrice + shotAddonPrice
+
+  // Fetch plans from DB on mount to sync with admin adjustments
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const res = await fetch("/api/payments/plans")
+        if (res.ok) {
+          const result = await res.json()
+          if (result.success && Array.isArray(result.data)) {
+            const mapped: Record<string, number> = {}
+            result.data.forEach((p: any) => {
+              mapped[p.id] = p.price_inr
+            })
+            setPlanPrices(prev => ({ ...prev, ...mapped }))
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch dynamic plan prices", e)
+      }
+    }
+    fetchPlans()
+  }, [])
 
   // Double check user session
   useEffect(() => {
@@ -81,10 +104,11 @@ function CheckoutForm() {
 
       if (!orderRes.ok) {
         const errorData = await orderRes.json()
-        throw new Error(errorData.error || "Failed to initiate payment")
+        throw new Error((typeof errorData.error === "object" ? errorData.error?.message : errorData.error) || "Failed to initiate payment")
       }
 
-      const orderData = await orderRes.json()
+      const responseJson = await orderRes.json()
+      const orderData = responseJson.data
 
       // 2. Open Razorpay checkout modal
       const options = {
