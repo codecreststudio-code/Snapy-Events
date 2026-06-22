@@ -16,12 +16,30 @@ export const POST = defineRoute({
     if (!auth.organization?.feature_flags?.["ai_face_search"]) return fail("FORBIDDEN", "AI search not enabled on your plan", 403)
     const t0 = Date.now()
     const supabase = await createClient()
+
+    // Resolve event_id: if gallery_id is given, look up its parent event
+    let eventId: string | null = null
+    if (body.gallery_id) {
+      const { data: gallery } = await supabase
+        .from("galleries")
+        .select("event_id")
+        .eq("id", body.gallery_id)
+        .single()
+      eventId = gallery?.event_id ?? null
+    }
+
     const det = await detectFaces({ imageUrl: body.photo_id ? undefined : body.image_data, imageBase64: body.image_data })
     if (det.faces.length === 0) return ok({ results: [] })
-    const { data: faces, error } = await supabase
+
+    let facesQuery = supabase
       .from("faces")
       .select("id, photo_id, embedding_path, photo:photos(id, gallery_id, event_id, storage_path, is_approved)")
-      .eq("event_id", body.gallery_id ?? (body.photo_id ?? ""))
+
+    if (eventId) {
+      facesQuery = facesQuery.eq("event_id", eventId)
+    }
+
+    const { data: faces, error } = await facesQuery
     if (error) return fail("DB_ERROR", error.message, 500)
     // For the stub, compare against hash embeddings of photo IDs
     const candidates = (faces ?? []).map((f) => ({ id: f.id, embedding: det.faces[0]!.embedding.map((v, i) => v * (1 - i / det.faces[0]!.embedding.length * 0.001)) }))
@@ -30,7 +48,7 @@ export const POST = defineRoute({
     await supabase.from("face_search_logs").insert({
       user_id: auth.user!.id,
       organization_id: auth.organization!.id,
-      event_id: body.gallery_id ?? null,
+      event_id: eventId,
       search_type: body.photo_id ? "upload" : "selfie",
       query_photo_id: body.photo_id ?? null,
       results: hits,
