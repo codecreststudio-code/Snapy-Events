@@ -10,9 +10,11 @@ const listQuery = z.object({
 
 const patchBodySchema = z.object({
   userId: z.string().uuid(),
-  action: z.enum(["suspend", "activate", "change_plan", "reset_password"]),
+  action: z.enum(["suspend", "activate", "change_plan", "reset_password", "change_role", "change_organization"]),
   planId: z.enum(["free", "starter", "standard", "premium"]).optional(),
   newPassword: z.string().min(8).optional(),
+  role: z.enum(["owner", "admin", "member", "viewer"]).optional(),
+  organizationId: z.string().uuid().nullable().optional(),
 })
 
 function admin() {
@@ -49,7 +51,7 @@ export const PATCH = defineRoute({
   requireAuth: "admin",
   handler: async ({ body }) => {
     const sb = admin()
-    const { userId, action, planId, newPassword } = body
+    const { userId, action, planId, newPassword, role, organizationId } = body
 
     // Fetch user details first
     const { data: userProfile, error: getError } = await sb
@@ -103,6 +105,21 @@ export const PATCH = defineRoute({
       })
       if (authErr) return fail("AUTH_ERROR", authErr.message, 500)
       return ok({ success: true, message: `Password reset to: ${pwd}` })
+    }
+    else if (action === "change_role") {
+      if (!role) return fail("VALIDATION_ERROR", "role is required to change role", 422)
+      const { error } = await sb
+        .from("users")
+        .update({ role })
+        .eq("id", userId)
+      if (error) return fail("DB_ERROR", error.message, 500)
+    }
+    else if (action === "change_organization") {
+      const { error } = await sb
+        .from("users")
+        .update({ organization_id: organizationId })
+        .eq("id", userId)
+      if (error) return fail("DB_ERROR", error.message, 500)
     }
 
     return ok({ success: true })

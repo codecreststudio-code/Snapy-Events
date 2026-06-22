@@ -15,12 +15,12 @@ type OrgItem = {
   name: string
   slug: string
   plan: string
+  settings: any
   created_at: string
   events: { id: string }[]
   users: { id: string }[]
   transactions: { amount: number; status: string }[]
   storage_usage: { total_bytes: any }[] | null
-  is_suspended?: boolean
 }
 
 export default function AdminOrganizationsPage() {
@@ -30,27 +30,13 @@ export default function AdminOrganizationsPage() {
   const [actioningId, setActioningId] = useState<string | null>(null)
   const [selectedOrg, setSelectedOrg] = useState<OrgItem | null>(null)
 
-  const supabase = createClient()
-
   const fetchOrgs = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from("organizations")
-        .select(`
-          id,
-          name,
-          slug,
-          plan,
-          created_at,
-          events:events(id),
-          users:users(id),
-          transactions:transactions(amount, status),
-          storage_usage:storage_usage(total_bytes)
-        `)
-
-      if (error) throw error
-      setOrgs((data as any) || [])
+      const res = await fetch("/api/admin/organizations?pageSize=100")
+      if (!res.ok) throw new Error("Failed to load organizations")
+      const result = await res.json()
+      setOrgs(result.data || [])
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" })
     } finally {
@@ -65,12 +51,12 @@ export default function AdminOrganizationsPage() {
   const handlePlanChange = async (orgId: string, planId: string) => {
     setActioningId(orgId)
     try {
-      const { error } = await supabase
-        .from("organizations")
-        .update({ plan: planId })
-        .eq("id", orgId)
-
-      if (error) throw error
+      const res = await fetch("/api/admin/organizations", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orgId, action: "change_plan", plan: planId }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error?.message || "Failed to update plan tier")
       toast({ title: "Success", description: "Plan tier updated successfully." })
       fetchOrgs()
       if (selectedOrg?.id === orgId) {
@@ -86,12 +72,22 @@ export default function AdminOrganizationsPage() {
   const toggleSuspend = async (orgId: string, currentSuspended: boolean) => {
     setActioningId(orgId)
     const is_suspended = !currentSuspended
+    const action = is_suspended ? "suspend" : "activate"
     try {
-      // Toggle suspension (we simulate this by updating settings JSON or mock state)
+      const res = await fetch("/api/admin/organizations", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orgId, action }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error?.message || `Failed to ${action} organization`)
       toast({ title: "Success", description: `Organization has been ${is_suspended ? "suspended" : "activated"}.` })
-      setOrgs(orgs.map(o => o.id === orgId ? { ...o, is_suspended } : o))
+      fetchOrgs()
       if (selectedOrg?.id === orgId) {
-        setSelectedOrg(prev => prev ? { ...prev, is_suspended } : null)
+        setSelectedOrg(prev => {
+          if (!prev) return null
+          const settings = prev.settings && typeof prev.settings === "object" ? prev.settings : {}
+          return { ...prev, settings: { ...settings, is_suspended } }
+        })
       }
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" })
@@ -104,8 +100,10 @@ export default function AdminOrganizationsPage() {
     if (!confirm("Are you sure you want to delete this organization? All users, events, and photos under it will be permanently deleted. This action is irreversible.")) return
     setActioningId(orgId)
     try {
-      const { error } = await supabase.from("organizations").delete().eq("id", orgId)
-      if (error) throw error
+      const res = await fetch(`/api/admin/organizations?orgId=${orgId}`, {
+        method: "DELETE",
+      })
+      if (!res.ok) throw new Error((await res.json()).error?.message || "Failed to delete organization")
       toast({ title: "Success", description: "Organization deleted." })
       fetchOrgs()
       if (selectedOrg?.id === orgId) setSelectedOrg(null)
@@ -181,14 +179,14 @@ export default function AdminOrganizationsPage() {
                           className={cn(
                             "hover:bg-slate-50/50 transition-colors cursor-pointer",
                             selectedOrg?.id === o.id ? "bg-violet-50/20" : "",
-                            o.is_suspended ? "bg-red-50/20" : ""
+                            (o.settings && (o.settings as any).is_suspended) ? "bg-red-50/20" : ""
                           )}
                           onClick={() => setSelectedOrg(o)}
                         >
                           <td className="p-4">
                             <div className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
                               <span>{o.name}</span>
-                              {o.is_suspended && (
+                              {o.settings && (o.settings as any).is_suspended && (
                                 <span className="bg-rose-100 text-rose-700 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Suspended</span>
                               )}
                             </div>
@@ -306,15 +304,15 @@ export default function AdminOrganizationsPage() {
                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Workspace Controls</h4>
                     <div className="grid grid-cols-2 gap-2">
                       <Button
-                        onClick={() => toggleSuspend(selectedOrg.id, !!selectedOrg.is_suspended)}
+                        onClick={() => toggleSuspend(selectedOrg.id, !!(selectedOrg.settings && (selectedOrg.settings as any).is_suspended))}
                         variant="outline"
                         className={cn("w-full text-xs font-bold border shadow-sm",
-                          selectedOrg.is_suspended 
+                          (selectedOrg.settings && (selectedOrg.settings as any).is_suspended)
                             ? "text-emerald-700 border-emerald-100 bg-emerald-50 hover:bg-emerald-100" 
                             : "text-slate-700 border-slate-200 hover:bg-slate-50"
                         )}
                       >
-                        {selectedOrg.is_suspended ? "Activate Studio" : "Suspend Studio"}
+                        {(selectedOrg.settings && (selectedOrg.settings as any).is_suspended) ? "Activate Studio" : "Suspend Studio"}
                       </Button>
                       <Button
                         onClick={() => handleDeleteOrg(selectedOrg.id)}
