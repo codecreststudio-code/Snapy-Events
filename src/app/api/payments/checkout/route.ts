@@ -2,6 +2,8 @@ import { z } from "zod"
 import { defineRoute, ok, fail, created } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder } from "@/lib/integrations/razorpay"
+import { adminDb } from "@/lib/supabase/admin"
+import { DEFAULT_GUEST_BOOSTS, DEFAULT_SHOT_BOOSTS } from "@/lib/constants"
 
 const checkoutBodySchema = z.object({
   plan_id: z.enum(["starter", "standard", "premium"]),
@@ -26,19 +28,35 @@ export async function calculatePrice(supabase: any, planId: string, guestBoost: 
     else if (planId === "premium") price = 3999
   }
 
-  // Guest boost
-  if (guestBoost === 10) price += 199
-  else if (guestBoost === 25) price += 399
-  else if (guestBoost === 50) price += 699
-  else if (guestBoost === 100) price += 1199
+  // Fetch addons from platform settings using adminDb (RLS bypass)
+  let guestBoosts = DEFAULT_GUEST_BOOSTS
+  let shotBoosts = DEFAULT_SHOT_BOOSTS
+  try {
+    const sb = await adminDb()
+    const [guestRes, shotRes] = await Promise.all([
+      sb.from("platform_settings").select("value").eq("key", "guest_boosts").maybeSingle(),
+      sb.from("platform_settings").select("value").eq("key", "shot_boosts").maybeSingle(),
+    ])
+    if (guestRes.data?.value) guestBoosts = guestRes.data.value
+    if (shotRes.data?.value) shotBoosts = shotRes.data.value
+  } catch (err) {
+    console.error("Failed to query platform settings for pricing:", err)
+  }
 
-  // Shots boost
-  if (shotsBoost === 5) price += 99
-  else if (shotsBoost === 10) price += 179
-  else if (shotsBoost === 15) price += 249
+  // Calculate pricing based on dynamic boosts
+  const guestItem = guestBoosts.find((b: any) => b.value === guestBoost)
+  if (guestItem) {
+    price += guestItem.price
+  }
+
+  const shotItem = shotBoosts.find((b: any) => b.value === shotsBoost)
+  if (shotItem) {
+    price += shotItem.price
+  }
 
   return price // in INR
 }
+
 
 export const POST = defineRoute({
   method: "POST",

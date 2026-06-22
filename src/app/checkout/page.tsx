@@ -50,14 +50,16 @@ function CheckoutForm() {
   const [initiating, setInitiating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [planPrices, setPlanPrices] = useState<Record<string, number>>(PLAN_DEFAULT_PRICES)
+  const [guestPrices, setGuestPrices] = useState<Record<number, number>>(GUEST_PRICES)
+  const [shotPrices, setShotPrices] = useState<Record<number, number>>(SHOT_PRICES)
 
   // Calculations
   const basePrice = planPrices[plan] || PLAN_DEFAULT_PRICES[plan] || 0
-  const guestAddonPrice = GUEST_PRICES[guests] || 0
-  const shotAddonPrice = SHOT_PRICES[shots] || 0
+  const guestAddonPrice = guestPrices[guests] || 0
+  const shotAddonPrice = shotPrices[shots] || 0
   const totalPrice = basePrice + guestAddonPrice + shotAddonPrice
 
-  // Fetch plans from DB on mount to sync with admin adjustments
+  // Fetch plans and addons from DB on mount to sync with admin adjustments
   useEffect(() => {
     const fetchPlans = async () => {
       try {
@@ -76,7 +78,34 @@ function CheckoutForm() {
         console.error("Failed to fetch dynamic plan prices", e)
       }
     }
+    
+    const fetchAddons = async () => {
+      try {
+        const res = await fetch("/api/payments/addons")
+        if (res.ok) {
+          const result = await res.json()
+          if (result.guest_boosts) {
+            const guestMap: Record<number, number> = {}
+            result.guest_boosts.forEach((b: any) => {
+              guestMap[b.value] = b.price
+            })
+            setGuestPrices(guestMap)
+          }
+          if (result.shot_boosts) {
+            const shotMap: Record<number, number> = {}
+            result.shot_boosts.forEach((b: any) => {
+              shotMap[b.value] = b.price
+            })
+            setShotPrices(shotMap)
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch dynamic addon prices", e)
+      }
+    }
+
     fetchPlans()
+    fetchAddons()
   }, [])
 
   // Double check user session
