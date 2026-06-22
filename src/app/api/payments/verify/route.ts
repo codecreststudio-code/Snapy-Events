@@ -86,7 +86,7 @@ export const POST = defineRoute({
     const subscriptionId = subRes.data?.id ?? null
 
     // 5. Calculate total paid amount
-    const price = calculatePrice(plan_id, guest_boost, shots_boost)
+    const price = await calculatePrice(supabase, plan_id, guest_boost, shots_boost)
     const amountInPaise = price * 100
 
     // 6. Create Invoice

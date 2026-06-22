@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/hooks"
 import { createClient } from "@/lib/supabase/client"
@@ -154,11 +155,196 @@ function loadRazorpayScript(): Promise<boolean> {
   })
 }
 
+function BillingCard({
+  plan,
+  billingInterval,
+  isCurrentPlan,
+  isUpgrade,
+  upgradeMutation,
+}: {
+  plan: PlanInfo
+  billingInterval: "monthly" | "yearly"
+  isCurrentPlan: (id: PlanId) => boolean
+  isUpgrade: (id: PlanId) => boolean
+  upgradeMutation: any
+}) {
+  const [coords, setCoords] = useState({ x: 0, y: 0 })
+  const [isHovered, setIsHovered] = useState(false)
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    setCoords({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    })
+  }
+
+  const isPopular = plan.id === "standard"
+  const isPremium = plan.id === "premium"
+
+  return (
+    <motion.div
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ y: -6, transition: { duration: 0.2 } }}
+      className={`relative overflow-hidden rounded-3xl border bg-white p-8 flex flex-col justify-between transition-all duration-300 ${
+        isCurrentPlan(plan.id)
+          ? "border-[#4f46e5] ring-2 ring-[#4f46e5]/20 shadow-md"
+          : isPopular
+          ? "border-violet-500 shadow-[0_20px_50px_rgba(139,92,246,0.15)] ring-1 ring-violet-500 z-10"
+          : "border-slate-200 hover:border-slate-350 hover:shadow-xl"
+      }`}
+    >
+      {/* Background Spotlight Glow */}
+      {isHovered && (
+        <div
+          className="pointer-events-none absolute -inset-px transition duration-300 opacity-100"
+          style={{
+            background: `radial-gradient(350px circle at ${coords.x}px ${coords.y}px, ${
+              isPopular ? "rgba(139, 92, 246, 0.12)" : "rgba(139, 92, 246, 0.06)"
+            }, transparent 80%)`,
+          }}
+        />
+      )}
+
+      {/* Badges */}
+      {isCurrentPlan(plan.id) && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-slate-900 px-4 py-1 text-[9px] font-bold text-white tracking-widest uppercase shadow-md">
+          Current Plan
+        </div>
+      )}
+      {!isCurrentPlan(plan.id) && isPopular && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-1 text-[9px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1">
+          <Sparkles className="h-3 w-3" />
+          Popular
+        </div>
+      )}
+      {!isCurrentPlan(plan.id) && isPremium && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-1 text-[9px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1">
+          <Crown className="h-3 w-3" />
+          Best Value
+        </div>
+      )}
+
+      <div>
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
+            <p className="mt-2 text-xs text-slate-450 leading-relaxed font-light min-h-[32px]">
+              {plan.description}
+            </p>
+          </div>
+          {isPopular && (
+            <span className="h-8 w-8 rounded-full bg-violet-50 flex items-center justify-center text-violet-600">
+              <Sparkles className="h-4 w-4" />
+            </span>
+          )}
+        </div>
+
+        <div className="mt-6 flex items-baseline gap-1">
+          <span className="text-4xl font-extrabold text-slate-900">
+            ₹{billingInterval === "yearly" ? plan.price * 10 : plan.price}
+          </span>
+          <span className="text-slate-400 text-xs font-light">
+            / {billingInterval === "yearly" ? "year" : "month"}
+          </span>
+        </div>
+        
+        {billingInterval === "yearly" && (
+          <p className="text-xs text-emerald-600 font-semibold mt-1">Save 2 months free!</p>
+        )}
+
+        <ul className="mt-6 space-y-3 border-t border-slate-100 pt-6">
+          {plan.features.map((feature, i) => (
+            <li key={i} className="flex items-start gap-3 text-xs text-slate-600 font-light">
+              <Check className={`h-4 w-4 flex-shrink-0 ${isPopular ? "text-violet-600" : "text-slate-400"}`} />
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+
+        <Separator className="my-4" />
+
+        <div className="text-[11px] text-slate-400 font-light space-y-1">
+          <p>{plan.limits.events === -1 ? "Unlimited events" : `Up to ${plan.limits.events} events`}</p>
+          <p>{plan.limits.storage === 1000 ? "1 TB storage" : `${plan.limits.storage} GB storage`}</p>
+          <p>{plan.limits.photos === -1 ? "Unlimited photos" : `${plan.limits.photos.toLocaleString()} photos`}</p>
+        </div>
+      </div>
+
+      <div className="mt-8 pt-4">
+        <Button
+          className={`w-full font-bold py-5 rounded-full transition-transform active:scale-[0.98] ${
+            isCurrentPlan(plan.id)
+              ? "bg-slate-100 text-slate-500 hover:bg-slate-100 cursor-not-allowed border-none"
+              : isPopular
+              ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white shadow-lg shadow-violet-500/20 border-none"
+              : "bg-slate-900 text-white hover:bg-slate-800 border-none"
+          }`}
+          disabled={isCurrentPlan(plan.id) || upgradeMutation.isPending}
+          onClick={() => upgradeMutation.mutate(plan.id)}
+        >
+          {isCurrentPlan(plan.id) ? (
+            "Current Plan"
+          ) : isUpgrade(plan.id) ? (
+            <span className="flex items-center justify-center gap-1.5">
+              <Zap className="h-4 w-4 shrink-0" />
+              Upgrade
+            </span>
+          ) : (
+            "Downgrade"
+          )}
+        </Button>
+      </div>
+    </motion.div>
+  )
+}
+
 export default function BillingPage() {
   const queryClient = useQueryClient()
   const router = useRouter()
   const { profile, user } = useAuth()
   const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">("monthly")
+  const [plansList, setPlansList] = useState<PlanInfo[]>(PLAN_INFO)
+
+  // Dynamic database plans sync
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const res = await fetch("/api/payments/plans")
+        if (res.ok) {
+          const result = await res.json()
+          if (result.success && Array.isArray(result.data)) {
+            const mapped = PLAN_INFO.map(plan => {
+              const dbPlan = result.data.find((p: any) => p.id === plan.id)
+              if (dbPlan) {
+                return {
+                  ...plan,
+                  price: dbPlan.price_inr,
+                  priceMonthly: dbPlan.price_inr,
+                  features: Array.isArray(dbPlan.features) ? dbPlan.features : plan.features,
+                  limits: {
+                    events: dbPlan.limits?.events_limit ?? plan.limits.events,
+                    storage: dbPlan.limits?.storage_limit_gb ?? plan.limits.storage,
+                    photos: dbPlan.limits?.photo_limit ?? plan.limits.photos,
+                  }
+                }
+              }
+              return plan
+            })
+            setPlansList(mapped)
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch dynamic billing plans", e)
+      }
+    }
+    fetchPlans()
+  }, [])
 
   const { data: subscription, isLoading: subLoading } = useQuery({
     queryKey: ["subscription"],
@@ -363,80 +549,16 @@ export default function BillingPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {PLAN_INFO.map((plan) => (
-          <Card
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
+        {plansList.map((plan) => (
+          <BillingCard
             key={plan.id}
-            className={`relative ${isCurrentPlan(plan.id) ? "border-primary" : ""}`}
-          >
-            {isCurrentPlan(plan.id) && (
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-                <Badge>Current Plan</Badge>
-              </div>
-            )}
-            {plan.id === "standard" && (
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-                <Badge variant="default" className="bg-primary">
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  Popular
-                </Badge>
-              </div>
-            )}
-            {plan.id === "premium" && (
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-                <Badge variant="default" className="bg-gradient-to-r from-amber-500 to-orange-500">
-                  <Crown className="h-3 w-3 mr-1" />
-                  Best Value
-                </Badge>
-              </div>
-            )}
-            <CardHeader>
-              <CardTitle className="text-xl">{plan.name}</CardTitle>
-              <CardDescription>{plan.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-3xl font-bold">
-                ₹{billingInterval === "yearly" ? plan.price * 10 : plan.price}
-                <span className="text-sm font-normal text-muted-foreground">
-                  /{billingInterval === "yearly" ? "year" : "month"}
-                </span>
-              </div>
-              {billingInterval === "yearly" && (
-                <p className="text-xs text-green-600">Save 2 months free!</p>
-              )}
-              <ul className="space-y-2 text-sm">
-                {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Separator />
-              <div className="text-xs text-muted-foreground space-y-1">
-                <p>{plan.limits.events === -1 ? "Unlimited events" : `Up to ${plan.limits.events} events`}</p>
-                <p>{plan.limits.storage === 1000 ? "1 TB storage" : `${plan.limits.storage} GB storage`}</p>
-                <p>{plan.limits.photos === -1 ? "Unlimited photos" : `${plan.limits.photos.toLocaleString()} photos`}</p>
-              </div>
-              <Button
-                className="w-full"
-                variant={isCurrentPlan(plan.id) ? "outline" : isUpgrade(plan.id) ? "default" : "outline"}
-                disabled={isCurrentPlan(plan.id) || upgradeMutation.isPending}
-                onClick={() => upgradeMutation.mutate(plan.id)}
-              >
-                {isCurrentPlan(plan.id) ? (
-                  "Current Plan"
-                ) : isUpgrade(plan.id) ? (
-                  <>
-                    <Zap className="h-4 w-4" />
-                    Upgrade
-                  </>
-                ) : (
-                  "Downgrade"
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+            plan={plan}
+            billingInterval={billingInterval}
+            isCurrentPlan={isCurrentPlan}
+            isUpgrade={isUpgrade}
+            upgradeMutation={upgradeMutation}
+          />
         ))}
       </div>
 
