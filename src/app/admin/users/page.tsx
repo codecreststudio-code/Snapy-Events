@@ -110,6 +110,50 @@ export default function AdminUsersPage() {
     }
   }
 
+  const handleRoleChange = async (userId: string, role: string) => {
+    setActioningId(userId)
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, action: "change_role", role }),
+      })
+      if (!res.ok) throw new Error("Failed to change user role")
+      toast({ title: "Success", description: "User role updated successfully." })
+      fetchUsers()
+      if (selectedUser?.id === userId) {
+        setSelectedUser(prev => prev ? { ...prev, role } : null)
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" })
+    } finally {
+      setActioningId(null)
+    }
+  }
+
+  const handleOrganizationChange = async (userId: string, orgId: string | null) => {
+    setActioningId(userId)
+    // Convert empty string to null
+    const organizationId = orgId && orgId.trim() !== "" ? orgId.trim() : null
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, action: "change_organization", organizationId }),
+      })
+      if (!res.ok) throw new Error("Failed to change organization assignment")
+      toast({ title: "Success", description: "User organization assignment updated." })
+      fetchUsers()
+      if (selectedUser?.id === userId) {
+        setSelectedUser(prev => prev ? { ...prev, organization_id: organizationId } : null)
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" })
+    } finally {
+      setActioningId(null)
+    }
+  }
+
   const handleDeleteUser = async (userId: string) => {
     if (!confirm("Are you absolutely sure you want to delete this user? This cannot be undone.")) return
 
@@ -180,29 +224,43 @@ export default function AdminUsersPage() {
                     <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/50">
                       <th className="p-4">User Info</th>
                       <th className="p-4">Studio / Organization</th>
+                      <th className="p-4">Role</th>
                       <th className="p-4">Plan Tier</th>
                       <th className="p-4">Status</th>
                       <th className="p-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
-                    {filteredUsers.map((u) => (
-                      <tr 
-                        key={u.id} 
-                        className={cn(
-                          "hover:bg-slate-50/50 transition-colors cursor-pointer",
-                          selectedUser?.id === u.id ? "bg-violet-50/20" : ""
-                        )}
-                        onClick={() => setSelectedUser(u)}
-                      >
-                        <td className="p-4">
-                          <div className="font-bold text-slate-800 text-sm">{u.full_name || "N/A"}</div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">{u.email}</div>
-                        </td>
-                        <td className="p-4">
-                          <div className="text-slate-700 font-semibold">{u.organization?.name || "No Organization"}</div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">Joined: {new Date(u.created_at).toLocaleDateString()}</div>
-                        </td>
+                    <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
+                      {filteredUsers.map((u) => (
+                        <tr 
+                          key={u.id} 
+                          className={cn(
+                            "hover:bg-slate-50/50 transition-colors cursor-pointer",
+                            selectedUser?.id === u.id ? "bg-violet-50/20" : ""
+                          )}
+                          onClick={() => setSelectedUser(u)}
+                        >
+                          <td className="p-4">
+                            <div className="font-bold text-slate-800 text-sm">{u.full_name || "N/A"}</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">{u.email}</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="text-slate-700 font-semibold">{u.organization?.name || "No Organization"}</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">Joined: {new Date(u.created_at).toLocaleDateString()}</div>
+                          </td>
+                          <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                            <select
+                              value={u.role || "member"}
+                              onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                              disabled={actioningId === u.id}
+                              className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-violet-500 font-semibold shadow-sm capitalize"
+                            >
+                              <option value="owner">Owner</option>
+                              <option value="admin">Admin</option>
+                              <option value="member">Member</option>
+                              <option value="viewer">Viewer</option>
+                            </select>
+                          </td>
                         <td className="p-4" onClick={(e) => e.stopPropagation()}>
                           <select
                             value={u.organization?.plan || "free"}
@@ -300,6 +358,29 @@ export default function AdminUsersPage() {
                 <div className="flex justify-between">
                   <span className="text-slate-400 font-bold uppercase tracking-wider">Join Date</span>
                   <span className="text-slate-700 font-semibold">{new Date(selectedUser.created_at).toLocaleString()}</span>
+                </div>
+              </div>
+
+              {/* Organization Assignment Section */}
+              <div className="border-t border-slate-100 pt-4 space-y-2">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Assign Organization</h4>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter Organization ID (UUID)"
+                    id="orgIdInput"
+                    defaultValue={selectedUser.organization_id || ""}
+                    className="h-8 text-xs bg-white border-slate-200 text-slate-800 shadow-sm"
+                  />
+                  <Button
+                    onClick={() => {
+                      const el = document.getElementById("orgIdInput") as HTMLInputElement
+                      handleOrganizationChange(selectedUser.id, el?.value || null)
+                    }}
+                    disabled={actioningId === selectedUser.id}
+                    className="h-8 px-3 text-xs bg-violet-600 hover:bg-violet-750 text-white font-bold rounded-lg shadow-sm"
+                  >
+                    Assign
+                  </Button>
                 </div>
               </div>
 

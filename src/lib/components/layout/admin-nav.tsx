@@ -25,6 +25,8 @@ import {
   Settings,
   Shield,
   LogOut,
+  Film,
+  Volume2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "./logo"
@@ -56,6 +58,8 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/admin/users", label: "Users", icon: Users },
       { href: "/admin/events", label: "Events", icon: Calendar },
       { href: "/admin/photos", label: "Photos", icon: Image },
+      { href: "/admin/videos", label: "Videos", icon: Film },
+      { href: "/admin/voice-notes", label: "Voice Notes", icon: Volume2 },
       { href: "/admin/ai-face-search", label: "AI Face Search", icon: Sparkles },
     ],
   },

@@ -7,18 +7,56 @@ export default async function AdminHome() {
   const supabase = await createClient()
   const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString()
   
-  const [orgs, events, txs, photos, searches, storage, recentEvts] = await Promise.all([
+  const [orgs, events, txs, photos, searches, storage, recentEvts, txsTrend, eventsTrend, photosTrend, usersTrend] = await Promise.all([
     supabase.from("organizations").select("id", { count: "exact", head: true }),
     supabase.from("events").select("id", { count: "exact", head: true }),
     supabase.from("transactions").select("amount, currency, status, created_at").in("status", ["success"]),
     supabase.from("photos").select("id", { count: "exact", head: true }),
     supabase.from("face_search_logs").select("id", { count: "exact", head: true }),
     supabase.from("storage_usage").select("total_bytes"),
-    supabase.from("events").select("name, venue, status, event_date, organization:organizations(name)").order("created_at", { ascending: false }).limit(5)
+    supabase.from("events").select("name, venue, status, event_date, organization:organizations(name)").order("created_at", { ascending: false }).limit(5),
+    supabase.from("transactions").select("amount, created_at").eq("status", "success").gte("created_at", since),
+    supabase.from("events").select("created_at").gte("created_at", since),
+    supabase.from("photos").select("created_at").gte("created_at", since),
+    supabase.from("users").select("created_at").gte("created_at", since),
   ])
 
   const revenueSum = (txs.data ?? []).reduce((s, t) => s + (t.amount ?? 0), 0) / 100 // Convert paise to Rupees
   const storageSum = (storage.data ?? []).reduce((s, st) => s + Number(st.total_bytes ?? 0), 0)
+
+  // Helper to bucket trend data by date range
+  function getTrendData(items: { created_at: string }[], keyExtractor?: (item: any) => number) {
+    const buckets: Record<string, number> = {}
+    
+    // Create 5 interval buckets over the last 30 days
+    for (let i = 4; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 6 * 24 * 3600 * 1000)
+      const label = d.toLocaleDateString("en-US", { month: "short", day: "2-digit" })
+      buckets[label] = 0
+    }
+    
+    const labels = Object.keys(buckets)
+
+    items.forEach((item) => {
+      const itemTime = new Date(item.created_at).getTime()
+      const val = keyExtractor ? keyExtractor(item) : 1
+      
+      // Assign to the closest date bucket
+      let closestLabel = labels[0]
+      let minDiff = Infinity
+      labels.forEach(label => {
+        const bucketTime = new Date(label + ", " + new Date().getFullYear()).getTime()
+        const diff = Math.abs(itemTime - bucketTime)
+        if (diff < minDiff) {
+          minDiff = diff
+          closestLabel = label
+        }
+      })
+      buckets[closestLabel] += val
+    })
+
+    return labels.map(label => ({ label, value: buckets[label] }))
+  }
 
   // Assemble custom feed events based on recent actions
   const feed: any[] = []
@@ -47,30 +85,21 @@ export default async function AdminHome() {
     })
   }
 
-  // Pre-fill with standard events to make the feed lively if actual db records are few
-  if (feed.length < 5) {
-    feed.push(
-      { type: "event", message: "New event 'Rahul & Priya Wedding' created.", time: "5 min ago", rawTime: Date.now() - 300000 },
-      { type: "photo", message: "35 photos uploaded to 'Birthday Bash 2025'.", time: "8 min ago", rawTime: Date.now() - 480000 },
-      { type: "photo", message: "AI search completed for event 'Corporate Meetup'.", time: "10 min ago", rawTime: Date.now() - 600000 }
-    )
-  }
-
   feed.sort((a, b) => b.rawTime - a.rawTime)
 
   const initialData = {
-    orgsCount: orgs.count ?? 1248,
-    eventsCount: events.count ?? 3429,
-    photosCount: photos.count ?? 1200000,
-    searchesCount: searches.count ?? 18542,
-    revenueSum: revenueSum || 245680,
-    storageBytes: storageSum || 2512660000000,
-    recentEvents: recentEvts.data && recentEvts.data.length > 0 ? recentEvts.data : [
-      { name: "Rahul & Priya Wedding", organization: { name: "Dreamy Events" }, venue: "Rahul Sharma", status: "published", event_date: new Date().toISOString() },
-      { name: "Corporate Meetup 2025", organization: { name: "TechCorp Solutions" }, venue: "Amit Patel", status: "published", event_date: new Date().toISOString() },
-      { name: "Birthday Bash 2025", organization: { name: "Party Planners" }, venue: "Neha Verma", status: "published", event_date: new Date().toISOString() },
-    ],
+    orgsCount: orgs.count ?? 0,
+    eventsCount: events.count ?? 0,
+    photosCount: photos.count ?? 0,
+    searchesCount: searches.count ?? 0,
+    revenueSum: revenueSum || 0,
+    storageBytes: storageSum || 0,
+    recentEvents: recentEvts.data ?? [],
     recentActivities: feed.map(f => ({ type: f.type, message: f.message, time: f.time })),
+    revenueTrend: getTrendData(txsTrend.data ?? [], (t) => (t.amount || 0) / 100),
+    eventsTrend: getTrendData(eventsTrend.data ?? []),
+    photosTrend: getTrendData(photosTrend.data ?? []),
+    usersTrend: getTrendData(usersTrend.data ?? []),
   }
 
   return <DashboardClient initialData={initialData} />

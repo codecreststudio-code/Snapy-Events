@@ -28,6 +28,8 @@ import {
 import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 
 type SparklineProps = {
   data: number[]
@@ -88,7 +90,7 @@ function InteractiveChart({ title, subtitle, data, color, prefix = "" }: Interac
           <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{title}</h4>
           <div className="text-2xl font-bold text-slate-900 mt-1">{subtitle}</div>
         </div>
-        {hoveredIdx !== null && (
+        {hoveredIdx !== null && data[hoveredIdx] && (
           <div className="text-right">
             <span className="text-xs text-slate-400 block">{data[hoveredIdx].label}</span>
             <span className="text-sm font-bold text-slate-800">
@@ -107,39 +109,43 @@ function InteractiveChart({ title, subtitle, data, color, prefix = "" }: Interac
         </div>
 
         {/* Chart SVG */}
-        <svg className="w-full h-[160px] overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
-          <defs>
-            <linearGradient id={`chart-grad-${color}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.25" />
-              <stop offset="100%" stopColor={color} stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          
-          {/* Fill Area */}
-          <path
-            d={`M 0,100 ${data.map((d, i) => {
-              const x = (i / (data.length - 1)) * 100
-              const y = 100 - ((d.value - min) / range) * 90 - 5
-              return `L ${x},${y}`
-            }).join(" ")} L 100,100 Z`}
-            fill={`url(#chart-grad-${color})`}
-            stroke="none"
-          />
+        {data.length > 1 ? (
+          <svg className="w-full h-[160px] overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
+            <defs>
+              <linearGradient id={`chart-grad-${color}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+                <stop offset="100%" stopColor={color} stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            
+            {/* Fill Area */}
+            <path
+              d={`M 0,100 ${data.map((d, i) => {
+                const x = (i / (data.length - 1)) * 100
+                const y = 100 - ((d.value - min) / (range || 1)) * 90 - 5
+                return `L ${x},${y}`
+              }).join(" ")} L 100,100 Z`}
+              fill={`url(#chart-grad-${color})`}
+              stroke="none"
+            />
 
-          {/* Stroke Line */}
-          <path
-            d={data.map((d, i) => {
-              const x = (i / (data.length - 1)) * 100
-              const y = 100 - ((d.value - min) / range) * 90 - 5
-              return `${i === 0 ? "M" : "L"} ${x},${y}`
-            }).join(" ")}
-            fill="none"
-            stroke={color}
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+            {/* Stroke Line */}
+            <path
+              d={data.map((d, i) => {
+                const x = (i / (data.length - 1)) * 100
+                const y = 100 - ((d.value - min) / (range || 1)) * 90 - 5
+                return `${i === 0 ? "M" : "L"} ${x},${y}`
+              }).join(" ")}
+              fill="none"
+              stroke={color}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        ) : (
+          <div className="w-full text-center text-slate-400 py-16 text-xs">Awaiting trend tracking...</div>
+        )}
 
         {/* Hover zones */}
         <div className="absolute inset-0 flex">
@@ -159,7 +165,7 @@ function InteractiveChart({ title, subtitle, data, color, prefix = "" }: Interac
                     className="absolute left-1/2 w-3 h-3 rounded-full border-2 border-white shadow-sm pointer-events-none transform -translate-x-1/2 -translate-y-1/2"
                     style={{
                       backgroundColor: color,
-                      top: `${chartHeight - ((d.value - min) / range) * (chartHeight * 0.9) - 8}px`
+                      top: `${chartHeight - ((d.value - min) / (range || 1)) * (chartHeight * 0.9) - 8}px`
                     }}
                   />
                 </>
@@ -169,11 +175,13 @@ function InteractiveChart({ title, subtitle, data, color, prefix = "" }: Interac
         </div>
       </div>
       
-      <div className="flex justify-between text-[10px] text-slate-400 font-semibold mt-3 px-1">
-        <span>{data[0].label}</span>
-        <span>{data[Math.floor(data.length / 2)].label}</span>
-        <span>{data[data.length - 1].label}</span>
-      </div>
+      {data.length > 0 && (
+        <div className="flex justify-between text-[10px] text-slate-400 font-semibold mt-3 px-1">
+          <span>{data[0].label}</span>
+          <span>{data[Math.floor(data.length / 2)]?.label || ""}</span>
+          <span>{data[data.length - 1].label}</span>
+        </div>
+      )}
     </div>
   )
 }
@@ -188,25 +196,50 @@ type DashboardClientProps = {
     storageBytes: number
     recentEvents: any[]
     recentActivities: any[]
+    revenueTrend: { label: string; value: number }[]
+    eventsTrend: { label: string; value: number }[]
+    photosTrend: { label: string; value: number }[]
+    usersTrend: { label: string; value: number }[]
   }
 }
 
 export default function DashboardClient({ initialData }: DashboardClientProps) {
   const [data, setData] = React.useState(initialData)
   const [refreshing, setRefreshing] = React.useState(false)
+  const router = useRouter()
+  const supabase = createClient()
+
+  React.useEffect(() => {
+    setData(initialData)
+  }, [initialData])
+
+  // Establish Supabase Realtime channel subscription to sync changes live
+  React.useEffect(() => {
+    const channel = supabase
+      .channel("admin-dashboard-realtime-feed")
+      .on("postgres_changes", { event: "*", schema: "public", table: "organizations" }, () => {
+        router.refresh()
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "events" }, () => {
+        router.refresh()
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "photos" }, () => {
+        router.refresh()
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, () => {
+        router.refresh()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, router])
 
   const handleRefresh = async () => {
     setRefreshing(true)
     try {
-      const res = await fetch("/api/admin/revenue")
-      if (res.ok) {
-        const stats = await res.json()
-        setData(prev => ({
-          ...prev,
-          orgsCount: stats.total_organizations || prev.orgsCount,
-          revenueSum: (stats.total_revenue / 100) || prev.revenueSum,
-        }))
-      }
+      router.refresh()
     } catch (err) {
       console.error(err)
     } finally {
@@ -215,51 +248,12 @@ export default function DashboardClient({ initialData }: DashboardClientProps) {
   }
 
   // Pre-configured trend vectors aligned on live database metrics
-  const revenueTrend = React.useMemo(() => {
-    const base = data.revenueSum
-    return [
-      { label: "May 17", value: Math.max(0, base * 0.45) },
-      { label: "May 24", value: Math.max(0, base * 0.60) },
-      { label: "May 31", value: Math.max(0, base * 0.52) },
-      { label: "Jun 07", value: Math.max(0, base * 0.85) },
-      { label: "Jun 16", value: base },
-    ]
-  }, [data.revenueSum])
+  const revenueTrend = data.revenueTrend || []
+  const eventsTrend = data.eventsTrend || []
+  const photosTrend = data.photosTrend || []
+  const usersTrend = data.usersTrend || []
 
-  const eventsTrend = React.useMemo(() => {
-    const base = data.eventsCount
-    return [
-      { label: "May 17", value: Math.floor(base * 0.3) },
-      { label: "May 24", value: Math.floor(base * 0.55) },
-      { label: "May 31", value: Math.floor(base * 0.48) },
-      { label: "Jun 07", value: Math.floor(base * 0.8) },
-      { label: "Jun 16", value: base },
-    ]
-  }, [data.eventsCount])
-
-  const photosTrend = React.useMemo(() => {
-    const base = data.photosCount
-    return [
-      { label: "May 17", value: Math.floor(base * 0.2) },
-      { label: "May 24", value: Math.floor(base * 0.4) },
-      { label: "May 31", value: Math.floor(base * 0.6) },
-      { label: "Jun 07", value: Math.floor(base * 0.75) },
-      { label: "Jun 16", value: base },
-    ]
-  }, [data.photosCount])
-
-  const usersTrend = React.useMemo(() => {
-    const base = Math.floor(data.orgsCount * 1.8)
-    return [
-      { label: "May 17", value: Math.floor(base * 0.4) },
-      { label: "May 24", value: Math.floor(base * 0.5) },
-      { label: "May 31", value: Math.floor(base * 0.65) },
-      { label: "Jun 07", value: Math.floor(base * 0.8) },
-      { label: "Jun 16", value: base },
-    ]
-  }, [data.orgsCount])
-
-  const storageGB = (data.storageBytes / (1024 * 1024 * 1024)) || 2.34
+  const storageGB = (data.storageBytes / (1024 * 1024 * 1024)) || 0.00
 
   return (
     <main className="px-6 py-8 space-y-8 bg-slate-50 min-h-full">
