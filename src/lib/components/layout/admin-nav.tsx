@@ -12,6 +12,7 @@ import {
   Settings,
   Sparkles,
   LogOut,
+  BookOpen,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "./logo"
@@ -24,6 +25,7 @@ const NAV = [
   { href: "/admin/subscriptions", label: "Subscriptions", icon: Sparkles },
   { href: "/admin/revenue", label: "Revenue", icon: CreditCard },
   { href: "/admin/storage", label: "Storage", icon: HardDrive },
+  { href: "/admin/blog", label: "Blog CMS", icon: BookOpen },
   { href: "/admin/ai-usage", label: "AI usage", icon: Sparkles },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ]
