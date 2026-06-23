@@ -169,6 +169,16 @@ export function DashboardSidebar() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              {(profile?.is_admin || profile?.role === "owner" || profile?.role === "admin") && (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin" className="font-semibold text-violet-600 hover:text-violet-700">
+                      Admin Portal
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/settings">Settings</Link>
               </DropdownMenuItem>
