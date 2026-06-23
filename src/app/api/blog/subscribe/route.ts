@@ -1,31 +1,57 @@
-import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
+import { defineRoute, ok, fail } from "@/lib/api/handler"
+import { createClient } from "@/lib/supabase/server"
 
-export async function POST(req: NextRequest) {
-  try {
-    const { email, name } = await req.json()
+const subscribeSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  name: z.string().optional().nullable(),
+})
 
-    if (!email || typeof email !== "string") {
-      return NextResponse.json({ success: false, error: "Valid email required" }, { status: 400 })
+export const POST = defineRoute({
+  method: "POST",
+  body: subscribeSchema,
+  handler: async ({ body }) => {
+    const { email, name } = body
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+      .from("blog_subscribers")
+      .upsert(
+        { 
+          email: email.toLowerCase().trim(), 
+          name: name ?? null, 
+          status: "active",
+          source: "footer"
+        },
+        { onConflict: "email" }
+      )
+      .select()
+      .single()
+
+    if (error) {
+      console.error("[blog/subscribe] POST DB Error:", error.message)
+      return fail("DB_ERROR", "Failed to subscribe", 500)
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return NextResponse.json({ success: false, error: "Invalid email format" }, { status: 400 })
-    }
-
-    // In a full implementation, this would insert into blog_subscribers table via Supabase.
-    // For now, this is a graceful no-op that returns success.
-    // TODO: Connect to Supabase blog_subscribers table.
-    // const supabase = await createServerSupabaseClient()
-    // const { error } = await supabase.from("blog_subscribers").upsert(
-    //   { email: email.toLowerCase().trim(), name: name ?? null, status: "active" },
-    //   { onConflict: "email", ignoreDuplicates: false }
-    // )
-    // if (error && error.code !== "23505") throw error
-
-    return NextResponse.json({ success: true, message: "Successfully subscribed" })
-  } catch (err) {
-    console.error("[blog/subscribe]", err)
-    return NextResponse.json({ success: false, error: "Failed to subscribe" }, { status: 500 })
+    return ok({ message: "Successfully subscribed", data })
   }
-}
+}).POST
+
+export const GET = defineRoute({
+  method: "GET",
+  requireAuth: "admin",
+  handler: async () => {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from("blog_subscribers")
+      .select("*")
+      .order("subscribed_at", { ascending: false })
+
+    if (error) {
+      console.error("[blog/subscribe] GET DB Error:", error.message)
+      return fail("DB_ERROR", "Failed to fetch subscribers", 500)
+    }
+
+    return ok({ subscribers: data ?? [] })
+  }
+}).GET
