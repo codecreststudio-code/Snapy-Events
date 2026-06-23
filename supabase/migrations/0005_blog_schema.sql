@@ -122,7 +122,7 @@ CREATE POLICY "Anyone can read published blog posts"
 DROP POLICY IF EXISTS "Admins can manage all blog posts" ON blog_posts;
 CREATE POLICY "Admins can manage all blog posts"
   ON blog_posts FOR ALL
-  USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND is_admin = true));
+  USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (is_admin = true OR role = 'owner' OR role = 'admin')));
 
 -- Public read for categories
 DROP POLICY IF EXISTS "Anyone can read blog categories" ON blog_categories;
@@ -133,7 +133,7 @@ CREATE POLICY "Anyone can read blog categories"
 DROP POLICY IF EXISTS "Admins can manage blog categories" ON blog_categories;
 CREATE POLICY "Admins can manage blog categories"
   ON blog_categories FOR ALL
-  USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND is_admin = true));
+  USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (is_admin = true OR role = 'owner' OR role = 'admin')));
 
 -- Public read for tags
 DROP POLICY IF EXISTS "Anyone can read blog tags" ON blog_tags;
@@ -144,7 +144,7 @@ CREATE POLICY "Anyone can read blog tags"
 DROP POLICY IF EXISTS "Admins can manage blog tags" ON blog_tags;
 CREATE POLICY "Admins can manage blog tags"
   ON blog_tags FOR ALL
-  USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND is_admin = true));
+  USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (is_admin = true OR role = 'owner' OR role = 'admin')));
 
 -- Public read for authors
 DROP POLICY IF EXISTS "Anyone can read blog authors" ON blog_authors;
@@ -155,13 +155,18 @@ CREATE POLICY "Anyone can read blog authors"
 DROP POLICY IF EXISTS "Admins can manage blog authors" ON blog_authors;
 CREATE POLICY "Admins can manage blog authors"
   ON blog_authors FOR ALL
-  USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND is_admin = true));
+  USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (is_admin = true OR role = 'owner' OR role = 'admin')));
 
 -- Public read for post tags
 DROP POLICY IF EXISTS "Anyone can read blog post tags" ON blog_post_tags;
 CREATE POLICY "Anyone can read blog post tags"
   ON blog_post_tags FOR SELECT
   USING (true);
+
+DROP POLICY IF EXISTS "Admins can manage blog post tags" ON blog_post_tags;
+CREATE POLICY "Admins can manage blog post tags"
+  ON blog_post_tags FOR ALL
+  USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (is_admin = true OR role = 'owner' OR role = 'admin')));
 
 -- Newsletter subscribers - insert only for public
 DROP POLICY IF EXISTS "Anyone can subscribe to newsletter" ON blog_subscribers;
@@ -172,7 +177,7 @@ CREATE POLICY "Anyone can subscribe to newsletter"
 DROP POLICY IF EXISTS "Admins can manage subscribers" ON blog_subscribers;
 CREATE POLICY "Admins can manage subscribers"
   ON blog_subscribers FOR ALL
-  USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND is_admin = true));
+  USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (is_admin = true OR role = 'owner' OR role = 'admin')));
 
 -- ============================================
 -- UPDATE TRIGGER
