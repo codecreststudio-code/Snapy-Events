@@ -42,6 +42,7 @@ export const createEventSchema = z.object({
   end_date: z.string().datetime().optional(),
   venue: z.string().max(500).optional(),
   timezone: z.string().default("UTC"),
+  status: z.enum(["draft", "published", "completed", "archived"]).optional(),
   settings: z.object({
     is_public: z.boolean().default(true),
     password_protected: z.boolean().default(false),

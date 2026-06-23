@@ -182,7 +182,7 @@ export function NewEventForm() {
         venue: "Virtual Room",
         timezone: "Asia/Kolkata",
         cover_image_url: coverImage.startsWith("http") ? coverImage : null,
-        status: "draft" as const,
+        status: "published" as const,
         settings: {
           is_public: true,
           password_protected: false,
@@ -446,7 +446,7 @@ export function NewEventForm() {
                   
                   {/* Selector tabs */}
                   <div className="flex border-b border-[#EAE5DF]">
-                    {["gradient", "template", "ai"].map((tab) => (
+                    {["gradient", "template"].map((tab) => (
                       <button
                         key={tab}
                         onClick={() => setCoverType(tab as any)}
@@ -454,7 +454,7 @@ export function NewEventForm() {
                           coverType === tab ? "border-b-2 border-[#A58263] text-[#A58263]" : "text-[#9C958E]"
                         }`}
                       >
-                        {tab === "ai" ? "AI Cover" : `${tab}s`}
+                        {`${tab}s`}
                       </button>
                     ))}
                   </div>
@@ -500,47 +500,6 @@ export function NewEventForm() {
                       })}
                     </div>
                   )}
-
-                  {/* AI Generation Section */}
-                  {coverType === "ai" && (
-                    <div className="space-y-4 pt-2">
-                      <p className="text-xs text-[#7A756E]">Describe your event vibe and let AI construct a bespoke illustration.</p>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={aiPrompt}
-                          onChange={(e) => setAiPrompt(e.target.value)}
-                          placeholder="e.g. Pastel wedding table decorated with wildflowers, cinematic sun rays"
-                          className="flex-1 bg-white border border-[#EAE5DF] rounded-xl px-3 py-2 text-sm outline-none focus:border-[#A58263]"
-                        />
-                        <Button
-                          type="button"
-                          onClick={generateAiCover}
-                          disabled={generatingAi}
-                          className="bg-[#A58263] text-white hover:bg-[#8D6B50] rounded-xl text-xs px-4"
-                        >
-                          {generatingAi ? "Crafting..." : "Generate"}
-                        </Button>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-[11px] text-[#A58263] font-medium">
-                        <Sparkles className="h-3 w-3" />
-                        <span>Premium cover generated with Imagen 3</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Manual file upload */}
-                  <div className="border border-dashed border-[#CDC5BB] rounded-xl p-4 text-center bg-white/50 hover:bg-white transition-colors cursor-pointer relative">
-                    <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
-                      // Mock file upload preview
-                      setCoverImage("https://images.unsplash.com/photo-1469371670807-013ccf25f16a?q=80&w=600&auto=format&fit=crop")
-                      toast({ title: "Custom cover added!" })
-                    }} />
-                    <div className="flex items-center justify-center gap-2 text-xs text-[#69635C]">
-                      <Upload className="h-4 w-4 text-[#A58263]" />
-                      <span>Or click here to upload a custom cover photo</span>
-                    </div>
-                  </div>
                 </div>
               )}
 
@@ -1109,8 +1068,7 @@ export function NewEventForm() {
                 <div
                   className="w-full h-full bg-cover bg-center transition-all duration-500"
                   style={{
-                    backgroundImage: coverImage.startsWith("http") ? `url(${coverImage})` : "none",
-                    background: coverImage.startsWith("linear") ? coverImage : undefined,
+                    backgroundImage: coverImage.startsWith("http") ? `url(${coverImage})` : coverImage,
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-[#FAF9F6]" />
