@@ -22,9 +22,14 @@ function isPublic(pathname: string): boolean {
   if (pathname.startsWith("/event/")) return true
   if (pathname.startsWith("/api/auth/")) return true
   if (pathname.startsWith("/api/admin/auth/")) return true
-  if (pathname.startsWith("/api/qr/scan")) return true
+  if (pathname.startsWith("/api/qr/")) return true
+  if (pathname.startsWith("/api/photos/upload")) return true
   if (pathname.startsWith("/api/payments/webhooks")) return true
   if (pathname.startsWith("/api/ai/webhooks")) return true
+  if (pathname.startsWith("/api/payments/plans")) return true
+  if (pathname.startsWith("/api/payments/addons")) return true
+  if (pathname.startsWith("/api/blog/")) return true
+  if (pathname.startsWith("/api/contact")) return true
   if (pathname.startsWith("/_next")) return true
   if (pathname.toLowerCase().startsWith("/favicon")) return true
   if (pathname === "/robots.txt" || pathname === "/sitemap.xml") return true

@@ -1,9 +1,8 @@
+import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { Clock, ArrowRight, BookOpen } from "lucide-react"
-import { PublicNav } from "@/lib/components/layout/public-nav"
-import { PublicFooter } from "@/lib/components/layout/public-footer"
 import { BLOG_TAGS, getPostsByTag } from "@/lib/blog/data"
 import { Playfair_Display, Inter } from "next/font/google"
 import type { BlogPost } from "@/lib/types/blog"
@@ -61,7 +60,7 @@ export default async function TagPage({ params }: Props) {
 
   return (
     <div className={`flex min-h-screen flex-col bg-white text-slate-900 ${inter.className}`}>
-      <PublicNav />
+      <PublicNavbar />
       <main className="flex-1">
         <section className="border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white py-14 md:py-20">
           <div className="container mx-auto max-w-3xl px-6 text-center">

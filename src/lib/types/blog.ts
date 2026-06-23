@@ -35,7 +35,7 @@ export interface BlogPost {
   title: string
   slug: string
   excerpt?: string
-  content: string
+  content?: string
   cover_image_url?: string
   status: "draft" | "published" | "scheduled" | "archived"
   author?: BlogAuthor

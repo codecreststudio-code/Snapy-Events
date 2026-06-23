@@ -6,7 +6,7 @@ export function Logo({ className }: { className?: string }) {
       <img
         src="/logo_png.png"
         alt="Snapsy Logo"
-        className="h-8 w-auto object-contain"
+        className="h-24 w-auto object-contain"
       />
     </div>
   )

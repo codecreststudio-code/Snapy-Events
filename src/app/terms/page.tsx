@@ -1,12 +1,11 @@
-import { PublicNav } from "@/lib/components/layout/public-nav"
-import { PublicFooter } from "@/lib/components/layout/public-footer"
+import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
 
 export const metadata = { title: "Terms of Service" }
 
 export default function TermsPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <PublicNav />
+      <PublicNavbar />
       <main className="prose prose-neutral dark:prose-invert mx-auto w-full max-w-3xl flex-1 px-6 py-16">
         <h1>Terms of Service</h1>
         <p>By using Snapsy you agree to the following terms. Snapsy provides event photo collection, storage, and sharing services.</p>

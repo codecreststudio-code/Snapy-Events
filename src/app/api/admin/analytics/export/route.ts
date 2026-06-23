@@ -239,6 +239,18 @@ export const GET = defineRoute({
       })
       csvContent += `\n`
 
+      csvContent += `"REVENUE SPLITS"\n`
+      csvContent += `"Category","Total Revenue (INR)"\n`
+      csvContent += `"Base Subscriptions","₹${planRevenue}"\n`
+      csvContent += `"Add-on Boosts","₹${addonRevenue}"\n`
+      csvContent += `"Total Platform Revenue","₹${planRevenue + addonRevenue}"\n\n`
+
+      csvContent += `"AI SEARCH METRICS"\n`
+      csvContent += `"Metric","Value"\n`
+      csvContent += `"Total Face Searches","${totalSearchesCumulative}"\n`
+      csvContent += `"Current Period Searches","${currSearchesSum}"\n`
+      csvContent += `"Search Growth","${searchesGrowth}%"\n\n`
+
       csvContent += `"RECENT EVENTS DETAILED LEDGER"\n`
       csvContent += `"Event Name","Hosting Organization","Venue","Status","Created Date","Guests Count","Photos Count","Videos Count","Attributed Organization Revenue"\n`
       richEvents.forEach(evt => {

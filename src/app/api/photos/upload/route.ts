@@ -11,7 +11,7 @@ const querySchema = z.object({ gallery_id: z.string().uuid() })
 export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
   method: "POST",
   query: querySchema,
-  requireAuth: true,
+  requireAuth: false,
   rateLimit: { key: "photos:upload", limit: API_RATE_LIMITS.UPLOAD_PHOTOS, windowSeconds: 60 },
   audit: "photo.uploaded",
   handler: async ({ request, query, auth }) => {

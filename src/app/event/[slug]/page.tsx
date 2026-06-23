@@ -1,7 +1,7 @@
+import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
-import { PublicFooter } from "@/lib/components/layout/public-footer"
 import { Button } from "@/lib/components/ui/button"
 import { Camera, Calendar, MapPin, QrCode, Lock, Image, Upload } from "lucide-react"
 import { Logo } from "@/lib/components/layout/logo"

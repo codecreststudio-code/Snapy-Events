@@ -1,12 +1,11 @@
-import { PublicNav } from "@/lib/components/layout/public-nav"
-import { PublicFooter } from "@/lib/components/layout/public-footer"
+import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
 
 export const metadata = { title: "Refund Policy" }
 
 export default function RefundPolicyPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <PublicNav />
+      <PublicNavbar />
       <main className="prose prose-neutral dark:prose-invert mx-auto w-full max-w-3xl flex-1 px-6 py-16">
         <h1>Refund Policy</h1>
         <p>We want you to be happy. If you're not, email <a href="mailto:hello@snapsy.app">hello@snapsy.app</a> within 7 days of your purchase and we'll refund you in full — no questions asked.</p>
