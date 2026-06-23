@@ -562,6 +562,8 @@ export default function BillingPage() {
         ))}
       </div>
 
+      <AddonsSection />
+
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -591,5 +593,154 @@ export default function BillingPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+function AddonsSection() {
+  const queryClient = useQueryClient()
+  const { profile, user } = useAuth()
+  const [addons, setAddons] = useState<{ guest_boosts: any[]; shot_boosts: any[] }>({ guest_boosts: [], shot_boosts: [] })
+
+  useEffect(() => {
+    fetch("/api/payments/addons").then(res => res.json()).then(res => {
+      if (res.success && res.data) {
+        setAddons(res.data)
+      }
+    })
+  }, [])
+
+  const { data: organization } = useQuery({
+    queryKey: ["organization"],
+    queryFn: getOrganization,
+  })
+
+  const currentSettings: Record<string, any> = (organization as any)?.settings || {}
+  const currentGuestBoost = currentSettings.guest_boost || 0
+  const currentShotsBoost = currentSettings.shots_boost || 0
+
+  const addonCheckoutMutation = useMutation({
+    mutationFn: async ({ type, value }: { type: "guest" | "shots"; value: number }) => {
+      const response = await fetch("/api/payments/addon-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ boost_type: type, boost_value: value }),
+      })
+
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "Failed to initiate addon checkout")
+      const checkoutData = result.data
+
+      const scriptLoaded = await loadRazorpayScript()
+      if (!scriptLoaded) throw new Error("Razorpay SDK failed to load.")
+
+      const options = {
+        key: checkoutData.key_id,
+        amount: checkoutData.amount,
+        currency: checkoutData.currency,
+        name: "Snapy Add-ons",
+        description: `Purchase ${type === "guest" ? "Guest Capacity" : "Storage"} Boost`,
+        order_id: checkoutData.order_id,
+        customer_id: checkoutData.customer_id,
+        prefill: { email: user?.email || "", name: profile?.full_name || "" },
+        theme: { color: "#8b5cf6" },
+        handler: async function (paymentResponse: any) {
+          toast({ title: "Processing Addon", description: "Verifying your purchase..." })
+          const verifyRes = await fetch("/api/payments/addon-verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              razorpay_payment_id: paymentResponse.razorpay_payment_id,
+              razorpay_order_id: paymentResponse.razorpay_order_id,
+              razorpay_signature: paymentResponse.razorpay_signature,
+              boost_type: type,
+              boost_value: value,
+              total_price: checkoutData.total_price,
+            })
+          })
+          const v = await verifyRes.json()
+          if (!v.success) throw new Error(v.error)
+
+          toast({ title: "Boost Added!", description: "Your workspace limits have been increased." })
+          queryClient.invalidateQueries({ queryKey: ["organization"] })
+        },
+      }
+
+      const rzp = new (window as any).Razorpay(options)
+      rzp.open()
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to purchase addon", description: error.message, variant: "destructive" })
+    },
+  })
+
+  return (
+    <Card className="border-violet-100 shadow-md">
+      <CardHeader className="bg-violet-50/50 rounded-t-xl border-b border-violet-100 pb-4">
+        <div className="flex items-center gap-2">
+          <Zap className="h-5 w-5 text-violet-600" />
+          <CardTitle className="text-violet-900">Add-On Boosts</CardTitle>
+        </div>
+        <CardDescription>Need more capacity without upgrading your base plan? Purchase one-time boosts.</CardDescription>
+      </CardHeader>
+      <CardContent className="p-6 grid gap-8 md:grid-cols-2">
+        
+        {/* Guest Boosts */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-end">
+            <h3 className="font-semibold text-slate-800">Extra Guests</h3>
+            <span className="text-xs font-bold text-violet-600 bg-violet-100 px-2 py-1 rounded-full">Current: +{currentGuestBoost}</span>
+          </div>
+          <div className="grid gap-3">
+            {addons.guest_boosts.map((b: any, i: number) => (
+              <div key={i} className="flex items-center justify-between p-3 border rounded-lg hover:border-violet-300 transition-colors">
+                <div>
+                  <p className="font-medium text-sm text-slate-900">+{b.value} Guests</p>
+                  <p className="text-xs text-slate-500">One-time payment</p>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="gap-2 border-violet-200 text-violet-700 hover:bg-violet-50"
+                  onClick={() => addonCheckoutMutation.mutate({ type: "guest", value: b.value })}
+                  disabled={addonCheckoutMutation.isPending}
+                >
+                  ₹{b.price} <ArrowRight className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+            {addons.guest_boosts.length === 0 && <p className="text-xs text-slate-400">No guest boosts available</p>}
+          </div>
+        </div>
+
+        {/* Shots Boosts */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-end">
+            <h3 className="font-semibold text-slate-800">Extra Photo Storage</h3>
+            <span className="text-xs font-bold text-violet-600 bg-violet-100 px-2 py-1 rounded-full">Current: +{currentShotsBoost} GB</span>
+          </div>
+          <div className="grid gap-3">
+            {addons.shot_boosts.map((b: any, i: number) => (
+              <div key={i} className="flex items-center justify-between p-3 border rounded-lg hover:border-violet-300 transition-colors">
+                <div>
+                  <p className="font-medium text-sm text-slate-900">+{b.value} GB Storage</p>
+                  <p className="text-xs text-slate-500">One-time payment</p>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="gap-2 border-violet-200 text-violet-700 hover:bg-violet-50"
+                  onClick={() => addonCheckoutMutation.mutate({ type: "shots", value: b.value })}
+                  disabled={addonCheckoutMutation.isPending}
+                >
+                  ₹{b.price} <ArrowRight className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+            {addons.shot_boosts.length === 0 && <p className="text-xs text-slate-400">No storage boosts available</p>}
+          </div>
+        </div>
+
+      </CardContent>
+    </Card>
   )
 }

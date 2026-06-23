@@ -1,4 +1,5 @@
 "use client"
+import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
@@ -15,8 +16,6 @@ import {
   Check,
   BookOpen,
 } from "lucide-react"
-import { PublicNav } from "@/lib/components/layout/public-nav"
-import { PublicFooter } from "@/lib/components/layout/public-footer"
 import { Button } from "@/lib/components/ui/button"
 import type { BlogPost } from "@/lib/types/blog"
 
@@ -190,6 +189,12 @@ export default function BlogPostClient({ post, related }: { post: BlogPost; rela
   const articleRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
+    if (post?.id) {
+      fetch(`/api/blog/posts/${post.id}/view`, { method: "POST" }).catch(() => {})
+    }
+  }, [post?.id])
+
+  useEffect(() => {
     const onScroll = () => {
       const el = articleRef.current
       if (!el) return
@@ -211,7 +216,7 @@ export default function BlogPostClient({ post, related }: { post: BlogPost; rela
         />
       </div>
 
-      <PublicNav />
+      <PublicNavbar />
 
       <main className="flex-1">
         {/* Hero */}
@@ -301,10 +306,9 @@ export default function BlogPostClient({ post, related }: { post: BlogPost; rela
                 </div>
               </div>
 
-              {/* Article content */}
               <div
                 className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 md:p-12 prose-article"
-                dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
+                dangerouslySetInnerHTML={{ __html: formatContent(post.content || "") }}
               />
 
               {/* Tags */}

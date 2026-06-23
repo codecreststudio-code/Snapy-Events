@@ -1,25 +1,47 @@
+import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { Clock, ArrowRight, BookOpen } from "lucide-react"
-import { PublicNav } from "@/lib/components/layout/public-nav"
-import { PublicFooter } from "@/lib/components/layout/public-footer"
-import { BLOG_CATEGORIES, getPostsByCategory } from "@/lib/blog/data"
 import { Playfair_Display, Inter } from "next/font/google"
 import type { BlogPost } from "@/lib/types/blog"
+import { createClient } from "@/lib/supabase/server"
+
+export const dynamic = "force-dynamic"
 
 const playfair = Playfair_Display({ subsets: ["latin"], display: "swap" })
 const inter = Inter({ subsets: ["latin"], display: "swap" })
 
 interface Props { params: Promise<{ category: string }> }
 
-export async function generateStaticParams() {
-  return BLOG_CATEGORIES.map((c) => ({ category: c.slug }))
+async function getCategory(slug: string) {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from("blog_categories")
+    .select("*")
+    .eq("slug", slug)
+    .single()
+  return data
+}
+
+async function getCategoryPosts(categoryId: string): Promise<BlogPost[]> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from("blog_posts")
+    .select(`
+      id, title, slug, excerpt, cover_image_url, read_time_minutes, published_at, status,
+      author:blog_authors(id, name, slug, avatar_url),
+      category:blog_categories(id, name, slug, emoji, color)
+    `)
+    .eq("category_id", categoryId)
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
+  return (data as unknown as BlogPost[]) ?? []
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category } = await params
-  const cat = BLOG_CATEGORIES.find((c) => c.slug === category)
+  const cat = await getCategory(category)
   if (!cat) return { title: "Category Not Found" }
   return {
     title: `${cat.name} Articles | Snapsy Blog`,
@@ -42,7 +64,7 @@ function PostCard({ post }: { post: BlogPost }) {
       <div className="flex-1 p-5">
         <h3 className="text-sm font-bold text-slate-900 leading-snug mb-2 group-hover:text-violet-700 transition-colors line-clamp-2">{post.title}</h3>
         <p className="text-xs text-slate-500 font-light leading-relaxed line-clamp-2 mb-4">{post.excerpt}</p>
-        <div className="flex items-center gap-2 pt-3 border-t border-slate-50">
+        <div className="flex items-center gap-2 pt-3 border-t border-slate-55">
           <img src={post.author?.avatar_url} alt={post.author?.name} className="h-5 w-5 rounded-full object-cover" />
           <span className="text-[10px] text-slate-400">{post.author?.name}</span>
           <span className="text-[10px] text-slate-300">•</span>
@@ -57,13 +79,13 @@ function PostCard({ post }: { post: BlogPost }) {
 
 export default async function CategoryPage({ params }: Props) {
   const { category } = await params
-  const cat = BLOG_CATEGORIES.find((c) => c.slug === category)
+  const cat = await getCategory(category)
   if (!cat) notFound()
-  const posts = getPostsByCategory(category)
+  const posts = await getCategoryPosts(cat.id)
 
   return (
     <div className={`flex min-h-screen flex-col bg-white text-slate-900 ${inter.className}`}>
-      <PublicNav />
+      <PublicNavbar />
       <main className="flex-1">
         {/* Hero */}
         <section className="border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white py-14 md:py-20">

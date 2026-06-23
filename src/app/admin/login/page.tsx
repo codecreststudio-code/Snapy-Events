@@ -1,5 +1,4 @@
-import { PublicNav } from "@/lib/components/layout/public-nav"
-import { PublicFooter } from "@/lib/components/layout/public-footer"
+import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
 import { Card } from "@/lib/components/ui/card"
 import { AdminLoginForm } from "./admin-login-form"
 
@@ -8,7 +7,7 @@ export const metadata = { title: "Admin sign in" }
 export default function AdminLoginPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <PublicNav />
+      <PublicNavbar />
       <main className="flex flex-1 items-center justify-center px-6 py-16">
         <Card className="w-full max-w-sm p-6">
           <h1 className="text-xl font-semibold">Admin sign in</h1>

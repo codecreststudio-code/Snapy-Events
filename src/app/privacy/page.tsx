@@ -1,12 +1,11 @@
-import { PublicNav } from "@/lib/components/layout/public-nav"
-import { PublicFooter } from "@/lib/components/layout/public-footer"
+import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
 
 export const metadata = { title: "Privacy Policy" }
 
 export default function PrivacyPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <PublicNav />
+      <PublicNavbar />
       <main className="prose prose-neutral dark:prose-invert mx-auto w-full max-w-3xl flex-1 px-6 py-16">
         <h1>Privacy Policy</h1>
         <p>We collect the minimum data needed to operate Snapsy. We never sell your data.</p>

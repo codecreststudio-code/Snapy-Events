@@ -1,20 +1,80 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import BlogPostClient from "./client"
-import { BLOG_POSTS, getPostBySlug, getRelatedPosts } from "@/lib/blog/data"
+import { createClient } from "@/lib/supabase/server"
+import type { BlogPost } from "@/lib/types/blog"
+
+export const dynamic = "force-dynamic"
 
 interface Props {
   params: Promise<{ slug: string }>
 }
 
-export async function generateStaticParams() {
-  return BLOG_POSTS.filter((p) => p.status === "published").map((p) => ({ slug: p.slug }))
+async function getPost(slug: string): Promise<BlogPost | null> {
+  const supabase = await createClient()
+  const { data: post } = await supabase
+    .from("blog_posts")
+    .select(`
+      *,
+      author:blog_authors(id, name, slug, avatar_url, bio, twitter_url, linkedin_url),
+      category:blog_categories(id, name, slug, emoji, color)
+    `)
+    .eq("slug", slug)
+    .single()
+
+  return post as unknown as BlogPost | null
+}
+
+async function getRelated(categoryId: string | null, excludeId: string) {
+  const supabase = await createClient()
+  let related: any[] = []
+
+  if (categoryId) {
+    const { data } = await supabase
+      .from("blog_posts")
+      .select(`
+        id, title, slug, cover_image_url, read_time_minutes, status,
+        category:blog_categories(id, name, slug, emoji, color)
+      `)
+      .eq("status", "published")
+      .eq("category_id", categoryId)
+      .neq("id", excludeId)
+      .order("published_at", { ascending: false })
+      .limit(3)
+    related = data || []
+  }
+
+  if (related.length < 3) {
+    const needed = 3 - related.length
+    const excludeIds = [excludeId, ...related.map((r) => r.id)]
+    
+    let query = supabase
+      .from("blog_posts")
+      .select(`
+        id, title, slug, cover_image_url, read_time_minutes, status,
+        category:blog_categories(id, name, slug, emoji, color)
+      `)
+      .eq("status", "published")
+      .order("published_at", { ascending: false })
+      .limit(needed)
+      
+    if (excludeIds.length === 1) {
+      query = query.neq("id", excludeId)
+    } else {
+      query = query.not("id", "in", `(${excludeIds.join(",")})`)
+    }
+
+    const { data } = await query
+    if (data) related = [...related, ...data]
+  }
+
+  return related as unknown as BlogPost[]
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const post = getPostBySlug(slug)
-  if (!post) return { title: "Article Not Found" }
+  const post = await getPost(slug)
+  if (!post || post.status !== "published") return { title: "Article Not Found" }
 
   const title = post.seo_title ?? post.title
   const description = post.seo_description ?? post.excerpt ?? ""
@@ -45,12 +105,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params
-  const post = getPostBySlug(slug)
+  const post = await getPost(slug)
   if (!post || post.status !== "published") notFound()
 
-  const related = getRelatedPosts(post, 3)
+  const related = await getRelated(post.category?.id || null, post.id)
 
-  // JSON-LD Article schema
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",

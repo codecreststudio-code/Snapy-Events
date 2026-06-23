@@ -1,25 +1,47 @@
+import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { Clock, ArrowRight, BookOpen } from "lucide-react"
-import { PublicNav } from "@/lib/components/layout/public-nav"
-import { PublicFooter } from "@/lib/components/layout/public-footer"
-import { BLOG_AUTHORS, BLOG_POSTS, getPostsByAuthor } from "@/lib/blog/data"
 import { Playfair_Display, Inter } from "next/font/google"
 import type { BlogPost } from "@/lib/types/blog"
+import { createClient } from "@/lib/supabase/server"
+
+export const dynamic = "force-dynamic"
 
 const playfair = Playfair_Display({ subsets: ["latin"], display: "swap" })
 const inter = Inter({ subsets: ["latin"], display: "swap" })
 
 interface Props { params: Promise<{ author: string }> }
 
-export async function generateStaticParams() {
-  return BLOG_AUTHORS.map((a) => ({ author: a.slug }))
+async function getAuthor(slug: string) {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from("blog_authors")
+    .select("*")
+    .eq("slug", slug)
+    .single()
+  return data
+}
+
+async function getAuthorPosts(authorId: string): Promise<BlogPost[]> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from("blog_posts")
+    .select(`
+      id, title, slug, excerpt, cover_image_url, read_time_minutes, published_at, status,
+      author:blog_authors(id, name, slug, avatar_url),
+      category:blog_categories(id, name, slug, emoji, color)
+    `)
+    .eq("author_id", authorId)
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
+  return (data as unknown as BlogPost[]) ?? []
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { author } = await params
-  const a = BLOG_AUTHORS.find((x) => x.slug === author)
+  const a = await getAuthor(author)
   if (!a) return { title: "Author Not Found" }
   return {
     title: `${a.name} | Snapsy Blog`,
@@ -54,18 +76,20 @@ function PostCard({ post }: { post: BlogPost }) {
 
 export default async function AuthorPage({ params }: Props) {
   const { author } = await params
-  const a = BLOG_AUTHORS.find((x) => x.slug === author)
+  const a = await getAuthor(author)
   if (!a) notFound()
-  const posts = getPostsByAuthor(author)
+  const posts = await getAuthorPosts(a.id)
 
   return (
     <div className={`flex min-h-screen flex-col bg-white text-slate-900 ${inter.className}`}>
-      <PublicNav />
+      <PublicNavbar />
       <main className="flex-1">
         {/* Hero */}
         <section className="border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white py-14 md:py-20">
           <div className="container mx-auto max-w-3xl px-6 text-center">
-            <img src={a.avatar_url} alt={a.name} className="h-20 w-20 rounded-2xl object-cover mx-auto mb-5 ring-4 ring-white shadow-lg" />
+            {a.avatar_url && (
+              <img src={a.avatar_url} alt={a.name} className="h-20 w-20 rounded-2xl object-cover mx-auto mb-5 ring-4 ring-white shadow-lg" />
+            )}
             <div className="inline-block rounded-full bg-violet-50 border border-violet-100 px-3 py-1 text-xs font-bold text-violet-600 mb-3">AUTHOR</div>
             <h1 className={`text-3xl md:text-4xl font-normal tracking-tight text-slate-900 mb-3 ${playfair.className}`}>{a.name}</h1>
             <p className="text-slate-500 font-light max-w-lg mx-auto text-sm">{a.bio}</p>
