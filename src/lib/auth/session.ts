@@ -32,16 +32,59 @@ export async function getAuthContext(): Promise<AuthContext> {
   console.log(`[getAuthContext] User resolved: ${user ? user.email : "null"}`)
   if (!user) return emptyAuth()
 
-  const { data: profile } = await supabase
+  let profileData: any = null
+  const { data: existingProfile, error: profileError } = await supabase
     .from("users")
-    .select("id, email, full_name, avatar_url, role, permissions, organization_id, organizations:organizations(id, name, slug, plan, feature_flags)")
+    .select("id, email, full_name, avatar_url, role, permissions, is_admin, organization_id, organizations:organizations(id, name, slug, plan, feature_flags)")
     .eq("id", user.id)
     .single()
 
-  if (!profile) {
-    console.log(`[getAuthContext] Profile not found for user: ${user.id}`)
+  if (profileError || !existingProfile) {
+    console.log(`[getAuthContext] Profile not found for user: ${user.id}. Auto-provisioning...`)
+    const { createServiceClient } = await import("@/lib/supabase/server")
+    const svc = await createServiceClient()
+    
+    const userEmail = user.email || ""
+    const fullName = user.user_metadata?.full_name || userEmail.split("@")[0] || "User"
+    const avatarUrl = user.user_metadata?.avatar_url || null
+
+    const { data: insertedProfile, error: insertError } = await svc
+      .from("users")
+      .insert({
+        id: user.id,
+        email: userEmail,
+        full_name: fullName,
+        avatar_url: avatarUrl,
+        role: "owner",
+        permissions: ["*"],
+        is_admin: false,
+      })
+      .select()
+      .single()
+
+    if (insertError) {
+      console.error(`[getAuthContext] Failed to auto-provision user profile:`, insertError.message)
+      return emptyAuth()
+    }
+
+    // Refetch the profile with organizations relation
+    const { data: refetchedProfile } = await supabase
+      .from("users")
+      .select("id, email, full_name, avatar_url, role, permissions, is_admin, organization_id, organizations:organizations(id, name, slug, plan, feature_flags)")
+      .eq("id", user.id)
+      .single()
+
+    profileData = refetchedProfile
+  } else {
+    profileData = existingProfile
+  }
+
+  if (!profileData) {
+    console.log(`[getAuthContext] Profile resolve failed for user: ${user.id}`)
     return emptyAuth()
   }
+
+  const profile = profileData
 
   // Server-side auto-provisioning of organization if it is missing
   if (!profile.organization_id) {
@@ -79,7 +122,7 @@ export async function getAuthContext(): Promise<AuthContext> {
         // Re-fetch profile with the new organization linked
         const { data: updatedProfile } = await supabase
           .from("users")
-          .select("id, email, full_name, avatar_url, role, permissions, organization_id, organizations:organizations(id, name, slug, plan, feature_flags)")
+          .select("id, email, full_name, avatar_url, role, permissions, is_admin, organization_id, organizations:organizations(id, name, slug, plan, feature_flags)")
           .eq("id", user.id)
           .single()
         
@@ -118,7 +161,7 @@ export async function getAuthContext(): Promise<AuthContext> {
       : null,
     role,
     permissions,
-    isAdmin: role === "owner" || role === "admin" || (profile as { is_admin?: boolean }).is_admin === true,
+    isAdmin: role === "owner" || role === "admin" || profile.is_admin === true,
   }
 }
 
