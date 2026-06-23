@@ -214,6 +214,28 @@ const LinkedInIcon = (props: React.SVGProps<SVGSVGElement>) => (
 )
 
 export function PublicFooter() {
+  const [email, setEmail] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+    setLoading(true)
+    try {
+      const res = await fetch("/api/blog/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      if (res.ok) {
+        setSubmitted(true)
+        setEmail("")
+      }
+    } catch (_) {}
+    setLoading(false)
+  }
+
   return (
     <footer
       className="relative w-full border-t border-violet-950/20 text-white overflow-hidden pt-20 pb-6 px-4 sm:px-6 lg:px-8 bg-slate-950"
@@ -236,19 +258,40 @@ export function PublicFooter() {
             <h3 className="mb-4 text-2xl font-bold md:text-3xl tracking-tight text-white">
               Stay ahead with Snapsy.
             </h3>
-            <p className="text-slate-400 mb-8 text-sm leading-relaxed max-w-md">
+            <p className="text-slate-400 mb-8 text-sm leading-relaxed max-w-md font-light">
               Join thousands of event organizers who trust Snapsy for seamless photo sharing and event management.
             </p>
-            <div className="flex flex-col gap-3 sm:flex-row w-full max-w-md justify-center">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full border border-white/10 bg-white/5 text-white placeholder-slate-500 focus:ring-violet-500/50 rounded-full px-5 py-3 text-sm focus:ring-2 focus:outline-none transition-all duration-200"
-              />
-              <button className="bg-violet-600 hover:bg-violet-500 text-white font-medium rounded-full px-6 py-3 text-sm shadow-lg shadow-violet-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shrink-0">
-                Subscribe Now
-              </button>
-            </div>
+            {submitted ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center gap-2 py-4"
+              >
+                <div className="h-10 w-10 rounded-full bg-violet-500/20 flex items-center justify-center border border-violet-500/30">
+                  <span className="text-violet-400 text-lg">✓</span>
+                </div>
+                <p className="font-semibold text-white text-sm">Thank you for subscribing!</p>
+                <p className="text-xs text-slate-400">You are now on our list.</p>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row w-full max-w-md justify-center">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  className="w-full border border-white/10 bg-white/5 text-white placeholder-slate-500 focus:ring-violet-500/50 rounded-full px-5 py-3 text-sm focus:ring-2 focus:outline-none transition-all duration-200"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-violet-600 hover:bg-violet-500 text-white font-medium rounded-full px-6 py-3 text-sm shadow-lg shadow-violet-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shrink-0 disabled:opacity-50"
+                >
+                  {loading ? "Subscribing…" : "Subscribe Now"}
+                </button>
+              </form>
+            )}
           </div>
         </div>
 
