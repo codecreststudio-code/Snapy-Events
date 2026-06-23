@@ -37,7 +37,6 @@ const NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/dashboard/events", label: "Events", icon: Calendar },
   { href: "/dashboard/galleries", label: "Galleries", icon: Image },
-  { href: "/dashboard/team", label: "Team", icon: Users },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/downloads", label: "Downloads", icon: Download },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },

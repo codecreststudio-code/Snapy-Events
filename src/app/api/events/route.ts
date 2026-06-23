@@ -68,7 +68,7 @@ export const POST = defineRoute({
         slug,
         organization_id: auth.organization!.id,
         host_id: auth.user!.id,
-        status: "draft",
+        status: body.status || "published",
       })
       .select()
       .single()

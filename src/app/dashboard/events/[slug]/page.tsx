@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/lib/hooks"
-import type { Event, EventSettings } from "@/lib/types"
+import type { Event, EventSettings, EventStatus } from "@/lib/types"
 import { Button } from "@/lib/components/ui/button"
 import { Switch } from "@/lib/components/ui/switch"
 import { Input } from "@/lib/components/ui/input"
@@ -124,6 +124,7 @@ async function updateEvent(slug: string, data: any, currentSettings: any) {
 
   const eventData: any = {
     name: data.name,
+    status: data.status,
     end_date: data.end_date ? new Date(data.end_date).toISOString() : null,
     settings: mergedSettings,
   }
@@ -193,13 +194,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
   // Local Form state for settings edits
   const [editName, setEditName] = useState("")
+  const [editStatus, setEditStatus] = useState<EventStatus>("published")
   const [editEndDate, setEditEndDate] = useState("")
 
   useEffect(() => {
     if (event) {
       setEditName(event.name)
+      setEditStatus(event.status)
       if (event.end_date) {
-        setEditName(event.name)
         setEditEndDate(new Date(event.end_date).toISOString().slice(0, 16))
       }
     }
@@ -328,6 +330,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     e.preventDefault()
     updateMutation.mutate({
       name: editName,
+      status: editStatus,
       end_date: editEndDate,
       settings: {
         ...settings,
@@ -721,6 +724,21 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       onChange={(e) => setEditEndDate(e.target.value)}
                       className="border-[#EAE5DF] focus:border-[#A58263]"
                     />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="status" className="text-xs font-bold text-stone-600">Event Status</Label>
+                    <select
+                      id="status"
+                      value={editStatus}
+                      onChange={(e) => setEditStatus(e.target.value as EventStatus)}
+                      className="w-full h-10 rounded-md border border-[#EAE5DF] bg-white px-3 py-2 text-sm focus:border-[#A58263] outline-none"
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="published">Published (Live)</option>
+                      <option value="completed">Completed</option>
+                      <option value="archived">Archived</option>
+                    </select>
                   </div>
 
                   {/* Settings toggle display list */}

@@ -12,10 +12,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib
 import { Button } from "@/lib/components/ui/button"
 import { Badge } from "@/lib/components/ui/badge"
 import { Skeleton } from "@/lib/components/ui/skeleton"
-import { Separator } from "@/lib/components/ui/separator"
 import { toast } from "@/lib/components/ui/toaster"
-import { Check, CreditCard, Zap, Crown, Sparkles, ArrowRight } from "lucide-react"
+import { Label } from "@/lib/components/ui/label"
+import { Check, Zap, Crown, Sparkles, ArrowRight } from "lucide-react"
 import type { PlanId, Subscription } from "@/lib/types"
+import { Playfair_Display, Inter } from "next/font/google"
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+})
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+})
 
 interface PlanInfo {
   id: PlanId
@@ -35,22 +46,21 @@ const PLAN_INFO: PlanInfo[] = [
   {
     id: "free",
     name: "Free",
-    description: "Perfect for trying out Snapsy",
+    description: "Get started with one event",
     price: 0,
     priceMonthly: 0,
     features: [
-      "1 event",
-      "1 GB storage",
-      "100 photos",
-      "1 QR code per event",
-      "Basic support",
+      "10 guests",
+      "10 shots per guest",
+      "Standard reveal",
+      "Basic gallery",
     ],
     limits: { events: 1, storage: 1, photos: 100 },
   },
   {
     id: "starter",
     name: "Starter",
-    description: "For small events and gatherings",
+    description: "For photographers running a few events per year.",
     price: 499,
     priceMonthly: 499,
     features: [
@@ -58,33 +68,33 @@ const PLAN_INFO: PlanInfo[] = [
       "10 GB storage",
       "5,000 photos",
       "10 QR codes per event",
+      "Custom gallery URL",
       "Email support",
-      "Custom branding",
     ],
     limits: { events: 5, storage: 10, photos: 5000 },
   },
   {
     id: "standard",
     name: "Standard",
-    description: "For professional photographers",
+    description: "For studios running multiple weddings or events each month.",
     price: 1499,
     priceMonthly: 1499,
     features: [
       "25 events",
       "100 GB storage",
       "50,000 photos",
-      "50 QR codes per event",
-      "AI face search",
-      "Priority support",
-      "White-label",
-      "Advanced analytics",
+      "Live photo wall",
+      "Slideshow mode",
+      "Watermarking",
+      "Custom branding",
+      "AI face search (500/mo)",
     ],
     limits: { events: 25, storage: 100, photos: 50000 },
   },
   {
     id: "premium",
     name: "Premium",
-    description: "For agencies and high-volume needs",
+    description: "For agencies and enterprises at scale.",
     price: 3999,
     priceMonthly: 3999,
     features: [
@@ -92,16 +102,29 @@ const PLAN_INFO: PlanInfo[] = [
       "1 TB storage",
       "Unlimited photos",
       "Unlimited QR codes",
-      "AI face search",
-      "24/7 priority support",
-      "White-label",
-      "Advanced analytics",
-      "Custom domains",
-      "API access",
-      "Dedicated account manager",
+      "AI face search (unlimited)",
+      "White label",
+      "Custom domain",
+      "Priority support",
+      "Dedicated success manager",
     ],
     limits: { events: -1, storage: 1000, photos: -1 },
   },
+]
+
+const GUEST_BOOSTS = [
+  { label: "No extra", value: 0, price: 0 },
+  { label: "+10 guests", value: 10, price: 199 },
+  { label: "+25 guests", value: 25, price: 399 },
+  { label: "+50 guests", value: 50, price: 699 },
+  { label: "+100 guests", value: 100, price: 1199 },
+]
+
+const SHOT_BOOSTS = [
+  { label: "No extra", value: 0, price: 0 },
+  { label: "+5 shots/guest", value: 5, price: 99 },
+  { label: "+10 shots/guest", value: 10, price: 179 },
+  { label: "+15 shots/guest", value: 15, price: 249 },
 ]
 
 async function getSubscription(): Promise<Subscription | null> {
@@ -138,35 +161,19 @@ async function getOrganization() {
     .select("organization:organizations(*)")
     .eq("id", user.id)
     .single()
-  return (data?.organization as any as { id: string; name: string; plan: PlanId } | null)
+  return (data?.organization as any as { id: string; name: string; plan: PlanId; settings?: any } | null)
 }
 
-function loadRazorpayScript(): Promise<boolean> {
-  return new Promise((resolve) => {
-    if ((window as any).Razorpay) {
-      resolve(true)
-      return
-    }
-    const script = document.createElement("script")
-    script.src = "https://checkout.razorpay.com/v1/checkout.js"
-    script.onload = () => resolve(true)
-    script.onerror = () => resolve(false)
-    document.body.appendChild(script)
-  })
-}
-
-function BillingCard({
+function PricingCard({
   plan,
-  billingInterval,
-  isCurrentPlan,
-  isUpgrade,
-  upgradeMutation,
+  isSelected,
+  isCurrent,
+  onClick,
 }: {
   plan: PlanInfo
-  billingInterval: "monthly" | "yearly"
-  isCurrentPlan: (id: PlanId) => boolean
-  isUpgrade: (id: PlanId) => boolean
-  upgradeMutation: any
+  isSelected: boolean
+  isCurrent: boolean
+  onClick: () => void
 }) {
   const [coords, setCoords] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
@@ -182,123 +189,139 @@ function BillingCard({
   const isPopular = plan.id === "standard"
   const isPremium = plan.id === "premium"
 
+  let selectedClasses = "border-slate-200 hover:border-slate-350 hover:shadow-xl"
+  if (isSelected) {
+    if (plan.id === "free") {
+      selectedClasses = "border-slate-900 ring-2 ring-slate-900/10 shadow-[0_15px_40px_rgba(0,0,0,0.05)]"
+    } else if (plan.id === "starter") {
+      selectedClasses = "border-indigo-600 ring-2 ring-indigo-600/15 shadow-[0_15px_40px_rgba(79,70,229,0.1)]"
+    } else if (plan.id === "standard") {
+      selectedClasses = "border-violet-500 ring-2 ring-violet-500/20 shadow-[0_20px_50px_rgba(139,92,246,0.15)] md:scale-[1.03] z-10"
+    } else if (plan.id === "premium") {
+      selectedClasses = "border-orange-500 ring-2 ring-orange-500/20 shadow-[0_20px_50px_rgba(249,115,22,0.15)] md:scale-[1.03] z-10"
+    }
+  } else {
+    if (isPopular) {
+      selectedClasses = "border-slate-200 hover:border-violet-300 hover:shadow-lg"
+    } else if (isPremium) {
+      selectedClasses = "border-slate-200 hover:border-orange-300 hover:shadow-lg"
+    }
+  }
+
   return (
     <motion.div
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      whileHover={{ y: -6, transition: { duration: 0.2 } }}
-      className={`relative overflow-hidden rounded-3xl border bg-white p-8 flex flex-col justify-between transition-all duration-300 ${
-        isCurrentPlan(plan.id)
-          ? "border-[#4f46e5] ring-2 ring-[#4f46e5]/20 shadow-md"
-          : isPopular
-          ? "border-violet-500 shadow-[0_20px_50px_rgba(139,92,246,0.15)] ring-1 ring-violet-500 z-10"
-          : "border-slate-200 hover:border-slate-350 hover:shadow-xl"
-      }`}
+      onClick={onClick}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      className={`relative rounded-3xl border bg-white p-6 cursor-pointer flex flex-col justify-between transition-all duration-300 ${selectedClasses}`}
     >
-      {/* Background Spotlight Glow */}
-      {isHovered && (
-        <div
-          className="pointer-events-none absolute -inset-px transition duration-300 opacity-100"
-          style={{
-            background: `radial-gradient(350px circle at ${coords.x}px ${coords.y}px, ${
-              isPopular ? "rgba(139, 92, 246, 0.12)" : "rgba(139, 92, 246, 0.06)"
-            }, transparent 80%)`,
-          }}
-        />
-      )}
+      {/* Background Spotlight Glow Wrapper */}
+      <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+        {isHovered && (
+          <div
+            className="absolute -inset-px transition duration-300 opacity-100"
+            style={{
+              background: `radial-gradient(320px circle at ${coords.x}px ${coords.y}px, ${
+                isPopular
+                  ? "rgba(139, 92, 246, 0.08)"
+                  : isPremium
+                  ? "rgba(249, 115, 22, 0.08)"
+                  : plan.id === "starter"
+                  ? "rgba(79, 70, 229, 0.06)"
+                  : "rgba(100, 116, 139, 0.05)"
+              }, transparent 80%)`,
+            }}
+          />
+        )}
+      </div>
 
-      {/* Badges */}
-      {isCurrentPlan(plan.id) && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-slate-900 px-4 py-1 text-[9px] font-bold text-white tracking-widest uppercase shadow-md">
-          Current Plan
-        </div>
-      )}
-      {!isCurrentPlan(plan.id) && isPopular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-1 text-[9px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1">
+      {/* Badges Container */}
+      {isPopular && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-1.5 text-[9px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
           <Sparkles className="h-3 w-3" />
-          Popular
+          POPULAR
         </div>
       )}
-      {!isCurrentPlan(plan.id) && isPremium && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-1 text-[9px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1">
-          <Crown className="h-3 w-3" />
-          Best Value
+      {isPremium && (
+        <div className="absolute -top-3 right-4 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1.5 text-[9px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
+          <Crown className="h-3.5 w-3.5" />
+          BEST VALUE
         </div>
       )}
 
-      <div>
+      {/* Current Plan Indicator for existing active plan */}
+      {isCurrent && (
+        <div className="absolute -top-3 left-4 rounded-full bg-slate-900 px-3 py-1 text-[8px] font-bold text-white tracking-widest uppercase shadow-md z-20">
+          CURRENT
+        </div>
+      )}
+
+      <div className="relative z-10">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
-            <p className="mt-2 text-xs text-slate-450 leading-relaxed font-light min-h-[32px]">
+            <h3 className="text-lg font-bold text-slate-900">{plan.name}</h3>
+            <p className="mt-1.5 text-xs text-slate-450 leading-relaxed font-light min-h-[32px]">
               {plan.description}
             </p>
           </div>
           {isPopular && (
-            <span className="h-8 w-8 rounded-full bg-violet-50 flex items-center justify-center text-violet-600">
-              <Sparkles className="h-4 w-4" />
+            <span className="h-7 w-7 rounded-full bg-violet-50 flex items-center justify-center text-violet-600 shrink-0">
+              <Sparkles className="h-3.5 w-3.5" />
+            </span>
+          )}
+          {isPremium && (
+            <span className="h-7 w-7 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+              <Crown className="h-3.5 w-3.5" />
             </span>
           )}
         </div>
 
-        <div className="mt-6 flex items-baseline gap-1">
-          <span className="text-4xl font-extrabold text-slate-900">
-            ₹{billingInterval === "yearly" ? plan.price * 10 : plan.price}
-          </span>
-          <span className="text-slate-400 text-xs font-light">
-            / {billingInterval === "yearly" ? "year" : "month"}
-          </span>
+        <div className="mt-4 flex items-baseline gap-1">
+          <span className="text-3xl font-extrabold text-slate-900">₹{plan.price}</span>
+          <span className="text-slate-400 text-xs font-light">/ month</span>
         </div>
-        
-        {billingInterval === "yearly" && (
-          <p className="text-xs text-emerald-600 font-semibold mt-1">Save 2 months free!</p>
-        )}
 
-        <ul className="mt-6 space-y-3 border-t border-slate-100 pt-6">
-          {plan.features.map((feature, i) => (
-            <li key={i} className="flex items-start gap-3 text-xs text-slate-600 font-light">
-              <Check className={`h-4 w-4 flex-shrink-0 ${isPopular ? "text-violet-600" : "text-slate-400"}`} />
+        <ul className="mt-5 space-y-3 border-t border-slate-100 pt-5">
+          {plan.features.map((feature, idx) => (
+            <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-600 font-light">
+              <Check
+                className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
+                  isSelected
+                    ? plan.id === "free"
+                      ? "text-slate-800"
+                      : plan.id === "starter"
+                      ? "text-indigo-600"
+                      : isPopular
+                      ? "text-violet-600"
+                      : "text-orange-500"
+                    : "text-slate-400"
+                }`}
+              />
               <span>{feature}</span>
             </li>
           ))}
         </ul>
-
-        <Separator className="my-4" />
-
-        <div className="text-[11px] text-slate-400 font-light space-y-1">
-          <p>{plan.limits.events === -1 ? "Unlimited events" : `Up to ${plan.limits.events} events`}</p>
-          <p>{plan.limits.storage === 1000 ? "1 TB storage" : `${plan.limits.storage} GB storage`}</p>
-          <p>{plan.limits.photos === -1 ? "Unlimited photos" : `${plan.limits.photos.toLocaleString()} photos`}</p>
-        </div>
       </div>
 
-      <div className="mt-8 pt-4">
-        <Button
-          className={`w-full font-bold py-5 rounded-full transition-transform active:scale-[0.98] ${
-            isCurrentPlan(plan.id)
-              ? "bg-slate-100 text-slate-500 hover:bg-slate-100 cursor-not-allowed border-none"
-              : isPopular
-              ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white shadow-lg shadow-violet-500/20 border-none"
-              : "bg-slate-900 text-white hover:bg-slate-800 border-none"
+      <div className="mt-6 pt-2">
+        <button
+          type="button"
+          className={`w-full font-bold py-2.5 rounded-xl transition-all active:scale-[0.98] text-xs border-none ${
+            isSelected
+              ? plan.id === "free"
+                ? "bg-slate-950 text-white shadow-md"
+                : plan.id === "starter"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10"
+                : isPopular
+                ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/20"
+                : "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/20"
+              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
           }`}
-          disabled={isCurrentPlan(plan.id) || upgradeMutation.isPending}
-          onClick={() => upgradeMutation.mutate(plan.id)}
         >
-          {isCurrentPlan(plan.id) ? (
-            "Current Plan"
-          ) : isUpgrade(plan.id) ? (
-            <span className="flex items-center justify-center gap-1.5">
-              <Zap className="h-4 w-4 shrink-0" />
-              Upgrade
-            </span>
-          ) : (
-            "Downgrade"
-          )}
-        </Button>
+          {isSelected ? "Selected" : `Choose ${plan.name}`}
+        </button>
       </div>
     </motion.div>
   )
@@ -307,9 +330,40 @@ function BillingCard({
 export default function BillingPage() {
   const queryClient = useQueryClient()
   const router = useRouter()
-  const { profile, user } = useAuth()
-  const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">("monthly")
   const [plansList, setPlansList] = useState<PlanInfo[]>(PLAN_INFO)
+  const [guestBoostsList, setGuestBoostsList] = useState(GUEST_BOOSTS)
+  const [shotBoostsList, setShotBoostsList] = useState(SHOT_BOOSTS)
+
+  // Local state for unified selection
+  const [selectedPlan, setSelectedPlan] = useState<string>("free")
+  const [guestBoost, setGuestBoost] = useState<number>(0)
+  const [shotBoost, setShotBoost] = useState<number>(0)
+  const [showAddOns, setShowAddOns] = useState<boolean>(true)
+
+  // Queries to load active plan details
+  const { data: subscription, isLoading: subLoading } = useQuery({
+    queryKey: ["subscription"],
+    queryFn: getSubscription,
+  })
+
+  const { data: organization, isLoading: orgLoading } = useQuery({
+    queryKey: ["organization"],
+    queryFn: getOrganization,
+  })
+
+  const currentPlan = organization?.plan || "free"
+  const currentSettings = organization?.settings || {}
+  const currentGuestBoost = currentSettings.guest_boost || 0
+  const currentShotsBoost = currentSettings.shots_boost || 0
+
+  // Set default selection based on current organization plan/settings on load
+  useEffect(() => {
+    if (organization) {
+      setSelectedPlan(organization.plan || "free")
+      setGuestBoost(organization.settings?.guest_boost || 0)
+      setShotBoost(organization.settings?.shots_boost || 0)
+    }
+  }, [organization])
 
   // Dynamic database plans sync
   useEffect(() => {
@@ -346,78 +400,26 @@ export default function BillingPage() {
     fetchPlans()
   }, [])
 
-  const { data: subscription, isLoading: subLoading } = useQuery({
-    queryKey: ["subscription"],
-    queryFn: getSubscription,
-  })
-
-  const { data: organization, isLoading: orgLoading } = useQuery({
-    queryKey: ["organization"],
-    queryFn: getOrganization,
-  })
-
-  const upgradeMutation = useMutation({
-    mutationFn: async (planId: PlanId) => {
-      const response = await fetch("/api/payments/subscriptions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan_id: planId }),
-      })
-
-      const result = await response.json()
-      if (!response.ok) throw new Error(result.error || "Failed to create subscription")
-      const checkoutData = result.data
-
-      const scriptLoaded = await loadRazorpayScript()
-      if (!scriptLoaded) {
-        throw new Error("Razorpay SDK failed to load. Please check your connection.")
+  // Dynamic database addons sync
+  useEffect(() => {
+    const fetchAddons = async () => {
+      try {
+        const res = await fetch("/api/payments/addons")
+        if (res.ok) {
+          const result = await res.json()
+          if (result.success && result.data) {
+            if (result.data.guest_boosts) setGuestBoostsList(result.data.guest_boosts)
+            if (result.data.shot_boosts) setShotBoostsList(result.data.shot_boosts)
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch dynamic addons", e)
       }
+    }
+    fetchAddons()
+  }, [])
 
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_Stre2LIpvla35v",
-        amount: checkoutData.amount,
-        currency: checkoutData.currency,
-        name: "Snapy",
-        description: `Upgrade to ${checkoutData.plan} plan`,
-        order_id: checkoutData.order_id,
-        customer_id: checkoutData.customer_id,
-        prefill: {
-          email: user?.email || "",
-          name: profile?.full_name || "",
-        },
-        theme: {
-          color: "#4f46e5",
-        },
-        handler: async function (response: any) {
-          toast({
-            title: "Payment captured successfully",
-            description: "Your workspace is being upgraded. Please wait...",
-          })
-          setTimeout(() => {
-            queryClient.invalidateQueries({ queryKey: ["subscription"] })
-            queryClient.invalidateQueries({ queryKey: ["organization"] })
-            router.refresh()
-          }, 2000)
-        },
-        modal: {
-          ondismiss: function () {
-            toast({
-              title: "Payment cancelled",
-              description: "You cancelled the payment process.",
-              variant: "destructive",
-            })
-          },
-        },
-      }
-
-      const rzp = new (window as any).Razorpay(options)
-      rzp.open()
-    },
-    onError: (error: Error) => {
-      toast({ title: "Failed to upgrade", description: error.message, variant: "destructive" })
-    },
-  })
-
+  // Cancel subscription mutation (Downgrade to free)
   const cancelMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch("/api/payments/subscriptions", {
@@ -438,11 +440,108 @@ export default function BillingPage() {
     },
   })
 
-  const currentPlan = organization?.plan || "free"
-  const isCurrentPlan = (planId: PlanId) => planId === currentPlan
-  const isUpgrade = (planId: PlanId) => {
-    const order = ["free", "starter", "standard", "premium"]
-    return order.indexOf(planId) > order.indexOf(currentPlan as PlanId)
+  const handleSelectPlan = (planId: string) => {
+    setSelectedPlan(planId)
+    // Free plan does not support boosts
+    if (planId === "free") {
+      setGuestBoost(0)
+      setShotBoost(0)
+    }
+  }
+
+  const getAccentColor = () => {
+    if (selectedPlan === "starter") return {
+      text: "text-indigo-650",
+      bg: "bg-indigo-50",
+      border: "border-indigo-200",
+      badge: "bg-indigo-600",
+      hover: "hover:border-indigo-300",
+      buttonActive: "bg-indigo-50/80 border-indigo-500 text-indigo-700 shadow-[0_0_10px_rgba(79,70,229,0.05)]",
+      icon: "text-indigo-600"
+    }
+    if (selectedPlan === "standard") return {
+      text: "text-violet-650",
+      bg: "bg-violet-50",
+      border: "border-violet-200",
+      badge: "bg-violet-600",
+      hover: "hover:border-violet-300",
+      buttonActive: "bg-violet-50/80 border-violet-500 text-violet-700 shadow-[0_0_10px_rgba(139,92,246,0.05)]",
+      icon: "text-violet-600"
+    }
+    if (selectedPlan === "premium") return {
+      text: "text-orange-600",
+      bg: "bg-orange-50",
+      border: "border-orange-200",
+      badge: "bg-orange-600",
+      hover: "hover:border-orange-300",
+      buttonActive: "bg-orange-50/80 border-orange-500 text-orange-700 shadow-[0_0_10px_rgba(249,115,22,0.05)]",
+      icon: "text-orange-600"
+    }
+    return {
+      text: "text-slate-600",
+      bg: "bg-slate-50",
+      border: "border-slate-200",
+      badge: "bg-slate-600",
+      hover: "hover:border-slate-300",
+      buttonActive: "bg-slate-50/80 border-slate-500 text-slate-700 shadow-[0_0_10px_rgba(100,116,139,0.05)]",
+      icon: "text-slate-600"
+    }
+  }
+
+  const activePlanDetails = plansList.find((p) => p.id === selectedPlan) || plansList[0]
+  
+  // Calculate price dynamically
+  const basePrice = activePlanDetails?.price || 0
+  const guestAddOnPrice = guestBoostsList.find((b) => b.value === guestBoost)?.price || 0
+  const shotAddOnPrice = shotBoostsList.find((b) => b.value === shotBoost)?.price || 0
+  const totalPrice = basePrice + guestAddOnPrice + shotAddOnPrice
+
+  const baseGuestLimitStr = activePlanDetails?.features.find(f => f.toLowerCase().includes("guest")) || "10 guests"
+  const baseShotLimitStr = activePlanDetails?.features.find(f => f.toLowerCase().includes("shot")) || "10 shots per guest"
+  const accent = getAccentColor()
+
+  const isActionDisabled = 
+    selectedPlan === currentPlan && 
+    guestBoost === currentGuestBoost && 
+    shotBoost === currentShotsBoost
+
+  const getContinueButtonClass = () => {
+    const base = "w-full sm:w-auto font-bold px-8 py-6 rounded-2xl flex items-center justify-center gap-2 text-base transition-all active:scale-[0.98] border-none text-white "
+    if (isActionDisabled) {
+      return base + "bg-slate-100 text-slate-400 cursor-not-allowed hover:bg-slate-100 shadow-none"
+    }
+    if (selectedPlan === "free") {
+      return base + "bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-600/10"
+    } else if (selectedPlan === "starter") {
+      return base + "bg-indigo-650 hover:bg-indigo-700 shadow-md shadow-indigo-600/10"
+    } else if (selectedPlan === "standard") {
+      return base + "bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 shadow-lg shadow-violet-500/20"
+    } else if (selectedPlan === "premium") {
+      return base + "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-orange-500/20"
+    }
+    return base + "bg-orange-500 hover:bg-orange-600"
+  }
+
+  const getActionButtonText = () => {
+    if (cancelMutation.isPending) return "Processing Downgrade..."
+    if (selectedPlan === "free") {
+      if (currentPlan === "free") return "Current Plan"
+      return "Downgrade to Free"
+    }
+    if (isActionDisabled) return "Current Plan"
+    if (selectedPlan === currentPlan) return "Update Settings & Pay"
+    return "Proceed to Payment"
+  }
+
+  const handleActionClick = () => {
+    if (isActionDisabled) return
+    if (selectedPlan === "free") {
+      if (confirm("Are you sure you want to cancel your paid subscription and downgrade to the Free plan? Your additional storage and guest limits will be reset.")) {
+        cancelMutation.mutate()
+      }
+    } else {
+      router.push(`/checkout?plan=${selectedPlan}&guests=${guestBoost}&shots=${shotBoost}`)
+    }
   }
 
   if (subLoading || orgLoading) {
@@ -460,287 +559,195 @@ export default function BillingPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-8 pb-16 selection:bg-violet-100 ${inter.className}`}>
+      {/* Title Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Billing</h1>
-        <p className="text-muted-foreground">Manage your subscription and billing</p>
+        <p className="text-muted-foreground">Manage your workspace subscription and limits</p>
       </div>
 
+      {/* Subscription Details if active */}
       {subscription && (
-        <Card>
-          <CardHeader>
+        <Card className="border-slate-200 shadow-sm overflow-hidden">
+          <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Current Subscription</CardTitle>
-                <CardDescription>Your active subscription details</CardDescription>
+                <CardTitle className="text-lg font-bold text-slate-800">Current Subscription</CardTitle>
+                <CardDescription>Your active billing and period details</CardDescription>
               </div>
               <Badge
                 variant={subscription.status === "active" ? "success" : "secondary"}
-                className="text-sm"
+                className="text-xs uppercase font-semibold tracking-wider px-2.5 py-0.5"
               >
                 {subscription.status}
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-3">
+          <CardContent className="p-6 space-y-4">
+            <div className="grid gap-6 md:grid-cols-3">
               <div>
-                <p className="text-sm text-muted-foreground">Plan</p>
-                <p className="text-lg font-medium capitalize">{subscription.plan_id}</p>
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Plan</p>
+                <p className="text-lg font-bold text-slate-800 capitalize mt-1">{subscription.plan_id}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Current Period</p>
-                <p className="text-lg font-medium">
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Current Period</p>
+                <p className="text-sm font-medium text-slate-700 mt-1">
                   {subscription.current_period_start
                     ? `${formatDate(subscription.current_period_start)} - ${formatDate(subscription.current_period_end!)}`
                     : "—"}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Next Billing</p>
-                <p className="text-lg font-medium">
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Next Billing Date</p>
+                <p className="text-sm font-medium text-slate-700 mt-1">
                   {subscription.current_period_end ? formatDate(subscription.current_period_end) : "—"}
                 </p>
               </div>
             </div>
+            
             {subscription.cancel_at_period_end && (
-              <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
+              <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 mt-2">
                 <p className="text-sm text-amber-800">
-                  Your subscription will cancel at the end of the current billing period.
+                  Your subscription will cancel at the end of the current billing period on {formatDate(subscription.current_period_end!)}.
                 </p>
               </div>
-            )}
-            {!subscription.cancel_at_period_end && subscription.plan_id !== "free" && (
-              <Button
-                variant="outline"
-                onClick={() => cancelMutation.mutate()}
-                disabled={cancelMutation.isPending}
-              >
-                {cancelMutation.isPending ? "Cancelling..." : "Cancel Subscription"}
-              </Button>
             )}
           </CardContent>
         </Card>
       )}
 
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium">Available Plans</h2>
-        <div className="flex items-center gap-2 rounded-lg border p-1">
-          <button
-            onClick={() => setBillingInterval("monthly")}
-            className={`px-3 py-1 text-sm rounded-md transition-colors ${
-              billingInterval === "monthly"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => setBillingInterval("yearly")}
-            className={`px-3 py-1 text-sm rounded-md transition-colors ${
-              billingInterval === "yearly"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Yearly
-          </button>
-        </div>
+      {/* Main Pricing Header */}
+      <div className="text-center py-6 border-t border-slate-100 pt-8">
+        <h2 className={`text-3xl font-normal tracking-tight sm:text-4xl bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent ${playfair.className}`}>
+          Choose Your Perfect Plan
+        </h2>
+        <p className="mt-3 text-sm text-slate-500 max-w-xl mx-auto font-light leading-relaxed">
+          Select a tier that matches your event size. Instantly collect photos, boost limits, and enable premium features.
+        </p>
       </div>
 
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
+      {/* Pricing Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch max-w-6xl mx-auto">
         {plansList.map((plan) => (
-          <BillingCard
+          <PricingCard
             key={plan.id}
             plan={plan}
-            billingInterval={billingInterval}
-            isCurrentPlan={isCurrentPlan}
-            isUpgrade={isUpgrade}
-            upgradeMutation={upgradeMutation}
+            isSelected={selectedPlan === plan.id}
+            isCurrent={currentPlan === plan.id}
+            onClick={() => handleSelectPlan(plan.id)}
           />
         ))}
       </div>
 
-      <AddonsSection />
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-muted-foreground" />
-            <CardTitle>Payment Method</CardTitle>
+      {/* Add-ons Customization Panel */}
+      {selectedPlan !== "free" && (
+        <div className="bg-white border border-slate-200 rounded-3xl p-8 max-w-4xl mx-auto shadow-sm transition-all duration-300">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+            <div className="flex items-center gap-2.5">
+              <Sparkles className={`h-5 w-5 ${accent.icon} animate-pulse`} />
+              <h3 className="text-lg font-bold text-slate-900">
+                Customize Limits with Add-Ons
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowAddOns(!showAddOns)}
+              className={`text-sm font-semibold ${accent.text} hover:opacity-80 transition-all`}
+            >
+              {showAddOns ? "Hide add-ons" : "Show add-ons"}
+            </button>
           </div>
-          <CardDescription>Manage your payment details</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                <CreditCard className="h-5 w-5" />
+
+          {showAddOns && (
+            <div className="space-y-8">
+              {/* Guest Limit Boost */}
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <span>🚀 Boost Guest Limit</span>
+                  <span className="text-xs text-slate-400 font-normal">(Base: {baseGuestLimitStr})</span>
+                </Label>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  {guestBoostsList.map((boost) => (
+                    <button
+                      key={boost.value}
+                      type="button"
+                      onClick={() => setGuestBoost(boost.value)}
+                      className={`py-3 px-3 rounded-2xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
+                        guestBoost === boost.value
+                          ? accent.buttonActive
+                          : "bg-white border-slate-200 text-slate-500 hover:border-slate-350 hover:bg-slate-50"
+                      }`}
+                    >
+                      <span>{boost.label}</span>
+                      <span className="opacity-80 font-normal">
+                        {boost.price === 0 ? "₹0" : `+₹${boost.price}`}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div>
-                <p className="font-medium">Razorpay</p>
-                <p className="text-sm text-muted-foreground">
-                  Secure payment via Razorpay
-                </p>
+
+              {/* Shots Limit Boost */}
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <span>📸 Boost Shots Per Guest</span>
+                  <span className="text-xs text-slate-400 font-normal">(Base: {baseShotLimitStr})</span>
+                </Label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {shotBoostsList.map((boost) => (
+                    <button
+                      key={boost.value}
+                      type="button"
+                      onClick={() => setShotBoost(boost.value)}
+                      className={`py-3 px-3 rounded-2xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
+                        shotBoost === boost.value
+                          ? accent.buttonActive
+                          : "bg-white border-slate-200 text-slate-500 hover:border-slate-350 hover:bg-slate-50"
+                      }`}
+                    >
+                      <span>{boost.label}</span>
+                      <span className="opacity-80 font-normal">
+                        {boost.price === 0 ? "₹0" : `+₹${boost.price}`}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-            <Button variant="outline">Manage</Button>
+          )}
+        </div>
+      )}
+
+      {/* Pricing Overview & Main Action Card */}
+      <div className="flex flex-col sm:flex-row items-center justify-between bg-white border border-slate-200 rounded-3xl p-8 max-w-4xl mx-auto gap-6 shadow-sm">
+        <div className="text-center sm:text-left">
+          <span className="text-xs text-slate-400 uppercase tracking-widest font-semibold">Total Price</span>
+          <div className="flex items-baseline gap-1.5 justify-center sm:justify-start mt-1">
+            <span className="text-3xl font-extrabold text-slate-900">₹{totalPrice}</span>
+            <span className="text-sm text-slate-500 font-light">
+              {selectedPlan === "free" ? "forever" : "per event"}
+            </span>
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">
-            Your payment is securely processed by Razorpay. We never store your card details.
+          <p className="text-xs text-slate-400 mt-1.5 font-light">
+            {selectedPlan !== "free" && (
+              <>
+                Base ₹{basePrice}
+                {guestBoost > 0 && ` + Guest Boost ₹${guestAddOnPrice}`}
+                {shotBoost > 0 && ` + Shots Boost ₹${shotAddOnPrice}`}
+              </>
+            )}
           </p>
-        </CardContent>
-      </Card>
+        </div>
+
+        <Button
+          onClick={handleActionClick}
+          disabled={isActionDisabled || cancelMutation.isPending}
+          className={getContinueButtonClass()}
+        >
+          <span>{getActionButtonText()}</span>
+          {selectedPlan !== "free" && !isActionDisabled && <ArrowRight className="h-5 w-5" />}
+        </Button>
+      </div>
     </div>
-  )
-}
-
-function AddonsSection() {
-  const queryClient = useQueryClient()
-  const { profile, user } = useAuth()
-  const [addons, setAddons] = useState<{ guest_boosts: any[]; shot_boosts: any[] }>({ guest_boosts: [], shot_boosts: [] })
-
-  useEffect(() => {
-    fetch("/api/payments/addons").then(res => res.json()).then(res => {
-      if (res.success && res.data) {
-        setAddons(res.data)
-      }
-    })
-  }, [])
-
-  const { data: organization } = useQuery({
-    queryKey: ["organization"],
-    queryFn: getOrganization,
-  })
-
-  const currentSettings: Record<string, any> = (organization as any)?.settings || {}
-  const currentGuestBoost = currentSettings.guest_boost || 0
-  const currentShotsBoost = currentSettings.shots_boost || 0
-
-  const addonCheckoutMutation = useMutation({
-    mutationFn: async ({ type, value }: { type: "guest" | "shots"; value: number }) => {
-      const response = await fetch("/api/payments/addon-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ boost_type: type, boost_value: value }),
-      })
-
-      const result = await response.json()
-      if (!response.ok) throw new Error(result.error || "Failed to initiate addon checkout")
-      const checkoutData = result.data
-
-      const scriptLoaded = await loadRazorpayScript()
-      if (!scriptLoaded) throw new Error("Razorpay SDK failed to load.")
-
-      const options = {
-        key: checkoutData.key_id,
-        amount: checkoutData.amount,
-        currency: checkoutData.currency,
-        name: "Snapy Add-ons",
-        description: `Purchase ${type === "guest" ? "Guest Capacity" : "Storage"} Boost`,
-        order_id: checkoutData.order_id,
-        customer_id: checkoutData.customer_id,
-        prefill: { email: user?.email || "", name: profile?.full_name || "" },
-        theme: { color: "#8b5cf6" },
-        handler: async function (paymentResponse: any) {
-          toast({ title: "Processing Addon", description: "Verifying your purchase..." })
-          const verifyRes = await fetch("/api/payments/addon-verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              razorpay_payment_id: paymentResponse.razorpay_payment_id,
-              razorpay_order_id: paymentResponse.razorpay_order_id,
-              razorpay_signature: paymentResponse.razorpay_signature,
-              boost_type: type,
-              boost_value: value,
-              total_price: checkoutData.total_price,
-            })
-          })
-          const v = await verifyRes.json()
-          if (!v.success) throw new Error(v.error)
-
-          toast({ title: "Boost Added!", description: "Your workspace limits have been increased." })
-          queryClient.invalidateQueries({ queryKey: ["organization"] })
-        },
-      }
-
-      const rzp = new (window as any).Razorpay(options)
-      rzp.open()
-    },
-    onError: (error: Error) => {
-      toast({ title: "Failed to purchase addon", description: error.message, variant: "destructive" })
-    },
-  })
-
-  return (
-    <Card className="border-violet-100 shadow-md">
-      <CardHeader className="bg-violet-50/50 rounded-t-xl border-b border-violet-100 pb-4">
-        <div className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-violet-600" />
-          <CardTitle className="text-violet-900">Add-On Boosts</CardTitle>
-        </div>
-        <CardDescription>Need more capacity without upgrading your base plan? Purchase one-time boosts.</CardDescription>
-      </CardHeader>
-      <CardContent className="p-6 grid gap-8 md:grid-cols-2">
-        
-        {/* Guest Boosts */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-end">
-            <h3 className="font-semibold text-slate-800">Extra Guests</h3>
-            <span className="text-xs font-bold text-violet-600 bg-violet-100 px-2 py-1 rounded-full">Current: +{currentGuestBoost}</span>
-          </div>
-          <div className="grid gap-3">
-            {addons.guest_boosts.map((b: any, i: number) => (
-              <div key={i} className="flex items-center justify-between p-3 border rounded-lg hover:border-violet-300 transition-colors">
-                <div>
-                  <p className="font-medium text-sm text-slate-900">+{b.value} Guests</p>
-                  <p className="text-xs text-slate-500">One-time payment</p>
-                </div>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="gap-2 border-violet-200 text-violet-700 hover:bg-violet-50"
-                  onClick={() => addonCheckoutMutation.mutate({ type: "guest", value: b.value })}
-                  disabled={addonCheckoutMutation.isPending}
-                >
-                  ₹{b.price} <ArrowRight className="h-3 w-3" />
-                </Button>
-              </div>
-            ))}
-            {addons.guest_boosts.length === 0 && <p className="text-xs text-slate-400">No guest boosts available</p>}
-          </div>
-        </div>
-
-        {/* Shots Boosts */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-end">
-            <h3 className="font-semibold text-slate-800">Extra Photo Storage</h3>
-            <span className="text-xs font-bold text-violet-600 bg-violet-100 px-2 py-1 rounded-full">Current: +{currentShotsBoost} GB</span>
-          </div>
-          <div className="grid gap-3">
-            {addons.shot_boosts.map((b: any, i: number) => (
-              <div key={i} className="flex items-center justify-between p-3 border rounded-lg hover:border-violet-300 transition-colors">
-                <div>
-                  <p className="font-medium text-sm text-slate-900">+{b.value} GB Storage</p>
-                  <p className="text-xs text-slate-500">One-time payment</p>
-                </div>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="gap-2 border-violet-200 text-violet-700 hover:bg-violet-50"
-                  onClick={() => addonCheckoutMutation.mutate({ type: "shots", value: b.value })}
-                  disabled={addonCheckoutMutation.isPending}
-                >
-                  ₹{b.price} <ArrowRight className="h-3 w-3" />
-                </Button>
-              </div>
-            ))}
-            {addons.shot_boosts.length === 0 && <p className="text-xs text-slate-400">No storage boosts available</p>}
-          </div>
-        </div>
-
-      </CardContent>
-    </Card>
   )
 }

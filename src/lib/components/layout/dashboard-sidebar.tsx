@@ -43,7 +43,6 @@ const navigation = [
 const secondaryNavigation = [
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
   { name: "Billing", href: "/dashboard/billing", icon: CreditCard },
-  { name: "Team", href: "/dashboard/team", icon: Users },
 ]
 
 export function DashboardSidebar() {
