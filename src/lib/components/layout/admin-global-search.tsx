@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Search, Loader2 } from "lucide-react"
+import { Search, Loader2, LayoutDashboard, Building2, Users, Calendar, Image, CreditCard, Ticket, FileText } from "lucide-react"
 import { Input } from "@/lib/components/ui/input"
 import { searchAdminGlobal, GlobalSearchResult } from "@/app/actions/admin-search"
 import { useRouter } from "next/navigation"
@@ -41,12 +41,40 @@ export function AdminGlobalSearch() {
     return () => clearTimeout(timer)
   }, [query])
 
+  const groupedResults = React.useMemo(() => {
+    const groups: Record<string, GlobalSearchResult[]> = {
+      module: [],
+      database: []
+    }
+    results.forEach(r => {
+      if (r.type === 'module') {
+        groups.module.push(r)
+      } else {
+        groups.database.push(r)
+      }
+    })
+    return groups
+  }, [results])
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'module': return <LayoutDashboard className="h-4 w-4 text-violet-500" />
+      case 'organization': return <Building2 className="h-4 w-4 text-blue-500" />
+      case 'user': return <Users className="h-4 w-4 text-emerald-500" />
+      case 'event': return <Calendar className="h-4 w-4 text-amber-500" />
+      case 'gallery': return <Image className="h-4 w-4 text-pink-500" />
+      case 'subscription': return <CreditCard className="h-4 w-4 text-indigo-500" />
+      case 'ticket': return <Ticket className="h-4 w-4 text-rose-500" />
+      default: return <FileText className="h-4 w-4 text-slate-500" />
+    }
+  }
+
   return (
     <div className="flex flex-1 items-center max-w-md relative" ref={wrapperRef}>
       <Search className="absolute left-3 h-4 w-4 text-slate-400 pointer-events-none" />
       <Input
         type="search"
-        placeholder="Search organizations, users, events..."
+        placeholder="Search everything... (modules, users, events)"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onFocus={() => { if (query.trim().length >= 2) setIsOpen(true) }}
@@ -63,28 +91,60 @@ export function AdminGlobalSearch() {
       )}
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-80 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto">
           {results.length > 0 ? (
             <div className="py-2">
-              <div className="px-3 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Results</div>
-              {results.map((result) => (
-                <div
-                  key={result.id}
-                  onClick={() => {
-                    router.push(result.link)
-                    setIsOpen(false)
-                    setQuery("")
-                  }}
-                  className="px-4 py-2 hover:bg-slate-50 cursor-pointer flex flex-col gap-0.5 border-b border-slate-50 last:border-0"
-                >
-                  <span className="text-sm font-medium text-slate-900">{result.title}</span>
-                  <span className="text-xs text-slate-500 capitalize">{result.type} &bull; {result.subtitle}</span>
+              {groupedResults.module.length > 0 && (
+                <div className="mb-2">
+                  <div className="px-3 pb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Navigation Modules</div>
+                  {groupedResults.module.map((result) => (
+                    <div
+                      key={result.id}
+                      onClick={() => { router.push(result.link); setIsOpen(false); setQuery(""); }}
+                      className="px-3 py-2 mx-1 rounded-lg hover:bg-slate-50 cursor-pointer flex items-center gap-3 transition-colors"
+                    >
+                      <div className="shrink-0 p-1.5 bg-violet-50 rounded-md">
+                        {getTypeIcon(result.type)}
+                      </div>
+                      <div className="flex flex-col flex-1 overflow-hidden">
+                        <span className="text-sm font-semibold text-slate-900 truncate">{result.title}</span>
+                        <span className="text-[11px] text-slate-500 truncate">{result.subtitle}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
+              
+              {groupedResults.database.length > 0 && (
+                <div>
+                  <div className="px-3 pb-1.5 pt-2 border-t border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Database Records</div>
+                  {groupedResults.database.map((result) => (
+                    <div
+                      key={result.id}
+                      onClick={() => { router.push(result.link); setIsOpen(false); setQuery(""); }}
+                      className="px-3 py-2 mx-1 rounded-lg hover:bg-slate-50 cursor-pointer flex items-center gap-3 transition-colors"
+                    >
+                      <div className="shrink-0 p-1.5 bg-slate-50 rounded-md border border-slate-100">
+                        {getTypeIcon(result.type)}
+                      </div>
+                      <div className="flex flex-col flex-1 overflow-hidden">
+                        <span className="text-sm font-medium text-slate-800 truncate">{result.title}</span>
+                        <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+                          <span className="capitalize font-medium text-slate-600">{result.type}</span>
+                          <span>&bull;</span>
+                          <span className="truncate">{result.subtitle}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ) : query.trim().length >= 2 && !isSearching ? (
-            <div className="p-4 text-sm text-center text-slate-500">
-              No results found for &quot;{query}&quot;
+            <div className="p-6 flex flex-col items-center justify-center text-center gap-2">
+              <Search className="h-8 w-8 text-slate-200" />
+              <p className="text-sm text-slate-500 font-medium">No results found for &quot;{query}&quot;</p>
+              <p className="text-xs text-slate-400">Try searching for a different keyword or module name.</p>
             </div>
           ) : null}
         </div>
