@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
 import { toast } from "@/lib/components/ui/toaster"
-import { Search, RefreshCw, MessageSquare, Loader2, User, Building2, Clock, Send, ShieldAlert, CheckCircle2, XCircle, Inbox } from "lucide-react"
+import { Search, RefreshCw, MessageSquare, Loader2, Building2, Clock, Send, ShieldAlert, CheckCircle2, XCircle, Inbox } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type MessageItem = {
@@ -23,7 +23,7 @@ type TicketItem = {
   priority: string
   created_at: string
   updated_at: string
-  organization: {
+  user: {
     name: string
   } | null
   messages: MessageItem[]
@@ -117,7 +117,7 @@ export default function AdminSupportTicketsPage() {
     const matchesSearch = 
       t.subject.toLowerCase().includes(term) ||
       t.description.toLowerCase().includes(term) ||
-      (t.organization?.name || "").toLowerCase().includes(term)
+      (t.user?.name || "").toLowerCase().includes(term)
 
     if (statusFilter === "all") return matchesSearch
     return matchesSearch && t.status === statusFilter
@@ -204,7 +204,7 @@ export default function AdminSupportTicketsPage() {
                         <td className="p-4">
                           <div className="text-slate-700 font-semibold flex items-center gap-1">
                             <Building2 className="h-3.5 w-3.5 text-slate-400" />
-                            <span>{t.organization?.name || "Independent"}</span>
+                            <span>{t.user?.name || "Independent"}</span>
                           </div>
                         </td>
                         <td className="p-4">
@@ -247,7 +247,7 @@ export default function AdminSupportTicketsPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-bold text-slate-800 text-base">{selectedTicket.subject}</h3>
-                    <span className="text-xs text-slate-400 block mt-0.5">Org: {selectedTicket.organization?.name || "N/A"}</span>
+                    <span className="text-xs text-slate-400 block mt-0.5">Org: {selectedTicket.user?.name || "N/A"}</span>
                   </div>
                   <div className="flex flex-col items-end gap-1.5">
                     <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border",

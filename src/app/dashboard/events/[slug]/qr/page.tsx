@@ -48,7 +48,7 @@ async function getEvent(eventSlug: string, orgId: string) {
     .from("events")
     .select("id, name, slug")
     .eq("slug", eventSlug)
-    .eq("organization_id", orgId)
+    .eq("host_id", orgId)
     .single()
 
   if (error) throw error
@@ -311,7 +311,7 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
   const router = useRouter()
   const queryClient = useQueryClient()
   const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.organization_id
+  const orgId = profile?.user_id
 
   const { data: event, isLoading: eventLoading } = useQuery({
     queryKey: ["event", slug, orgId],

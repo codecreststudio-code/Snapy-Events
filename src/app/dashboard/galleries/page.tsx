@@ -39,6 +39,7 @@ import {
   Globe,
   Search,
   Filter,
+  Settings
 } from "lucide-react"
 import type { Gallery as GalleryType } from "@/lib/types"
 
@@ -60,7 +61,7 @@ async function getEvents(orgId: string) {
   const { data, error } = await supabase
     .from("events")
     .select("id")
-    .eq("organization_id", orgId)
+    .eq("host_id", orgId)
 
   if (error) throw error
   return data || []
@@ -211,7 +212,7 @@ function GalleryCard({
 export default function GalleriesPage() {
   const queryClient = useQueryClient()
   const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.organization_id
+  const orgId = profile?.user_id
   const [searchQuery, setSearchQuery] = useState("")
   const [filterType, setFilterType] = useState("all")
 

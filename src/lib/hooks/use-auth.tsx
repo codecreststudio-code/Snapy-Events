@@ -2,13 +2,13 @@
 
 import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState, createContext, useContext, useCallback } from "react"
-import type { User, Session } from "@supabase/supabase-js"
-import type { UserWithOrganization } from "@/lib/types"
+import type { User as SupabaseUser, Session } from "@supabase/supabase-js"
+import type { User as DatabaseUser } from "@/lib/types"
 
 interface AuthContextType {
-  user: User | null
+  user: SupabaseUser | null
   session: Session | null
-  profile: UserWithOrganization | null
+  profile: DatabaseUser | null
   isLoading: boolean
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signUp: (email: string, password: string, fullName: string, orgName: string) => Promise<{ error: Error | null }>
@@ -21,21 +21,21 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<SupabaseUser | null>(null)
   const [session, setSession] = useState<Session | null>(null)
-  const [profile, setProfile] = useState<UserWithOrganization | null>(null)
+  const [profile, setProfile] = useState<DatabaseUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const supabase = createClient()
 
   const fetchProfile = useCallback(async (userId: string) => {
     const { data, error } = await supabase
       .from("users")
-      .select("*, organization:organizations(*)")
+      .select("*, user:organizations(*)")
       .eq("id", userId)
       .single()
 
     if (!error && data) {
-      if (!data.organization_id) {
+      if (!data.user_id) {
         const userEmail = data.email || ""
         const fullName = data.full_name || userEmail.split("@")[0] || "User"
         const orgName = `${fullName}'s Workspace`
@@ -50,23 +50,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!orgError && org) {
           const { error: updateError } = await supabase
             .from("users")
-            .update({ organization_id: org.id, role: "owner", permissions: ["*"] })
+            .update({ user_id: data.user.id, role: "owner", permissions: ["*"] })
             .eq("id", userId)
 
           if (!updateError) {
             const { data: updatedData } = await supabase
               .from("users")
-              .select("*, organization:organizations(*)")
+              .select("*, user:organizations(*)")
               .eq("id", userId)
               .single()
             if (updatedData) {
-              setProfile(updatedData as UserWithOrganization)
+              setProfile(updatedData as DatabaseUser)
               return
             }
           }
         }
       }
-      setProfile(data as UserWithOrganization)
+      setProfile(data as DatabaseUser)
     }
   }, [supabase])
 

@@ -1,4 +1,4 @@
-export type PlanId = "free" | "starter" | "standard" | "premium"
+export type PlanId = string
 export type EventType = typeof import("@/lib/constants").EVENT_TYPES[number]
 export type EventStatus = "draft" | "published" | "completed" | "archived"
 export type UserRole = "owner" | "admin" | "member" | "viewer"
@@ -37,12 +37,14 @@ export interface Organization {
 
 export interface User {
   id: string
-  organization_id: string | null
+  user_id: string | null
   email: string
   full_name: string | null
   avatar_url: string | null
   role: UserRole
   is_admin?: boolean
+  plan: PlanId
+  settings: Record<string, unknown>
   permissions: Permission[]
   preferences: Record<string, unknown>
   created_at: string
@@ -51,7 +53,7 @@ export interface User {
 
 export interface Event {
   id: string
-  organization_id: string
+  user_id: string
   host_id: string
   name: string
   slug: string
@@ -150,32 +152,80 @@ export interface PhotoAccess {
 }
 
 export interface Plan {
-  id: PlanId
+  id: string
   name: string
   description: string | null
   price_inr: number
   price_usd: number
   billing_interval: "monthly" | "yearly"
+  trial_days: number
+  theme_color: string | null
+  best_value: boolean
   features: string[]
-  limits: PlanLimits
+  limits: Record<string, any>
   is_active: boolean
   created_at: string
 }
 
+export interface Feature {
+  id: string
+  name: string
+  description: string | null
+  type: "boolean" | "quota" | "string"
+  is_active: boolean
+  is_beta: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface PlanFeature {
+  id: string
+  plan_id: string
+  feature_id: string
+  value: any
+  created_at: string
+}
+
+export interface Addon {
+  id: string
+  name: string
+  description: string | null
+  price_inr: number
+  price_usd: number
+  billing_type: "one_time" | "monthly" | "yearly" | "lifetime"
+  compatible_plans: string[]
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface AutomationRule {
+  id: string
+  name: string
+  trigger_event: string
+  action_type: string
+  target_plan: string | null
+  action_payload: Record<string, any>
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface PlanLimits {
-  events_limit: number
-  storage_limit_gb: number
-  photo_limit: number
-  qr_codes_per_event: number
-  galleries_per_event: number
-  ai_searches: number
-  custom_branding: boolean
-  priority_support: boolean
+  events_limit?: number
+  storage_limit_gb?: number
+  photo_limit?: number
+  qr_codes_per_event?: number
+  galleries_per_event?: number
+  ai_searches?: number
+  custom_branding?: boolean
+  priority_support?: boolean
+  [key: string]: any
 }
 
 export interface Subscription {
   id: string
-  organization_id: string
+  user_id: string
   plan_id: PlanId
   razorpay_subscription_id: string | null
   razorpay_customer_id: string | null
@@ -184,13 +234,14 @@ export interface Subscription {
   current_period_end: string | null
   trial_ends_at: string | null
   cancel_at_period_end: boolean
+  active_addons: string[]
   created_at: string
   updated_at: string
 }
 
 export interface Invoice {
   id: string
-  organization_id: string
+  user_id: string
   subscription_id: string | null
   razorpay_invoice_id: string | null
   invoice_number: string
@@ -206,7 +257,7 @@ export interface Invoice {
 
 export interface Transaction {
   id: string
-  organization_id: string
+  user_id: string
   invoice_id: string | null
   razorpay_payment_id: string | null
   razorpay_order_id: string | null
@@ -220,6 +271,8 @@ export interface Transaction {
 
 export interface Coupon {
   id: string
+  name: string | null
+  description: string | null
   code: string
   discount_type: "percentage" | "fixed"
   discount_value: number
@@ -229,6 +282,12 @@ export interface Coupon {
   valid_from: string
   valid_until: string | null
   is_active: boolean
+  max_discount_amount: number | null
+  min_order_value: number | null
+  stackable: boolean
+  first_purchase_only: boolean
+  excluded_plans: string[]
+  specific_users: string[]
   created_at: string
 }
 
@@ -276,20 +335,17 @@ export interface FaceSearchResult {
 
 export interface AnalyticsEvent {
   id: string
-  organization_id: string | null
+  user_id: string | null
   event_type: string
   event_data: Record<string, unknown>
-  user_id: string | null
   session_id: string | null
-  ip_address: string | null
   user_agent: string | null
   created_at: string
 }
 
 export interface AuditLog {
   id: string
-  organization_id: string | null
-  user_id: string | null
+  user_id?: string | null
   action: string
   resource_type: string
   resource_id: string | null
@@ -300,7 +356,7 @@ export interface AuditLog {
 
 export interface StorageUsage {
   id: string
-  organization_id: string
+  user_id: string
   total_bytes: number
   photo_count: number
   updated_at: string
@@ -333,7 +389,7 @@ export interface Pagination {
 
 // Extended types with relations
 export interface EventWithDetails extends Event {
-  organization?: Organization
+  user?: Organization
   host?: User
   galleries?: Gallery[]
   qr_codes?: QRCode[]
@@ -351,9 +407,9 @@ export interface GalleryWithPhotos extends Gallery {
   }
 }
 
-export interface UserWithOrganization extends User {
-  organization?: Organization
-}
+// export interface User extends User {
+//   user?: Organization
+// }
 
 // Database insert types
 export type OrganizationInsert = Omit<Organization, "id" | "created_at" | "updated_at">

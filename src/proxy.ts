@@ -92,7 +92,7 @@ export async function proxy(request: NextRequest) {
   if (authError) {
     console.error(`[Proxy Auth Error] Pathname: ${pathname}, Error:`, authError.message)
   }
-  console.log(`[Proxy Auth Result] Pathname: ${pathname}, User:`, user ? user.email : "null")
+  console.log(`[Proxy Auth Result] Pathname: ${pathname}:`, user ? user.email : "null")
 
   // 4. Set security headers
   response.headers.set("X-Frame-Options", "DENY")

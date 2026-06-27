@@ -1,67 +1,4 @@
-export const PLANS = {
-  FREE: "free",
-  STARTER: "starter",
-  STANDARD: "standard",
-  PREMIUM: "premium",
-} as const
 
-export const PLAN_LIMITS = {
-  [PLANS.FREE]: {
-    events_limit: 1,
-    storage_limit_gb: 1,
-    photo_limit: 25,
-    guests_limit: 5,
-    shots_limit: 5,
-    qr_codes_per_event: 1,
-    galleries_per_event: 1,
-    ai_searches: 0,
-    custom_branding: false,
-    priority_support: false,
-  },
-  [PLANS.STARTER]: {
-    events_limit: 5,
-    storage_limit_gb: 10,
-    photo_limit: 100,
-    guests_limit: 10,
-    shots_limit: 10,
-    qr_codes_per_event: 10,
-    galleries_per_event: 5,
-    ai_searches: 50,
-    custom_branding: false,
-    priority_support: false,
-  },
-  [PLANS.STANDARD]: {
-    events_limit: 25,
-    storage_limit_gb: 100,
-    photo_limit: 750,
-    guests_limit: 50,
-    shots_limit: 15,
-    qr_codes_per_event: 50,
-    galleries_per_event: 20,
-    ai_searches: 500,
-    custom_branding: true,
-    priority_support: false,
-  },
-  [PLANS.PREMIUM]: {
-    events_limit: -1, // unlimited
-    storage_limit_gb: 1000,
-    photo_limit: 2500,
-    guests_limit: 100,
-    shots_limit: 25,
-    qr_codes_per_event: -1,
-    galleries_per_event: -1,
-    ai_searches: -1,
-    custom_branding: true,
-    priority_support: true,
-  },
-} as const
-
-export const PLAN_PRICES = {
-  [PLANS.FREE]: { inr: 0, usd: 0 },
-  [PLANS.STARTER]: { inr: 99, usd: 1.5 },
-  [PLANS.STANDARD]: { inr: 499, usd: 6 },
-  [PLANS.PREMIUM]: { inr: 1499, usd: 18 },
-} as const
 
 export const EVENT_TYPES = [
   "wedding",
@@ -180,16 +117,14 @@ export const ALLOWED_MIME_TYPES = {
 } as const
 
 export const DEFAULT_GUEST_BOOSTS = [
-  { label: "No extra", value: 0, price: 0 },
-  { label: "+10 guests", value: 10, price: 199 },
-  { label: "+25 guests", value: 25, price: 399 },
-  { label: "+50 guests", value: 50, price: 699 },
-  { label: "+100 guests", value: 100, price: 1199 },
+  { value: 10, label: "+10 guests", price: 199 },
+  { value: 25, label: "+25 guests", price: 399 },
+  { value: 50, label: "+50 guests", price: 699 },
+  { value: 100, label: "+100 guests", price: 1199 },
 ]
 
 export const DEFAULT_SHOT_BOOSTS = [
-  { label: "No extra", value: 0, price: 0 },
-  { label: "+5 shots/guest", value: 5, price: 99 },
-  { label: "+10 shots/guest", value: 10, price: 179 },
-  { label: "+15 shots/guest", value: 15, price: 249 },
+  { value: 5, label: "+5 shots", price: 99 },
+  { value: 10, label: "+10 shots", price: 179 },
+  { value: 25, label: "+25 shots", price: 249 },
 ]

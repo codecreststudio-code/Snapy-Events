@@ -11,7 +11,7 @@ type Event = {
   end_date: string | null
   venue: string | null
   cover_image_url: string | null
-  organization: {
+  user: {
     name: string
     branding: {
       brand_color?: string | null
@@ -33,8 +33,8 @@ export function EventView({ event, galleries }: { event: Event; galleries: Galle
           />
         )}
         <div className="mx-auto max-w-5xl px-6 py-20 text-center">
-          {event.organization?.branding?.logo_url && <img src={event.organization.branding.logo_url} alt={event.organization.name} className="mx-auto mb-4 h-10" />}
-          <p className="text-sm uppercase tracking-widest text-muted-foreground">{event.organization?.name ?? "Event"}</p>
+          {event.user?.branding?.logo_url && <img src={event.user.branding.logo_url} alt={event.user.name} className="mx-auto mb-4 h-10" />}
+          <p className="text-sm uppercase tracking-widest text-muted-foreground">{event.user?.name ?? "Event"}</p>
           <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">{event.name}</h1>
           {event.description && <p className="mx-auto mt-3 max-w-2xl text-pretty text-muted-foreground">{event.description}</p>}
           <p className="mt-3 text-sm text-muted-foreground">

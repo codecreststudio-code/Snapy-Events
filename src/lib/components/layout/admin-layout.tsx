@@ -2,7 +2,15 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Users, Camera, CreditCard, BarChart3, Settings, Bell } from "lucide-react"
+import {
+  LayoutDashboard,
+  Camera,
+  CreditCard,
+  BarChart3,
+  Settings,
+  Bell,
+  Users
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/lib/components/ui/button"
 

@@ -79,7 +79,7 @@ export function defineRoute<TBody = unknown, TQuery = unknown, C = unknown>(opts
         }
 
         // Auth
-        let auth: AuthContext = { user: null, organization: null, role: "viewer", permissions: [], isAdmin: false }
+        let auth: AuthContext = { user: null, role: "viewer", permissions: [], isAdmin: false }
         if (opts.requireAuth === "admin") {
           auth = await requireAdmin()
         } else if (opts.requireAuth) {
@@ -115,7 +115,6 @@ export function defineRoute<TBody = unknown, TQuery = unknown, C = unknown>(opts
         if (opts.audit && auth.user) {
           void logAudit({
             user_id: auth.user.id,
-            organization_id: auth.organization?.id ?? null,
             action: opts.audit,
             resource_type: "route",
             resource_id: null,
@@ -124,7 +123,6 @@ export function defineRoute<TBody = unknown, TQuery = unknown, C = unknown>(opts
         }
         if (auth.user) {
           void trackEvent({
-            organization_id: auth.organization?.id ?? null,
             user_id: auth.user.id,
             event_type: `api.${m.toLowerCase()}`,
             event_data: { path: request.nextUrl.pathname },

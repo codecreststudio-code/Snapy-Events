@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
 import { toast } from "@/lib/components/ui/toaster"
-import { Search, RefreshCw, Trash2, ShieldAlert, Play, Pause, Loader2, Volume2, Mic, Clock, HardDrive, User, Calendar } from "lucide-react"
+import { Search, RefreshCw, Trash2, ShieldAlert, Play, Pause, Loader2, Volume2, Mic, Clock, HardDrive, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type VoiceItem = {

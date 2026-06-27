@@ -2,8 +2,9 @@ import { z } from "zod"
 import { defineRoute, ok, fail, created } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { subscribeSchema } from "@/lib/validators"
-import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder, planCurrency, cancelRazorpaySubscription } from "@/lib/integrations/razorpay"
+import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder, cancelRazorpaySubscription } from "@/lib/integrations/razorpay"
 import { logger } from "@/lib/logger"
+import { calculatePrice } from "../checkout/route"
 
 export const GET = defineRoute({
   method: "GET",
@@ -24,7 +25,7 @@ export const GET = defineRoute({
         razorpay_subscription_id,
         plan:plans(id, name, price_inr, price_usd, features, limits)
       `)
-      .eq("organization_id", auth.organization!.id)
+      .eq("user_id", auth.user!.id)
       .in("status", ["active", "past_due"])
       .order("created_at", { ascending: false })
       .limit(1)
@@ -56,22 +57,24 @@ export const POST = defineRoute({
     if (!isRazorpayConfigured()) return fail("BILLING_UNAVAILABLE", "Razorpay not configured", 503)
     const supabase = await createClient()
     const { data: existing } = await supabase
-      .from("organizations")
-      .select("razorpay_customer_id, name")
-      .eq("id", auth.organization!.id)
+      .from("users")
+      .select("razorpay_customer_id, full_name")
+      .eq("id", auth.user!.id)
       .single()
     let customerId = existing?.razorpay_customer_id ?? null
     if (!customerId) {
-      const c = await createRazorpayCustomer({ name: existing?.name ?? auth.user!.email, email: auth.user!.email })
+      const c = await createRazorpayCustomer({ name: existing?.full_name ?? auth.user!.email, email: auth.user!.email })
       customerId = c.id
-      await supabase.from("organizations").update({ razorpay_customer_id: customerId }).eq("id", auth.organization!.id)
+      await supabase.from("users").update({ razorpay_customer_id: customerId }).eq("id", auth.user!.id)
     }
-    const { amount, currency } = planCurrency(body.plan_id)
+    const price = await calculatePrice(supabase, body.plan_id, 0, 0, body.coupon_code)
+    const amount = price * 100
+    const currency = "INR"
     const order = await createRazorpayOrder({
       amount,
       currency,
-      receipt: `sub_${Date.now().toString(36)}_${auth.organization!.id.slice(0, 8)}`,
-      notes: { organization_id: auth.organization!.id, plan_id: body.plan_id },
+      receipt: `sub_${Date.now().toString(36)}_${auth.user!.id.slice(0, 8)}`,
+      notes: { user_id: auth.user!.id, plan_id: body.plan_id },
     })
     return created({ customer_id: customerId, order_id: order.id, amount, currency, plan: body.plan_id })
   },
@@ -86,7 +89,7 @@ export const DELETE = defineRoute({
     const { data: sub, error } = await supabase
       .from("subscriptions")
       .select("id, razorpay_subscription_id")
-      .eq("organization_id", auth.organization!.id)
+      .eq("user_id", auth.user!.id)
       .eq("status", "active")
       .single()
 
@@ -106,11 +109,11 @@ export const DELETE = defineRoute({
       .update({ status: "cancelled" })
       .eq("id", sub.id)
 
-    // Reset organization plan back to free
+    // Reset user plan back to free
     await supabase
-      .from("organizations")
+      .from("users")
       .update({ plan: "free" })
-      .eq("id", auth.organization!.id)
+      .eq("id", auth.user!.id)
 
     return ok({ success: true })
   },

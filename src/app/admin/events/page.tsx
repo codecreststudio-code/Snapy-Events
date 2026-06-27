@@ -17,8 +17,8 @@ type EventItem = {
   event_date: string | null
   created_at: string
   venue: string | null
-  organization_id: string
-  organization: {
+  host_id: string
+  user: {
     name: string
     plan: string
   } | null
@@ -73,7 +73,7 @@ export default function AdminEventsPage() {
     return (
       e.name.toLowerCase().includes(term) ||
       (e.venue || "").toLowerCase().includes(term) ||
-      (e.organization?.name || "").toLowerCase().includes(term)
+      (e.user?.name || "").toLowerCase().includes(term)
     )
   })
 
@@ -151,9 +151,9 @@ export default function AdminEventsPage() {
                         <td className="p-4">
                           <div className="text-slate-700 font-semibold flex items-center gap-1">
                             <Building className="h-3.5 w-3.5 text-slate-400" />
-                            <span>{e.organization?.name || "N/A"}</span>
+                            <span>{e.user?.name || "N/A"}</span>
                           </div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">Plan: <span className="text-violet-600 font-bold uppercase">{e.organization?.plan}</span></div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">Plan: <span className="text-violet-600 font-bold uppercase">{e.user?.plan}</span></div>
                         </td>
                         <td className="p-4">
                           <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border",
@@ -213,11 +213,11 @@ export default function AdminEventsPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400 font-bold uppercase tracking-wider">Organizer</span>
-                  <span className="text-slate-700 font-semibold">{selectedEvent.organization?.name || "N/A"}</span>
+                  <span className="text-slate-700 font-semibold">{selectedEvent.user?.name || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400 font-bold uppercase tracking-wider">Organizer Plan</span>
-                  <span className="text-violet-600 font-bold uppercase">{selectedEvent.organization?.plan || "free"}</span>
+                  <span className="text-violet-600 font-bold uppercase">{selectedEvent.user?.plan || "free"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400 font-bold uppercase tracking-wider">Event Date</span>

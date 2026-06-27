@@ -4,8 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import Link from "next/link"
 import {
   Camera,
-  Image as ImageIcon,
-  Users,
+  Image as ImageIcons,
   QrCode,
   TrendingUp,
   Plus,
@@ -16,6 +15,7 @@ import {
   Sparkles,
   ChevronRight,
   Layers,
+  ImageIcon
 } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
@@ -52,7 +52,7 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
       status,
       galleries(id, photo_count)
     `)
-    .eq("organization_id", orgId)
+    .eq("user_id", orgId)
     .order("created_at", { ascending: false })
     .limit(5)
 
@@ -60,7 +60,7 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
   const { data: allEvents, count: totalEventCount } = await supabase
     .from("events")
     .select("id", { count: "exact", head: true })
-    .eq("organization_id", orgId)
+    .eq("user_id", orgId)
 
   const allEventIds = allEvents?.map((e) => e.id) || []
 
@@ -73,7 +73,7 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
     const { data: storageData } = await supabase
       .from("storage_usage")
       .select("photo_count")
-      .eq("organization_id", orgId)
+      .eq("user_id", orgId)
       .single()
     photoCount = storageData?.photo_count || 0
 
@@ -113,7 +113,7 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
 
 export default function DashboardPage() {
   const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.organization_id
+  const orgId = profile?.user_id
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["dashboard-stats", orgId],

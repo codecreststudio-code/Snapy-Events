@@ -27,7 +27,7 @@ export const POST = defineRoute({
         description: body.message,
         status: "open",
         priority: "normal",
-        organization_id: null,
+        user_id: null,
       })
     } catch (err) {
       logger.warn("Failed to create support ticket", { error: String(err) })

@@ -1,0 +1,1 @@
+ALTER TABLE public.coupons ADD COLUMN IF NOT EXISTS name TEXT; ALTER TABLE public.coupons ADD COLUMN IF NOT EXISTS description TEXT;

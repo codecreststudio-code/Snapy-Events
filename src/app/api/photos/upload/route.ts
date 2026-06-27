@@ -3,7 +3,7 @@ import { defineRoute, ok, fail, created, ApiErrors } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { uploadPhotoSchema } from "@/lib/validators"
 import { uploadFile } from "@/lib/integrations/storage"
-import { MAX_FILE_SIZES, ALLOWED_MIME_TYPES, API_RATE_LIMITS, PLAN_LIMITS } from "@/lib/constants"
+import { MAX_FILE_SIZES, ALLOWED_MIME_TYPES, API_RATE_LIMITS } from "@/lib/constants"
 import { trackEvent } from "@/lib/analytics/track"
 
 const querySchema = z.object({ gallery_id: z.string().uuid() })
@@ -29,7 +29,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     }
     const { data: gallery } = await supabase
       .from("galleries")
-      .select("event_id, event:events(organization_id, settings, organization:organizations(plan, settings))")
+      .select("event_id, event:events(user_id, settings, user:organizations(plan, settings))")
       .eq("id", id)
       .single()
 
@@ -37,23 +37,34 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
 
     // Enforce limits
     const event = gallery.event as any
-    const orgId = Array.isArray(event) ? event[0]?.organization_id : event?.organization_id
-    const orgPlan = Array.isArray(event) ? event[0]?.organization?.plan : event?.organization?.plan || "free"
-    const orgSettings = (Array.isArray(event) ? event[0]?.organization?.settings : event?.organization?.settings) || {}
+    const orgId = Array.isArray(event) ? event[0]?.user_id : event?.user_id
+    const orgPlan = Array.isArray(event) ? event[0]?.user?.plan : event?.user?.plan || "free"
+    const orgSettings = (Array.isArray(event) ? event[0]?.user?.settings : event?.user?.settings) || {}
     
     const guestBoost = orgSettings.guest_boost || 0
     const shotsBoost = orgSettings.shots_boost || 0
 
-    const baseLimits = PLAN_LIMITS[orgPlan as keyof typeof PLAN_LIMITS] || PLAN_LIMITS.free
+    let baseLimits = { guests_limit: 0, shots_limit: 0, storage_limit_gb: 1 }
+    if (orgPlan) {
+      const { data: planData } = await supabase.from("plans").select("limits").eq("id", orgPlan).single()
+      if (planData?.limits) {
+        baseLimits = {
+          guests_limit: planData.limits.guests_limit ?? 0,
+          shots_limit: planData.limits.shots_limit ?? 0,
+          storage_limit_gb: planData.limits.storage_limit_gb ?? 1,
+        }
+      }
+    }
+
     const maxGuests = baseLimits.guests_limit + guestBoost
     const maxShots = baseLimits.shots_limit + shotsBoost
-    const maxStorageBytes = (baseLimits.storage_limit_gb || 1) * 1024 * 1024 * 1024
+    const maxStorageBytes = baseLimits.storage_limit_gb * 1024 * 1024 * 1024
 
     // Check storage quota
     const { data: storageUsage } = await supabase
       .from("storage_usage")
       .select("total_bytes, photo_count")
-      .eq("organization_id", orgId)
+      .eq("host_id", orgId)
       .single()
 
     const currentStorageBytes = storageUsage?.total_bytes ? BigInt(storageUsage.total_bytes) : BigInt(0)
@@ -121,7 +132,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       const { error: upsertError } = await supabase
         .from("storage_usage")
         .upsert({
-          organization_id: orgId,
+          host_id: orgId,
           total_bytes: (currentStorageBytes + BigInt(file.size)).toString(),
           photo_count: currentPhotoCount + 1,
         })
@@ -132,7 +143,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       console.error("Failed to update storage usage:", err)
     }
     
-    void trackEvent({ organization_id: auth.organization?.id ?? null, user_id: auth.user?.id ?? null, event_type: "photo.uploaded", event_data: { gallery_id: id }, request })
+    void trackEvent({ user_id: auth.user?.id ?? undefined, event_type: "photo.uploaded", event_data: { gallery_id: id }, request })
     return created(data)
   },
 }).POST

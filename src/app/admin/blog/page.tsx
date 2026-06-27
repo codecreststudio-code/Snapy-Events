@@ -20,10 +20,10 @@ import {
   AlertCircle,
   CheckCircle,
   X,
+  Mail,
   Users,
   UserCheck,
-  UserX,
-  Mail,
+  UserX
 } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import type { BlogPost, BlogCategory } from "@/lib/types/blog"

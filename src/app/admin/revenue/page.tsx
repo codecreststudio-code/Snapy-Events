@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
 
 type TransactionItem = {
   id: string
-  organization_id: string
+  user_id: string
   razorpay_payment_id: string | null
   razorpay_order_id: string | null
   amount: number
@@ -20,7 +20,7 @@ type TransactionItem = {
   status: string
   payment_method: string | null
   created_at: string
-  organization?: { name: string }
+  user?: { name: string }
 }
 
 type DailyRevenue = { date: string; amount: number }
@@ -278,7 +278,7 @@ export default function AdminRevenuePage() {
                         <div className="font-mono text-slate-800 font-bold">{tx.razorpay_payment_id || "N/A"}</div>
                         <div className="text-[10px] text-slate-400 mt-0.5">Order: {tx.razorpay_order_id || "N/A"}</div>
                       </td>
-                      <td className="p-4 font-semibold text-slate-700">{tx.organization?.name || "N/A"}</td>
+                      <td className="p-4 font-semibold text-slate-700">{tx.user?.name || "N/A"}</td>
                       <td className="p-4 font-extrabold text-slate-800 text-sm">₹{(tx.amount / 100).toLocaleString("en-IN")}</td>
                       <td className="p-4 uppercase text-slate-400 font-bold text-[10px]">{tx.payment_method || "N/A"}</td>
                       <td className="p-4 text-slate-400 font-semibold">

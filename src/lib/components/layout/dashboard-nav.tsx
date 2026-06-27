@@ -8,7 +8,6 @@ import {
   Calendar,
   Image,
   QrCode,
-  Users,
   Settings,
   BarChart3,
   CreditCard,
@@ -119,7 +118,7 @@ export function DashboardNav({ auth }: Props) {
                 </Avatar>
                 <div className="hidden text-left md:block">
                   <div className="text-sm font-medium">{auth.user?.full_name ?? "Account"}</div>
-                  <div className="text-xs text-muted-foreground">{auth.organization?.name ?? "Personal"}</div>
+                  <div className="text-xs text-muted-foreground">{auth.user?.full_name ?? "Personal"}</div>
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </Button>

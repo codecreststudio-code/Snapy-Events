@@ -20,7 +20,7 @@ export const GET = defineRoute({
       .select(
         `
         id,
-        organization_id,
+        user_id,
         plan_id,
         status,
         current_period_start,
@@ -30,7 +30,7 @@ export const GET = defineRoute({
         razorpay_subscription_id,
         created_at,
         metadata,
-        organization:organizations(id, name, plan),
+        user:users(id, full_name, email),
         plan:plans(id, name, price_inr, price_usd)
         `,
         { count: "exact" }
@@ -75,9 +75,9 @@ export const PATCH = defineRoute({
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq("id", id)
       .select(`
-        id, organization_id, plan_id, status, current_period_end,
+        id, user_id, plan_id, status, current_period_end,
         cancel_at_period_end, created_at,
-        organization:organizations(id, name),
+        user:users(id, full_name),
         plan:plans(id, name, price_inr)
       `)
       .single()

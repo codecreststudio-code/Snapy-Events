@@ -19,7 +19,7 @@ export const GET = defineRoute({
       sb
         .from("transactions")
         .select(
-          "id, amount, currency, status, created_at, razorpay_payment_id, razorpay_order_id, payment_method, organization_id, organization:organizations(name)"
+          "id, amount, currency, status, created_at, razorpay_payment_id, razorpay_order_id, payment_method, user_id, user:organizations(name)"
         )
         .gte("created_at", since)
         .order("created_at", { ascending: false }),

@@ -13,7 +13,7 @@ export const GET = defineRoute<unknown, unknown, { id: string }>({
     const supabase = await createClient()
     const { data, error } = await supabase
       .from("galleries")
-      .select("*, event:events(id, name, slug, organization_id)")
+      .select("*, event:events(id, name, slug, user_id)")
       .eq("id", id)
       .single()
     if (error || !data) return ApiErrors.notFound("Gallery")

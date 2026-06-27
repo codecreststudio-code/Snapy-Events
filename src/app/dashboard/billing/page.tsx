@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/hooks"
 import { createClient } from "@/lib/supabase/client"
-import { PLANS, PLAN_LIMITS, PLAN_PRICES } from "@/lib/constants"
+
 import { formatDate } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
@@ -14,7 +14,14 @@ import { Badge } from "@/lib/components/ui/badge"
 import { Skeleton } from "@/lib/components/ui/skeleton"
 import { toast } from "@/lib/components/ui/toaster"
 import { Label } from "@/lib/components/ui/label"
-import { Check, Zap, Crown, Sparkles, ArrowRight } from "lucide-react"
+import {
+  Check,
+  Zap,
+  Crown,
+  Sparkles,
+  ArrowRight,
+  Settings
+} from "lucide-react"
 import type { PlanId, Subscription } from "@/lib/types"
 import { Playfair_Display, Inter } from "next/font/google"
 
@@ -134,16 +141,16 @@ async function getSubscription(): Promise<Subscription | null> {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("organization_id")
+    .select("user_id")
     .eq("id", user.id)
     .single()
 
-  if (!profile?.organization_id) return null
+  if (!profile?.user_id) return null
 
   const { data, error } = await supabase
     .from("subscriptions")
     .select("*")
-    .eq("organization_id", profile.organization_id)
+    .eq("user_id", profile.user_id)
     .eq("status", "active")
     .single()
 
@@ -151,17 +158,17 @@ async function getSubscription(): Promise<Subscription | null> {
   return data || null
 }
 
-async function getOrganization() {
+async function getUserProfile() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
   const { data } = await supabase
     .from("users")
-    .select("organization:organizations(*)")
+    .select("plan, settings")
     .eq("id", user.id)
     .single()
-  return (data?.organization as any as { id: string; name: string; plan: PlanId; settings?: any } | null)
+  return data
 }
 
 function PricingCard({
@@ -346,24 +353,24 @@ export default function BillingPage() {
     queryFn: getSubscription,
   })
 
-  const { data: organization, isLoading: orgLoading } = useQuery({
-    queryKey: ["organization"],
-    queryFn: getOrganization,
+  const { data: userProfile, isLoading: profileLoading } = useQuery({
+    queryKey: ["userProfile"],
+    queryFn: getUserProfile,
   })
 
-  const currentPlan = organization?.plan || "free"
-  const currentSettings = organization?.settings || {}
+  const currentPlan = userProfile?.plan || "free"
+  const currentSettings = (userProfile?.settings as any) || {}
   const currentGuestBoost = currentSettings.guest_boost || 0
   const currentShotsBoost = currentSettings.shots_boost || 0
 
   // Set default selection based on current organization plan/settings on load
   useEffect(() => {
-    if (organization) {
-      setSelectedPlan(organization.plan || "free")
-      setGuestBoost(organization.settings?.guest_boost || 0)
-      setShotBoost(organization.settings?.shots_boost || 0)
+    if (userProfile) {
+      setSelectedPlan(userProfile.plan || "free")
+      setGuestBoost((userProfile.settings as any)?.guest_boost || 0)
+      setShotBoost((userProfile.settings as any)?.shots_boost || 0)
     }
-  }, [organization])
+  }, [userProfile])
 
   // Dynamic database plans sync
   useEffect(() => {
@@ -373,23 +380,25 @@ export default function BillingPage() {
         if (res.ok) {
           const result = await res.json()
           if (result.success && Array.isArray(result.data)) {
-            const mapped = PLAN_INFO.map(plan => {
-              const dbPlan = result.data.find((p: any) => p.id === plan.id)
-              if (dbPlan) {
-                return {
-                  ...plan,
-                  price: dbPlan.price_inr,
-                  priceMonthly: dbPlan.price_inr,
-                  features: Array.isArray(dbPlan.features) ? dbPlan.features : plan.features,
-                  limits: {
-                    events: dbPlan.limits?.events_limit ?? plan.limits.events,
-                    storage: dbPlan.limits?.storage_limit_gb ?? plan.limits.storage,
-                    photos: dbPlan.limits?.photo_limit ?? plan.limits.photos,
-                  }
+            const mapped = result.data.map((dbPlan: any) => {
+              return {
+                id: dbPlan.id,
+                name: dbPlan.name,
+                description: dbPlan.description || "",
+                price: dbPlan.price_inr,
+                priceMonthly: dbPlan.price_inr,
+                features: Array.isArray(dbPlan.features) ? dbPlan.features : [],
+                limits: {
+                  events: dbPlan.limits?.events_limit ?? -1,
+                  storage: dbPlan.limits?.storage_limit_gb ?? 0,
+                  photos: dbPlan.limits?.photo_limit ?? -1,
                 }
               }
-              return plan
             })
+            // Add free tier if not returned in API to preserve basic functionality
+            if (!mapped.find((m: any) => m.id === "free")) {
+              mapped.unshift(PLAN_INFO[0])
+            }
             setPlansList(mapped)
           }
         }
@@ -432,7 +441,7 @@ export default function BillingPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subscription"] })
-      queryClient.invalidateQueries({ queryKey: ["organization"] })
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] })
       router.refresh()
     },
     onError: (error: Error) => {
@@ -544,7 +553,7 @@ export default function BillingPage() {
     }
   }
 
-  if (subLoading || orgLoading) {
+  if (subLoading || profileLoading) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-10 w-1/3" />

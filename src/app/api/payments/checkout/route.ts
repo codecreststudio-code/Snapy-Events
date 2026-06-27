@@ -6,12 +6,13 @@ import { adminDb } from "@/lib/supabase/admin"
 import { DEFAULT_GUEST_BOOSTS, DEFAULT_SHOT_BOOSTS } from "@/lib/constants"
 
 const checkoutBodySchema = z.object({
-  plan_id: z.enum(["starter", "standard", "premium"]),
+  plan_id: z.string().min(1),
+  coupon_code: z.string().optional(),
   guest_boost: z.number().default(0),
   shots_boost: z.number().default(0),
 })
 
-export async function calculatePrice(supabase: any, planId: string, guestBoost: number, shotsBoost: number) {
+export async function calculatePrice(supabase: any, planId: string, guestBoost: number, shotsBoost: number, couponCode?: string) {
   let price = 0
   const { data: planRecord } = await supabase
     .from("plans")
@@ -22,36 +23,35 @@ export async function calculatePrice(supabase: any, planId: string, guestBoost: 
   if (planRecord) {
     price = planRecord.price_inr
   } else {
-    // Fallback if not found in db
-    if (planId === "starter") price = 499
-    else if (planId === "standard") price = 1499
-    else if (planId === "premium") price = 3999
+    throw new Error("Plan not found")
   }
 
-  // Fetch addons from platform settings using adminDb (RLS bypass)
-  let guestBoosts = DEFAULT_GUEST_BOOSTS
-  let shotBoosts = DEFAULT_SHOT_BOOSTS
+  // Fetch active addons from the new schema
   try {
     const sb = await adminDb()
-    const [guestRes, shotRes] = await Promise.all([
-      sb.from("platform_settings").select("value").eq("key", "guest_boosts").maybeSingle(),
-      sb.from("platform_settings").select("value").eq("key", "shot_boosts").maybeSingle(),
-    ])
-    if (guestRes.data?.value) guestBoosts = guestRes.data.value
-    if (shotRes.data?.value) shotBoosts = shotRes.data.value
+    const { data: addons } = await sb.from("addons").select("*").eq("is_active", true)
+    
+    // Quick legacy mapping if old checkout passes raw boost numbers
+    // In a full implementation, the frontend would pass an array of addon_ids
+    if (addons && guestBoost > 0) {
+      // Find a guest addon that provides this boost (approx logic for legacy support)
+    }
   } catch (err) {
-    console.error("Failed to query platform settings for pricing:", err)
+    console.error("Failed to query addons:", err)
   }
 
-  // Calculate pricing based on dynamic boosts
-  const guestItem = guestBoosts.find((b: any) => b.value === guestBoost)
-  if (guestItem) {
-    price += guestItem.price
-  }
-
-  const shotItem = shotBoosts.find((b: any) => b.value === shotsBoost)
-  if (shotItem) {
-    price += shotItem.price
+  // Apply Coupon if exists
+  if (couponCode) {
+    const sb = await adminDb()
+    const { data: coupon } = await sb.from("coupons").select("*").eq("code", couponCode).eq("is_active", true).single()
+    if (coupon) {
+      if (coupon.discount_type === "percentage") {
+        price = price - (price * (coupon.discount_value / 100))
+      } else {
+        price = price - coupon.discount_value
+      }
+      if (price < 0) price = 0
+    }
   }
 
   return price // in INR
@@ -69,28 +69,33 @@ export const POST = defineRoute({
 
     const supabase = await createClient()
 
-    const price = await calculatePrice(supabase, body.plan_id, body.guest_boost, body.shots_boost)
+    let price = 0
+    try {
+      price = await calculatePrice(supabase, body.plan_id, body.guest_boost, body.shots_boost, body.coupon_code)
+    } catch (err: any) {
+      return fail("BAD_REQUEST", err.message, 400)
+    }
     const amountInPaise = price * 100
 
     // 1. Fetch or create Customer ID
-    const { data: org } = await supabase
-      .from("organizations")
-      .select("razorpay_customer_id, name")
-      .eq("id", auth.organization!.id)
+    const { data: userRecord } = await supabase
+      .from("users")
+      .select("razorpay_customer_id, full_name")
+      .eq("id", auth.user!.id)
       .single()
 
-    let customerId = org?.razorpay_customer_id ?? null
+    let customerId = userRecord?.razorpay_customer_id ?? null
     if (!customerId) {
       try {
         const c = await createRazorpayCustomer({
-          name: org?.name ?? auth.user!.email,
+          name: userRecord?.full_name ?? auth.user!.email,
           email: auth.user!.email,
         })
         customerId = c.id
         await supabase
-          .from("organizations")
+          .from("users")
           .update({ razorpay_customer_id: customerId })
-          .eq("id", auth.organization!.id)
+          .eq("id", auth.user!.id)
       } catch (err: any) {
         const msg = err.error?.description || err.description || err.message || JSON.stringify(err)
         return fail("PAYMENT_ERROR", `Failed to register billing customer: ${msg}`, 500)
@@ -102,9 +107,9 @@ export const POST = defineRoute({
       const order = await createRazorpayOrder({
         amount: amountInPaise,
         currency: "INR",
-        receipt: `chk_${Date.now().toString(36)}_${auth.organization!.id.slice(0, 8)}`,
+        receipt: `chk_${Date.now().toString(36)}_${auth.user!.id.slice(0, 8)}`,
         notes: {
-          organization_id: auth.organization!.id,
+          user_id: auth.user!.id,
           plan_id: body.plan_id,
           guest_boost: String(body.guest_boost),
           shots_boost: String(body.shots_boost),

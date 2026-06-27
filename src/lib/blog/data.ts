@@ -117,9 +117,9 @@ For a wedding with 100+ guests, the Standard plan gives you unlimited guest uplo
 **Use AI Face Search to find yourself in every photo:**
 After the wedding, guests can take a selfie to instantly find all their photos in the gallery, saving hours of scrolling through thousands of images.
 
-### Benefits vs. Traditional Disposable Cameras
+### Benefits vs. Traditional Disposable Camera
 
-| Feature | Disposable Cameras | QR Gallery |
+| Feature | Disposable Camera | QR Gallery |
 |---|---|---|
 | Cost per event | ₹5,000–₹15,000 | ₹499–₹1,499 |
 | Photo quality | Medium | High (original quality) |
@@ -432,7 +432,7 @@ Snapsy's analytics dashboard gives you these insights automatically.
   },
   {
     id: "post-7",
-    title: "Best Cameras for Event Photography in 2025",
+    title: "Best Camera for Event Photography in 2025",
     slug: "best-cameras-event-photography-2025",
     excerpt: "Our top camera picks for event photographers in 2025 — from mirrorless flagships to budget-friendly options that still deliver stunning results.",
     cover_image_url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1200&q=80",
@@ -445,7 +445,7 @@ Snapsy's analytics dashboard gives you these insights automatically.
     is_trending: false,
     view_count: 3100,
     published_at: "2025-05-10",
-    seo_title: "Best Cameras for Event Photography in 2025 | Snapsy Blog",
+    seo_title: "Best Camera for Event Photography in 2025 | Snapsy Blog",
     seo_description: "Top camera recommendations for event photographers in 2025. Full-frame mirrorless, APS-C, and budget options reviewed for wedding, corporate, and birthday events.",
     content: `## Choosing the Right Camera for Event Photography
 
@@ -984,7 +984,7 @@ For decades, disposable cameras sat on wedding tables, birthday party tables, an
 
 The digital disposable camera has arrived. And it's just a QR code.
 
-### Why Physical Disposable Cameras Are Fading
+### Why Physical Disposable Camera Are Fading
 
 **Cost**: Physical cameras cost ₹350–₹600 each. For 20 tables, that's ₹7,000–₹12,000 before development.
 

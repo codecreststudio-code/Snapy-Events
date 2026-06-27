@@ -20,7 +20,7 @@ export const GET = defineRoute({
     let q = supabase
       .from("analytics_events")
       .select("*", { count: "exact" })
-      .eq("organization_id", auth.organization!.id)
+      .eq("host_id", auth.user!.id)
       .order("created_at", { ascending: false })
     if (query.type) q = q.eq("event_type", query.type)
     if (query.since) q = q.gte("created_at", query.since)

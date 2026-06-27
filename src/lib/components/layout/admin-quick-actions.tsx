@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronDown, Shield, Info, Activity, Settings, Users, CreditCard } from "lucide-react"
+import { Settings, Users, ChevronDown, Shield, Info, Activity, CreditCard } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import {
   DropdownMenu,

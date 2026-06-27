@@ -18,7 +18,7 @@ export const GET = defineRoute({
     const supabase = await createClient()
     let q = supabase
       .from("galleries")
-      .select("*, event:events(id, name, slug, organization_id)", { count: "exact" })
+      .select("*, event:events(id, name, slug, user_id)", { count: "exact" })
       .order("created_at", { ascending: false })
     if (query.eventId) q = q.eq("event_id", query.eventId)
     const from = (query.page - 1) * query.pageSize

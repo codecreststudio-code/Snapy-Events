@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
 import { toast } from "@/lib/components/ui/toaster"
-import { Search, RefreshCw, Trash2, ShieldAlert, Play, Eye, Loader2, Calendar, User, Film, Clock, HardDrive } from "lucide-react"
+import { Search, RefreshCw, Trash2, ShieldAlert, Play, Eye, Loader2, Calendar, Film, Clock, HardDrive } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type VideoItem = {

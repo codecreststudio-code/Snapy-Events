@@ -14,7 +14,7 @@ export const GET = defineRoute<unknown, z.infer<typeof query>, { id: string }>({
     const supabase = await createClient()
     const since = new Date(Date.now() - query.days * 24 * 3600 * 1000).toISOString()
     const [{ data: views }, { data: uploads }, { count: photoCount }, { count: scanCount }] = await Promise.all([
-      supabase.from("analytics_events").select("created_at").eq("event_type", "event.view").eq("organization_id", auth.organization!.id).gte("created_at", since),
+      supabase.from("analytics_events").select("created_at").eq("event_type", "event.view").eq("host_id", auth.user!.id).gte("created_at", since),
       supabase.from("photos").select("id", { count: "exact" }).eq("event_id", id),
       supabase.from("photos").select("id", { count: "exact", head: true }).eq("event_id", id),
       supabase.from("qr_scans").select("id", { count: "exact", head: true }).eq("event_id", id),

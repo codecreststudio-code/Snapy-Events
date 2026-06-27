@@ -9,12 +9,12 @@ import {
   QrCode,
   Settings,
   CreditCard,
-  Users,
   Download,
   LogOut,
   Menu,
   X,
   ChevronDown,
+  User
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/lib/components/ui/button"

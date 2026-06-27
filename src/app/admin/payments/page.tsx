@@ -17,7 +17,7 @@ type PaymentTx = {
   status: string
   payment_method: string | null
   created_at: string
-  organization?: {
+  user?: {
     name: string
   }
 }
@@ -35,7 +35,7 @@ export default function AdminPaymentsPage() {
     try {
       const { data, error } = await supabase
         .from("transactions")
-        .select("id, razorpay_payment_id, razorpay_order_id, amount, currency, status, payment_method, created_at, organization:organizations(name)")
+        .select("id, razorpay_payment_id, razorpay_order_id, amount, currency, status, payment_method, created_at, user:organizations(name)")
         .order("created_at", { ascending: false })
 
       if (error) throw error
@@ -81,7 +81,7 @@ export default function AdminPaymentsPage() {
     return (
       (tx.razorpay_payment_id || "").toLowerCase().includes(term) ||
       (tx.razorpay_order_id || "").toLowerCase().includes(term) ||
-      (tx.organization?.name || "").toLowerCase().includes(term)
+      (tx.user?.name || "").toLowerCase().includes(term)
     )
   })
 
@@ -179,7 +179,7 @@ export default function AdminPaymentsPage() {
                         <div className="font-mono text-slate-800 font-bold">{tx.razorpay_payment_id || "N/A"}</div>
                         <div className="text-[10px] text-slate-400 mt-0.5">Order: {tx.razorpay_order_id || "N/A"}</div>
                       </td>
-                      <td className="p-4 font-semibold text-slate-700">{tx.organization?.name || "N/A"}</td>
+                      <td className="p-4 font-semibold text-slate-700">{tx.user?.name || "N/A"}</td>
                       <td className="p-4 font-extrabold text-slate-850 text-sm">
                         ₹{(tx.amount / 100).toLocaleString()}
                       </td>

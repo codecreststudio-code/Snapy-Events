@@ -15,14 +15,14 @@ export async function GET(request: NextRequest) {
     if (!error && data?.user) {
       const userId = data.user.id
       
-      // Check if user already has an organization_id associated in public.users
+      // Check if user already has an user_id associated in public.users
       const { data: profile } = await supabase
         .from("users")
-        .select("organization_id, full_name, email")
+        .select("user_id, full_name, email")
         .eq("id", userId)
         .single()
 
-      if (profile && !profile.organization_id) {
+      if (profile && !profile.user_id) {
         const svc = await createServiceClient()
         
         // Automatically create a default organization for new OAuth users
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
           await svc
             .from("users")
             .update({
-              organization_id: org.id,
+              user_id: data.user.id,
               role: "owner",
               permissions: ["*"],
             })

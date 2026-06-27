@@ -7,7 +7,15 @@ import { Input } from "@/lib/components/ui/input"
 import { Switch } from "@/lib/components/ui/switch"
 import { Label } from "@/lib/components/ui/label"
 import { toast } from "@/lib/components/ui/toaster"
-import { Save, Shield, Key, Eye, Mail } from "lucide-react"
+import {
+  Save,
+  Shield,
+  Key,
+  Eye,
+  Mail,
+  Activity,
+  Settings
+} from "lucide-react"
 import { updatePlatformSettings } from "@/app/actions/admin-settings"
 
 export function SettingsClient({ initialSettings }: { initialSettings: any }) {

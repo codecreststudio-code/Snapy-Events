@@ -25,7 +25,6 @@ import {
   QrCode,
   Settings,
   Trash2,
-  Users,
   Clock,
   Sparkles,
   Play,
@@ -37,10 +36,10 @@ import {
   X,
   Plus,
   Activity,
-  UserCheck,
   Search,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Users
 } from "lucide-react"
 
 const playfair = Playfair_Display({
@@ -100,7 +99,7 @@ async function getEvent(slug: string, orgId: string): Promise<Event> {
     .from("events")
     .select("*")
     .eq("slug", slug)
-    .eq("organization_id", orgId)
+    .eq("host_id", orgId)
     .single()
 
   if (error) throw error
@@ -181,7 +180,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const router = useRouter()
   const queryClient = useQueryClient()
   const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.organization_id
+  const orgId = profile?.user_id
 
   // State management
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)

@@ -21,7 +21,7 @@ async function getEvents(orgId: string): Promise<Event[]> {
   const { data, error } = await supabase
     .from("events")
     .select("*")
-    .eq("organization_id", orgId)
+    .eq("host_id", orgId)
     .order("created_at", { ascending: false })
 
   if (error) throw error
@@ -30,7 +30,7 @@ async function getEvents(orgId: string): Promise<Event[]> {
 
 export default function EventsPage() {
   const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.organization_id
+  const orgId = profile?.user_id
 
   const { data: events, isLoading: eventsLoading } = useQuery({
     queryKey: ["events", orgId],

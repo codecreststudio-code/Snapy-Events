@@ -6,8 +6,7 @@ import { createServiceClient } from "@/lib/supabase/server"
 import type { NextRequest } from "next/server"
 
 export interface TrackEventInput {
-  organization_id: string | null
-  user_id: string | null
+  user_id?: string
   event_type: string
   event_data?: Record<string, unknown>
   session_id?: string | null
@@ -20,7 +19,6 @@ export async function trackEvent(input: TrackEventInput) {
     const ip = input.request?.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null
     const ua = input.request?.headers.get("user-agent") ?? null
     await supabase.from("analytics_events").insert({
-      organization_id: input.organization_id,
       user_id: input.user_id,
       event_type: input.event_type,
       event_data: input.event_data ?? {},

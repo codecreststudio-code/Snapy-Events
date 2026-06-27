@@ -10,7 +10,7 @@ type FlagKey = keyof typeof FEATURE_FLAGS | string
 
 export function isEnabled(ctx: AuthContext | null, flag: FlagKey): boolean {
   if (!ctx) return false
-  return Boolean(ctx.organization?.feature_flags?.[flag])
+  return Boolean((ctx.user as any)?.settings?.[flag])
 }
 
 export function isPhaseEnabled(phase: "payments" | "ai" | "premium" | "enterprise" | "whatsapp"): boolean {

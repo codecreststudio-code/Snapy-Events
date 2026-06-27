@@ -11,7 +11,7 @@ export const POST = defineRoute({
   requireAuth: true,
   audit: "ai.face.detect",
   handler: async ({ body, auth }) => {
-    if (!auth.organization?.feature_flags?.["ai_face_search"]) return fail("FORBIDDEN", "AI search not enabled", 403)
+    if (!(auth.user as any)?.settings?.["ai_face_search"]) return fail("FORBIDDEN", "AI search not enabled", 403)
     const supabase = await createClient()
     const { data: photo } = await supabase.from("photos").select("storage_path").eq("id", body.photo_id).single()
     if (!photo) return fail("NOT_FOUND", "Photo not found", 404)

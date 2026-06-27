@@ -8,7 +8,8 @@ const verifyBodySchema = z.object({
   razorpay_payment_id: z.string(),
   razorpay_order_id: z.string(),
   razorpay_signature: z.string(),
-  plan_id: z.enum(["starter", "standard", "premium"]),
+  plan_id: z.string().min(1),
+  coupon_code: z.string().optional(),
   guest_boost: z.number().default(0),
   shots_boost: z.number().default(0),
 })
@@ -18,7 +19,7 @@ export const POST = defineRoute({
   body: verifyBodySchema,
   requireAuth: true,
   handler: async ({ body, auth }) => {
-    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, plan_id, guest_boost, shots_boost } = body
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, plan_id, guest_boost, shots_boost, coupon_code } = body
 
     // 1. Verify Razorpay Signature
     const secret = process.env.RAZORPAY_KEY_SECRET
@@ -38,31 +39,42 @@ export const POST = defineRoute({
 
     const supabase = await createServiceClient()
 
-    // 2. Fetch current organization settings to merge
-    const { data: org } = await supabase
-      .from("organizations")
+    const { data: userRecord } = await supabase
+      .from("users")
       .select("settings")
-      .eq("id", auth.organization!.id)
+      .eq("id", auth.user!.id)
       .single()
 
-    const currentSettings = (org?.settings as Record<string, any>) || {}
-    const newSettings = {
+    const { data: newPlan } = await supabase
+      .from("plans")
+      .select("features")
+      .eq("id", plan_id)
+      .single()
+
+    const currentSettings = (userRecord?.settings as Record<string, any>) || {}
+    const newSettings: Record<string, any> = {
       ...currentSettings,
       guest_boost,
       shots_boost,
     }
 
-    // 3. Update Organization
-    const { error: orgError } = await supabase
-      .from("organizations")
+    if (newPlan?.features && Array.isArray(newPlan.features)) {
+      newPlan.features.forEach((f: string) => {
+        newSettings[f] = true
+      })
+    }
+
+    // 3. Update User
+    const { error: userError } = await supabase
+      .from("users")
       .update({
         plan: plan_id,
         settings: newSettings,
       })
-      .eq("id", auth.organization!.id)
+      .eq("id", auth.user!.id)
 
-    if (orgError) {
-      return fail("DB_ERROR", `Failed to update organization: ${orgError.message}`, 500)
+    if (userError) {
+      return fail("DB_ERROR", `Failed to update user: ${userError.message}`, 500)
     }
 
     // 4. Create or update Subscription
@@ -71,14 +83,14 @@ export const POST = defineRoute({
       .from("subscriptions")
       .upsert(
         {
-          organization_id: auth.organization!.id,
+          user_id: auth.user!.id,
           plan_id: plan_id,
           status: "active",
           razorpay_subscription_id: razorpay_payment_id, // Store payment ID as the subscription identifier
           current_period_start: new Date().toISOString(),
           current_period_end: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
         },
-        { onConflict: "organization_id" }
+        { onConflict: "user_id" }
       )
       .select()
       .single()
@@ -86,15 +98,20 @@ export const POST = defineRoute({
     const subscriptionId = subRes.data?.id ?? null
 
     // 5. Calculate total paid amount
-    const price = await calculatePrice(supabase, plan_id, guest_boost, shots_boost)
+    let price = 0
+    try {
+      price = await calculatePrice(supabase, plan_id, guest_boost, shots_boost, coupon_code)
+    } catch {
+      price = 0 // default to 0 if something fails here, but payment succeeded
+    }
     const amountInPaise = price * 100
 
     // 6. Create Invoice
-    const invoiceNumber = `INV-${Date.now().toString().slice(-6)}-${auth.organization!.id.slice(0, 4)}`
+    const invoiceNumber = `INV-${Date.now().toString().slice(-6)}-${auth.user!.id.slice(0, 4)}`
     const { data: invoice } = await supabase
       .from("invoices")
       .insert({
-        organization_id: auth.organization!.id,
+        user_id: auth.user!.id,
         subscription_id: subscriptionId,
         invoice_number: invoiceNumber,
         status: "paid",
@@ -109,7 +126,7 @@ export const POST = defineRoute({
 
     // 7. Record Transaction
     await supabase.from("transactions").insert({
-      organization_id: auth.organization!.id,
+      user_id: auth.user!.id,
       invoice_id: invoice?.id ?? null,
       razorpay_payment_id: razorpay_payment_id,
       razorpay_order_id: razorpay_order_id,

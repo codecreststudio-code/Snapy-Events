@@ -16,17 +16,12 @@ export function hasPermission(role: UserRole, granted: Permission[], required: P
   return false
 }
 
-export function canAccessOrg(role: UserRole, userOrgId: string, targetOrgId: string): boolean {
-  if (role === "owner" || role === "admin") return userOrgId === targetOrgId
-  return userOrgId === targetOrgId
-}
-
 export function isAdminRole(role: UserRole): boolean {
   return role === "owner" || role === "admin"
 }
 
 export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
-  owner: "Full access including billing and organization deletion",
+  owner: "Full access including billing and account deletion",
   admin: "Manage events, users, and settings (no billing)",
   member: "Create and manage own events and galleries",
   viewer: "Read-only access to events and galleries",

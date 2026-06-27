@@ -22,7 +22,7 @@ export const POST = defineRoute({
     // 1. Fetch the transaction
     const { data: tx, error: txErr } = await sb
       .from("transactions")
-      .select("id, razorpay_payment_id, amount, status, organization_id")
+      .select("id, razorpay_payment_id, amount, status, user_id")
       .eq("id", transactionId)
       .single()
 

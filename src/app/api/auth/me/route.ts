@@ -12,5 +12,5 @@ export async function POST(_request: NextRequest) {
 
 export async function GET() {
   const ctx = await getAuthContext()
-  return ok({ user: ctx.user, organization: ctx.organization, role: ctx.role, permissions: ctx.permissions })
+  return ok({ user: ctx.user, role: ctx.role, permissions: ctx.permissions })
 }

@@ -16,7 +16,7 @@ interface EventData {
     enable_countdown: boolean
     countdown_date: string
   }
-  organization: {
+  user: {
     name: string
   } | null
 }
@@ -43,7 +43,7 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
     .from("events")
     .select(`
       *,
-      organization:organizations(name)
+      user:organizations(name)
     `)
     .eq("slug", slug)
     .eq("status", "published")
@@ -89,7 +89,7 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
 
           <div className="space-y-2">
             <p className="text-sm uppercase tracking-widest text-muted-foreground">
-              {event.organization?.name ?? "Event"}
+              {event.user?.name ?? "Event"}
             </p>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
               {event.name}

@@ -6,7 +6,21 @@ import { Card, CardContent } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
 import { toast } from "@/lib/components/ui/toaster"
-import { Search, ShieldAlert, Key, UserCheck, UserMinus, Trash2, ShieldCheck, RefreshCw, Sparkles, Loader2, Mail, ExternalLink } from "lucide-react"
+import {
+  Search,
+  ShieldAlert,
+  Key,
+  Trash2,
+  ShieldCheck,
+  RefreshCw,
+  Sparkles,
+  Loader2,
+  Mail,
+  ExternalLink,
+  UserCheck,
+  User,
+  UserMinus
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type UserItem = {
@@ -16,8 +30,8 @@ type UserItem = {
   role: string
   is_active: boolean
   created_at: string
-  organization_id: string | null
-  organization: {
+  user_id: string | null
+  user: {
     id: string
     name: string
     plan: string
@@ -145,7 +159,7 @@ export default function AdminUsersPage() {
       toast({ title: "Success", description: "User organization assignment updated." })
       fetchUsers()
       if (selectedUser?.id === userId) {
-        setSelectedUser(prev => prev ? { ...prev, organization_id: organizationId } : null)
+        setSelectedUser(prev => prev ? { ...prev, user_id: organizationId } : null)
       }
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" })
@@ -178,7 +192,7 @@ export default function AdminUsersPage() {
     return (
       u.email.toLowerCase().includes(term) ||
       (u.full_name || "").toLowerCase().includes(term) ||
-      (u.organization?.name || "").toLowerCase().includes(term)
+      (u.user?.name || "").toLowerCase().includes(term)
     )
   })
 
@@ -245,7 +259,7 @@ export default function AdminUsersPage() {
                             <div className="text-[10px] text-slate-400 mt-0.5">{u.email}</div>
                           </td>
                           <td className="p-4">
-                            <div className="text-slate-700 font-semibold">{u.organization?.name || "No Organization"}</div>
+                            <div className="text-slate-700 font-semibold">{u.user?.name || "No Organization"}</div>
                             <div className="text-[10px] text-slate-400 mt-0.5">Joined: {new Date(u.created_at).toLocaleDateString()}</div>
                           </td>
                           <td className="p-4" onClick={(e) => e.stopPropagation()}>
@@ -263,9 +277,9 @@ export default function AdminUsersPage() {
                           </td>
                         <td className="p-4" onClick={(e) => e.stopPropagation()}>
                           <select
-                            value={u.organization?.plan || "free"}
+                            value={u.user?.plan || "free"}
                             onChange={(e) => handlePlanChange(u.id, e.target.value)}
-                            disabled={!u.organization_id || actioningId === u.id}
+                            disabled={!u.user_id || actioningId === u.id}
                             className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-violet-500 font-semibold shadow-sm"
                           >
                             <option value="free">Free</option>
@@ -349,11 +363,11 @@ export default function AdminUsersPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400 font-bold uppercase tracking-wider">Organization ID</span>
-                  <span className="font-mono text-slate-700 font-semibold truncate max-w-[150px]">{selectedUser.organization_id || "N/A"}</span>
+                  <span className="font-mono text-slate-700 font-semibold truncate max-w-[150px]">{selectedUser.user_id || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400 font-bold uppercase tracking-wider">Plan Tier</span>
-                  <span className="text-violet-600 font-bold uppercase">{selectedUser.organization?.plan || "free"}</span>
+                  <span className="text-violet-600 font-bold uppercase">{selectedUser.user?.plan || "free"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400 font-bold uppercase tracking-wider">Join Date</span>
@@ -368,7 +382,7 @@ export default function AdminUsersPage() {
                   <Input
                     placeholder="Enter Organization ID (UUID)"
                     id="orgIdInput"
-                    defaultValue={selectedUser.organization_id || ""}
+                    defaultValue={selectedUser.user_id || ""}
                     className="h-8 text-xs bg-white border-slate-200 text-slate-800 shadow-sm"
                   />
                   <Button
