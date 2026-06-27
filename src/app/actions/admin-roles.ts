@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
 export async function getAdminProfiles() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) return { success: false, error: "Unauthorized" }
@@ -33,7 +33,7 @@ export async function getAdminProfiles() {
 }
 
 export async function revokeAdminAccess(userIdToRevoke: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) return { success: false, error: "Unauthorized" }
@@ -63,7 +63,7 @@ export async function revokeAdminAccess(userIdToRevoke: string) {
 }
 
 export async function grantAdminAccessByEmail(email: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) return { success: false, error: "Unauthorized" }
