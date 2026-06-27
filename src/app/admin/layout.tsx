@@ -15,16 +15,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const ctx = await getAuthContext()
   
   let needsMfa = false
+  let theme = "light"
   if (ctx.user) {
     const supabase = await createClient()
     const { data: authLevel } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
     needsMfa = authLevel?.nextLevel === 'aal2' && authLevel?.currentLevel !== 'aal2'
-  }
 
-  // Get user theme preference
-  let theme = "light"
-  if (ctx.user?.user_metadata?.theme) {
-    theme = ctx.user.user_metadata.theme
+    // Get user theme preference from auth metadata
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user?.user_metadata?.theme) {
+      theme = user.user_metadata.theme
+    }
   }
 
   return (
@@ -32,7 +33,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       needsMfa={needsMfa} 
       user={ctx.user}
       isAdmin={ctx.isAdmin}
-      isOwner={ctx.isOwner}
+      isOwner={ctx.role === "owner"}
       initialTheme={theme}
     >
       {children}
