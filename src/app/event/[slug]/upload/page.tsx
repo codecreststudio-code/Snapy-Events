@@ -321,7 +321,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         <p className="text-[#9C958E] mb-4">
           The event you're looking for doesn't exist or uploads are disabled.
         </p>
-        <Button asChild className="bg-[#A58263] hover:bg-[#8D6B50] text-white font-bold">
+        <Button asChild className="bg-[#9333EA] hover:bg-[#7E22CE] text-white font-bold">
           <Link href="/">Go Home</Link>
         </Button>
       </div>
@@ -385,7 +385,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
                 disabled={isUploading}
-                className="bg-white border-[#EAE5DF] text-[#1C1A17] focus:border-[#A58263] focus:ring-[#A58263]"
+                className="bg-white border-[#EAE5DF] text-[#1C1A17] focus:border-[#9333EA] focus:ring-[#9333EA]"
               />
             </div>
             <div className="space-y-2">
@@ -397,7 +397,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 value={guestEmail}
                 onChange={(e) => setGuestEmail(e.target.value)}
                 disabled={isUploading}
-                className="bg-white border-[#EAE5DF] text-[#1C1A17] focus:border-[#A58263] focus:ring-[#A58263]"
+                className="bg-white border-[#EAE5DF] text-[#1C1A17] focus:border-[#9333EA] focus:ring-[#9333EA]"
               />
             </div>
           </div>
@@ -410,7 +410,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
               <select
                 value={selectedGallery}
                 onChange={(e) => setSelectedGallery(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-[#EAE5DF] bg-white px-3 py-2 text-sm text-[#1C1A17] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58263]"
+                className="flex h-10 w-full rounded-md border border-[#EAE5DF] bg-white px-3 py-2 text-sm text-[#1C1A17] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#9333EA]"
               >
                 <option value="">Choose a gallery...</option>
                 {uploadGalleries.map((gallery) => (
@@ -433,11 +433,11 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div
-            className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#A58263] hover:bg-[#A58263]/5 transition-all cursor-pointer group"
+            className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#9333EA] hover:bg-[#9333EA]/5 transition-all cursor-pointer group"
             onClick={() => setShowCamera(true)}
           >
-            <div className="p-4 rounded-full bg-white group-hover:bg-[#A58263]/20 transition-colors border border-transparent group-hover:border-[#A58263]/30">
-              <CameraIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#A58263]" />
+            <div className="p-4 rounded-full bg-white group-hover:bg-[#9333EA]/20 transition-colors border border-transparent group-hover:border-[#9333EA]/30">
+              <CameraIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#9333EA]" />
             </div>
             <div className="text-center">
               <p className="font-medium text-[#1C1A17]">Take Photo</p>
@@ -446,18 +446,18 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
           </div>
 
           <div
-            className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#A58263] hover:bg-[#A58263]/5 transition-all cursor-pointer group"
+            className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#9333EA] hover:bg-[#9333EA]/5 transition-all cursor-pointer group"
             onClick={() => fileInputRef.current?.click()}
             onDragOver={(e) => {
               e.preventDefault()
-              e.currentTarget.classList.add("border-[#A58263]", "bg-[#A58263]/5")
+              e.currentTarget.classList.add("border-[#9333EA]", "bg-[#9333EA]/5")
             }}
             onDragLeave={(e) => {
-              e.currentTarget.classList.remove("border-[#A58263]", "bg-[#A58263]/5")
+              e.currentTarget.classList.remove("border-[#9333EA]", "bg-[#9333EA]/5")
             }}
             onDrop={(e) => {
               e.preventDefault()
-              e.currentTarget.classList.remove("border-[#A58263]", "bg-[#A58263]/5")
+              e.currentTarget.classList.remove("border-[#9333EA]", "bg-[#9333EA]/5")
               handleFileSelect(e.dataTransfer.files)
             }}
           >
@@ -469,8 +469,8 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
               className="hidden"
               onChange={(e) => handleFileSelect(e.target.files)}
             />
-            <div className="p-4 rounded-full bg-white group-hover:bg-[#A58263]/20 transition-colors border border-transparent group-hover:border-[#A58263]/30">
-              <ImageIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#A58263]" />
+            <div className="p-4 rounded-full bg-white group-hover:bg-[#9333EA]/20 transition-colors border border-transparent group-hover:border-[#9333EA]/30">
+              <ImageIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#9333EA]" />
             </div>
             <div className="text-center">
               <p className="font-medium text-[#1C1A17]">Upload Gallery</p>
@@ -543,7 +543,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
               <Button
                 onClick={uploadFiles}
                 disabled={!selectedGallery || isUploading || files.length === 0}
-                className="bg-[#A58263] hover:bg-[#8D6B50] text-white font-bold px-6 py-5 rounded-xl shadow-[0_0_15px_rgba(165,130,99,0.25)]"
+                className="bg-[#9333EA] hover:bg-[#7E22CE] text-white font-bold px-6 py-5 rounded-xl shadow-[0_0_15px_rgba(147,51,234,0.25)]"
               >
                 {isUploading ? (
                   <>
