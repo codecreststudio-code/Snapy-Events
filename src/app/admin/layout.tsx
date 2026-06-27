@@ -14,19 +14,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // Verify administrator access on server side (also guarded by middleware)
   const ctx = await getAuthContext()
   
+  let needsMfa = false
   if (ctx.user) {
     const supabase = await createClient()
     const { data: authLevel } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-    
-    // If the user has set up 2FA (nextLevel is aal2) but hasn't verified it yet in this session
-    if (authLevel?.nextLevel === 'aal2' && authLevel?.currentLevel !== 'aal2') {
-      redirect("/admin/mfa")
-    }
+    needsMfa = authLevel?.nextLevel === 'aal2' && authLevel?.currentLevel !== 'aal2'
   }
 
-  
   return (
-    <AdminLayoutWrapper>
+    <AdminLayoutWrapper needsMfa={needsMfa}>
       {children}
     </AdminLayoutWrapper>
   )
