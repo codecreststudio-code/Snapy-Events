@@ -1,6 +1,6 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
 export async function getAdminProfiles() {
@@ -49,7 +49,8 @@ export async function revokeAdminAccess(userIdToRevoke: string) {
     return { success: false, error: "Unauthorized" }
   }
 
-  const { error } = await supabase
+  const svc = await createServiceClient()
+  const { error } = await svc
     .from("users")
     .update({ is_admin: false })
     .eq("id", userIdToRevoke)
@@ -89,7 +90,8 @@ export async function grantAdminAccessByEmail(email: string) {
     return { success: false, error: "User with this email not found in the system. They must sign up first." }
   }
 
-  const { error: updateError } = await supabase
+  const svc = await createServiceClient()
+  const { error: updateError } = await svc
     .from("users")
     .update({ is_admin: true })
     .eq("id", targetUser.id)
