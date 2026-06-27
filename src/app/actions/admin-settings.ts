@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
 export async function getPlatformSettings() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) return { success: false, error: "Unauthorized" }
@@ -39,7 +39,7 @@ export async function getPlatformSettings() {
 }
 
 export async function updatePlatformSettings(key: string, value: any) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) return { success: false, error: "Unauthorized" }

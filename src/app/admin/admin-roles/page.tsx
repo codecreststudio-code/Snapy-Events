@@ -7,10 +7,10 @@ export const metadata = {
 }
 
 export default async function AdminRolesPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
   const { data: admins, success } = await getAdminProfiles()
   
-  return <AdminRolesClient initialAdmins={success ? admins : []} currentUserId={user?.id} />
+  return <AdminRolesClient initialAdmins={(admins as any[]) || []} currentUserId={user?.id} />
 }
