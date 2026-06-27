@@ -97,6 +97,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/admin/feature-flags", label: "Feature Flags", icon: Sliders },
       { href: "/admin/settings", label: "Settings", icon: Settings },
       { href: "/admin/admin-roles", label: "Admin Roles", icon: Shield },
+      { href: "/admin/profile", label: "Profile Settings", icon: Users },
     ],
   },
 ]
