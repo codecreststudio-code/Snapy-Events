@@ -57,6 +57,7 @@ const TEMPLATE_COVERS = [
 
 // Types for settings
 interface ExtEventSettings extends EventSettings {
+  allowed_filters?: string[]
   cover_gradient?: string | null
   reveal_experience?: string
   photo_limit?: number
@@ -117,6 +118,41 @@ async function getEventPhotos(eventId: string) {
   return data || []
 }
 
+// Fetch face clusters
+async function getFaceClusters(eventId: string) {
+  const supabase = createClient()
+  const { data } = await supabase
+    .from("face_clusters")
+    .select("*, representative_face:representative_face_id(photo:photo_id(thumbnail_path, storage_path))")
+    .eq("event_id", eventId)
+    .order("face_count", { ascending: false })
+  return data || []
+}
+
+// Fetch live wall items (messages)
+async function getLiveWallMessages(eventId: string) {
+  const supabase = createClient()
+  const { data } = await supabase
+    .from("live_wall_items")
+    .select("*, photo:photo_id(uploader_name, uploader_email, thumbnail_path)")
+    .eq("event_id", eventId)
+    .not("message", "is", null)
+    .order("created_at", { ascending: false })
+  return data || []
+}
+
+// Fetch photo access (for guest activity)
+async function getPhotoAccess(eventId: string) {
+  const supabase = createClient()
+  const { data } = await supabase
+    .from("photo_access")
+    .select("*")
+    .eq("event_id", eventId)
+    .order("accessed_at", { ascending: false })
+    .limit(20)
+  return data || []
+}
+
 // Update event details
 async function updateEvent(slug: string, data: any, currentSettings: any) {
   const supabase = createClient()
@@ -168,6 +204,24 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     enabled: !!event?.id,
   })
 
+  const { data: faceClusters = [] } = useQuery({
+    queryKey: ["face-clusters", event?.id],
+    queryFn: () => getFaceClusters(event!.id),
+    enabled: !!event?.id,
+  })
+
+  const { data: liveWallMessages = [] } = useQuery({
+    queryKey: ["live-wall-messages", event?.id],
+    queryFn: () => getLiveWallMessages(event!.id),
+    enabled: !!event?.id,
+  })
+
+  const { data: photoAccess = [] } = useQuery({
+    queryKey: ["photo-access", event?.id],
+    queryFn: () => getPhotoAccess(event!.id),
+    enabled: !!event?.id,
+  })
+
   // Mutate endpoints
   const updateMutation = useMutation({
     mutationFn: (data: any) => updateEvent(slug, data, event?.settings || {}),
@@ -196,16 +250,16 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [editName, setEditName] = useState("")
   const [editStatus, setEditStatus] = useState<EventStatus>("published")
   const [editEndDate, setEditEndDate] = useState("")
+  const [editAllowedFilters, setEditAllowedFilters] = useState<string[]>([])
 
   useEffect(() => {
     if (event) {
       setEditName(event.name)
-      setEditStatus(event.status)
-      if (event.end_date) {
-        setEditEndDate(new Date(event.end_date).toISOString().slice(0, 16))
-      }
+      setEditStatus(event.status as EventStatus)
+      setEditEndDate(event.end_date ? new Date(event.end_date).toISOString().slice(0, 16) : "")
+      setEditAllowedFilters((event.settings as ExtEventSettings)?.allowed_filters || ["normal", "golden_hour", "vintage", "bw", "cinematic", "vivid", "cyberpunk", "dreamy"])
     }
-  }, [event])
+  }, [event, isDrawerOpen])
 
   // Countdown timer calculation
   useEffect(() => {
@@ -254,64 +308,128 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
   const settings = (event.settings || {}) as ExtEventSettings
 
-  // Mock guest counts, AI matches, messages, and voice notes for rich dashboard presentation
-  const MOCK_GUESTS = [
-    { name: "Sophia Miller", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&h=60&fit=crop", count: 8 },
-    { name: "Julian Carter", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop", count: 12 },
-    { name: "Elena Rostova", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop", count: 6 },
-    { name: "Marcus Vance", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&h=60&fit=crop", count: 4 },
-  ]
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+  const getImageUrl = (path: string | null, fallback: string = "/placeholder.png") => {
+    if (!path) return fallback
+    if (path.startsWith("http") || path.startsWith("blob:") || path.startsWith("data:")) return path
+    return `${supabaseUrl}/storage/v1/object/public/photos/${path}`
+  }
 
-  const MOCK_TIMELINE = [
-    {
-      id: "m1",
-      type: "message",
-      guest: "Sophia Miller",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&h=60&fit=crop",
-      time: "2 hours ago",
-      content: "Congratulations Evelyn and Liam! Truly beautiful night. Wishing you both a lifetime of happiness. ❤️🍾",
-      reaction: "🥂 4"
-    },
-    {
-      id: "v1",
-      type: "voice",
-      guest: "Julian Carter",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop",
-      time: "3 hours ago",
-      duration: "0:18",
-      category: "Wedding Wish",
-      audioUrl: "#"
-    },
-    {
-      id: "vid1",
-      type: "video",
-      guest: "Elena Rostova",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop",
-      time: "4 hours ago",
-      thumbnail: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&auto=format&fit=crop",
-      title: "First Dance Highlight clip",
-      duration: "15s"
-    },
-    {
-      id: "m2",
-      type: "message",
-      guest: "Marcus Vance",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&h=60&fit=crop",
-      time: "5 hours ago",
-      content: "The cocktails are incredible! Best wedding reception ever.",
-      reaction: "👍 2"
+  // Dynamic guest processing
+  const dynamicGuestsMap = new Map()
+  photos.forEach((p: any) => {
+    const name = p.uploader_name || "Anonymous Guest"
+    if (!dynamicGuestsMap.has(name)) {
+      dynamicGuestsMap.set(name, {
+        name,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`,
+        count: 1
+      })
+    } else {
+      dynamicGuestsMap.get(name).count += 1
     }
-  ]
+  })
+  const dynamicGuests = Array.from(dynamicGuestsMap.values()).sort((a: any, b: any) => b.count - a.count)
 
-  const MOCK_AI_MATCHES = [
-    { id: "c1", label: "Bride & Groom", photoCount: 15, cover: "https://images.unsplash.com/photo-1519741497674-611481863552?w=100&h=100&fit=crop" },
-    { id: "c2", label: "Best Friends Group", photoCount: 9, cover: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=100&h=100&fit=crop" },
-    { id: "c3", label: "Evelyn Family", photoCount: 6, cover: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop" },
-  ]
+  const dynamicAiMatches = faceClusters.map((c: any) => ({
+    id: c.id,
+    label: c.label || "Unknown Group",
+    photoCount: c.face_count || 0,
+    cover: getImageUrl(c.representative_face?.photo?.thumbnail_path || c.representative_face?.photo?.storage_path)
+  }))
+
+  const rawTimelineItems: any[] = []
+  const justPhotos: any[] = []
+
+  photos.forEach((p: any) => {
+    if (p.mime_type?.startsWith("video/")) {
+      rawTimelineItems.push({
+        id: p.id,
+        type: "video",
+        guest: p.uploader_name || "Anonymous",
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(p.uploader_name || "A")}&background=random`,
+        time: new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date(p.created_at).getTime(),
+        thumbnail: getImageUrl(p.thumbnail_path || p.storage_path, "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&auto=format&fit=crop"),
+        title: p.original_filename || "Video clip",
+        duration: "0:15"
+      })
+    } else if (p.mime_type?.startsWith("audio/")) {
+      rawTimelineItems.push({
+        id: p.id,
+        type: "voice",
+        guest: p.uploader_name || "Anonymous",
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(p.uploader_name || "A")}&background=random`,
+        time: new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date(p.created_at).getTime(),
+        category: "Voice Note",
+        duration: "0:30",
+        audioUrl: getImageUrl(p.storage_path, "")
+      })
+    } else {
+      justPhotos.push(p)
+    }
+  })
+
+  // Group photos
+  const photoGroups = new Map()
+  justPhotos.forEach((p: any) => {
+    const key = p.uploader_name || "Anonymous"
+    if (!photoGroups.has(key)) {
+      photoGroups.set(key, {
+        id: `pg-${p.id}`,
+        type: "photo_group",
+        guest: key,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(key)}&background=random`,
+        time: new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date(p.created_at).getTime(),
+        photos: []
+      })
+    }
+    photoGroups.get(key).photos.push(p)
+  })
+  rawTimelineItems.push(...Array.from(photoGroups.values()))
+
+  // Messages
+  liveWallMessages.forEach((m: any) => {
+    const name = m.photo?.uploader_name || "Anonymous"
+    rawTimelineItems.push({
+      id: m.id,
+      type: "message",
+      guest: name,
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`,
+      time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: new Date(m.created_at).getTime(),
+      content: m.message,
+      reaction: m.pinned ? "📌" : "💬"
+    })
+  })
+
+  const dynamicTimeline = rawTimelineItems.sort((a, b) => b.timestamp - a.timestamp)
+
+  // Activities
+  const dynamicActivities: any[] = []
+  photoAccess.forEach((a: any) => {
+    dynamicActivities.push({
+      actor: a.guest_name || "Someone",
+      action: "joined the capsule page",
+      time: new Date(a.accessed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: new Date(a.accessed_at).getTime(),
+    })
+  })
+  
+  dynamicTimeline.slice(0, 8).forEach((t: any) => {
+    if (t.type === "photo_group") dynamicActivities.push({ actor: t.guest, action: `uploaded ${t.photos.length} photos`, time: t.time, timestamp: t.timestamp })
+    if (t.type === "video") dynamicActivities.push({ actor: t.guest, action: `uploaded a video`, time: t.time, timestamp: t.timestamp })
+    if (t.type === "message") dynamicActivities.push({ actor: t.guest, action: `left a message`, time: t.time, timestamp: t.timestamp })
+    if (t.type === "voice") dynamicActivities.push({ actor: t.guest, action: `shared a voice note`, time: t.time, timestamp: t.timestamp })
+  })
+  dynamicActivities.sort((a, b) => b.timestamp - a.timestamp)
 
   // Filter contributions
-  const filteredTimeline = MOCK_TIMELINE.filter((item) => {
+  const filteredTimeline = dynamicTimeline.filter((item) => {
     if (activeMediaTab === "all") return true
+    if (activeMediaTab === "photos") return item.type === "photo_group"
     if (activeMediaTab === "videos") return item.type === "video"
     if (activeMediaTab === "voices") return item.type === "voice"
     if (activeMediaTab === "messages") return item.type === "message"
@@ -319,12 +437,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   })
 
   // Format stats counts
-  const totalPhotosCount = photos.length + 18
-  const totalVideosCount = 4
-  const totalVoicesCount = 7
-  const totalMessagesCount = 14
-  const totalGuestsCount = 38
-  const totalAiClusters = MOCK_AI_MATCHES.length
+  const totalPhotosCount = justPhotos.length
+  const totalVideosCount = dynamicTimeline.filter(t => t.type === "video").length
+  const totalVoicesCount = dynamicTimeline.filter(t => t.type === "voice").length
+  const totalMessagesCount = dynamicTimeline.filter(t => t.type === "message").length
+  const totalGuestsCount = dynamicGuests.length
+  const totalAiClusters = dynamicAiMatches.length
 
   const handleUpdateSave = (e: React.FormEvent) => {
     e.preventDefault()
@@ -333,7 +451,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       status: editStatus,
       end_date: editEndDate,
       settings: {
-        ...settings,
+        ...event?.settings,
+        allowed_filters: editAllowedFilters
       }
     })
   }
@@ -448,47 +567,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             
             <AnimatePresence mode="popLayout">
               
-              {/* Photo contribution layout */}
-              {(activeMediaTab === "all" || activeMediaTab === "photos") && (
-                <div className="timeline-item flex gap-4 items-start relative z-10">
-                  <div className="w-12 h-12 rounded-full border-4 border-[#FAF9F6] bg-[#FAF2EB] flex items-center justify-center text-white font-bold shrink-0 shadow-sm relative">
-                    <img src={MOCK_GUESTS[0].avatar} alt="Sophia" className="w-full h-full object-cover rounded-full" />
-                    <div className="absolute -bottom-1 -right-1 w-5.5 h-5.5 rounded-full bg-white flex items-center justify-center text-[10px] shadow-sm">📸</div>
-                  </div>
-                  
-                  <div className="flex-1 bg-white border border-[#EAE5DF] rounded-2xl p-4 space-y-3 shadow-sm hover:shadow-md transition-all">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-[#1C1A17]">{MOCK_GUESTS[0].name}</span>
-                      <span className="text-[#9C958E]">1 hour ago</span>
-                    </div>
-                    
-                    {/* Masonry-like dynamic Photo Grid */}
-                    <div className="grid grid-cols-3 gap-2">
-                      {photos.length > 0 ? (
-                        photos.map((p, idx) => (
-                          <div key={idx} className="aspect-square bg-stone-100 rounded-lg overflow-hidden relative group">
-                            <img src={p.thumbnailPath || "/placeholder.png"} alt="Upload" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <Download className="h-4 w-4 text-white cursor-pointer" />
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        [1, 2, 3, 4].map((i) => (
-                          <div key={i} className="aspect-square bg-stone-100 rounded-lg overflow-hidden relative group">
-                            <img src={TEMPLATE_COVERS[i % TEMPLATE_COVERS.length]} alt="Upload Placeholder" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
-                              <Download className="h-4 w-4 text-white" />
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                    
-                    <p className="text-[10px] text-[#A58263] font-semibold">Uploaded {photos.length || 4} high-resolution prints to Capsule</p>
-                  </div>
-                </div>
-              )}
+
 
               {/* Dynamic filtered Mock Timeline items (voice, videos, messages) */}
               {filteredTimeline.map((item) => (
@@ -503,6 +582,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   <div className="w-12 h-12 rounded-full border-4 border-[#FAF9F6] bg-[#FAF2EB] flex items-center justify-center shrink-0 shadow-sm relative">
                     <img src={item.avatar} alt={item.guest} className="w-full h-full object-cover rounded-full" />
                     <div className="absolute -bottom-1 -right-1 w-5.5 h-5.5 rounded-full bg-white flex items-center justify-center text-[10px] shadow-sm">
+                      {item.type === "photo_group" && "📸"}
                       {item.type === "message" && "💌"}
                       {item.type === "voice" && "🎤"}
                       {item.type === "video" && "🎥"}
@@ -514,6 +594,23 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       <span className="font-bold text-[#1C1A17]">{item.guest}</span>
                       <span className="text-[#9C958E]">{item.time}</span>
                     </div>
+
+                    {/* Photo group display */}
+                    {item.type === "photo_group" && (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-3 gap-2">
+                          {item.photos?.map((p: any, idx: number) => (
+                            <div key={idx} className="aspect-square bg-stone-100 rounded-lg overflow-hidden relative group">
+                              <img src={getImageUrl(p.thumbnail_path || p.storage_path)} alt="Upload" className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <Download className="h-4 w-4 text-white cursor-pointer" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-[10px] text-[#A58263] font-semibold">Uploaded {item.photos?.length || 0} high-resolution prints to Capsule</p>
+                      </div>
+                    )}
 
                     {/* Messages content display */}
                     {item.type === "message" && (
@@ -612,7 +709,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </div>
             
             <div className="space-y-3">
-              {MOCK_AI_MATCHES.map((cluster) => (
+              {dynamicAiMatches.length > 0 ? dynamicAiMatches.map((cluster) => (
                 <div key={cluster.id} className="flex items-center justify-between text-xs p-2 rounded-xl hover:bg-stone-50 border border-transparent hover:border-stone-150 transition-all cursor-pointer">
                   <div className="flex items-center gap-3">
                     <img src={cluster.cover} alt="Cluster Cover" className="w-10 h-10 rounded-lg object-cover border border-stone-100 shrink-0" />
@@ -623,7 +720,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   </div>
                   <ChevronRight className="h-4 w-4 text-stone-300" />
                 </div>
-              ))}
+              )) : (
+                <p className="text-xs text-stone-500 text-center py-4">No smart clusters found yet.</p>
+              )}
             </div>
 
             <Button variant="outline" className="w-full text-xs py-5 border-[#EAE5DF] text-[#69635C] rounded-xl flex items-center justify-center gap-1.5">
@@ -640,19 +739,16 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </div>
 
             <div className="space-y-3 text-xs leading-relaxed">
-              {[
-                { actor: "Julian", action: "joined the capsule page", time: "10m ago" },
-                { actor: "Marcus", action: "unlocked Standard photo pass", time: "25m ago" },
-                { actor: "Sophia", action: "reacted with 🥂 to Julian's toast", time: "1h ago" },
-                { actor: "Elena", action: "uploaded video highlight", time: "4h ago" },
-              ].map((act, idx) => (
+              {dynamicActivities.length > 0 ? dynamicActivities.slice(0, 10).map((act, idx) => (
                 <div key={idx} className="flex justify-between items-start gap-4 text-stone-600 border-b border-stone-50 pb-2.5 last:border-none last:pb-0">
                   <p>
                     <span className="font-bold text-[#1C1A17]">{act.actor}</span> {act.action}
                   </p>
                   <span className="text-[9px] text-[#9C958E] shrink-0">{act.time}</span>
                 </div>
-              ))}
+              )) : (
+                <p className="text-xs text-stone-500 text-center py-4">No recent activity.</p>
+              )}
             </div>
           </div>
 
@@ -739,6 +835,40 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       <option value="completed">Completed</option>
                       <option value="archived">Archived</option>
                     </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold text-stone-600">Guest Camera Filters</Label>
+                    <p className="text-[10px] text-stone-500 mb-2">Select which premium filters guests can use.</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: "normal", name: "Normal" },
+                        { id: "golden_hour", name: "Golden Hour" },
+                        { id: "vintage", name: "Vintage" },
+                        { id: "bw", name: "B&W" },
+                        { id: "cinematic", name: "Cinematic" },
+                        { id: "vivid", name: "Vivid" },
+                        { id: "cyberpunk", name: "Cyberpunk" },
+                        { id: "dreamy", name: "Dreamy" }
+                      ].map(filter => (
+                        <div key={filter.id} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id={`filter-${filter.id}`}
+                            checked={editAllowedFilters.includes(filter.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setEditAllowedFilters(prev => [...prev, filter.id])
+                              } else {
+                                setEditAllowedFilters(prev => prev.filter(id => id !== filter.id))
+                              }
+                            }}
+                            className="rounded border-[#EAE5DF] text-[#A58263] focus:ring-[#A58263]"
+                          />
+                          <Label htmlFor={`filter-${filter.id}`} className="text-xs">{filter.name}</Label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Settings toggle display list */}

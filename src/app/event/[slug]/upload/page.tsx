@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { CameraCapture } from "@/lib/components/events/camera-capture"
 import { Button } from "@/lib/components/ui/button"
 import { Card, CardContent } from "@/lib/components/ui/card"
 import { Input } from "@/lib/components/ui/input"
@@ -20,6 +21,8 @@ import {
   Loader2,
   X,
   AlertTriangle,
+  Camera as CameraIcon,
+  Image as ImageIcon,
 } from "lucide-react"
 import type { Gallery } from "@/lib/types"
 
@@ -53,7 +56,7 @@ interface UploadFile {
   file: File
   preview: string
   progress: number
-  status: "pending" | "uploading" | "done" | "error"
+  status: "pending" | "uploading" | "done" | "error" | "idle"
   error?: string
 }
 
@@ -72,6 +75,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
   const [guestName, setGuestName] = useState("")
   const [guestEmail, setGuestEmail] = useState("")
   const [limitError, setLimitError] = useState<string | null>(null)
+  const [showCamera, setShowCamera] = useState(false)
 
   const { data: event, isLoading: eventLoading } = useQuery({
     queryKey: ["event", slug],
@@ -97,6 +101,15 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     }
   }, [uploadGalleries, selectedGallery])
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedName = localStorage.getItem("snapsy_last_guest_name")
+      const storedEmail = localStorage.getItem("snapsy_last_guest_email")
+      if (storedName) setGuestName(storedName)
+      if (storedEmail) setGuestEmail(storedEmail)
+    }
+  }, [])
+
   const handleFileSelect = useCallback((selectedFiles: FileList | null) => {
     if (!selectedFiles) return
 
@@ -109,6 +122,20 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     }))
 
     setFiles((prev) => [...prev, ...newFiles])
+  }, [])
+
+  const handleCameraCapture = useCallback((file: File) => {
+    setFiles((prev) => {
+      const newUpload: UploadFile = {
+        id: Math.random().toString(36).substring(7),
+        file,
+        preview: URL.createObjectURL(file),
+        progress: 0,
+        status: "pending" as const,
+      }
+      return [...prev, newUpload]
+    })
+    setShowCamera(false)
   }, [])
 
   function removeFile(id: string) {
@@ -304,7 +331,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
   if (!settings.allow_guest_uploads) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-slate-50">
-        <Camera className="h-12 w-12 text-slate-500 mb-4 animate-bounce" />
+        <CameraIcon className="h-12 w-12 text-slate-500 mb-4 animate-bounce" />
         <h1 className="text-2xl font-semibold mb-2 text-slate-200">Uploads Disabled</h1>
         <p className="text-slate-400 mb-4 text-center max-w-md">
           This event is not accepting photo uploads at the moment.
@@ -396,34 +423,59 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
           </CardContent>
         </Card>
 
-        <div
-          className="border-2 border-dashed border-slate-800 rounded-2xl p-8 text-center hover:border-slate-700 transition-colors cursor-pointer bg-slate-900/20"
-          onClick={() => fileInputRef.current?.click()}
-          onDragOver={(e) => {
-            e.preventDefault()
-            e.currentTarget.classList.add("border-orange-500")
-          }}
-          onDragLeave={(e) => {
-            e.currentTarget.classList.remove("border-orange-500")
-          }}
-          onDrop={(e) => {
-            e.preventDefault()
-            e.currentTarget.classList.remove("border-orange-500")
-            handleFileSelect(e.dataTransfer.files)
-          }}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={(e) => handleFileSelect(e.target.files)}
+        {showCamera && (
+          <CameraCapture 
+            allowedFilters={(event.settings as any)?.allowed_filters}
+            onCapture={handleCameraCapture}
+            onClose={() => setShowCamera(false)}
           />
-          <div className="flex flex-col items-center gap-2 text-slate-400">
-            <CloudUpload className="h-12 w-12 text-slate-500" />
-            <p className="text-lg font-medium text-slate-300">Click to upload or drag and drop</p>
-            <p className="text-xs text-slate-500">PNG, JPG, WEBP, HEIC up to 50MB</p>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div
+            className="border-2 border-dashed border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-orange-500 hover:bg-orange-500/5 transition-all cursor-pointer group"
+            onClick={() => setShowCamera(true)}
+          >
+            <div className="p-4 rounded-full bg-slate-900 group-hover:bg-orange-500/20 transition-colors">
+              <CameraIcon className="h-8 w-8 text-slate-400 group-hover:text-orange-400" />
+            </div>
+            <div className="text-center">
+              <p className="font-medium text-slate-200">Take Photo</p>
+              <p className="text-xs text-slate-500 mt-1">Use camera with premium filters</p>
+            </div>
+          </div>
+
+          <div
+            className="border-2 border-dashed border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-orange-500 hover:bg-orange-500/5 transition-all cursor-pointer group"
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => {
+              e.preventDefault()
+              e.currentTarget.classList.add("border-orange-500", "bg-orange-500/5")
+            }}
+            onDragLeave={(e) => {
+              e.currentTarget.classList.remove("border-orange-500", "bg-orange-500/5")
+            }}
+            onDrop={(e) => {
+              e.preventDefault()
+              e.currentTarget.classList.remove("border-orange-500", "bg-orange-500/5")
+              handleFileSelect(e.dataTransfer.files)
+            }}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => handleFileSelect(e.target.files)}
+            />
+            <div className="p-4 rounded-full bg-slate-900 group-hover:bg-orange-500/20 transition-colors">
+              <ImageIcon className="h-8 w-8 text-slate-400 group-hover:text-orange-400" />
+            </div>
+            <div className="text-center">
+              <p className="font-medium text-slate-200">Upload Gallery</p>
+              <p className="text-xs text-slate-500 mt-1">Select PNG, JPG up to 50MB</p>
+            </div>
           </div>
         </div>
 

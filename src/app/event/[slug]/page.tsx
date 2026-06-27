@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server"
 import { Button } from "@/lib/components/ui/button"
 import { Camera, Calendar, MapPin, QrCode, Lock, Image, Upload } from "lucide-react"
 import { Logo } from "@/lib/components/layout/logo"
+import { GuestCaptureModal } from "@/lib/components/events/guest-capture-modal"
 
 interface EventData {
   id: string
@@ -101,6 +102,8 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
 
   return (
     <div className="flex min-h-screen flex-col">
+      <GuestCaptureModal eventId={event.id} eventName={event.name} />
+      
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">

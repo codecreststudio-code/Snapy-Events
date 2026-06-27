@@ -220,8 +220,6 @@ function CreateQRDialog({
   const [open, setOpen] = useState(false)
   const [name, setName] = useState("")
   const [galleryId, setGalleryId] = useState("")
-  const [customUrl, setCustomUrl] = useState("")
-  const [isUsingCustomUrl, setIsUsingCustomUrl] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const mutation = useMutation({
@@ -231,8 +229,6 @@ function CreateQRDialog({
       setOpen(false)
       setName("")
       setGalleryId("")
-      setCustomUrl("")
-      setIsUsingCustomUrl(false)
       onSuccess()
     },
     onError: (error: Error) => {
@@ -247,7 +243,6 @@ function CreateQRDialog({
       event_id: eventId,
       name,
       gallery_id: galleryId || undefined,
-      redirect_url: isUsingCustomUrl ? customUrl : undefined,
     })
     setLoading(false)
   }
@@ -295,28 +290,7 @@ function CreateQRDialog({
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="custom-url"
-              checked={isUsingCustomUrl}
-              onChange={(e) => setIsUsingCustomUrl(e.target.checked)}
-              className="rounded border-input"
-            />
-            <Label htmlFor="custom-url">Use custom redirect URL</Label>
-          </div>
 
-          {isUsingCustomUrl && (
-            <div className="space-y-2">
-              <Label htmlFor="redirect-url">Redirect URL</Label>
-              <Input
-                id="redirect-url"
-                value={customUrl}
-                onChange={(e) => setCustomUrl(e.target.value)}
-                placeholder="https://example.com/custom-page"
-              />
-            </div>
-          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
