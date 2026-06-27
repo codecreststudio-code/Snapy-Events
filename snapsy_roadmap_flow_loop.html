@@ -1,0 +1,148 @@
+
+<h2 class="sr-only">Snapsy build roadmap, improved wizard flow comparison, and viral growth loop</h2>
+<style>
+.ph{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.ph-body{padding:14px 16px}
+.row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.row:last-child{border-bottom:none}
+.dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.lbl{font-size:12px;font-weight:500;color:var(--color-text-secondary);padding:1.5rem 0 0.6rem;letter-spacing:.04em}
+.sbox{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:7px 11px;font-size:13px;color:var(--color-text-primary);background:var(--color-background-primary)}
+.snew{border:0.5px solid #9FE1CB;border-radius:var(--border-radius-md);padding:7px 11px;font-size:13px;color:#085041;background:#E1F5EE}
+.lstep{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px 12px;font-size:13px;color:var(--color-text-primary)}
+</style>
+
+<div style="padding:1rem 0">
+
+<p class="lbl">Build roadmap</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(295px,1fr));gap:12px">
+
+<div class="ph">
+  <div style="background:#E1F5EE;padding:12px 16px;border-bottom:0.5px solid #9FE1CB">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+      <span style="font-size:11px;font-weight:500;color:#085041;letter-spacing:.04em">Phase 1 · weeks 1–2</span>
+      <span style="font-size:11px;padding:2px 8px;background:#085041;color:#9FE1CB;border-radius:10px">Quick wins</span>
+    </div>
+    <p style="font-size:15px;font-weight:500;color:#085041;margin:0">UX polish</p>
+    <p style="font-size:12px;color:#0F6E56;margin:2px 0 0">Low effort · +25% wizard completion</p>
+  </div>
+  <div class="ph-body">
+    <div class="row"><div class="dot" style="background:#0F6E56"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Merge date + reveal into one step</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">6-step wizard becomes 4 steps</p></div></div>
+    <div class="row"><div class="dot" style="background:#0F6E56"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Invite card → shareable PNG</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">WhatsApp / iMessage native share</p></div></div>
+    <div class="row"><div class="dot" style="background:#0F6E56"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Shot counter warning + haptic</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">Amber pulse when &lt;5 shots remain</p></div></div>
+    <div class="row"><div class="dot" style="background:#0F6E56"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Post-reveal "host your own" CTA</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">Free tier offer shown to all guests</p></div></div>
+    <div class="row"><div class="dot" style="background:#0F6E56"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Value math on pricing step</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">"10 × 36 shots = 360 memories"</p></div></div>
+  </div>
+</div>
+
+<div class="ph">
+  <div style="background:#FAEEDA;padding:12px 16px;border-bottom:0.5px solid #FAC775">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+      <span style="font-size:11px;font-weight:500;color:#412402;letter-spacing:.04em">Phase 2 · weeks 3–6</span>
+      <span style="font-size:11px;padding:2px 8px;background:#633806;color:#FAC775;border-radius:10px">India-first</span>
+    </div>
+    <p style="font-size:15px;font-weight:500;color:#412402;margin:0">India market unlock</p>
+    <p style="font-size:12px;color:#854F0B;margin:2px 0 0">High effort · opens ₹-paying user base</p>
+  </div>
+  <div class="ph-body">
+    <div class="row"><div class="dot" style="background:#BA7517"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Phone + OTP login (MSG91)</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">No email friction for Indian users</p></div></div>
+    <div class="row"><div class="dot" style="background:#BA7517"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Razorpay + UPI + INR pricing</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">Free / ₹99 / ₹249 / ₹499 tiers</p></div></div>
+    <div class="row"><div class="dot" style="background:#BA7517"></div><div><span style="font-size:13px;color:var(--color-text-primary)">WhatsApp Business API invite</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">Visual card delivery, not a raw URL</p></div></div>
+    <div class="row"><div class="dot" style="background:#BA7517"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Multi-ceremony wedding rolls</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">Mehendi / Haldi / Baraat / Reception</p></div></div>
+    <div class="row"><div class="dot" style="background:#BA7517"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Offline photo queue (WebP)</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">Capture → compress → sync on signal</p></div></div>
+  </div>
+</div>
+
+<div class="ph">
+  <div style="background:#EEEDFE;padding:12px 16px;border-bottom:0.5px solid #CECBF6">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+      <span style="font-size:11px;font-weight:500;color:#26215C;letter-spacing:.04em">Phase 3 · weeks 7–10</span>
+      <span style="font-size:11px;padding:2px 8px;background:#3C3489;color:#CECBF6;border-radius:10px">Growth</span>
+    </div>
+    <p style="font-size:15px;font-weight:500;color:#26215C;margin:0">Conversion + viral</p>
+    <p style="font-size:12px;color:#534AB7;margin:2px 0 0">+40% landing CVR · viral coeff &gt;1.0</p>
+  </div>
+  <div class="ph-body">
+    <div class="row"><div class="dot" style="background:#534AB7"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Demo event on landing</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">Try before signup — pre-seeded event</p></div></div>
+    <div class="row"><div class="dot" style="background:#534AB7"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Event type pre-selector</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">Auto-configures wizard for event type</p></div></div>
+    <div class="row"><div class="dot" style="background:#534AB7"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Cinematic reveal animation</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">Darkroom effect + optional music</p></div></div>
+    <div class="row"><div class="dot" style="background:#534AB7"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Guest email at join</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">"Notify me when photos reveal"</p></div></div>
+    <div class="row"><div class="dot" style="background:#534AB7"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Social proof + film strip on landing</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">Live counters + blurred real events</p></div></div>
+  </div>
+</div>
+
+<div class="ph">
+  <div style="background:#E6F1FB;padding:12px 16px;border-bottom:0.5px solid #B5D4F4">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+      <span style="font-size:11px;font-weight:500;color:#042C53;letter-spacing:.04em">Phase 4 · month 3+</span>
+      <span style="font-size:11px;padding:2px 8px;background:#0C447C;color:#B5D4F4;border-radius:10px">Scale</span>
+    </div>
+    <p style="font-size:15px;font-weight:500;color:#042C53;margin:0">Global + revenue</p>
+    <p style="font-size:12px;color:#185FA5;margin:2px 0 0">New revenue streams · GCC entry</p>
+  </div>
+  <div class="ph-body">
+    <div class="row"><div class="dot" style="background:#185FA5"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Reel compilation export</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">9:16 video → Reels / TikTok / Status</p></div></div>
+    <div class="row"><div class="dot" style="background:#185FA5"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Stripe + Apple / Google Pay</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">USD / AED / GBP + native checkout</p></div></div>
+    <div class="row"><div class="dot" style="background:#185FA5"></div><div><span style="font-size:13px;color:var(--color-text-primary)">AI "photos of me" filter</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">Selfie → face-grouped gallery view</p></div></div>
+    <div class="row"><div class="dot" style="background:#185FA5"></div><div><span style="font-size:13px;color:var(--color-text-primary)">White-label photographer tier</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">Custom domain, bulk events, B2B MRR</p></div></div>
+    <div class="row"><div class="dot" style="background:#185FA5"></div><div><span style="font-size:13px;color:var(--color-text-primary)">Print + photobook integration</span><p style="font-size:12px;color:var(--color-text-secondary);margin:1px 0 0">Canvera (IN) / Artifact Uprising (US)</p></div></div>
+  </div>
+</div>
+
+</div>
+
+<p class="lbl">Improved wizard: before vs after</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:12px">
+
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 16px">
+    <p style="font-size:12px;color:var(--color-text-secondary);font-weight:500;margin:0 0 10px">Current — 6 steps</p>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div class="sbox">1. Event name</div>
+      <div class="sbox">2. End date</div>
+      <div class="sbox">3. Reveal timing</div>
+      <div class="sbox">4. Camera style</div>
+      <div class="sbox">5. Guest count + shots</div>
+      <div class="sbox">6. Invite card design</div>
+      <div style="border:0.5px solid var(--color-border-danger);border-radius:var(--border-radius-md);padding:7px 11px;font-size:13px;color:var(--color-text-danger);background:var(--color-background-danger)">Plain text modal: code + URL</div>
+    </div>
+  </div>
+
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 16px">
+    <p style="font-size:12px;color:var(--color-text-secondary);font-weight:500;margin:0 0 10px">Improved — 4 steps</p>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div class="snew">0. Event type picker (new)</div>
+      <div class="sbox">1. Event name (pre-suggested from type)</div>
+      <div class="snew">2. Date + reveal timing (merged)</div>
+      <div class="sbox">3. Camera style</div>
+      <div class="sbox">4. Guest count + shots + value math</div>
+      <div class="sbox">Invite card design (inline, skippable)</div>
+      <div style="border:0.5px solid #9FE1CB;border-radius:var(--border-radius-md);padding:7px 11px;font-size:13px;color:#085041;background:#E1F5EE">WhatsApp share sheet — visual card</div>
+    </div>
+  </div>
+
+</div>
+
+<p class="lbl">Viral growth loop</p>
+<div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 16px">
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
+    <div class="lstep">Host creates film</div>
+    <span style="color:var(--color-text-tertiary);font-size:13px">→</span>
+    <div class="lstep">WhatsApp card to guests</div>
+    <span style="color:var(--color-text-tertiary);font-size:13px">→</span>
+    <div class="lstep">Guests join + shoot</div>
+    <span style="color:var(--color-text-tertiary);font-size:13px">→</span>
+    <div class="lstep">Film closes</div>
+    <span style="color:var(--color-text-tertiary);font-size:13px">→</span>
+    <div style="background:#EEEDFE;border:0.5px solid #AFA9EC;border-radius:var(--border-radius-md);padding:8px 12px;font-size:13px;color:#26215C">Darkroom reveal moment</div>
+    <span style="color:var(--color-text-tertiary);font-size:13px">→</span>
+    <div class="lstep">Guests share reel to Reels / Status</div>
+    <span style="color:var(--color-text-tertiary);font-size:13px">→</span>
+    <div style="background:#E1F5EE;border:0.5px solid #9FE1CB;border-radius:var(--border-radius-md);padding:8px 12px;font-size:13px;color:#085041">"Host your own" CTA</div>
+    <span style="color:var(--color-text-tertiary);font-size:13px">→</span>
+    <div class="lstep">Guests become new hosts</div>
+    <span style="font-size:16px;font-weight:500;color:#534AB7">↺</span>
+  </div>
+  <p style="font-size:12px;color:var(--color-text-secondary);margin:12px 0 0">10 guests per event × 1% post-reveal conversion = 0.1 new hosts/event. At 1,000 events/month = 100 new organic hosts/month with zero CAC. The reel export multiplies this further — every share is a Snapsy ad.</p>
+</div>
+
+</div>

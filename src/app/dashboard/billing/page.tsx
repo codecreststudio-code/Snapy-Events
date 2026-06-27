@@ -506,20 +506,20 @@ export default function BillingPage() {
     shotBoost === currentShotsBoost
 
   const getContinueButtonClass = () => {
-    const base = "w-full sm:w-auto font-bold px-8 py-6 rounded-2xl flex items-center justify-center gap-2 text-base transition-all active:scale-[0.98] border-none text-white "
+    const base = "w-full sm:w-auto font-bold px-8 py-6 rounded-2xl flex items-center justify-center gap-2 text-base transition-all active:scale-[0.98] border-none "
     if (isActionDisabled) {
-      return base + "bg-slate-100 text-slate-400 cursor-not-allowed hover:bg-slate-100 shadow-none"
+      return base + "bg-slate-100 text-slate-500 cursor-not-allowed shadow-none"
     }
     if (selectedPlan === "free") {
-      return base + "bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-600/10"
+      return base + "bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/10"
     } else if (selectedPlan === "starter") {
-      return base + "bg-indigo-650 hover:bg-indigo-700 shadow-md shadow-indigo-600/10"
+      return base + "bg-indigo-650 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/10"
     } else if (selectedPlan === "standard") {
-      return base + "bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 shadow-lg shadow-violet-500/20"
+      return base + "bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white shadow-lg shadow-violet-500/20"
     } else if (selectedPlan === "premium") {
-      return base + "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-orange-500/20"
+      return base + "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-orange-500/20"
     }
-    return base + "bg-orange-500 hover:bg-orange-600"
+    return base + "bg-orange-500 hover:bg-orange-600 text-white"
   }
 
   const getActionButtonText = () => {

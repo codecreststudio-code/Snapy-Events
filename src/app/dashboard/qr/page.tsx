@@ -244,8 +244,6 @@ function CreateQRDialog({
   const [name, setName] = useState("")
   const [eventId, setEventId] = useState("")
   const [galleryId, setGalleryId] = useState("")
-  const [customUrl, setCustomUrl] = useState("")
-  const [isUsingCustomUrl, setIsUsingCustomUrl] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const { data: galleries } = useQuery({
@@ -262,8 +260,6 @@ function CreateQRDialog({
       setName("")
       setEventId("")
       setGalleryId("")
-      setCustomUrl("")
-      setIsUsingCustomUrl(false)
       onSuccess()
     },
     onError: (error: Error) => {
@@ -282,7 +278,6 @@ function CreateQRDialog({
       event_id: eventId,
       name: name || "Welcome QR",
       gallery_id: galleryId || undefined,
-      redirect_url: isUsingCustomUrl ? customUrl : undefined,
     })
     setLoading(false)
   }
@@ -353,29 +348,7 @@ function CreateQRDialog({
             </select>
           </div>
 
-          <div className="flex items-center gap-2 pt-1">
-            <input
-              type="checkbox"
-              id="custom-url"
-              checked={isUsingCustomUrl}
-              onChange={(e) => setIsUsingCustomUrl(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-            />
-            <Label htmlFor="custom-url" className="cursor-pointer">Use custom redirect URL</Label>
-          </div>
 
-          {isUsingCustomUrl && (
-            <div className="space-y-2">
-              <Label htmlFor="redirect-url">Custom URL</Label>
-              <Input
-                id="redirect-url"
-                value={customUrl}
-                onChange={(e) => setCustomUrl(e.target.value)}
-                placeholder="https://example.com/custom-page"
-                required={isUsingCustomUrl}
-              />
-            </div>
-          )}
 
           <DialogFooter className="pt-4 border-t gap-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
