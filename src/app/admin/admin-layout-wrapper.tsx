@@ -4,11 +4,18 @@ import { usePathname } from "next/navigation"
 import { AdminNav } from "@/lib/components/layout/admin-nav"
 import { AdminTopNav } from "@/lib/components/layout/admin-topnav"
 
-export function AdminLayoutWrapper({ children }: { children: React.ReactNode }) {
+import { redirect } from "next/navigation"
+
+export function AdminLayoutWrapper({ children, needsMfa = false }: { children: React.ReactNode, needsMfa?: boolean }) {
   const pathname = usePathname() ?? ""
   const isLoginPage = pathname === "/admin/login"
+  const isMfaPage = pathname === "/admin/mfa"
 
-  if (isLoginPage) {
+  if (needsMfa && !isMfaPage && !isLoginPage) {
+    redirect("/admin/mfa")
+  }
+
+  if (isLoginPage || isMfaPage) {
     return <>{children}</>
   }
 
