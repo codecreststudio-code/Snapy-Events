@@ -33,7 +33,7 @@ export const DELETE = defineRoute<unknown, unknown, { id: string }>({
     if (photo?.storage_path) await deleteFile("PHOTOS", photo.storage_path).catch(() => null)
     const { error } = await supabase.from("photos").delete().eq("id", id)
     if (error) return fail("DB_ERROR", error.message, 400)
-    await logAudit({ organization_id: auth.organization!.id, user_id: auth.user!.id, action: "photo.deleted", resource_type: "photo", resource_id: id, request })
+    await logAudit({ user_id: auth.user!.id, action: "photo.deleted", resource_type: "photo", resource_id: id, request })
     return ok({ deleted: true })
   },
 }).DELETE

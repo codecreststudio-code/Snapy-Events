@@ -5,12 +5,11 @@ import { Card, CardContent } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { toast } from "@/lib/components/ui/toaster"
 import { HardDrive, RefreshCw, Layers, Database, Loader2, Sparkles, AlertTriangle } from "lucide-react"
-import { PLAN_LIMITS } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 
 type StorageRow = {
   id: string
-  organization_id: string
+  user_id: string
   total_bytes: any // stored as bigint string
   photo_count: number
   video_count: number | null
@@ -28,17 +27,33 @@ function bytesToGb(bytes: any): number {
   return n / (1024 * 1024 * 1024)
 }
 
-function storageLimitGb(plan: string): number {
-  const limits = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS]
-  return limits?.storage_limit_gb ?? 1
+function storageLimitGb(plan: string, plansList: any[]): number {
+  const planData = plansList.find((p) => p.id === plan)
+  return planData?.limits?.storage_limit_gb ?? 10
 }
 
 export default function AdminStoragePage() {
   const [rows, setRows] = useState<StorageRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [plans, setPlans] = useState<any[]>([])
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const PAGE_SIZE = 20
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const res = await fetch("/api/admin/subscriptions/plans")
+        if (res.ok) {
+          const json = await res.json()
+          if (json.success && json.data) setPlans(json.data)
+        }
+      } catch (e) {
+        console.error("Failed to fetch plans", e)
+      }
+    }
+    fetchPlans()
+  }, [])
 
   const fetchStorageData = useCallback(async (pg = 1) => {
     setLoading(true)
@@ -67,8 +82,8 @@ export default function AdminStoragePage() {
   const totalPhotos = rows.reduce((sum, row) => sum + (row.photo_count || 0), 0)
   const nearCapacity = rows.filter((r) => {
     const used = bytesToGb(r.total_bytes)
-    const limit = storageLimitGb(r.organizations?.plan || "free")
-    return used / limit >= 0.8
+    const limit = storageLimitGb(r.organizations?.plan || "free", plans)
+    return limit > 0 && used / limit >= 0.8
   })
 
   return (
@@ -161,7 +176,7 @@ export default function AdminStoragePage() {
                 <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
                   {rows.map((row) => {
                     const usedGb = bytesToGb(row.total_bytes)
-                    const limitGb = storageLimitGb(row.organizations?.plan || "free")
+                    const limitGb = storageLimitGb(row.organizations?.plan || "free", plans)
                     const usagePct = limitGb > 0 ? Math.min(100, (usedGb / limitGb) * 100) : 0
                     const isWarning = usagePct >= 80
                     const isCritical = usagePct >= 95
@@ -173,7 +188,7 @@ export default function AdminStoragePage() {
                       )}>
                         <td className="p-4">
                           <div className="font-bold text-slate-800">{row.organizations?.name ?? "—"}</div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">{row.organization_id.slice(0, 8)}…</div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">{row.user_id.slice(0, 8)}…</div>
                         </td>
                         <td className="p-4">
                           <span className={cn("px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase",

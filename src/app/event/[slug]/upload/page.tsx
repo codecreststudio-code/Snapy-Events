@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/lib/components/ui/card"
 import { Input } from "@/lib/components/ui/input"
 import { Label } from "@/lib/components/ui/label"
 import { toast } from "@/lib/components/ui/toaster"
-import { PLAN_LIMITS } from "@/lib/constants"
+
 import {
   ArrowLeft,
   Camera,
@@ -30,12 +30,18 @@ async function getEvent(slug: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, slug, settings, organization_id, organization:organizations(plan, settings)")
+    .select("id, name, slug, settings, user_id, user:users(plan, settings)")
     .eq("slug", slug)
     .eq("status", "published")
     .single()
-
   if (error) throw error
+  const userObj: any = Array.isArray(data?.user) ? data.user[0] : data?.user
+  if (userObj?.plan) {
+    const { data: planData } = await supabase.from("plans").select("limits").eq("id", userObj.plan).single()
+    if (planData) {
+      (data as any).planLimits = planData.limits
+    }
+  }
   return data
 }
 
@@ -170,15 +176,17 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
     try {
       // 1. Quota checks
-      const orgPlan = (event.organization as any)?.plan || "free"
-      const orgSettings = (event.organization as any)?.settings || {}
+      const userPlan = (event.user as any)?.plan || "free"
+      const orgSettings = (event.user as any)?.settings || {}
+      
+      const { data: planData } = await supabase.from("plans").select("limits").eq("id", userPlan).single()
+      const planLimits = planData?.limits || { guests_limit: 0, shots_limit: 0 }
       
       const guestBoost = orgSettings.guest_boost || 0
       const shotsBoost = orgSettings.shots_boost || 0
 
-      const baseLimits = PLAN_LIMITS[orgPlan as keyof typeof PLAN_LIMITS] || PLAN_LIMITS.free
-      const maxGuests = baseLimits.guests_limit + guestBoost
-      const maxShots = baseLimits.shots_limit + shotsBoost
+      const maxGuests = (planLimits.guests_limit || 0) + guestBoost
+      const maxShots = (planLimits.shots_limit || 0) + shotsBoost
 
       // Fetch uploads list to calculate current usage
       const { data: currentUploads, error: uploadsErr } = await supabase

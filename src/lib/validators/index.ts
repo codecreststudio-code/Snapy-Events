@@ -14,7 +14,6 @@ export const signupSchema = z.object({
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number"),
   full_name: z.string().min(2, "Name must be at least 2 characters"),
-  organization_name: z.string().min(2, "Organization name must be at least 2 characters"),
 })
 
 export const forgotPasswordSchema = z.object({
@@ -91,7 +90,7 @@ export const updateOrganizationSchema = z.object({
 })
 
 export const subscribeSchema = z.object({
-  plan_id: z.enum(["free", "starter", "standard", "premium"]),
+  plan_id: z.string().min(1),
   payment_method_id: z.string().optional(),
   coupon_code: z.string().optional(),
 })

@@ -53,11 +53,47 @@ function CheckoutForm() {
   const [guestPrices, setGuestPrices] = useState<Record<number, number>>(GUEST_PRICES)
   const [shotPrices, setShotPrices] = useState<Record<number, number>>(SHOT_PRICES)
 
+  const [couponCode, setCouponCode] = useState("")
+  const [appliedCoupon, setAppliedCoupon] = useState<{ discount_type: string, discount_value: number, code: string } | null>(null)
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponError, setCouponError] = useState("")
+
   // Calculations
   const basePrice = planPrices[plan] || PLAN_DEFAULT_PRICES[plan] || 0
   const guestAddonPrice = guestPrices[guests] || 0
   const shotAddonPrice = shotPrices[shots] || 0
-  const totalPrice = basePrice + guestAddonPrice + shotAddonPrice
+  let totalPrice = basePrice + guestAddonPrice + shotAddonPrice
+  let discountAmount = 0
+  
+  if (appliedCoupon) {
+    if (appliedCoupon.discount_type === "percentage") {
+      discountAmount = totalPrice * (appliedCoupon.discount_value / 100)
+    } else {
+      discountAmount = appliedCoupon.discount_value
+    }
+    totalPrice = Math.max(0, totalPrice - discountAmount)
+  }
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return
+    setCouponLoading(true)
+    setCouponError("")
+    try {
+      const res = await fetch("/api/payments/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error?.message || "Invalid coupon")
+      setAppliedCoupon({ discount_type: data.data.discount_type, discount_value: data.data.discount_value, code: couponCode })
+    } catch (e: any) {
+      setCouponError(e.message)
+      setAppliedCoupon(null)
+    } finally {
+      setCouponLoading(false)
+    }
+  }
 
   // Fetch plans and addons from DB on mount to sync with admin adjustments
   useEffect(() => {
@@ -128,6 +164,7 @@ function CheckoutForm() {
           plan_id: plan,
           guest_boost: guests,
           shots_boost: shots,
+          coupon_code: appliedCoupon?.code
         }),
       })
 
@@ -267,10 +304,42 @@ function CheckoutForm() {
             </div>
 
             <div className="mt-8 border-t border-slate-100 pt-6">
+              {/* Coupon Section */}
+              <div className="flex items-start gap-2 mb-4">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    placeholder="Have a coupon code?"
+                    disabled={initiating || !!appliedCoupon}
+                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-semibold focus:outline-none focus:border-orange-500 disabled:opacity-50"
+                  />
+                  {couponError && <p className="text-rose-500 text-[10px] mt-1 font-semibold">{couponError}</p>}
+                </div>
+                {!appliedCoupon ? (
+                  <Button onClick={handleApplyCoupon} disabled={!couponCode || couponLoading || initiating} variant="outline" size="sm" className="text-xs h-8">
+                    {couponLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Apply"}
+                  </Button>
+                ) : (
+                  <Button onClick={() => { setAppliedCoupon(null); setCouponCode(""); setCouponError("") }} disabled={initiating} variant="outline" size="sm" className="text-xs h-8 text-rose-500 hover:text-rose-600">
+                    Remove
+                  </Button>
+                )}
+              </div>
+
               {/* Total Summary */}
-              <div className="flex items-center justify-between mb-6">
+              {appliedCoupon && (
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-emerald-600 flex items-center gap-1">
+                    <Check className="h-3.5 w-3.5" /> Discount Applied
+                  </span>
+                  <span className="text-sm font-bold text-emerald-600">-₹{Math.floor(discountAmount)}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between mb-6 pt-2 border-t border-slate-100/50">
                 <span className="text-base font-medium text-slate-650">Total Price (INR)</span>
-                <span className="text-3xl font-extrabold text-slate-900">₹{totalPrice}</span>
+                <span className="text-3xl font-extrabold text-slate-900">₹{Math.floor(totalPrice)}</span>
               </div>
 
               {error && (

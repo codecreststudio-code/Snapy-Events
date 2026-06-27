@@ -17,7 +17,7 @@ export const GET = defineRoute<unknown, unknown, { id: string }>({
       .from("events")
       .select("*, galleries(*), qr_codes(*)")
       .eq("id", id)
-      .eq("organization_id", auth.organization!.id)
+      .eq("host_id", auth.user!.id)
       .single()
     if (error || !data) return ApiErrors.notFound("Event")
     return ok(data)
@@ -36,11 +36,11 @@ export const PATCH = defineRoute<z.infer<typeof updateEventSchema>, unknown, { i
       .from("events")
       .update(body)
       .eq("id", id)
-      .eq("organization_id", auth.organization!.id)
+      .eq("host_id", auth.user!.id)
       .select()
       .single()
     if (error) return fail("DB_ERROR", error.message, 400)
-    await logAudit({ organization_id: auth.organization!.id, user_id: auth.user!.id, action: "event.updated", resource_type: "event", resource_id: id, changes: body as Record<string, unknown>, request })
+    await logAudit({ user_id: auth.user!.id, action: "event.updated", resource_type: "event", resource_id: id, changes: body as Record<string, unknown>, request })
     return ok(data)
   },
 }).PATCH
@@ -56,9 +56,9 @@ export const DELETE = defineRoute<unknown, unknown, { id: string }>({
       .from("events")
       .delete()
       .eq("id", id)
-      .eq("organization_id", auth.organization!.id)
+      .eq("host_id", auth.user!.id)
     if (error) return fail("DB_ERROR", error.message, 400)
-    await logAudit({ organization_id: auth.organization!.id, user_id: auth.user!.id, action: "event.deleted", resource_type: "event", resource_id: id, request })
+    await logAudit({ user_id: auth.user!.id, action: "event.deleted", resource_type: "event", resource_id: id, request })
     return ok({ deleted: true })
   },
 }).DELETE

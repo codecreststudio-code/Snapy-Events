@@ -1,7 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { LogOut, Settings, User, Shield } from "lucide-react"
+import {
+  LogOut,
+  Settings,
+  Shield,
+  User
+} from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,9 +57,9 @@ export function AdminProfileDropdown({ user }: AdminProfileProps) {
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <a href="/admin/mfa" className="flex items-center gap-2.5 text-slate-700 focus:bg-slate-50 rounded-lg px-3 py-2 text-sm cursor-pointer">
+          <a href="/admin/security" className="flex items-center gap-2.5 text-slate-700 focus:bg-slate-50 rounded-lg px-3 py-2 text-sm cursor-pointer">
             <Shield className="h-4 w-4 text-slate-400" />
-            <span>Two-Factor Auth (2FA)</span>
+            <span>Security & 2FA</span>
           </a>
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-slate-100" />

@@ -3,21 +3,21 @@
 import { Playfair_Display, Inter } from "next/font/google"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { 
-  ArrowRight, 
-  Play, 
-  Sparkles, 
-  Lock, 
-  Smile, 
-  Globe, 
-  Compass, 
-  Eye, 
-  Camera, 
-  Users, 
+import {
+  ArrowRight,
+  Play,
+  Sparkles,
+  Lock,
+  Smile,
+  Globe,
+  Compass,
+  Eye,
+  Camera,
   Heart,
   Calendar,
   Cpu,
-  Bookmark
+  Bookmark,
+  Users
 } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { PublicNavbar, PublicFooter } from "@/lib/components/layout"

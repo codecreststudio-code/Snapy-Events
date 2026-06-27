@@ -6,7 +6,14 @@ import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
 import { Label } from "@/lib/components/ui/label"
 import { toast } from "@/lib/components/ui/toaster"
-import { User, Shield, Lock, ShieldCheck, Loader2 } from "lucide-react"
+import {
+  User,
+  Shield,
+  Lock,
+  ShieldCheck,
+  Loader2,
+  Settings
+} from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
 export function AdminProfileClient({ user, profile }: { user: any, profile: any }) {

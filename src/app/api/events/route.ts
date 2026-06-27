@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/server"
 import { createEventSchema } from "@/lib/validators"
 import { slugify } from "@/lib/utils"
 import { logAudit } from "@/lib/audit/log"
-import { PLAN_LIMITS } from "@/lib/constants"
 
 const listQuery = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -23,7 +22,7 @@ export const GET = defineRoute({
     let q = supabase
       .from("events")
       .select("*, galleries(id, name, photo_count)", { count: "exact" })
-      .eq("organization_id", auth.organization!.id)
+      .eq("host_id", auth.user!.id)
       .order("created_at", { ascending: false })
     if (query.status) q = q.eq("status", query.status)
     if (query.search) q = q.ilike("name", `%${query.search}%`)
@@ -44,15 +43,20 @@ export const POST = defineRoute({
     const supabase = await createClient()
 
     // Enforce Event Limit
-    const plan = auth.organization?.plan || "free"
-    const limits = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS] || PLAN_LIMITS.free
-    const maxEvents = limits.events_limit
+    const { data: userObj } = await supabase.from("users").select("plan").eq("id", auth.user!.id).single()
+    const plan = userObj?.plan || "free"
+    
+    let maxEvents = 1
+    const { data: planData } = await supabase.from("plans").select("limits").eq("id", plan).single()
+    if (planData?.limits?.events_limit !== undefined) {
+      maxEvents = planData.limits.events_limit
+    }
 
     if (maxEvents !== -1) {
       const { count, error: countError } = await supabase
         .from("events")
         .select("id", { count: "exact", head: true })
-        .eq("organization_id", auth.organization!.id)
+        .eq("host_id", auth.user!.id)
 
       if (countError) return fail("DB_ERROR", countError.message, 500)
       if (count !== null && count >= maxEvents) {
@@ -66,7 +70,6 @@ export const POST = defineRoute({
       .insert({
         ...body,
         slug,
-        organization_id: auth.organization!.id,
         host_id: auth.user!.id,
         status: body.status || "published",
       })
@@ -79,7 +82,7 @@ export const POST = defineRoute({
       name: "All Photos",
       slug: "all-photos",
     })
-    await logAudit({ organization_id: auth.organization!.id, user_id: auth.user!.id, action: "event.created", resource_type: "event", resource_id: data.id, request })
+    await logAudit({ user_id: auth.user!.id, action: "event.created", resource_type: "event", resource_id: data.id, request })
     return NextResponse.json({ success: true, data })
   },
 }).POST

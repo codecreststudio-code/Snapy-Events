@@ -1,0 +1,217 @@
+"use client"
+
+import { useState, useEffect, useCallback } from "react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/lib/components/ui/card"
+import { Button } from "@/lib/components/ui/button"
+import { Input } from "@/lib/components/ui/input"
+import { Label } from "@/lib/components/ui/label"
+import { toast } from "@/lib/components/ui/toaster"
+import { Plus, Edit2, Trash2, Loader2, Save, X, Package } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Addon } from "@/lib/types"
+
+export function AddonMarketplace() {
+  const [addons, setAddons] = useState<Addon[]>([])
+  const [loading, setLoading] = useState(true)
+  const [actioning, setActioning] = useState(false)
+  
+  const [editingAddon, setEditingAddon] = useState<Addon | null>(null)
+  const [isAdding, setIsAdding] = useState(false)
+  
+  // Form state
+  const [formName, setFormName] = useState("")
+  const [formDesc, setFormDesc] = useState("")
+  const [formPriceInr, setFormPriceInr] = useState(0)
+  const [formPriceUsd, setFormPriceUsd] = useState(0)
+  const [formBilling, setFormBilling] = useState<"one_time" | "monthly" | "yearly" | "lifetime">("one_time")
+  const [formActive, setFormActive] = useState(true)
+
+  const fetchAddons = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch("/api/admin/subscriptions/addons")
+      if (!res.ok) throw new Error("Failed to load addons")
+      const data = await res.json()
+      setAddons(data.data || [])
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" })
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchAddons() }, [fetchAddons])
+
+  const startAdd = () => {
+    setIsAdding(true)
+    setEditingAddon(null)
+    setFormName("")
+    setFormDesc("")
+    setFormPriceInr(0)
+    setFormPriceUsd(0)
+    setFormBilling("one_time")
+    setFormActive(true)
+  }
+
+  const startEdit = (a: Addon) => {
+    setIsAdding(false)
+    setEditingAddon(a)
+    setFormName(a.name)
+    setFormDesc(a.description || "")
+    setFormPriceInr(a.price_inr)
+    setFormPriceUsd(a.price_usd)
+    setFormBilling(a.billing_type)
+    setFormActive(a.is_active)
+  }
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setActioning(true)
+
+    const payload = {
+      name: formName, description: formDesc, price_inr: formPriceInr,
+      price_usd: formPriceUsd, billing_type: formBilling, is_active: formActive
+    }
+
+    try {
+      if (isAdding) {
+        const res = await fetch("/api/admin/subscriptions/addons", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+        if (!res.ok) throw new Error("Failed to create addon")
+      } else {
+        const res = await fetch(`/api/admin/subscriptions/addons/${editingAddon!.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+        if (!res.ok) throw new Error("Failed to update addon")
+      }
+      toast({ title: "Success", description: "Addon saved successfully." })
+      setEditingAddon(null)
+      setIsAdding(false)
+      fetchAddons()
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" })
+    } finally {
+      setActioning(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this addon?")) return
+    setActioning(true)
+    try {
+      const res = await fetch(`/api/admin/subscriptions/addons/${id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error("Failed to delete addon")
+      toast({ title: "Success", description: "Addon deleted." })
+      fetchAddons()
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" })
+    } finally {
+      setActioning(false)
+    }
+  }
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <div className="lg:col-span-2 space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-bold text-slate-800">Add-on Marketplace</h2>
+          <Button onClick={startAdd} className="h-8 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold gap-1">
+            <Plus className="h-3.5 w-3.5" /> New Add-on
+          </Button>
+        </div>
+        
+        {loading ? (
+          <div className="p-16 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-violet-600" /></div>
+        ) : addons.length === 0 ? (
+          <div className="p-16 border border-dashed border-slate-200 bg-white text-slate-400 text-center rounded-2xl text-xs font-semibold">
+            <Package className="h-8 w-8 mx-auto mb-2 text-slate-300" />
+            No add-ons configured yet.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {addons.map(a => (
+              <Card key={a.id} className="bg-white border-slate-200 shadow-sm hover:border-slate-300">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="font-extrabold text-slate-800">{a.name}</h3>
+                      <div className="text-xs text-slate-500 font-medium line-clamp-2 mt-1">{a.description}</div>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      <Button variant="ghost" size="sm" onClick={() => startEdit(a)} className="h-7 w-7 p-0 text-slate-500 hover:bg-slate-100 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(a.id)} className="h-7 w-7 p-0 text-rose-500 hover:bg-rose-50 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-end gap-1">
+                    <span className="text-2xl font-black text-slate-900">₹{a.price_inr}</span>
+                    <span className="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider bg-slate-100 px-1.5 py-0.5 rounded-md">{a.billing_type.replace("_", " ")}</span>
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-slate-100">
+                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", a.is_active ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-100 text-slate-500 border-slate-200")}>
+                      {a.is_active ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        {(editingAddon || isAdding) ? (
+          <Card className="bg-white border-slate-200 sticky top-6 shadow-sm">
+            <CardHeader className="pb-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-base text-slate-800 font-bold">{isAdding ? "Create Add-on" : "Edit Add-on"}</CardTitle>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => { setIsAdding(false); setEditingAddon(null) }} className="h-7 w-7 p-0 rounded-lg"><X className="h-4 w-4" /></Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSave} className="space-y-4">
+                <div className="space-y-1">
+                  <Label className="text-xs font-bold text-slate-500">Name</Label>
+                  <Input value={formName} onChange={e => setFormName(e.target.value)} required placeholder="e.g. Extra 50 Guests" className="h-8 text-xs font-medium" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs font-bold text-slate-500">Description</Label>
+                  <Input value={formDesc} onChange={e => setFormDesc(e.target.value)} className="h-8 text-xs font-medium" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-slate-500">Price (INR)</Label>
+                    <Input type="number" value={formPriceInr} onChange={e => setFormPriceInr(Number(e.target.value))} required className="h-8 text-xs font-medium" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-slate-500">Price (USD)</Label>
+                    <Input type="number" value={formPriceUsd} onChange={e => setFormPriceUsd(Number(e.target.value))} required className="h-8 text-xs font-medium" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs font-bold text-slate-500">Billing Type</Label>
+                  <select value={formBilling} onChange={e => setFormBilling(e.target.value as any)} className="w-full h-8 px-2 rounded-md border border-slate-200 text-xs font-medium">
+                    <option value="one_time">One-time Purchase</option>
+                    <option value="monthly">Recurring Monthly</option>
+                    <option value="yearly">Recurring Yearly</option>
+                    <option value="lifetime">Lifetime</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2 py-2 border-t border-b border-slate-100">
+                  <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-violet-600 h-3.5 w-3.5" />
+                  <span className="text-xs font-bold text-slate-700">Add-on Active</span>
+                </div>
+                <Button type="submit" disabled={actioning} className="w-full h-8 bg-violet-600 hover:bg-violet-700 font-bold text-xs">
+                  {actioning ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
+                  Save Add-on
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="p-8 border border-dashed border-slate-200 bg-slate-50 text-slate-400 text-center rounded-xl text-xs font-semibold">
+            Select an add-on to edit or create a new one.
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

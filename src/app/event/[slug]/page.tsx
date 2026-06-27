@@ -25,7 +25,7 @@ interface EventData {
     enable_countdown: boolean
     countdown_date?: string
   }
-  organization: {
+  user: {
     name: string
     branding: {
       brand_color?: string | null
@@ -68,7 +68,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
     .from("events")
     .select(`
       *,
-      organization:organizations(name, branding),
+      user:organizations(name, branding),
       galleries(*)
     `)
     .eq("slug", slug)
@@ -107,10 +107,10 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            {event.organization?.branding?.logo_url ? (
+            {event.user?.branding?.logo_url ? (
               <img
-                src={event.organization.branding.logo_url}
-                alt={event.organization.name}
+                src={event.user.branding.logo_url}
+                alt={event.user.name}
                 className="h-8 w-auto"
               />
             ) : (
@@ -137,15 +137,15 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
             />
           )}
           <div className="mx-auto max-w-5xl px-6 py-20 text-center">
-            {event.organization?.branding?.logo_url && (
+            {event.user?.branding?.logo_url && (
               <img
-                src={event.organization.branding.logo_url}
-                alt={event.organization.name}
+                src={event.user.branding.logo_url}
+                alt={event.user.name}
                 className="mx-auto mb-4 h-10"
               />
             )}
             <p className="text-sm uppercase tracking-widest text-muted-foreground">
-              {event.organization?.name ?? "Event"}
+              {event.user?.name ?? "Event"}
             </p>
             <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">
               {event.name}

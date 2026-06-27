@@ -67,7 +67,7 @@ async function getEvents(orgId: string) {
   const { data, error } = await supabase
     .from("events")
     .select("id, name, slug")
-    .eq("organization_id", orgId)
+    .eq("host_id", orgId)
     .order("created_at", { ascending: false })
 
   if (error) throw error
@@ -367,7 +367,7 @@ function CreateQRDialog({
 export default function ConsolidatedQRPage() {
   const queryClient = useQueryClient()
   const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.organization_id
+  const orgId = profile?.user_id
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedEventId, setSelectedEventId] = useState("all")
 

@@ -6,8 +6,7 @@ import { Playfair_Display, Inter } from "next/font/google"
 import {
   Camera,
   QrCode,
-  Image as ImageIcon,
-  Users,
+  Image as ImageIcons,
   Sparkles,
   Shield,
   Zap,
@@ -25,6 +24,9 @@ import {
   CheckCircle,
   TrendingUp,
   Crown,
+  Users,
+  ImageIcon,
+  Settings
 } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { PublicNavbar, PublicFooter } from "@/lib/components/layout"

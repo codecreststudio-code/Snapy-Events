@@ -60,7 +60,7 @@ async function getEvent(slug: string, orgId: string): Promise<Event> {
     .from("events")
     .select("*")
     .eq("slug", slug)
-    .eq("organization_id", orgId)
+    .eq("host_id", orgId)
     .single()
   if (error) throw error
   return data
@@ -592,7 +592,7 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
   const router = useRouter()
   const queryClient = useQueryClient()
   const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.organization_id
+  const orgId = profile?.user_id
 
   const { data: event, isLoading: eventLoading } = useQuery({
     queryKey: ["event", slug, orgId],

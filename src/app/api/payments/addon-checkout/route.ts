@@ -55,7 +55,7 @@ export const POST = defineRoute({
     const { data: org } = await supabase
       .from("organizations")
       .select("razorpay_customer_id, name")
-      .eq("id", auth.organization!.id)
+      .eq("id", auth.user!.id)
       .single()
 
     let customerId = org?.razorpay_customer_id ?? null
@@ -69,7 +69,7 @@ export const POST = defineRoute({
         await supabase
           .from("organizations")
           .update({ razorpay_customer_id: customerId })
-          .eq("id", auth.organization!.id)
+          .eq("id", auth.user!.id)
       } catch (err: any) {
         return fail("PAYMENT_ERROR", `Failed to register billing customer: ${err.message}`, 500)
       }
@@ -80,9 +80,9 @@ export const POST = defineRoute({
       const order = await createRazorpayOrder({
         amount: amountInPaise,
         currency: "INR",
-        receipt: `addon_${Date.now().toString(36)}_${auth.organization!.id.slice(0, 8)}`,
+        receipt: `addon_${Date.now().toString(36)}_${auth.user!.id.slice(0, 8)}`,
         notes: {
-          organization_id: auth.organization!.id,
+          user_id: auth.user!.id,
           addon_type: body.boost_type,
           addon_value: String(body.boost_value),
         },

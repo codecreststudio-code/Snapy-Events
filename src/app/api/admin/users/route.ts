@@ -36,7 +36,7 @@ export const GET = defineRoute({
     // Fetch users with their organizations joined
     const { data, count, error } = await sb
       .from("users")
-      .select("id, email, full_name, role, is_active, created_at, organization_id, organization:organizations(id, name, plan, settings)", { count: "exact" })
+      .select("id, email, full_name, role, is_active, created_at, user_id, user:organizations(id, name, plan, settings)", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(from, to)
 
@@ -56,7 +56,7 @@ export const PATCH = defineRoute({
     // Fetch user details first
     const { data: userProfile, error: getError } = await sb
       .from("users")
-      .select("organization_id")
+      .select("user_id")
       .eq("id", userId)
       .single()
 
@@ -87,14 +87,14 @@ export const PATCH = defineRoute({
     } 
     else if (action === "change_plan") {
       if (!planId) return fail("VALIDATION_ERROR", "planId is required for changing plans", 422)
-      if (!userProfile.organization_id) {
+      if (!userProfile.user_id) {
         return fail("CONFLICT", "User does not belong to an organization", 409)
       }
 
       const { error } = await sb
         .from("organizations")
         .update({ plan: planId })
-        .eq("id", userProfile.organization_id)
+        .eq("id", userProfile.user_id)
 
       if (error) return fail("DB_ERROR", error.message, 500)
     } 
@@ -117,7 +117,7 @@ export const PATCH = defineRoute({
     else if (action === "change_organization") {
       const { error } = await sb
         .from("users")
-        .update({ organization_id: organizationId })
+        .update({ user_id: organizationId })
         .eq("id", userId)
       if (error) return fail("DB_ERROR", error.message, 500)
     }

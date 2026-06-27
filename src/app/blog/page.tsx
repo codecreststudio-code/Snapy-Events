@@ -11,13 +11,13 @@ import {
   ArrowRight,
   Search,
   BookOpen,
-  Users,
   Sparkles,
   TrendingUp,
   Mail,
   Check,
   ChevronDown,
   Loader2,
+  Users
 } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import type { BlogPost, BlogCategory } from "@/lib/types/blog"

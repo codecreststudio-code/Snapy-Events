@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Search, Loader2, LayoutDashboard, Building2, Users, Calendar, Image, CreditCard, Ticket, FileText } from "lucide-react"
+import { Users, Search, Loader2, LayoutDashboard, Building2, Calendar, Image, CreditCard, Ticket, FileText } from "lucide-react"
 import { Input } from "@/lib/components/ui/input"
 import { searchAdminGlobal, GlobalSearchResult } from "@/app/actions/admin-search"
 import { useRouter } from "next/navigation"

@@ -41,7 +41,7 @@ export const POST = defineRoute({
     const { data: org } = await supabase
       .from("organizations")
       .select("settings, plan")
-      .eq("id", auth.organization!.id)
+      .eq("id", auth.user!.id)
       .single()
 
     const currentSettings = (org?.settings as Record<string, any>) || {}
@@ -67,20 +67,20 @@ export const POST = defineRoute({
       .update({
         settings: newSettings,
       })
-      .eq("id", auth.organization!.id)
+      .eq("id", auth.user!.id)
 
     if (orgError) {
-      return fail("DB_ERROR", `Failed to update organization: ${orgError.message}`, 500)
+      return fail("DB_ERROR", `Failed to update user: ${orgError.message}`, 500)
     }
 
     // 4. Create Invoice for the Add-on purchase
     const amountInPaise = total_price * 100
-    const invoiceNumber = `INV-${Date.now().toString().slice(-6)}-${auth.organization!.id.slice(0, 4)}`
+    const invoiceNumber = `INV-${Date.now().toString().slice(-6)}-${auth.user!.id.slice(0, 4)}`
     
     const { data: invoice } = await supabase
       .from("invoices")
       .insert({
-        organization_id: auth.organization!.id,
+        user_id: auth.user!.id,
         invoice_number: invoiceNumber,
         status: "paid",
         currency: "INR",
@@ -94,7 +94,7 @@ export const POST = defineRoute({
 
     // 5. Record Transaction
     await supabase.from("transactions").insert({
-      organization_id: auth.organization!.id,
+      user_id: auth.user!.id,
       invoice_id: invoice?.id ?? null,
       razorpay_payment_id: razorpay_payment_id,
       razorpay_order_id: razorpay_order_id,

@@ -1,11 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { defineRoute, fail, created } from "@/lib/api/handler"
 import { createClient, createServiceClient } from "@/lib/supabase/server"
-import { signupSchema } from "@/lib/validators"
-import { defaultOrgFlags } from "@/lib/feature-flags"
 import { slugify } from "@/lib/utils"
 import { logAudit } from "@/lib/audit/log"
 import { sendEmail, emailWelcome } from "@/lib/integrations/resend"
+import { z } from "zod"
+
+const signupSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  full_name: z.string().min(2),
+})
 
 export const POST = defineRoute({
   method: "POST",
@@ -23,30 +28,26 @@ export const POST = defineRoute({
     })
     if (error || !data.user) return fail("AUTH_ERROR", error?.message ?? "Sign up failed", 400)
 
-    // Create the organization + link the user
-    const orgSlug = `${slugify(body.organization_name)}-${Date.now().toString(36).slice(-4)}`
-    const { data: org, error: orgError } = await svc
-      .from("organizations")
-      .insert({
-        name: body.organization_name,
-        slug: orgSlug,
-        plan: "free",
-        feature_flags: defaultOrgFlags("free"),
+    const { data: freePlan } = await svc.from("plans").select("features").eq("id", "free").single()
+    const defaultSettings: Record<string, boolean> = {
+      payments_enabled: true, // Core system feature
+    }
+    if (freePlan?.features && Array.isArray(freePlan.features)) {
+      freePlan.features.forEach((f: string) => {
+        defaultSettings[f] = true
       })
-      .select()
-      .single()
-    if (orgError || !org) return fail("SIGNUP_ERROR", "Could not create organization", 500, orgError?.message)
+    }
 
     await svc
       .from("users")
-      .update({ organization_id: org.id, role: "owner" })
+      .update({ plan: "free", settings: defaultSettings, role: "owner" })
       .eq("id", data.user.id)
 
-    await logAudit({ organization_id: org.id, user_id: data.user.id, action: "org.created", resource_type: "organization", resource_id: org.id, request })
+    await logAudit({ user_id: data.user.id, action: "user.created", resource_type: "user", resource_id: data.user.id, request })
 
     const tpl = emailWelcome(body.full_name)
     void sendEmail({ to: body.email, ...tpl })
 
-    return created({ user: { id: data.user.id, email: data.user.email }, organization: org })
+    return created({ user: { id: data.user.id, email: data.user.email, full_name: body.full_name } })
   },
 }).POST

@@ -211,8 +211,8 @@ export default function PricingPage() {
               description: p.description || "",
               cta: p.id === "free" ? "Start free" : `Choose ${p.name}`,
               features: Array.isArray(p.features) ? p.features : [],
-              popular: p.id === "standard",
-              bestValue: p.id === "premium",
+              popular: p.is_popular || false,
+              bestValue: p.best_value || false,
             }))
             // Add free tier if not returned in API to preserve basic signup
             if (!mapped.find((m: any) => m.id === "free")) {

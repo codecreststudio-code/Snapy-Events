@@ -80,7 +80,6 @@ export const GET = defineRoute({
     // 1. Fetch Current & Previous totals for KPI Growth Calculations
     const [
       currRevenueRes, prevRevenueRes,
-      currOrgsRes, prevOrgsRes,
       currEventsRes, prevEventsRes,
       currPhotosRes, prevPhotosRes,
       currVideosRes, prevVideosRes,
@@ -91,8 +90,6 @@ export const GET = defineRoute({
     ] = await Promise.all([
       sb.from("transactions").select("amount").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
       sb.from("transactions").select("amount").eq("status", "success").gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
-      sb.from("organizations").select("id", { count: "exact" }).gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
-      sb.from("organizations").select("id", { count: "exact" }).gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
       sb.from("events").select("id", { count: "exact" }).gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
       sb.from("events").select("id", { count: "exact" }).gte("created_at", prevStartDate.toISOString()).lte("created_at", prevEndDate.toISOString()),
       sb.from("photos").select("id", { count: "exact" }).or("mime_type.is.null,mime_type.ilike.image/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
@@ -112,8 +109,6 @@ export const GET = defineRoute({
     // KPI current sums
     const currRevenueSum = (currRevenueRes.data || []).reduce((s, t) => s + (t.amount || 0), 0) / 100
     const prevRevenueSum = (prevRevenueRes.data || []).reduce((s, t) => s + (t.amount || 0), 0) / 100
-    const currOrgsSum = currOrgsRes.count ?? 0
-    const prevOrgsSum = prevOrgsRes.count ?? 0
     const currEventsSum = currEventsRes.count ?? 0
     const prevEventsSum = prevEventsRes.count ?? 0
     const currPhotosSum = currPhotosRes.count ?? 0
@@ -131,7 +126,6 @@ export const GET = defineRoute({
 
     // Calculate growth percentages
     const revenueGrowth = calculateGrowth(currRevenueSum, prevRevenueSum)
-    const orgsGrowth = calculateGrowth(currOrgsSum, prevOrgsSum)
     const eventsGrowth = calculateGrowth(currEventsSum, prevEventsSum)
     const photosGrowth = calculateGrowth(currPhotosSum, prevPhotosSum)
     const videosGrowth = calculateGrowth(currVideosSum, prevVideosSum)
@@ -143,7 +137,6 @@ export const GET = defineRoute({
     // 2. Fetch Cumulative absolute totals to display on Cards
     const [
       allRevenueRes,
-      allOrgsRes,
       allEventsRes,
       allPhotosRes,
       allVideosRes,
@@ -153,7 +146,6 @@ export const GET = defineRoute({
       allUsersRes
     ] = await Promise.all([
       sb.from("transactions").select("amount").eq("status", "success").lte("created_at", endDate.toISOString()),
-      sb.from("organizations").select("id", { count: "exact" }).lte("created_at", endDate.toISOString()),
       sb.from("events").select("id", { count: "exact" }).lte("created_at", endDate.toISOString()),
       sb.from("photos").select("id", { count: "exact" }).or("mime_type.is.null,mime_type.ilike.image/%").lte("created_at", endDate.toISOString()),
       sb.from("photos").select("id", { count: "exact" }).ilike("mime_type", "video/%").lte("created_at", endDate.toISOString()),
@@ -164,7 +156,6 @@ export const GET = defineRoute({
     ])
 
     const totalRevenueCumulative = (allRevenueRes.data || []).reduce((s, t) => s + (t.amount || 0), 0) / 100
-    const totalOrgsCumulative = allOrgsRes.count ?? 0
     const totalEventsCumulative = allEventsRes.count ?? 0
     const totalPhotosCumulative = allPhotosRes.count ?? 0
     const totalVideosCumulative = allVideosRes.count ?? 0
@@ -237,7 +228,7 @@ export const GET = defineRoute({
     // 5. Recent Events with rich stats (guest counts, media uploads, revenue)
     const { data: eventsList } = await sb
       .from("events")
-      .select("id, name, venue, status, created_at, organization_id, organization:organizations(name)")
+      .select("id, name, venue, status, created_at, user_id, user:users(full_name)")
       .gte("created_at", startDate.toISOString())
       .lte("created_at", endDate.toISOString())
       .order("created_at", { ascending: false })
@@ -248,7 +239,7 @@ export const GET = defineRoute({
         sb.from("photo_access").select("id", { count: "exact", head: true }).eq("event_id", e.id).gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
         sb.from("photos").select("id", { count: "exact", head: true }).eq("event_id", e.id).or("mime_type.is.null,mime_type.ilike.image/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
         sb.from("photos").select("id", { count: "exact", head: true }).eq("event_id", e.id).ilike("mime_type", "video/%").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()),
-        sb.from("transactions").select("amount").eq("organization_id", e.organization_id || "").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
+        sb.from("transactions").select("amount").eq("user_id", e.user_id || "").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
       ])
 
       const orgRevenue = (organizationRevenueRes.data || []).reduce((sum, t) => sum + (t.amount || 0), 0) / 100
@@ -259,7 +250,7 @@ export const GET = defineRoute({
         venue: e.venue || "N/A",
         status: e.status,
         created_at: e.created_at,
-        organization: e.organization?.name || "N/A",
+        user: e.user?.full_name || "N/A",
         guestsCount: guestsCountRes.count ?? 0,
         photosCount: photosCountRes.count ?? 0,
         videosCount: videosCountRes.count ?? 0,
@@ -269,10 +260,10 @@ export const GET = defineRoute({
 
     // 6. Live activity feed generated dynamically from actual DB updates
     const [recentOrgs, recentEventsList, recentPhotos, recentSuccessTxs] = await Promise.all([
-      sb.from("organizations").select("name, created_at").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()).order("created_at", { ascending: false }).limit(10),
+      sb.from("users").select("name, created_at").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()).order("created_at", { ascending: false }).limit(10),
       sb.from("events").select("name, created_at").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()).order("created_at", { ascending: false }).limit(10),
       sb.from("photos").select("mime_type, created_at, uploader_name").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()).order("created_at", { ascending: false }).limit(10),
-      sb.from("transactions").select("amount, created_at, organization:organizations(name)").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()).order("created_at", { ascending: false }).limit(10),
+      sb.from("transactions").select("amount, created_at, user:users(full_name)").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString()).order("created_at", { ascending: false }).limit(10),
     ])
 
     const dynamicFeed: any[] = []
@@ -280,8 +271,8 @@ export const GET = defineRoute({
     if (recentOrgs.data) {
       recentOrgs.data.forEach(o => {
         dynamicFeed.push({
-          type: "org",
-          message: `New organization '${o.name}' registered.`,
+          type: "user",
+          message: `New user '${o.name}' registered.`,
           time: new Date(o.created_at).toLocaleDateString(),
           rawTime: new Date(o.created_at).getTime(),
         })
@@ -320,7 +311,7 @@ export const GET = defineRoute({
       recentSuccessTxs.data.forEach(t => {
         dynamicFeed.push({
           type: "payment",
-          message: `Payment of ₹${(t.amount/100).toLocaleString()} received from '${(t.organization as any)?.name || 'Member'}'.`,
+          message: `Payment of ₹${(t.amount/100).toLocaleString()} received from '${(t.user as any)?.full_name || 'Member'}'.`,
           time: new Date(t.created_at).toLocaleDateString(),
           rawTime: new Date(t.created_at).getTime(),
         })
@@ -330,19 +321,19 @@ export const GET = defineRoute({
     dynamicFeed.sort((a, b) => b.rawTime - a.rawTime)
     const activeFeed = dynamicFeed.slice(0, 10).map(f => ({ type: f.type, message: f.message, time: f.time }))
 
-    // 7. Advanced Analytics (Top Organization revenue, plans, etc.)
-    const { data: orgsTopList } = await sb.from("organizations").select("id, name")
-    const topOrgsRevenue = await Promise.all((orgsTopList || []).map(async (org) => {
-      const { data: txs } = await sb.from("transactions").select("amount").eq("organization_id", org.id).eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
+    // 7. Advanced Analytics (Top User revenue, plans, etc.)
+    const { data: orgsTopList } = await sb.from("users").select("id, name")
+    const topUsersRevenue = await Promise.all((orgsTopList || []).map(async (org) => {
+      const { data: txs } = await sb.from("transactions").select("amount").eq("user_id", org.id).eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
       const sum = (txs || []).reduce((s, t) => s + (t.amount || 0), 0) / 100
       return { name: org.name, revenue: sum }
     }))
-    const sortedTopOrgs = topOrgsRevenue.sort((a, b) => b.revenue - a.revenue).slice(0, 5)
+    const sortedTopUsers = topUsersRevenue.sort((a, b) => b.revenue - a.revenue).slice(0, 5)
 
-    const { data: topEventsList } = await sb.from("events").select("id, name, organization:organizations(name)").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
+    const { data: topEventsList } = await sb.from("events").select("id, name, user:users(full_name)").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
     const topEventsMedia = await Promise.all((topEventsList || []).map(async (ev) => {
       const { count } = await sb.from("photos").select("id", { count: "exact", head: true }).eq("event_id", ev.id).gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
-      return { name: ev.name, org: (ev.organization as any)?.name || "N/A", count: count ?? 0 }
+      return { name: ev.name, user: (ev.user as any)?.full_name || "N/A", count: count ?? 0 }
     }))
     const sortedTopEvents = topEventsMedia.sort((a, b) => b.count - a.count).slice(0, 5)
 
@@ -379,7 +370,7 @@ export const GET = defineRoute({
     })
 
     // Plan count distributions
-    const { data: activeOrgsPlans } = await sb.from("organizations").select("plan").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
+    const { data: activeOrgsPlans } = await sb.from("users").select("plan").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
     const planDistribution: Record<string, number> = { free: 0, starter: 0, standard: 0, premium: 0 }
     let totalActiveOrgs = 0;
     
@@ -398,7 +389,6 @@ export const GET = defineRoute({
     return ok({
       metrics: {
         revenue: { total: totalRevenueCumulative, current: currRevenueSum, previous: prevRevenueSum, growth: revenueGrowth },
-        orgs: { total: totalOrgsCumulative, current: currOrgsSum, previous: prevOrgsSum, growth: orgsGrowth },
         events: { total: totalEventsCumulative, current: currEventsSum, previous: prevEventsSum, growth: eventsGrowth },
         photos: { total: totalPhotosCumulative, current: currPhotosSum, previous: prevPhotosSum, growth: photosGrowth },
         videos: { total: totalVideosCumulative, current: currVideosSum, previous: prevVideosSum, growth: videosGrowth },
@@ -423,7 +413,7 @@ export const GET = defineRoute({
       recentEvents: richEvents,
       activityFeed: activeFeed,
       topLists: {
-        organizations: sortedTopOrgs,
+        users: sortedTopUsers,
         events: sortedTopEvents,
         plans: finalPlanPerc,
         revenueSources: { plans: planRevenue, addons: addonRevenue }

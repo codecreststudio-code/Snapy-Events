@@ -2,22 +2,21 @@
 
 import * as React from "react"
 import { motion } from "framer-motion"
-import { 
-  Building2, 
-  Calendar, 
-  Image, 
-  Sparkles, 
-  TrendingUp, 
-  CreditCard, 
-  HardDrive, 
-  ChevronRight, 
-  ArrowUpRight, 
-  Activity, 
-  Database, 
-  Mail, 
-  MessageSquare, 
-  Layers, 
-  UserPlus, 
+import {
+  Building2,
+  Calendar,
+  Image,
+  Sparkles,
+  TrendingUp,
+  CreditCard,
+  HardDrive,
+  ChevronRight,
+  ArrowUpRight,
+  Activity,
+  Database,
+  Mail,
+  MessageSquare,
+  LayersPlus,
   ArrowDownRight,
   RefreshCw,
   Plus,
@@ -25,7 +24,10 @@ import {
   Download,
   ShieldAlert,
   Sliders,
-  DollarSign
+  DollarSign,
+  Users,
+  Layers,
+  User
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/lib/components/ui/card"
@@ -194,7 +196,6 @@ function InteractiveChart({ title, subtitle, data, color, prefix = "" }: Interac
 const defaultData = {
   metrics: {
     revenue: { total: 0, current: 0, previous: 0, growth: 0 },
-    orgs: { total: 0, current: 0, previous: 0, growth: 0 },
     users: { total: 0, current: 0, previous: 0, growth: 0 },
     events: { total: 0, current: 0, previous: 0, growth: 0 },
     photos: { total: 0, current: 0, previous: 0, growth: 0 },
@@ -219,7 +220,7 @@ const defaultData = {
   recentEvents: [],
   activityFeed: [],
   topLists: {
-    organizations: [],
+    users: [],
     events: [],
     plans: { free: 0, starter: 0, standard: 0, premium: 0 },
     revenueSources: { plans: 0, addons: 0 }
@@ -482,40 +483,26 @@ export default function DashboardClient() {
               </CardContent>
             </Card>
 
-            {/* Total Organizations */}
+            {/* Total Users */}
             <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Organizations</span>
-                    <span className="text-2xl font-bold text-slate-900 mt-1.5 block">{data.metrics?.orgs.total}</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Users</span>
+                    <span className="text-2xl font-bold text-slate-900 mt-1.5 block">{data.metrics?.users.total}</span>
                     <div className="mt-2 flex items-center gap-1 text-[10px] font-bold">
                       <span className={cn(
                         "flex items-center gap-0.5",
-                        data.metrics?.orgs.growth >= 0 ? "text-emerald-600" : "text-rose-600"
+                        data.metrics?.users.growth >= 0 ? "text-emerald-600" : "text-rose-600"
                       )}>
-                        {data.metrics?.orgs.growth >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
-                        <span>{data.metrics?.orgs.growth >= 0 ? `+${data.metrics?.orgs.growth}` : data.metrics?.orgs.growth}%</span>
+                        {data.metrics?.users.growth >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
+                        <span>{data.metrics?.users.growth >= 0 ? `+${data.metrics?.users.growth}` : data.metrics?.users.growth}%</span>
                       </span>
-                      <span className="text-slate-400 font-semibold">period signups (+{data.metrics?.orgs.current})</span>
+                      <span className="text-slate-400 font-semibold">period signups (+{data.metrics?.users.current})</span>
                     </div>
                   </div>
                   <div className="h-10 w-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600 border border-violet-100">
-                    <Building2 className="h-5 w-5" />
-                  </div>
-                </div>
-                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-500">
-                  <div>
-                    <span className="text-[8px] text-slate-400 uppercase block">Organizations</span>
-                    <span className="text-slate-800 font-extrabold block">
-                      {data.metrics?.orgs.total} <span className={cn("font-bold text-[9px]", data.metrics?.orgs.growth >= 0 ? "text-emerald-600" : "text-rose-600")}>(+{data.metrics?.orgs.growth}%)</span>
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[8px] text-slate-400 uppercase block">User Members</span>
-                    <span className="text-slate-800 font-extrabold block">
-                      {data.metrics?.users.total} <span className={cn("font-bold text-[9px]", data.metrics?.users.growth >= 0 ? "text-emerald-600" : "text-rose-600")}>(+{data.metrics?.users.growth}%)</span>
-                    </span>
+                    <Users className="h-5 w-5" />
                   </div>
                 </div>
                 <div className="mt-3 flex justify-end">
@@ -697,7 +684,7 @@ export default function DashboardClient() {
             />
             <InteractiveChart
               title="New Users"
-              subtitle={data.metrics?.orgs.current.toString()}
+              subtitle={data.metrics?.users.current.toString()}
               data={usersTrend}
               color="#8B5CF6"
             />
@@ -717,7 +704,7 @@ export default function DashboardClient() {
                   data.activityFeed.map((act: any, index: number) => (
                     <div key={index} className="flex gap-3 text-xs">
                       <div className="h-6 w-6 rounded-full bg-violet-50 flex items-center justify-center text-violet-600 shrink-0 border border-violet-100">
-                        {act.type === "org" && <Building2 className="h-3 w-3" />}
+                        {act.type === "user" && <Users className="h-3 w-3" />}
                         {act.type === "event" && <Calendar className="h-3 w-3" />}
                         {act.type === "photo" && <Image className="h-3 w-3" />}
                         {act.type === "payment" && <CreditCard className="h-3 w-3" />}
@@ -825,20 +812,20 @@ export default function DashboardClient() {
 
           {/* Row 5: Advanced Analytics & Leaderboards */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Top performing orgs */}
+            {/* Top performing users */}
             <Card className="bg-white border-slate-200 p-6 shadow-sm">
-              <h4 className="font-extrabold text-slate-800 text-sm border-b border-slate-100 pb-3 mb-4">Top Billing Organizations</h4>
+              <h4 className="font-extrabold text-slate-800 text-sm border-b border-slate-100 pb-3 mb-4">Top Billing Users</h4>
               <div className="space-y-4">
-                {data.topLists?.organizations.length === 0 ? (
+                {data.topLists?.users?.length === 0 ? (
                   <div className="text-center text-slate-400 py-8 text-xs font-medium">No revenue generated in range.</div>
                 ) : (
-                  data.topLists?.organizations.map((org: any, i: number) => (
+                  data.topLists?.users?.map((user: any, i: number) => (
                     <div key={i} className="flex justify-between items-center text-xs">
                       <div className="flex items-center gap-2">
                         <span className="h-5 w-5 bg-violet-50 text-violet-600 text-[10px] font-extrabold rounded-md flex items-center justify-center">{i+1}</span>
-                        <span className="font-bold text-slate-700">{org.name}</span>
+                        <span className="font-bold text-slate-700">{user.name}</span>
                       </div>
-                      <span className="font-extrabold text-slate-900">₹{org.revenue.toLocaleString()}</span>
+                      <span className="font-extrabold text-slate-900">₹{user.revenue.toLocaleString()}</span>
                     </div>
                   ))
                 )}
@@ -858,7 +845,7 @@ export default function DashboardClient() {
                         <span className="h-5 w-5 bg-pink-50 text-pink-600 text-[10px] font-extrabold rounded-md flex items-center justify-center">{i+1}</span>
                         <div>
                           <span className="font-bold text-slate-700 block">{ev.name}</span>
-                          <span className="text-[10px] text-slate-400 font-semibold">{ev.org}</span>
+                          <span className="text-[10px] text-slate-400 font-semibold">{ev.user}</span>
                         </div>
                       </div>
                       <span className="font-extrabold text-slate-900">{ev.count.toLocaleString()} uploads</span>
@@ -923,7 +910,7 @@ export default function DashboardClient() {
                     <thead>
                       <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/50">
                         <th className="p-4">Event Name</th>
-                        <th className="p-4">Organization</th>
+                        <th className="p-4">User</th>
                         <th className="p-4">Venue</th>
                         <th className="p-4">Status</th>
                         <th className="p-4 text-center">Guests</th>
@@ -940,7 +927,7 @@ export default function DashboardClient() {
                           className="hover:bg-slate-50/60 transition-colors cursor-pointer"
                         >
                           <td className="p-4 font-extrabold text-slate-800">{evt.name}</td>
-                          <td className="p-4">{evt.organization}</td>
+                          <td className="p-4">{evt.user}</td>
                           <td className="p-4 text-slate-400">{evt.venue}</td>
                           <td className="p-4">
                             <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold border",
@@ -974,7 +961,6 @@ export default function DashboardClient() {
               </div>
               <CardContent className="p-6 flex-1 space-y-3">
                 {[
-                  { label: "Create Organization", action: "/admin/organizations", icon: Plus },
                   { label: "Broadcast Announcement", action: "/admin/notifications", icon: Send },
                   { label: "Export Analytics Data", action: "/admin/analytics", icon: Download },
                   { label: "Open Support Tickets Queue", action: "/admin/support-tickets", icon: MessageSquare },

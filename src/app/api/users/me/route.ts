@@ -6,6 +6,6 @@ export const GET = defineRoute({
   method: "GET",
   handler: async () => {
     const ctx = await getAuthContext()
-    return ok({ user: ctx.user, organization: ctx.organization, role: ctx.role, permissions: ctx.permissions, isAdmin: ctx.isAdmin })
+    return ok({ user: ctx.user, role: ctx.role, permissions: ctx.permissions, isAdmin: ctx.isAdmin })
   },
 }).GET

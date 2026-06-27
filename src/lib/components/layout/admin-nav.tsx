@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
   Building2,
-  Users,
   Calendar,
   Image,
   Sparkles,
@@ -28,6 +27,7 @@ import {
   Film,
   Volume2,
   FileText,
+  Users
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "./logo"
@@ -55,7 +55,6 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: "Core Entities",
     items: [
-      { href: "/admin/organizations", label: "Organizations", icon: Building2 },
       { href: "/admin/users", label: "Users", icon: Users },
       { href: "/admin/events", label: "Events", icon: Calendar },
       { href: "/admin/photos", label: "Photos", icon: Image },

@@ -27,17 +27,17 @@ export async function POST(request: NextRequest) {
           currency: string
           subscription_id?: string
           notes?: { 
-            organization_id?: string
+            user_id?: string
             plan_id?: string
             guest_boost?: string
             shots_boost?: string
           }
         }
         
-        if (p.notes?.organization_id) {
+        if (p.notes?.user_id) {
           // First, create transaction record for this payment
           await supabase.from("transactions").insert({
-            organization_id: p.notes.organization_id,
+            user_id: p.notes.user_id,
             razorpay_payment_id: p.id,
             amount: p.amount,
             currency: p.currency,
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
               .from("subscriptions")
               .upsert(
                 {
-                  organization_id: p.notes.organization_id,
+                  user_id: p.notes.user_id,
                   plan_id: p.notes.plan_id,
                   status: "active",
                   razorpay_subscription_id: p.subscription_id,
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
             const { data: org } = await supabase
               .from("organizations")
               .select("settings")
-              .eq("id", p.notes.organization_id)
+              .eq("id", p.notes.user_id)
               .single()
             
             const currentSettings = (org?.settings as Record<string, any>) || {}
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
             await supabase.from("organizations").update({ 
               plan: p.notes.plan_id,
               settings: newSettings
-            }).eq("id", p.notes.organization_id)
+            }).eq("id", p.notes.user_id)
           }
         }
         break
@@ -97,13 +97,13 @@ export async function POST(request: NextRequest) {
           id: string
           error_code?: string
           error_description?: string
-          notes?: { organization_id?: string }
+          notes?: { user_id?: string }
         }
         
-        if (p.notes?.organization_id) {
+        if (p.notes?.user_id) {
           // Create transaction record for failed payment
           await supabase.from("transactions").insert({
-            organization_id: p.notes.organization_id,
+            user_id: p.notes.user_id,
             razorpay_payment_id: p.id,
             status: "failed",
             error_code: p.error_code,

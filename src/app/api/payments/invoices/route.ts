@@ -35,7 +35,7 @@ export const GET = defineRoute({
           plan:plans(id, name)
         )
       `, { count: "exact" })
-      .eq("organization_id", auth.organization!.id)
+      .eq("user_id", auth.user!.id)
 
     if (query.status) {
       q = q.eq("status", query.status)

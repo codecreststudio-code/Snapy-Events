@@ -3,7 +3,19 @@
 import * as React from "react"
 import { Card, CardContent } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
-import { BarChart3, LineChart, Globe, Smartphone, RefreshCw, Zap, TrendingUp, Sparkles, Loader2 } from "lucide-react"
+import {
+  BarChart3,
+  LineChart,
+  Globe,
+  Smartphone,
+  RefreshCw,
+  Zap,
+  TrendingUp,
+  Sparkles,
+  Loader2,
+  Users,
+  User
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "@/lib/components/ui/toaster"
 

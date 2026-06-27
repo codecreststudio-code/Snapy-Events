@@ -31,7 +31,7 @@ export const GET = defineRoute({
 
     let q = sb
       .from("support_tickets")
-      .select("id, subject, description, status, priority, created_at, updated_at, organization:organizations(name), messages:support_ticket_messages(*)", { count: "exact" })
+      .select("id, subject, description, status, priority, created_at, updated_at, user:organizations(name), messages:support_ticket_messages(*)", { count: "exact" })
 
     if (query.status) {
       q = q.eq("status", query.status)

@@ -30,7 +30,9 @@ import {
   Copy,
   Download as DownloadIcon,
   Smile,
-  Users
+  Users,
+  Camera,
+  User
 } from "lucide-react"
 import QRCode from "qrcode"
 
@@ -159,7 +161,7 @@ export function NewEventForm() {
   // Form Mutation
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!profile?.organization_id || !user?.id) {
+      if (!profile?.user_id || !user?.id) {
         throw new Error("User or workspace session not found. Please log in.")
       }
 
@@ -171,8 +173,7 @@ export function NewEventForm() {
         : new Date(Date.now() + 86400000 * 2).toISOString() // default 2 days from now
 
       const eventData = {
-        organization_id: profile.organization_id,
-        host_id: user.id,
+        host_id: profile.user_id,
         name: name || "Celebration",
         slug,
         description: `Experience created with Snapsy.`,

@@ -13,7 +13,7 @@ export const GET = defineRoute({
     const { data, count, error } = await supabase
       .from("users")
       .select("id, email, full_name, avatar_url, role, created_at", { count: "exact" })
-      .eq("organization_id", auth.organization!.id)
+      .eq("user_id", auth.user!.id)
       .order("created_at", { ascending: false })
       .range((query.page - 1) * query.pageSize, query.pageSize - 1)
     if (error) return fail("DB_ERROR", error.message, 500)

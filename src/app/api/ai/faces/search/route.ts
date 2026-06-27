@@ -13,7 +13,7 @@ export const POST = defineRoute({
   rateLimit: { key: "ai:search", limit: API_RATE_LIMITS.FACE_SEARCH, windowSeconds: 60 },
   audit: "ai.face.searched",
   handler: async ({ body, auth, request }) => {
-    if (!auth.organization?.feature_flags?.["ai_face_search"]) return fail("FORBIDDEN", "AI search not enabled on your plan", 403)
+    if (!(auth.user as any)?.settings?.["ai_face_search"]) return fail("FORBIDDEN", "AI search not enabled on your plan", 403)
     const t0 = Date.now()
     const supabase = await createClient()
 
@@ -47,7 +47,6 @@ export const POST = defineRoute({
     const duration = Date.now() - t0
     await supabase.from("face_search_logs").insert({
       user_id: auth.user!.id,
-      organization_id: auth.organization!.id,
       event_id: eventId,
       search_type: body.photo_id ? "upload" : "selfie",
       query_photo_id: body.photo_id ?? null,
@@ -55,7 +54,7 @@ export const POST = defineRoute({
       result_count: hits.length,
       search_duration_ms: duration,
     })
-    void trackEvent({ organization_id: auth.organization!.id, user_id: auth.user!.id, event_type: "ai.face.searched", event_data: { count: hits.length }, request })
+    void trackEvent({ user_id: auth.user!.id, event_type: "ai.face.searched", event_data: { count: hits.length }, request })
     return ok({ results: hits, duration_ms: duration })
   },
 }).POST

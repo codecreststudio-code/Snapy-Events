@@ -13,8 +13,8 @@ export const POST = defineRoute({
   body: bodySchema,
   rateLimit: { key: "admin:login", limit: 5, windowSeconds: 60 },
   handler: async ({ body }) => {
-    const adminEmail = process.env.ADMIN_EMAIL || "admin@example.com"
-    const adminPassword = process.env.ADMIN_PASSWORD || "Admin@123"
+    const adminEmail = process.env.ADMIN_EMAIL || "syedfarrukh55@gmail.com"
+    const adminPassword = process.env.ADMIN_PASSWORD || "Sofb@1432"
 
     const supabase = await createClient()
 
@@ -52,30 +52,17 @@ export const POST = defineRoute({
           }
 
           if (userId) {
-            // Create a Premium Organization
-            const { data: org } = await serviceClient
-              .from("organizations")
-              .insert({
-                name: "Admin Workspace",
-                slug: "admin-workspace",
-                plan: "premium",
-                settings: { is_admin_org: true },
-              })
-              .select()
-              .single()
-
-            if (org) {
-              // Create user profile in DB
-              await serviceClient.from("users").insert({
-                id: userId,
-                email: adminEmail,
-                full_name: "Super Admin",
-                role: "owner",
-                is_admin: true,
-                organization_id: org.id,
-                permissions: ["*"],
-              })
-            }
+            // Create user profile in DB
+            await serviceClient.from("users").insert({
+              id: userId,
+              email: adminEmail,
+              full_name: "Super Admin",
+              role: "owner",
+              is_admin: true,
+              plan: "premium",
+              settings: { is_admin: true },
+              permissions: ["*"],
+            })
           }
         } catch (err) {
           console.error("Failed to auto-seed admin credentials:", err)

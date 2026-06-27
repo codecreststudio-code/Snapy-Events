@@ -78,16 +78,16 @@ export async function searchAdminGlobal(query: string): Promise<GlobalSearchResu
   const dbQueries = [
     // Users
     supabase.from("users").select("id, full_name, email").or(`full_name.ilike.${q},email.ilike.${q}`).limit(5),
-    // Organizations
-    supabase.from("organizations").select("id, name, slug").or(`name.ilike.${q},slug.ilike.${q}`).limit(5),
     // Events
-    supabase.from("events").select("id, title, slug").or(`title.ilike.${q},slug.ilike.${q}`).limit(5),
+    supabase.from("events").select("id, name, slug").or(`name.ilike.${q},slug.ilike.${q}`).limit(5),
     // Galleries
     supabase.from("galleries").select("id, name").ilike("name", q).limit(5),
+    // Photos
+    supabase.from("photos").select("id, original_filename").ilike("original_filename", q).limit(5),
     // Subscriptions
-    supabase.from("subscriptions").select("id, stripe_subscription_id, status").or(`stripe_subscription_id.ilike.${q},status.ilike.${q}`).limit(5),
-    // Support Tickets
-    supabase.from("support_tickets").select("id, subject, status").or(`subject.ilike.${q},status.ilike.${q}`).limit(5)
+    supabase.from("subscriptions").select("id, razorpay_subscription_id, status").or(`razorpay_subscription_id.ilike.${q},status.ilike.${q}`).limit(5),
+    // QR Codes
+    supabase.from("qr_codes").select("id, code, name").or(`code.ilike.${q},name.ilike.${q}`).limit(5)
   ]
 
   const results = await Promise.allSettled(dbQueries)
@@ -99,39 +99,39 @@ export async function searchAdminGlobal(query: string): Promise<GlobalSearchResu
       id: `user_${u.id}`, title: u.full_name || "Unknown Name", subtitle: u.email || "", type: "user", link: `/admin/users?highlight=${u.id}`
     }))
   }
-  // Organizations Result
+  // Events Result
   if (results[1].status === "fulfilled" && results[1].value.data) {
     const data = results[1].value.data as any[]
-    data.forEach(o => searchResults.push({
-      id: `org_${o.id}`, title: o.name, subtitle: `Slug: ${o.slug}`, type: "organization", link: `/admin/organizations?highlight=${o.id}`
-    }))
-  }
-  // Events Result
-  if (results[2].status === "fulfilled" && results[2].value.data) {
-    const data = results[2].value.data as any[]
     data.forEach(e => searchResults.push({
-      id: `evt_${e.id}`, title: e.title, subtitle: `Slug: ${e.slug}`, type: "event", link: `/admin/events?highlight=${e.id}`
+      id: `evt_${e.id}`, title: e.name, subtitle: `Slug: ${e.slug}`, type: "event", link: `/admin/events?highlight=${e.id}`
     }))
   }
   // Galleries Result
-  if (results[3].status === "fulfilled" && results[3].value.data) {
-    const data = results[3].value.data as any[]
+  if (results[2].status === "fulfilled" && results[2].value.data) {
+    const data = results[2].value.data as any[]
     data.forEach(g => searchResults.push({
       id: `gal_${g.id}`, title: g.name, subtitle: `Gallery`, type: "gallery", link: `/admin/galleries?highlight=${g.id}`
+    }))
+  }
+  // Photos Result
+  if (results[3].status === "fulfilled" && results[3].value.data) {
+    const data = results[3].value.data as any[]
+    data.forEach(p => searchResults.push({
+      id: `photo_${p.id}`, title: p.original_filename || "Photo", subtitle: `Photo ID: ${p.id.substring(0,8)}`, type: "module", link: `/admin/photos?highlight=${p.id}`
     }))
   }
   // Subscriptions Result
   if (results[4].status === "fulfilled" && results[4].value.data) {
     const data = results[4].value.data as any[]
     data.forEach(s => searchResults.push({
-      id: `sub_${s.id}`, title: s.stripe_subscription_id || "Subscription", subtitle: `Status: ${s.status}`, type: "subscription", link: `/admin/subscriptions?highlight=${s.id}`
+      id: `sub_${s.id}`, title: s.razorpay_subscription_id || "Subscription", subtitle: `Status: ${s.status}`, type: "subscription", link: `/admin/subscriptions?highlight=${s.id}`
     }))
   }
-  // Support Tickets Result
+  // QR Codes Result
   if (results[5].status === "fulfilled" && results[5].value.data) {
     const data = results[5].value.data as any[]
     data.forEach(t => searchResults.push({
-      id: `tkt_${t.id}`, title: t.subject, subtitle: `Status: ${t.status}`, type: "ticket", link: `/admin/support-tickets?highlight=${t.id}`
+      id: `qr_${t.id}`, title: t.name || t.code, subtitle: `QR Code`, type: "module", link: `/admin/qr-codes?highlight=${t.id}`
     }))
   }
 

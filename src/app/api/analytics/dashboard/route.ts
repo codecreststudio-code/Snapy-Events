@@ -12,9 +12,9 @@ export const GET = defineRoute({
     const supabase = await createClient()
     const since = new Date(Date.now() - query.days * 24 * 3600 * 1000).toISOString()
     const [{ data: events }, { data: photos }, { data: storage }] = await Promise.all([
-      supabase.from("events").select("id, name, status, view_count, upload_count").eq("organization_id", auth.organization!.id),
-      supabase.from("photos").select("id, created_at").eq("organization_id", auth.organization!.id).gte("created_at", since),
-      supabase.from("storage_usage").select("*").eq("organization_id", auth.organization!.id).single(),
+      supabase.from("events").select("id, name, status, view_count, upload_count").eq("user_id", auth.user!.id),
+      supabase.from("photos").select("id, created_at").eq("user_id", auth.user!.id).gte("created_at", since),
+      supabase.from("storage_usage").select("*").eq("user_id", auth.user!.id).single(),
     ])
     if (!events) return fail("DB_ERROR", "Could not load events", 500)
     const totalEvents = events.length

@@ -17,12 +17,19 @@ export type AdminTopNavProps = {
   initialTheme?: string
 }
 
+import { getAppVersion } from "@/app/actions/admin-version"
+
 export function AdminTopNav({ 
   user, 
   isAdmin = false, 
   isOwner = false, 
   initialTheme = "light" 
 }: AdminTopNavProps) {
+  const [version, setVersion] = React.useState("v...")
+
+  React.useEffect(() => {
+    getAppVersion().then(setVersion)
+  }, [])
   return (
     <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm">
       <AdminGlobalSearch />
@@ -31,7 +38,7 @@ export function AdminTopNav({
         {/* Platform Version */}
         <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-violet-50 text-violet-600 border border-violet-100">
           <Sparkles className="h-3 w-3" />
-          <span>v1.4.0-prod</span>
+          <span>{version}</span>
         </div>
 
         <AdminHealthBadge />

@@ -10,7 +10,6 @@ import {
   Sparkles, 
   Lock, 
   Globe, 
-  Users, 
   Layout, 
   Zap, 
   Download, 
