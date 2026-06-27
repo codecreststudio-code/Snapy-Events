@@ -6,7 +6,23 @@ import { AdminTopNav } from "@/lib/components/layout/admin-topnav"
 
 import { redirect } from "next/navigation"
 
-export function AdminLayoutWrapper({ children, needsMfa = false }: { children: React.ReactNode, needsMfa?: boolean }) {
+type AdminLayoutWrapperProps = {
+  children: React.ReactNode
+  needsMfa?: boolean
+  user?: any
+  isAdmin?: boolean
+  isOwner?: boolean
+  initialTheme?: string
+}
+
+export function AdminLayoutWrapper({ 
+  children, 
+  needsMfa = false,
+  user,
+  isAdmin = false,
+  isOwner = false,
+  initialTheme = "light"
+}: AdminLayoutWrapperProps) {
   const pathname = usePathname() ?? ""
   const isLoginPage = pathname.startsWith("/admin/login")
   const isMfaPage = pathname.startsWith("/admin/mfa")
@@ -23,7 +39,12 @@ export function AdminLayoutWrapper({ children, needsMfa = false }: { children: R
     <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900">
       <AdminNav />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <AdminTopNav />
+        <AdminTopNav 
+          user={user}
+          isAdmin={isAdmin}
+          isOwner={isOwner}
+          initialTheme={initialTheme}
+        />
         <div className="flex-1 overflow-y-auto">
           {children}
         </div>
