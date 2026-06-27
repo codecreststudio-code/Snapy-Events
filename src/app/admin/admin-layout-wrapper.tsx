@@ -8,8 +8,8 @@ import { redirect } from "next/navigation"
 
 export function AdminLayoutWrapper({ children, needsMfa = false }: { children: React.ReactNode, needsMfa?: boolean }) {
   const pathname = usePathname() ?? ""
-  const isLoginPage = pathname === "/admin/login"
-  const isMfaPage = pathname === "/admin/mfa"
+  const isLoginPage = pathname.startsWith("/admin/login")
+  const isMfaPage = pathname.startsWith("/admin/mfa")
 
   if (needsMfa && !isMfaPage && !isLoginPage) {
     redirect("/admin/mfa")

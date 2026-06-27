@@ -25,8 +25,8 @@ export function AdminMfaForm() {
       if (totpFactor) {
         setFactorId(totpFactor.id)
       } else {
-        // No verified MFA found, just push to admin
-        router.push("/admin")
+        // No verified MFA found
+        setError("No active Authenticator App found for your account.")
       }
     }
     initMfa()
