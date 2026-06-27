@@ -21,8 +21,20 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     needsMfa = authLevel?.nextLevel === 'aal2' && authLevel?.currentLevel !== 'aal2'
   }
 
+  // Get user theme preference
+  let theme = "light"
+  if (ctx.user?.user_metadata?.theme) {
+    theme = ctx.user.user_metadata.theme
+  }
+
   return (
-    <AdminLayoutWrapper needsMfa={needsMfa}>
+    <AdminLayoutWrapper 
+      needsMfa={needsMfa} 
+      user={ctx.user}
+      isAdmin={ctx.isAdmin}
+      isOwner={ctx.isOwner}
+      initialTheme={theme}
+    >
       {children}
     </AdminLayoutWrapper>
   )
