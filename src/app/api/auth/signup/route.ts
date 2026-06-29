@@ -1,9 +1,7 @@
-import { type NextRequest, NextResponse } from "next/server"
 import { defineRoute, fail, created } from "@/lib/api/handler"
-import { createClient, createServiceClient } from "@/lib/supabase/server"
-import { slugify } from "@/lib/utils"
+import { createServiceClient } from "@/lib/supabase/server"
 import { logAudit } from "@/lib/audit/log"
-import { sendEmail, emailWelcome } from "@/lib/integrations/resend"
+import { sendEmail } from "@/lib/integrations/resend"
 import { z } from "zod"
 
 const signupSchema = z.object({
@@ -19,7 +17,7 @@ export const POST = defineRoute({
   audit: "auth.signup",
   handler: async ({ body, request }) => {
     const svc = await createServiceClient()
-    
+
     const { data, error } = await svc.auth.admin.createUser({
       email: body.email,
       password: body.password,
@@ -28,35 +26,39 @@ export const POST = defineRoute({
     })
     if (error || !data.user) return fail("AUTH_ERROR", error?.message ?? "Sign up failed", 400)
 
-    const { data: freePlan } = await svc.from("plans").select("features").eq("id", "free").single()
-    const defaultSettings: Record<string, boolean> = {
-      payments_enabled: true, // Core system feature
-    }
-    if (freePlan?.features && Array.isArray(freePlan.features)) {
-      freePlan.features.forEach((f: string) => {
-        defaultSettings[f] = true
-      })
-    }
-
     await svc
       .from("users")
       .update({ role: "owner", permissions: ["*"] })
       .eq("id", data.user.id)
 
-    await svc
-      .from("subscriptions")
-      .insert({
-        user_id: data.user.id,
-        plan_id: "free",
-        status: "active",
-        current_period_start: new Date().toISOString(),
-        current_period_end: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(), // 1 year
-      })
+    await svc.from("subscriptions").insert({
+      user_id: data.user.id,
+      plan_id: "free",
+      status: "active",
+      current_period_start: new Date().toISOString(),
+      current_period_end: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
+    })
 
-    await logAudit({ user_id: data.user.id, action: "user.created", resource_type: "user", resource_id: data.user.id, request })
+    await logAudit({
+      user_id: data.user.id,
+      action: "user.created",
+      resource_type: "user",
+      resource_id: data.user.id,
+      request,
+    })
 
-    const tpl = emailWelcome(body.full_name)
-    void sendEmail({ to: body.email, ...tpl })
+    // Send welcome email via the centralized service
+    void sendEmail({
+      to: body.email,
+      templateId: "welcome",
+      variables: {
+        host_name: body.full_name,
+        host_email: body.email,
+        dashboard_url: `${process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://snapsy-events.vercel.app"}/dashboard`,
+        support_email: "snapsyevent@gmail.com",
+      },
+      tags: [{ name: "type", value: "welcome" }],
+    })
 
     return created({ user: { id: data.user.id, email: data.user.email, full_name: body.full_name } })
   },

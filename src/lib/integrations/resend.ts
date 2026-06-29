@@ -1,14 +1,16 @@
 // src/lib/integrations/resend.ts
-// Resend transactional email. Falls back to no-op in dev when the key is
-// missing (we log the message instead).
+// Centralized email service using Resend.
+// Fetches dynamic email settings and templates from database, logs all activity,
+// and handles retries. Falls back to no-op logs in development if API key is missing.
 
 import "server-only"
 import { serverEnv } from "@/lib/env"
 import { logger } from "@/lib/logger"
+import { adminDb } from "@/lib/supabase/admin"
 
-let _resend: import("resend").Resend | null = null
+let _resend: any = null
 
-async function client(): Promise<import("resend").Resend | null> {
+async function getResendClient(): Promise<any> {
   if (!serverEnv.RESEND_API_KEY) return null
   if (_resend) return _resend
   const { Resend } = await import("resend")
@@ -16,67 +18,222 @@ async function client(): Promise<import("resend").Resend | null> {
   return _resend
 }
 
+export interface EmailAttachment {
+  filename: string
+  content: string | Buffer
+}
+
 export interface EmailMessage {
   to: string | string[]
-  subject: string
-  html: string
+  subject?: string
+  html?: string
   text?: string
-  from?: string
-  replyTo?: string
+  templateId?: string
+  variables?: Record<string, string>
+  attachments?: EmailAttachment[]
   tags?: { name: string; value: string }[]
 }
 
+export interface EmailSettings {
+  sender_name: string
+  sender_email: string
+  reply_to: string
+  support_email: string
+  contact_email: string
+  logo_url?: string
+  signature?: string
+  footer_text: string
+  company_address?: string
+  social_links?: Record<string, string>
+}
+
+const DEFAULT_SETTINGS: EmailSettings = {
+  sender_name: "Snapsy Event",
+  sender_email: "snapsyevent@gmail.com",
+  reply_to: "snapsyevent@gmail.com",
+  support_email: "snapsyevent@gmail.com",
+  contact_email: "snapsyevent@gmail.com",
+  footer_text: "© Snapsy. All rights reserved.",
+  social_links: {}
+}
+
+// 1. Fetch Dynamic Settings from platform_settings
+export async function getEmailSettings(): Promise<EmailSettings> {
+  try {
+    const sb = await adminDb()
+    const { data, error } = await sb
+      .from("platform_settings")
+      .select("value")
+      .eq("key", "email_settings")
+      .single()
+
+    if (error || !data) {
+      return DEFAULT_SETTINGS
+    }
+    return { ...DEFAULT_SETTINGS, ...(data.value as any) }
+  } catch (err) {
+    logger.error("Failed to fetch email settings from DB", { error: err })
+    return DEFAULT_SETTINGS
+  }
+}
+
+// 2. Fetch Template from DB or return default fallback
+export async function getEmailTemplate(templateId: string) {
+  try {
+    const sb = await adminDb()
+    const { data, error } = await sb
+      .from("email_templates")
+      .select("*")
+      .eq("id", templateId)
+      .single()
+
+    if (error || !data) {
+      return null
+    }
+    return data
+  } catch (err) {
+    logger.error("Failed to fetch email template from DB", { templateId, error: err })
+    return null
+  }
+}
+
+// 3. Parse variables in HTML or Text templates
+export function parseTemplateContent(content: string, variables: Record<string, string>): string {
+  let result = content
+  for (const [key, value] of Object.entries(variables)) {
+    const regex = new RegExp(`{{\\s*${key}\\s*}}`, "g")
+    result = result.replace(regex, value)
+  }
+  return result
+}
+
+// 4. Centralized send email function with logs and retries
 export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null; error: string | null }> {
-  const c = await client()
-  if (!c) {
-    logger.info("[email:dev]", { to: msg.to, subject: msg.subject })
-    return { id: null, error: null }
-  }
-  const { data, error } = await c.emails.send({
-    from: msg.from ?? "Snapsy <hello@snapsy.app>",
-    to: Array.isArray(msg.to) ? msg.to : [msg.to],
-    subject: msg.subject,
-    html: msg.html,
-    text: msg.text,
-    replyTo: msg.replyTo,
-    tags: msg.tags,
-  })
-  if (error) {
-    logger.error("resend error", { error: error.message })
-    return { id: null, error: error.message }
-  }
-  return { id: data?.id ?? null, error: null }
-}
+  const sb = await adminDb()
+  const settings = await getEmailSettings()
+  
+  const recipient = Array.isArray(msg.to) ? msg.to.join(", ") : msg.to
+  const emailType = msg.templateId || "custom"
 
-// Template helpers -----------------------------------------------------------
-export function emailWelcome(name: string) {
-  return {
-    subject: "Welcome to Snapsy",
-    html: `<div style="font-family:sans-serif;max-width:560px;margin:auto">
-      <h1>Welcome aboard, ${name || "creator"}!</h1>
-      <p>Your Snapsy account is ready. Create your first event and start collecting photos in minutes.</p>
-      <p><a href="${serverEnv.APP_URL}/dashboard/events/new">Create your first event →</a></p>
-    </div>`,
-  }
-}
+  // Load subject and templates
+  let subject = msg.subject || ""
+  let html = msg.html || ""
+  let text = msg.text || ""
 
-export function emailEventCreated(eventName: string) {
-  return {
-    subject: `Event "${eventName}" is live`,
-    html: `<p>Your event <strong>${eventName}</strong> is now live. Share the QR code with your guests to start collecting photos.</p>`,
+  const variables = {
+    dashboard_url: `${serverEnv.APP_URL}/dashboard`,
+    support_email: settings.support_email,
+    sender_name: settings.sender_name,
+    ...msg.variables
   }
-}
 
-export function emailPhotoUploaded(count: number, eventName: string) {
-  return {
-    subject: `${count} new photo${count === 1 ? "" : "s"} for ${eventName}`,
-    html: `<p>Guests uploaded ${count} new photo${count === 1 ? "" : "s"} to <strong>${eventName}</strong>. <a href="${serverEnv.APP_URL}/dashboard">Review them now →</a></p>`,
+  if (msg.templateId) {
+    const template = await getEmailTemplate(msg.templateId)
+    if (template) {
+      subject = parseTemplateContent(template.subject, variables)
+      html = parseTemplateContent(template.html_content, variables)
+      if (template.text_content) {
+        text = parseTemplateContent(template.text_content, variables)
+      }
+    }
   }
-}
 
-export function emailPaymentReceipt(invoiceNumber: string, amount: number, currency: string) {
-  return {
-    subject: `Payment receipt — ${invoiceNumber}`,
-    html: `<p>Thank you for your payment of <strong>${(amount / 100).toFixed(2)} ${currency}</strong>. Invoice: ${invoiceNumber}.</p>`,
+  // Inject logo and settings-configured signature/footer if HTML contains placeholders or does not contain layout
+  if (html && !html.includes("snapsy-wrapper")) {
+    const logoHtml = settings.logo_url ? `<img src="${settings.logo_url}" alt="${settings.sender_name}" style="max-height: 48px; margin-bottom: 20px; display: block;" />` : ""
+    const footerHtml = `<div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eae5df; font-size: 11px; color: #9c958e; text-align: center;">
+      ${settings.company_address ? `<p>${settings.company_address}</p>` : ""}
+      <p>${settings.footer_text}</p>
+    </div>`
+    
+    html = `<div class="snapsy-wrapper" style="font-family: sans-serif; color: #1c1a17; background-color: #faf9f6; padding: 30px 15px;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border: 1px solid #eae5df; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+        ${logoHtml}
+        ${html}
+        ${settings.signature ? `<p style="margin-top: 25px; font-style: italic; color: #7a756e;">${settings.signature}</p>` : ""}
+        ${footerHtml}
+      </div>
+    </div>`
   }
+
+  // 4a. Create Initial Log Row (status = pending)
+  const { data: logData, error: logError } = await sb
+    .from("email_logs")
+    .insert({
+      recipient,
+      subject,
+      email_type: emailType,
+      status: "pending",
+      retry_count: 0
+    })
+    .select("id")
+    .single()
+
+  const logId = logData?.id
+
+  // 4b. Perform Send Attempts with Retries
+  let attempts = 0
+  const maxAttempts = 3
+  let sendId: string | null = null
+  let sendError: string | null = null
+
+  const resendClient = await getResendClient()
+
+  while (attempts < maxAttempts) {
+    try {
+      if (!resendClient) {
+        // Dev fallback mode if Resend key is missing
+        logger.info("[email:dev-mock]", { to: recipient, subject, type: emailType })
+        sendId = `mock-resend-id-${Math.random().toString(36).substring(7)}`
+        sendError = null
+        break
+      }
+
+      const { data, error } = await resendClient.emails.send({
+        from: `${settings.sender_name} <${settings.sender_email}>`,
+        to: Array.isArray(msg.to) ? msg.to : [msg.to],
+        subject,
+        html,
+        text: text || undefined,
+        replyTo: settings.reply_to,
+        attachments: msg.attachments ? msg.attachments.map(att => ({
+          filename: att.filename,
+          content: typeof att.content === 'string' ? Buffer.from(att.content, 'base64') : att.content
+        })) : undefined,
+        tags: msg.tags,
+      })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      sendId = data?.id ?? null
+      sendError = null
+      break // Successful send, exit loop
+    } catch (err: any) {
+      attempts++
+      sendError = err.message || "Unknown send error"
+      logger.warn(`Resend email attempt ${attempts} failed for ${recipient}`, { error: sendError })
+      
+      if (attempts < maxAttempts) {
+        // Wait 1 second before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
+    }
+  }
+
+  // 4c. Update Log Row with final results
+  if (logId) {
+    await sb
+      .from("email_logs")
+      .update({
+        status: sendError ? "failed" : "sent",
+        error_message: sendError,
+        retry_count: attempts - 1,
+        resend_id: sendError ? null : sendId,
+      })
+      .eq("id", logId)
+  }
+
+  return { id: sendId, error: sendError }
 }

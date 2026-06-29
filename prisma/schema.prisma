@@ -577,3 +577,33 @@ model NotificationQueue {
 
   @@map("notification_queue")
 }
+
+model EmailTemplate {
+  id          String   @id
+  name        String
+  subject     String
+  htmlContent String   @map("html_content")
+  textContent String?  @map("text_content")
+  variables   String[]
+  isSystem    Boolean  @default(false) @map("is_system")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("email_templates")
+}
+
+model EmailLog {
+  id           String    @id @default(uuid())
+  recipient    String
+  subject      String
+  emailType    String    @map("email_type")
+  status       String    @default("pending")
+  resendId     String?   @map("resend_id")
+  errorMessage String?   @map("error_message")
+  retryCount   Int       @default(0) @map("retry_count")
+  openedAt     DateTime? @map("opened_at")
+  clickedAt    DateTime? @map("clicked_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@map("email_logs")
+}

@@ -16,6 +16,7 @@ import {
   BarChart3,
   Megaphone,
   Bell,
+  Mail,
   MessageSquare,
   ShieldAlert,
   ClipboardList,
@@ -79,6 +80,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/admin/blog", label: "Blog", icon: FileText },
       { href: "/admin/marketing", label: "Marketing", icon: Megaphone },
       { href: "/admin/notifications", label: "Notifications", icon: Bell },
+      { href: "/admin/email", label: "Email Management", icon: Mail },
     ],
   },
   {
