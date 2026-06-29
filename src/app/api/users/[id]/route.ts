@@ -13,7 +13,7 @@ export const GET = defineRoute<unknown, unknown, { id: string }>({
     const supabase = await createClient()
     const { data, error } = await supabase
       .from("users")
-      .select("id, email, full_name, avatar_url, role, permissions, user_id, created_at")
+      .select("id, email, full_name, avatar_url, role, permissions, organization_id, created_at")
       .eq("id", id)
       .single()
     if (error) return fail("DB_ERROR", error.message, 500)
@@ -43,7 +43,7 @@ export const DELETE = defineRoute<unknown, unknown, { id: string }>({
     const { id } = params
     if (id === auth.user!.id) return fail("CONFLICT", "Cannot delete yourself", 409)
     const supabase = await createClient()
-    const { error } = await supabase.from("users").update({ user_id: null, role: "viewer" }).eq("id", id)
+    const { error } = await supabase.from("users").update({ organization_id: null, role: "viewer" }).eq("id", id)
     if (error) return fail("DB_ERROR", error.message, 400)
     return ok({ removed: true })
   },

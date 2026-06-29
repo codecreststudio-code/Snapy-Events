@@ -30,7 +30,7 @@ async function getEvent(slug: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, slug, settings, host_id, organization_id, end_date")
+    .select("id, name, slug, settings, host_id, organization_id, end_date, organization:organizations(plan, settings)")
     .eq("slug", slug)
     .eq("status", "published")
     .single()
