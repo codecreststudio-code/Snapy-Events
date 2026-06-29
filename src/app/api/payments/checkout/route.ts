@@ -97,8 +97,11 @@ export const POST = defineRoute({
           .update({ razorpay_customer_id: customerId })
           .eq("id", auth.user!.id)
       } catch (err: any) {
-        const msg = err.error?.description || err.description || err.message || JSON.stringify(err)
-        return fail("PAYMENT_ERROR", `Failed to register billing customer: ${msg}`, 500)
+        // Customer creation is non-critical — Razorpay standard checkout works
+        // without a pre-created customer_id. Log and continue to order creation.
+        const msg = err.error?.description || err.description || err.message || String(err)
+        console.warn(`[razorpay] Customer creation skipped (${msg}). Proceeding with order-only checkout.`)
+        customerId = null
       }
     }
 
