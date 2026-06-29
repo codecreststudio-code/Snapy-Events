@@ -30,7 +30,7 @@ async function getEvent(slug: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, slug, settings, host_id, organization_id")
+    .select("id, name, slug, settings, host_id, organization_id, end_date")
     .eq("slug", slug)
     .eq("status", "published")
     .single()
@@ -337,6 +337,23 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         <h1 className="text-2xl font-semibold mb-2">Uploads Disabled</h1>
         <p className="text-[#9C958E] mb-4 text-center max-w-md">
           This event is not accepting photo uploads at the moment.
+        </p>
+        <Button asChild variant="outline" className="border-[#EAE5DF] hover:bg-stone-50">
+          <Link href={`/event/${slug}`}>Back to Event</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  const isExpired = event.end_date && new Date(event.end_date) < new Date()
+
+  if (isExpired) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8F7F5] text-[#1C1A17]">
+        <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
+        <h1 className="text-2xl font-semibold mb-2">Event Expired</h1>
+        <p className="text-[#9C958E] mb-4 text-center max-w-md">
+          This event has ended, and guest uploads are no longer allowed.
         </p>
         <Button asChild variant="outline" className="border-[#EAE5DF] hover:bg-stone-50">
           <Link href={`/event/${slug}`}>Back to Event</Link>
