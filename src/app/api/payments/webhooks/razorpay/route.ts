@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { createServiceClient } from "@/lib/supabase/server"
 import { verifyRazorpaySignature } from "@/lib/integrations/razorpay"
 import { logger } from "@/lib/logger"
+import { sendEmail } from "@/lib/integrations/resend"
 
 export async function POST(request: NextRequest) {
   const sig = request.headers.get("x-razorpay-signature") ?? ""
@@ -98,6 +99,29 @@ export async function POST(request: NextRequest) {
               .from("users")
               .update({ preferences: newPrefs })
               .eq("id", p.notes.user_id)
+
+            // Fetch user email for receipt
+            const { data: userRow } = await supabase
+              .from("users")
+              .select("email, full_name")
+              .eq("id", p.notes.user_id)
+              .single()
+
+            if (userRow?.email) {
+              const invoiceNumber = `INV-${p.id.slice(-8).toUpperCase()}`
+              void sendEmail({
+                to: userRow.email,
+                templateId: "payment_receipt",
+                variables: {
+                  host_name: userRow.full_name || userRow.email,
+                  invoice_number: invoiceNumber,
+                  plan_name: p.notes.plan_id || "Subscription",
+                  payment_amount: ((p.amount || 0) / 100).toFixed(2),
+                  dashboard_url: process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://snapsy-events.vercel.app",
+                },
+                tags: [{ name: "type", value: "payment-receipt" }],
+              })
+            }
           }
         }
         break
