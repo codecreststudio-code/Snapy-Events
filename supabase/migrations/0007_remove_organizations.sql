@@ -41,17 +41,27 @@ EXCEPTION
 END $$;
 
 -- 3. Drop all dependent RLS Policies BEFORE dropping the columns
-DROP POLICY IF EXISTS "org_select" ON public.organizations;
-DROP POLICY IF EXISTS "org_insert" ON public.organizations;
-DROP POLICY IF EXISTS "org_update" ON public.organizations;
-DROP POLICY IF EXISTS "org_delete" ON public.organizations;
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'organizations') THEN
+    EXECUTE 'DROP POLICY IF EXISTS "org_select" ON public.organizations';
+    EXECUTE 'DROP POLICY IF EXISTS "org_insert" ON public.organizations';
+    EXECUTE 'DROP POLICY IF EXISTS "org_update" ON public.organizations';
+    EXECUTE 'DROP POLICY IF EXISTS "org_delete" ON public.organizations';
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "users_select" ON public.users;
 DROP POLICY IF EXISTS "users_update_self" ON public.users;
 DROP POLICY IF EXISTS "users_insert" ON public.users;
 
-DROP POLICY IF EXISTS "inv_select" ON public.organization_invitations;
-DROP POLICY IF EXISTS "inv_manage" ON public.organization_invitations;
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'organization_invitations') THEN
+    EXECUTE 'DROP POLICY IF EXISTS "inv_select" ON public.organization_invitations';
+    EXECUTE 'DROP POLICY IF EXISTS "inv_manage" ON public.organization_invitations';
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "events_select" ON public.events;
 DROP POLICY IF EXISTS "events_insert" ON public.events;
