@@ -30,18 +30,11 @@ async function getEvent(slug: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, slug, settings, user_id, user:users(plan, settings)")
+    .select("id, name, slug, settings, host_id, organization_id")
     .eq("slug", slug)
     .eq("status", "published")
     .single()
   if (error) throw error
-  const userObj: any = Array.isArray(data?.user) ? data.user[0] : data?.user
-  if (userObj?.plan) {
-    const { data: planData } = await supabase.from("plans").select("limits").eq("id", userObj.plan).single()
-    if (planData) {
-      (data as any).planLimits = planData.limits
-    }
-  }
   return data
 }
 
@@ -176,17 +169,18 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
     try {
       // 1. Quota checks
-      const userPlan = (event.user as any)?.plan || "free"
-      const orgSettings = (event.user as any)?.settings || {}
+      const userPlan = (event.organization as any)?.plan || "free"
+      const orgSettings = (event.organization as any)?.settings || {}
       
       const { data: planData } = await supabase.from("plans").select("limits").eq("id", userPlan).single()
-      const planLimits = planData?.limits || { guests_limit: 0, shots_limit: 0 }
+      const planLimits = planData?.limits || {}
       
       const guestBoost = orgSettings.guest_boost || 0
       const shotsBoost = orgSettings.shots_boost || 0
 
-      const maxGuests = (planLimits.guests_limit || 0) + guestBoost
-      const maxShots = (planLimits.shots_limit || 0) + shotsBoost
+      // Default to Infinity if the limit isn't explicitly defined for guests/shots
+      const maxGuests = planLimits.guests_limit !== undefined ? planLimits.guests_limit + guestBoost : Infinity
+      const maxShots = planLimits.shots_limit !== undefined ? planLimits.shots_limit + shotsBoost : Infinity
 
       // Fetch uploads list to calculate current usage
       const { data: currentUploads, error: uploadsErr } = await supabase
