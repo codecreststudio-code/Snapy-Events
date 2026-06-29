@@ -347,7 +347,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         type: "video",
         guest: p.uploader_name || "Anonymous",
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(p.uploader_name || "A")}&background=random`,
-        time: new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: new Date(p.created_at).toLocaleString("en-IN", { month: "short", day: "numeric", hour: '2-digit', minute: '2-digit' }),
         timestamp: new Date(p.created_at).getTime(),
         thumbnail: getImageUrl(p.thumbnail_path || p.storage_path, "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&auto=format&fit=crop"),
         title: p.original_filename || "Video clip",
@@ -358,11 +358,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         id: p.id,
         type: "voice",
         guest: p.uploader_name || "Anonymous",
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(p.uploader_name || "A")}&background=random`,
-        time: new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        timestamp: new Date(p.created_at).getTime(),
         category: "Voice Note",
         duration: "0:30",
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(p.uploader_name || "A")}&background=random`,
+        time: new Date(p.created_at).toLocaleString("en-IN", { month: "short", day: "numeric", hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date(p.created_at).getTime(),
         audioUrl: getImageUrl(p.storage_path, "")
       })
     } else {
@@ -380,7 +380,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         type: "photo_group",
         guest: key,
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(key)}&background=random`,
-        time: new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: new Date(p.created_at).toLocaleString("en-IN", { month: "short", day: "numeric", hour: '2-digit', minute: '2-digit' }),
         timestamp: new Date(p.created_at).getTime(),
         photos: []
       })
@@ -397,7 +397,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       type: "message",
       guest: name,
       avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`,
-      time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: new Date(m.created_at).toLocaleString("en-IN", { month: "short", day: "numeric", hour: '2-digit', minute: '2-digit' }),
       timestamp: new Date(m.created_at).getTime(),
       content: m.message,
       reaction: m.pinned ? "📌" : "💬"
@@ -412,7 +412,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     dynamicActivities.push({
       actor: a.guest_name || "Someone",
       action: "joined the capsule page",
-      time: new Date(a.accessed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: new Date(a.accessed_at).toLocaleString("en-IN", { month: "short", day: "numeric", hour: '2-digit', minute: '2-digit' }),
       timestamp: new Date(a.accessed_at).getTime(),
     })
   })

@@ -39,6 +39,7 @@ import {
   Trash2,
   ExternalLink,
   Camera,
+  AlertTriangle,
 } from "lucide-react"
 import type { QRCode, Gallery } from "@/lib/types"
 
@@ -46,7 +47,7 @@ async function getEvent(eventSlug: string, orgId: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, slug")
+    .select("id, name, slug, end_date")
     .eq("slug", eventSlug)
     .eq("host_id", orgId)
     .single()
@@ -370,6 +371,7 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
   }
 
   const totalScans = qrCodes?.reduce((acc, qr) => acc + (qr.scan_count || 0), 0) || 0
+  const isExpired = event.end_date && new Date(event.end_date) < new Date()
 
   return (
     <div className="space-y-6">
@@ -422,12 +424,24 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
           <h2 className="text-lg font-medium">Generated QR Codes</h2>
           <p className="text-sm text-muted-foreground">Click on a QR code to generate the image</p>
         </div>
-        <CreateQRDialog
-          eventId={event.id}
-          eventSlug={event.slug}
-          galleries={galleries || []}
-          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["event-qrcodes", event.id] })}
-        />
+        {isExpired ? (
+          <div className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-900 px-4 py-3 rounded-xl max-w-md">
+            <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-bold text-red-900">Event Expired</p>
+              <p className="text-xs text-red-700 mt-0.5">
+                QR generation is disabled. Guests can no longer upload media.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <CreateQRDialog
+            eventId={event.id}
+            eventSlug={event.slug}
+            galleries={galleries || []}
+            onSuccess={() => queryClient.invalidateQueries({ queryKey: ["event-qrcodes", event.id] })}
+          />
+        )}
       </div>
 
       {qrCodes && qrCodes.length > 0 ? (
