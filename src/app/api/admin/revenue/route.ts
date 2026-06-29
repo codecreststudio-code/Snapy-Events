@@ -15,16 +15,16 @@ export const GET = defineRoute({
     const windowDays = query.days
     const since = new Date(Date.now() - windowDays * 24 * 3600 * 1000).toISOString()
 
-    const [txsRes, activeSubs, totalOrgs] = await Promise.all([
+    const [txsRes, activeSubs, totalUsers] = await Promise.all([
       sb
         .from("transactions")
         .select(
-          "id, amount, currency, status, created_at, razorpay_payment_id, razorpay_order_id, payment_method, user_id, user:organizations(name)"
+          "id, amount, currency, status, created_at, razorpay_payment_id, razorpay_order_id, payment_method, user_id, user:users(full_name)"
         )
         .gte("created_at", since)
         .order("created_at", { ascending: false }),
       sb.from("subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
-      sb.from("organizations").select("id", { count: "exact", head: true }),
+      sb.from("users").select("id", { count: "exact", head: true }),
     ])
 
     const allTxs = txsRes.data ?? []
@@ -53,7 +53,7 @@ export const GET = defineRoute({
       failed_count: allTxs.filter((t) => t.status === "failed").length,
       refunded_count: allTxs.filter((t) => t.status === "refunded").length,
       active_subscriptions: activeSubs.count ?? 0,
-      total_organizations: totalOrgs.count ?? 0,
+      total_users: totalUsers.count ?? 0,
       transactions: allTxs,
       daily_revenue: dailyRevenue,
     })

@@ -18,38 +18,33 @@ export async function GET(request: NextRequest) {
       // Check if user already has an user_id associated in public.users
       const { data: profile } = await supabase
         .from("users")
-        .select("user_id, full_name, email")
+        .select("id, full_name, email")
         .eq("id", userId)
         .single()
 
-      if (profile && !profile.user_id) {
+      if (profile) {
         const svc = await createServiceClient()
-        
-        // Automatically create a default organization for new OAuth users
-        const userEmail = profile.email || data.user.email || ""
-        const fullName = profile.full_name || userEmail.split("@")[0] || "User"
-        const orgName = `${fullName}'s Workspace`
-        const orgSlug = `${slugify(orgName)}-${Date.now().toString(36).slice(-4)}`
+        const { data: sub } = await svc
+          .from("subscriptions")
+          .select("id")
+          .eq("user_id", userId)
+          .limit(1)
 
-        const { data: org, error: orgError } = await svc
-          .from("organizations")
-          .insert({
-            name: orgName,
-            slug: orgSlug,
-            plan: "free",
-          })
-          .select()
-          .single()
-
-        if (!orgError && org) {
+        if (!sub || sub.length === 0) {
           await svc
             .from("users")
-            .update({
-              user_id: data.user.id,
-              role: "owner",
-              permissions: ["*"],
-            })
+            .update({ role: "owner", permissions: ["*"] })
             .eq("id", userId)
+
+          await svc
+            .from("subscriptions")
+            .insert({
+              user_id: userId,
+              plan_id: "free",
+              status: "active",
+              current_period_start: new Date().toISOString(),
+              current_period_end: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
+            })
         }
       }
     }

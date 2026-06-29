@@ -161,7 +161,7 @@ export function NewEventForm() {
   // Form Mutation
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!profile?.user_id || !user?.id) {
+      if (!profile?.id || !user?.id) {
         throw new Error("User or workspace session not found. Please log in.")
       }
 
@@ -173,7 +173,7 @@ export function NewEventForm() {
         : new Date(Date.now() + 86400000 * 2).toISOString() // default 2 days from now
 
       const eventData = {
-        host_id: profile.user_id,
+        host_id: profile.id,
         name: name || "Celebration",
         slug,
         description: `Experience created with Snapsy.`,

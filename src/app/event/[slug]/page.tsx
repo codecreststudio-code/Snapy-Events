@@ -68,7 +68,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
     .from("events")
     .select(`
       *,
-      user:organizations(name, branding),
+      host:users(full_name, avatar_url, preferences),
       galleries(*)
     `)
     .eq("slug", slug)
@@ -76,8 +76,16 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
 
   if (!ev) notFound()
 
+  const hostData = ev.host ? {
+    name: ev.host.full_name,
+    branding: (ev.host.preferences?.branding as any) || {}
+  } : null
+
   const settings = ev.settings as EventData["settings"]
-  const event = ev as unknown as EventData
+  const event = {
+    ...ev,
+    user: hostData
+  } as unknown as EventData
 
   const isRevealed = !settings.enable_countdown ||
     (settings.countdown_date && new Date(settings.countdown_date) <= new Date())

@@ -43,7 +43,7 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
     .from("events")
     .select(`
       *,
-      user:organizations(name)
+      host:users(full_name)
     `)
     .eq("slug", slug)
     .eq("status", "published")
@@ -51,7 +51,14 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
 
   if (!ev) notFound()
 
-  const event = ev as unknown as EventData
+  const hostData = ev.host ? {
+    name: ev.host.full_name
+  } : null
+
+  const event = {
+    ...ev,
+    user: hostData
+  } as unknown as EventData
   const settings = event.settings
   const countdownDate = settings.countdown_date
 

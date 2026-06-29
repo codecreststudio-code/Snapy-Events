@@ -11,8 +11,8 @@ export const GET = defineRoute({
       const sb = await adminDb()
 
       // Parallel health checks against real DB tables
-      const [orgRes, userRes, eventRes, txRes] = await Promise.all([
-        sb.from("organizations").select("id", { count: "exact", head: true }),
+      const [subRes, userRes, eventRes, txRes] = await Promise.all([
+        sb.from("subscriptions").select("id", { count: "exact", head: true }),
         sb.from("users").select("id", { count: "exact", head: true }),
         sb.from("events").select("id", { count: "exact", head: true }),
         sb.from("transactions").select("id", { count: "exact", head: true }),
@@ -20,14 +20,14 @@ export const GET = defineRoute({
 
       const dbLatency = Date.now() - t0
 
-      const dbHealthy = !orgRes.error && !userRes.error && !eventRes.error && !txRes.error
+      const dbHealthy = !subRes.error && !userRes.error && !eventRes.error && !txRes.error
 
       return ok({
         db_latency_ms: dbLatency,
         db_healthy: dbHealthy,
-        db_error: orgRes.error?.message || userRes.error?.message || null,
+        db_error: subRes.error?.message || userRes.error?.message || null,
         record_counts: {
-          organizations: orgRes.count ?? 0,
+          subscriptions: subRes.count ?? 0,
           users: userRes.count ?? 0,
           events: eventRes.count ?? 0,
           transactions: txRes.count ?? 0,
@@ -39,7 +39,7 @@ export const GET = defineRoute({
         db_latency_ms: Date.now() - t0,
         db_healthy: false,
         db_error: err.message,
-        record_counts: { organizations: 0, users: 0, events: 0, transactions: 0 },
+        record_counts: { subscriptions: 0, users: 0, events: 0, transactions: 0 },
         checked_at: new Date().toISOString(),
       })
     }

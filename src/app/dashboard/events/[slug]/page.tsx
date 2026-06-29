@@ -180,7 +180,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const router = useRouter()
   const queryClient = useQueryClient()
   const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.user_id
+  const orgId = profile?.id
 
   // State management
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)

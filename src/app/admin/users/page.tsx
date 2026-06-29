@@ -30,12 +30,16 @@ type UserItem = {
   role: string
   is_active: boolean
   created_at: string
-  user_id: string | null
-  user: {
+  subscriptions?: Array<{
     id: string
-    name: string
-    plan: string
-  } | null
+    plan_id: string
+    status: string
+  }>
+}
+
+function getActivePlan(u: UserItem): string {
+  const activeSub = u.subscriptions?.find((s) => s.status === "active")
+  return activeSub?.plan_id || "free"
 }
 
 export default function AdminUsersPage() {
@@ -146,26 +150,7 @@ export default function AdminUsersPage() {
   }
 
   const handleOrganizationChange = async (userId: string, orgId: string | null) => {
-    setActioningId(userId)
-    // Convert empty string to null
-    const organizationId = orgId && orgId.trim() !== "" ? orgId.trim() : null
-    try {
-      const res = await fetch("/api/admin/users", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, action: "change_organization", organizationId }),
-      })
-      if (!res.ok) throw new Error("Failed to change organization assignment")
-      toast({ title: "Success", description: "User organization assignment updated." })
-      fetchUsers()
-      if (selectedUser?.id === userId) {
-        setSelectedUser(prev => prev ? { ...prev, user_id: organizationId } : null)
-      }
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" })
-    } finally {
-      setActioningId(null)
-    }
+    // No-op
   }
 
   const handleDeleteUser = async (userId: string) => {
@@ -191,8 +176,7 @@ export default function AdminUsersPage() {
     const term = search.toLowerCase()
     return (
       u.email.toLowerCase().includes(term) ||
-      (u.full_name || "").toLowerCase().includes(term) ||
-      (u.user?.name || "").toLowerCase().includes(term)
+      (u.full_name || "").toLowerCase().includes(term)
     )
   })
 
@@ -237,7 +221,7 @@ export default function AdminUsersPage() {
                   <thead>
                     <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/50">
                       <th className="p-4">User Info</th>
-                      <th className="p-4">Studio / Organization</th>
+                      <th className="p-4">Joined Date</th>
                       <th className="p-4">Role</th>
                       <th className="p-4">Plan Tier</th>
                       <th className="p-4">Status</th>
@@ -259,8 +243,7 @@ export default function AdminUsersPage() {
                             <div className="text-[10px] text-slate-400 mt-0.5">{u.email}</div>
                           </td>
                           <td className="p-4">
-                            <div className="text-slate-700 font-semibold">{u.user?.name || "No Organization"}</div>
-                            <div className="text-[10px] text-slate-400 mt-0.5">Joined: {new Date(u.created_at).toLocaleDateString()}</div>
+                            <div className="text-slate-700 font-semibold">{new Date(u.created_at).toLocaleDateString()}</div>
                           </td>
                           <td className="p-4" onClick={(e) => e.stopPropagation()}>
                             <select
@@ -277,9 +260,9 @@ export default function AdminUsersPage() {
                           </td>
                         <td className="p-4" onClick={(e) => e.stopPropagation()}>
                           <select
-                            value={u.user?.plan || "free"}
+                            value={getActivePlan(u)}
                             onChange={(e) => handlePlanChange(u.id, e.target.value)}
-                            disabled={!u.user_id || actioningId === u.id}
+                            disabled={actioningId === u.id}
                             className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-violet-500 font-semibold shadow-sm"
                           >
                             <option value="free">Free</option>
@@ -362,12 +345,8 @@ export default function AdminUsersPage() {
                   <span className="text-slate-700 capitalize font-semibold">{selectedUser.role}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Organization ID</span>
-                  <span className="font-mono text-slate-700 font-semibold truncate max-w-[150px]">{selectedUser.user_id || "N/A"}</span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-slate-400 font-bold uppercase tracking-wider">Plan Tier</span>
-                  <span className="text-violet-600 font-bold uppercase">{selectedUser.user?.plan || "free"}</span>
+                  <span className="text-violet-600 font-bold uppercase">{getActivePlan(selectedUser)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400 font-bold uppercase tracking-wider">Join Date</span>
@@ -375,28 +354,7 @@ export default function AdminUsersPage() {
                 </div>
               </div>
 
-              {/* Organization Assignment Section */}
-              <div className="border-t border-slate-100 pt-4 space-y-2">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Assign Organization</h4>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Enter Organization ID (UUID)"
-                    id="orgIdInput"
-                    defaultValue={selectedUser.user_id || ""}
-                    className="h-8 text-xs bg-white border-slate-200 text-slate-800 shadow-sm"
-                  />
-                  <Button
-                    onClick={() => {
-                      const el = document.getElementById("orgIdInput") as HTMLInputElement
-                      handleOrganizationChange(selectedUser.id, el?.value || null)
-                    }}
-                    disabled={actioningId === selectedUser.id}
-                    className="h-8 px-3 text-xs bg-violet-600 hover:bg-violet-750 text-white font-bold rounded-lg shadow-sm"
-                  >
-                    Assign
-                  </Button>
-                </div>
-              </div>
+
 
               <div className="border-t border-slate-100 pt-4 space-y-2">
                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Account Actions</h4>

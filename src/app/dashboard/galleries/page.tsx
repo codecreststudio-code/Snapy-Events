@@ -212,7 +212,7 @@ function GalleryCard({
 export default function GalleriesPage() {
   const queryClient = useQueryClient()
   const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.user_id
+  const orgId = profile?.id
   const [searchQuery, setSearchQuery] = useState("")
   const [filterType, setFilterType] = useState("all")
 

@@ -47,41 +47,57 @@ export async function POST(request: NextRequest) {
           })
 
           // If this is a subscription payment, update/create subscription
-          if (p.subscription_id && p.notes.plan_id) {
-            await supabase
+          if (p.notes.plan_id) {
+            const { data: existingSub } = await supabase
               .from("subscriptions")
-              .upsert(
-                {
+              .select("id")
+              .eq("user_id", p.notes.user_id)
+              .in("status", ["active", "past_due"])
+              .limit(1)
+              .maybeSingle()
+
+            if (existingSub) {
+              await supabase
+                .from("subscriptions")
+                .update({
+                  plan_id: p.notes.plan_id,
+                  status: "active",
+                  razorpay_subscription_id: p.subscription_id || null,
+                  current_period_start: new Date().toISOString(),
+                  current_period_end: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
+                })
+                .eq("id", existingSub.id)
+            } else {
+              await supabase
+                .from("subscriptions")
+                .insert({
                   user_id: p.notes.user_id,
                   plan_id: p.notes.plan_id,
                   status: "active",
-                  razorpay_subscription_id: p.subscription_id,
+                  razorpay_subscription_id: p.subscription_id || null,
                   current_period_start: new Date().toISOString(),
                   current_period_end: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
-                },
-                { onConflict: "razorpay_subscription_id" },
-              )
-          }
-
-          // Update organization plan and settings
-          if (p.notes.plan_id) {
-            const { data: org } = await supabase
-              .from("organizations")
-              .select("settings")
-              .eq("id", p.notes.user_id)
-              .single()
-            
-            const currentSettings = (org?.settings as Record<string, any>) || {}
-            const newSettings = {
-              ...currentSettings,
-              guest_boost: p.notes.guest_boost ? parseInt(p.notes.guest_boost) : 0,
-              shots_boost: p.notes.shots_boost ? parseInt(p.notes.shots_boost) : 0,
+                })
             }
 
-            await supabase.from("organizations").update({ 
-              plan: p.notes.plan_id,
-              settings: newSettings
-            }).eq("id", p.notes.user_id)
+            // Update user boosts in preferences
+            const { data: userProfile } = await supabase
+              .from("users")
+              .select("preferences")
+              .eq("id", p.notes.user_id)
+              .single()
+
+            const currentPrefs = (userProfile?.preferences as Record<string, any>) || {}
+            const newPrefs = {
+              ...currentPrefs,
+              guest_boost: (currentPrefs.guest_boost || 0) + (p.notes.guest_boost ? parseInt(p.notes.guest_boost) : 0),
+              shots_boost: (currentPrefs.shots_boost || 0) + (p.notes.shots_boost ? parseInt(p.notes.shots_boost) : 0),
+            }
+
+            await supabase
+              .from("users")
+              .update({ preferences: newPrefs })
+              .eq("id", p.notes.user_id)
           }
         }
         break

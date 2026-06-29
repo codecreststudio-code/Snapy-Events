@@ -11,7 +11,7 @@ interface AuthContextType {
   profile: DatabaseUser | null
   isLoading: boolean
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
-  signUp: (email: string, password: string, fullName: string, orgName: string) => Promise<{ error: Error | null }>
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>
   signInWithGoogle: () => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: Error | null }>
@@ -30,42 +30,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchProfile = useCallback(async (userId: string) => {
     const { data, error } = await supabase
       .from("users")
-      .select("*, user:organizations(*)")
+      .select("*")
       .eq("id", userId)
       .single()
 
     if (!error && data) {
-      if (!data.user_id) {
-        const userEmail = data.email || ""
-        const fullName = data.full_name || userEmail.split("@")[0] || "User"
-        const orgName = `${fullName}'s Workspace`
-        const orgSlug = `${orgName.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${Date.now().toString(36).slice(-4)}`
-
-        const { data: org, error: orgError } = await supabase
-          .from("organizations")
-          .insert({ name: orgName, slug: orgSlug, plan: "free" })
-          .select()
-          .single()
-
-        if (!orgError && org) {
-          const { error: updateError } = await supabase
-            .from("users")
-            .update({ user_id: data.user.id, role: "owner", permissions: ["*"] })
-            .eq("id", userId)
-
-          if (!updateError) {
-            const { data: updatedData } = await supabase
-              .from("users")
-              .select("*, user:organizations(*)")
-              .eq("id", userId)
-              .single()
-            if (updatedData) {
-              setProfile(updatedData as DatabaseUser)
-              return
-            }
-          }
-        }
-      }
       setProfile(data as DatabaseUser)
     }
   }, [supabase])
@@ -106,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: error ? new Error(error.message) : null }
   }
 
-  const signUp = async (email: string, password: string, fullName: string, orgName: string) => {
+  const signUp = async (email: string, password: string, fullName: string) => {
     try {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
@@ -115,7 +84,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email,
           password,
           full_name: fullName,
-          organization_name: orgName,
         }),
       })
 

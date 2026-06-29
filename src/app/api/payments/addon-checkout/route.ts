@@ -52,24 +52,27 @@ export const POST = defineRoute({
     const amountInPaise = price * 100
 
     // 2. Fetch or create Customer ID
-    const { data: org } = await supabase
-      .from("organizations")
-      .select("razorpay_customer_id, name")
-      .eq("id", auth.user!.id)
-      .single()
+    const { data: sub } = await supabase
+      .from("subscriptions")
+      .select("razorpay_customer_id, user:users(full_name)")
+      .eq("user_id", auth.user!.id)
+      .in("status", ["active", "past_due"])
+      .limit(1)
+      .maybeSingle()
 
-    let customerId = org?.razorpay_customer_id ?? null
+    const hostUser = sub?.user as any
+    let customerId = sub?.razorpay_customer_id ?? null
     if (!customerId) {
       try {
         const c = await createRazorpayCustomer({
-          name: org?.name ?? auth.user!.email,
+          name: hostUser?.full_name ?? auth.user!.email,
           email: auth.user!.email,
         })
         customerId = c.id
         await supabase
-          .from("organizations")
+          .from("subscriptions")
           .update({ razorpay_customer_id: customerId })
-          .eq("id", auth.user!.id)
+          .eq("user_id", auth.user!.id)
       } catch (err: any) {
         return fail("PAYMENT_ERROR", `Failed to register billing customer: ${err.message}`, 500)
       }
