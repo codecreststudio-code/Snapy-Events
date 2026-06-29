@@ -96,17 +96,32 @@ CREATE INDEX IF NOT EXISTS idx_addon_purchases_user ON public.addon_purchases(us
 CREATE INDEX IF NOT EXISTS idx_addon_purchases_sub ON public.addon_purchases(subscription_id);
 
 -- RLS Policies for new tables
+DROP POLICY IF EXISTS "features_select" ON public.features;
 CREATE POLICY "features_select" ON public.features FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "features_write" ON public.features;
 CREATE POLICY "features_write" ON public.features FOR ALL USING (public.is_platform_admin());
 
+DROP POLICY IF EXISTS "plan_features_select" ON public.plan_features;
 CREATE POLICY "plan_features_select" ON public.plan_features FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "plan_features_write" ON public.plan_features;
 CREATE POLICY "plan_features_write" ON public.plan_features FOR ALL USING (public.is_platform_admin());
 
+DROP POLICY IF EXISTS "addons_select" ON public.addons;
 CREATE POLICY "addons_select" ON public.addons FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "addons_write" ON public.addons;
 CREATE POLICY "addons_write" ON public.addons FOR ALL USING (public.is_platform_admin());
 
+DROP POLICY IF EXISTS "automation_rules_select" ON public.automation_rules;
 CREATE POLICY "automation_rules_select" ON public.automation_rules FOR SELECT USING (public.is_platform_admin());
+
+DROP POLICY IF EXISTS "automation_rules_write" ON public.automation_rules;
 CREATE POLICY "automation_rules_write" ON public.automation_rules FOR ALL USING (public.is_platform_admin());
 
+DROP POLICY IF EXISTS "addon_purchases_select" ON public.addon_purchases;
 CREATE POLICY "addon_purchases_select" ON public.addon_purchases FOR SELECT USING (user_id = auth.uid() OR public.is_platform_admin());
+
+DROP POLICY IF EXISTS "addon_purchases_write" ON public.addon_purchases;
 CREATE POLICY "addon_purchases_write" ON public.addon_purchases FOR ALL USING (public.is_platform_admin());

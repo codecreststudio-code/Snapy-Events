@@ -18,17 +18,20 @@ CREATE INDEX IF NOT EXISTS idx_admin_notifications_is_read ON public.admin_notif
 ALTER TABLE public.admin_notifications ENABLE ROW LEVEL SECURITY;
 
 -- Admins can read their own notifications
+DROP POLICY IF EXISTS "Admins can view their own notifications" ON public.admin_notifications;
 CREATE POLICY "Admins can view their own notifications" ON public.admin_notifications
     FOR SELECT
     USING (auth.uid() = user_id);
 
 -- Admins can update their own notifications (e.g. mark as read)
+DROP POLICY IF EXISTS "Admins can update their own notifications" ON public.admin_notifications;
 CREATE POLICY "Admins can update their own notifications" ON public.admin_notifications
     FOR UPDATE
     USING (auth.uid() = user_id)
     WITH CHECK (auth.uid() = user_id);
 
 -- Only service role or triggers can insert notifications
+DROP POLICY IF EXISTS "Service role can insert notifications" ON public.admin_notifications;
 CREATE POLICY "Service role can insert notifications" ON public.admin_notifications
     FOR INSERT
     WITH CHECK (true); -- Usually enforced by using service_role key anyway, but good practice
