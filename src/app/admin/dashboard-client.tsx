@@ -364,11 +364,6 @@ export default function DashboardClient() {
   const storageGB = (data.metrics?.storage.current / (1024 * 1024 * 1024)) || 0.00
   const totalStorageGB = (data.metrics?.storage.total / (1024 * 1024 * 1024)) || 0.00
 
-  // Displaying preset range label helper
-  const getPresetLabel = () => {
-    const { start, end } = getPresetDates(selectedPreset, customStart, customEnd)
-    return `${start.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${end.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
-  }
 
   return (
     <main className="px-6 py-8 space-y-8 bg-slate-50 min-h-full">
@@ -422,11 +417,7 @@ export default function DashboardClient() {
             </div>
           )}
 
-          <div className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 flex items-center gap-1.5 shadow-sm">
-            <Calendar className="h-3.5 w-3.5 text-slate-400" />
-            <span>{getPresetLabel()}</span>
-          </div>
-          
+
           <Button onClick={handleRefresh} disabled={refreshing || loading} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
             <RefreshCw className={cn("h-4 w-4 text-slate-500", (refreshing || loading) && "animate-spin")} />
             <span>Refresh</span>
