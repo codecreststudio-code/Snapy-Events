@@ -33,10 +33,10 @@ export const GET = defineRoute({
     const from = (query.page - 1) * query.pageSize
     const to = from + query.pageSize - 1
 
-    // Fetch users with their organizations joined
+    // Fetch users with their subscriptions joined
     const { data, count, error } = await sb
       .from("users")
-      .select("id, email, full_name, role, is_active, created_at, user_id, user:organizations(id, name, plan, settings)", { count: "exact" })
+      .select("id, email, full_name, role, is_active, created_at, subscriptions(id, plan_id, status)", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(from, to)
 
@@ -53,10 +53,9 @@ export const PATCH = defineRoute({
     const sb = admin()
     const { userId, action, planId, newPassword, role, organizationId } = body
 
-    // Fetch user details first
     const { data: userProfile, error: getError } = await sb
       .from("users")
-      .select("user_id")
+      .select("id")
       .eq("id", userId)
       .single()
 
@@ -87,16 +86,36 @@ export const PATCH = defineRoute({
     } 
     else if (action === "change_plan") {
       if (!planId) return fail("VALIDATION_ERROR", "planId is required for changing plans", 422)
-      if (!userProfile.user_id) {
-        return fail("CONFLICT", "User does not belong to an organization", 409)
+
+      const { data: existingSub } = await sb
+        .from("subscriptions")
+        .select("id")
+        .eq("user_id", userId)
+        .in("status", ["active", "past_due"])
+        .limit(1)
+        .maybeSingle()
+
+      let subError
+      if (existingSub) {
+        const { error } = await sb
+          .from("subscriptions")
+          .update({ plan_id: planId })
+          .eq("id", existingSub.id)
+        subError = error
+      } else {
+        const { error } = await sb
+          .from("subscriptions")
+          .insert({
+            user_id: userId,
+            plan_id: planId,
+            status: "active",
+            current_period_start: new Date().toISOString(),
+            current_period_end: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
+          })
+        subError = error
       }
 
-      const { error } = await sb
-        .from("organizations")
-        .update({ plan: planId })
-        .eq("id", userProfile.user_id)
-
-      if (error) return fail("DB_ERROR", error.message, 500)
+      if (subError) return fail("DB_ERROR", subError.message, 500)
     } 
     else if (action === "reset_password") {
       const pwd = newPassword || "Reset@123"
@@ -115,11 +134,8 @@ export const PATCH = defineRoute({
       if (error) return fail("DB_ERROR", error.message, 500)
     }
     else if (action === "change_organization") {
-      const { error } = await sb
-        .from("users")
-        .update({ user_id: organizationId })
-        .eq("id", userId)
-      if (error) return fail("DB_ERROR", error.message, 500)
+      // No-op in single-user architecture
+      return ok({ success: true, message: "No-op in single-user architecture" })
     }
 
     return ok({ success: true })

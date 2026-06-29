@@ -367,7 +367,7 @@ function CreateQRDialog({
 export default function ConsolidatedQRPage() {
   const queryClient = useQueryClient()
   const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.user_id
+  const orgId = profile?.id
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedEventId, setSelectedEventId] = useState("all")
 

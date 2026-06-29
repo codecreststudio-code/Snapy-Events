@@ -139,18 +139,10 @@ async function getSubscription(): Promise<Subscription | null> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data: profile } = await supabase
-    .from("users")
-    .select("user_id")
-    .eq("id", user.id)
-    .single()
-
-  if (!profile?.user_id) return null
-
   const { data, error } = await supabase
     .from("subscriptions")
     .select("*")
-    .eq("user_id", profile.user_id)
+    .eq("user_id", user.id)
     .eq("status", "active")
     .single()
 
@@ -163,12 +155,29 @@ async function getUserProfile() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data } = await supabase
-    .from("users")
-    .select("plan, settings")
-    .eq("id", user.id)
-    .single()
-  return data
+  const [subRes, userRes] = await Promise.all([
+    supabase
+      .from("subscriptions")
+      .select("plan_id")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("users")
+      .select("preferences")
+      .eq("id", user.id)
+      .single()
+  ])
+
+  const prefs = (userRes.data?.preferences as any) || {}
+  return {
+    plan: subRes.data?.plan_id || "free",
+    settings: {
+      guest_boost: prefs.guest_boost || 0,
+      shots_boost: prefs.shots_boost || 0,
+    }
+  }
 }
 
 function PricingCard({

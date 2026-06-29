@@ -12,9 +12,9 @@ export const GET = defineRoute({
     const sb = await adminDb()
     const { data, count, error } = await sb
       .from("storage_usage")
-      .select("*, organizations(name, slug, plan)", { count: "exact" })
+      .select("*, user:users(full_name, email, subscriptions(plan_id, status))", { count: "exact" })
       .order("total_bytes", { ascending: false })
-      .range((query.page - 1) * query.pageSize, query.pageSize - 1)
+      .range((query.page - 1) * query.pageSize, (query.page * query.pageSize) - 1)
     if (error) return fail("DB_ERROR", error.message, 500)
     return ok(data ?? [], { pagination: paginate({ page: query.page, pageSize: query.pageSize, total: count ?? 0 }) })
   },

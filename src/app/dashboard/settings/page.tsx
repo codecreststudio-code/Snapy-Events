@@ -30,7 +30,7 @@ async function getProfile(): Promise<User | null> {
 
   const { data, error } = await supabase
     .from("users")
-    .select("*, user:organizations(*)")
+    .select("*")
     .eq("id", user.id)
     .single()
 

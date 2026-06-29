@@ -274,7 +274,6 @@ export default function SignupPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [fullName, setFullName] = useState("")
-  const [orgName, setOrgName] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -388,8 +387,8 @@ export default function SignupPage() {
     setIsLoading(true)
     setError("")
 
-    // 1. Register Auth + Create Organization
-    const { error: signUpError } = await signUp(email, password, fullName, orgName)
+    // 1. Register Auth
+    const { error: signUpError } = await signUp(email, password, fullName)
 
     if (signUpError) {
       setError(signUpError.message)
@@ -667,19 +666,6 @@ export default function SignupPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="orgName" className="text-slate-700 text-xs font-semibold">Studio / Organization Name</Label>
-              <Input
-                id="orgName"
-                type="text"
-                placeholder="My Photography Studio"
-                value={orgName}
-                onChange={(e) => setOrgName(e.target.value)}
-                required
-                disabled={isLoading}
-                className={`bg-white border-slate-200 text-slate-900 rounded-xl py-5 focus-visible:ring-0 ${getInputFocusClass()}`}
-              />
-            </div>
 
             <div className="space-y-2">
               <Label htmlFor="email" className="text-slate-700 text-xs font-semibold">Email Address</Label>

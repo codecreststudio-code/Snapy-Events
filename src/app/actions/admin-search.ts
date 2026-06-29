@@ -12,7 +12,6 @@ export type GlobalSearchResult = {
 
 const ADMIN_MODULES = [
   { id: 'mod_dashboard', title: 'Dashboard', subtitle: 'Platform overview and metrics', type: 'module', link: '/admin', keywords: ['home', 'main', 'index', 'overview', 'stats'] },
-  { id: 'mod_organizations', title: 'Organizations', subtitle: 'Manage workspaces', type: 'module', link: '/admin/organizations', keywords: ['workspaces', 'tenants', 'companies', 'teams', 'orgs'] },
   { id: 'mod_users', title: 'Users', subtitle: 'Manage platform users', type: 'module', link: '/admin/users', keywords: ['people', 'accounts', 'guests', 'hosts', 'members'] },
   { id: 'mod_events', title: 'Events', subtitle: 'Manage events', type: 'module', link: '/admin/events', keywords: ['parties', 'weddings', 'corporate', 'gatherings'] },
   { id: 'mod_photos', title: 'Photos', subtitle: 'Manage all photos', type: 'module', link: '/admin/photos', keywords: ['images', 'pictures', 'media', 'uploads'] },

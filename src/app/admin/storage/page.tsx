@@ -14,10 +14,13 @@ type StorageRow = {
   photo_count: number
   video_count: number | null
   updated_at: string
-  organizations: {
-    name: string
-    slug: string
-    plan: string
+  user: {
+    full_name: string
+    email: string
+    subscriptions: Array<{
+      plan_id: string
+      status: string
+    }>
   } | null
 }
 
@@ -30,6 +33,11 @@ function bytesToGb(bytes: any): number {
 function storageLimitGb(plan: string, plansList: any[]): number {
   const planData = plansList.find((p) => p.id === plan)
   return planData?.limits?.storage_limit_gb ?? 10
+}
+
+function getActivePlan(row: StorageRow): string {
+  const activeSub = row.user?.subscriptions?.find((s) => s.status === "active")
+  return activeSub?.plan_id || "free"
 }
 
 export default function AdminStoragePage() {
@@ -82,7 +90,7 @@ export default function AdminStoragePage() {
   const totalPhotos = rows.reduce((sum, row) => sum + (row.photo_count || 0), 0)
   const nearCapacity = rows.filter((r) => {
     const used = bytesToGb(r.total_bytes)
-    const limit = storageLimitGb(r.organizations?.plan || "free", plans)
+    const limit = storageLimitGb(getActivePlan(r), plans)
     return limit > 0 && used / limit >= 0.8
   })
 
@@ -91,7 +99,7 @@ export default function AdminStoragePage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Storage Analytics</h1>
-          <p className="text-sm text-slate-500 mt-1">Review file uploads, quota consumption, and per-organization disk usage.</p>
+          <p className="text-sm text-slate-500 mt-1">Review file uploads, quota consumption, and per-user disk usage.</p>
         </div>
         <Button onClick={() => fetchStorageData(page)} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
           <RefreshCw className="h-4 w-4 text-slate-500" />
@@ -110,7 +118,7 @@ export default function AdminStoragePage() {
             <span className="text-2xl font-bold text-slate-900 mt-1 block">
               {totalUsedGb < 1 ? `${(totalUsedGb * 1024).toFixed(1)} MB` : `${totalUsedGb.toFixed(2)} GB`}
             </span>
-            <span className="text-[10px] text-slate-400 font-semibold">across {rows.length} organizations</span>
+            <span className="text-[10px] text-slate-400 font-semibold">across {rows.length} users</span>
           </div>
         </Card>
 
@@ -134,7 +142,7 @@ export default function AdminStoragePage() {
           <div>
             <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Near Quota (&gt;80%)</span>
             <span className={cn("text-2xl font-bold mt-1 block", nearCapacity.length > 0 ? "text-amber-700" : "text-slate-900")}>
-              {nearCapacity.length} orgs
+              {nearCapacity.length} users
             </span>
             <span className="text-[10px] text-slate-400 font-semibold">approaching their storage limit</span>
           </div>
@@ -147,7 +155,7 @@ export default function AdminStoragePage() {
           <div className="p-4 border-b border-slate-100 flex items-center justify-between">
             <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
               <Database className="h-4 w-4 text-violet-600" />
-              Per-Organization Storage Breakdown
+              Per-User Storage Breakdown
             </h3>
             <span className="text-[10px] text-slate-400 font-semibold">{rows.length} records</span>
           </div>
@@ -165,7 +173,7 @@ export default function AdminStoragePage() {
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/50">
-                    <th className="p-4">Organization</th>
+                    <th className="p-4">User</th>
                     <th className="p-4">Plan</th>
                     <th className="p-4">Photos</th>
                     <th className="p-4">Storage Used</th>
@@ -176,7 +184,8 @@ export default function AdminStoragePage() {
                 <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
                   {rows.map((row) => {
                     const usedGb = bytesToGb(row.total_bytes)
-                    const limitGb = storageLimitGb(row.organizations?.plan || "free", plans)
+                    const activePlan = getActivePlan(row)
+                    const limitGb = storageLimitGb(activePlan, plans)
                     const usagePct = limitGb > 0 ? Math.min(100, (usedGb / limitGb) * 100) : 0
                     const isWarning = usagePct >= 80
                     const isCritical = usagePct >= 95
@@ -187,17 +196,17 @@ export default function AdminStoragePage() {
                         isCritical ? "bg-rose-50/20" : isWarning ? "bg-amber-50/20" : ""
                       )}>
                         <td className="p-4">
-                          <div className="font-bold text-slate-800">{row.organizations?.name ?? "—"}</div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">{row.user_id.slice(0, 8)}…</div>
+                          <div className="font-bold text-slate-800">{row.user?.full_name ?? "—"}</div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">{row.user?.email || row.user_id.slice(0, 8) + "…"}</div>
                         </td>
                         <td className="p-4">
                           <span className={cn("px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase",
-                            row.organizations?.plan === "premium" ? "bg-violet-50 text-violet-700 border-violet-100" :
-                            row.organizations?.plan === "standard" ? "bg-blue-50 text-blue-700 border-blue-100" :
-                            row.organizations?.plan === "starter" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
+                            activePlan === "premium" ? "bg-violet-50 text-violet-700 border-violet-100" :
+                            activePlan === "standard" ? "bg-blue-50 text-blue-700 border-blue-100" :
+                            activePlan === "starter" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
                             "bg-slate-100 text-slate-500 border-slate-200"
                           )}>
-                            {row.organizations?.plan ?? "free"}
+                            {activePlan}
                           </span>
                         </td>
                         <td className="p-4 font-bold text-slate-700">{(row.photo_count || 0).toLocaleString()}</td>

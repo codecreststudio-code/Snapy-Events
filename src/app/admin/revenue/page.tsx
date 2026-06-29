@@ -20,7 +20,7 @@ type TransactionItem = {
   status: string
   payment_method: string | null
   created_at: string
-  user?: { name: string }
+  user?: { full_name: string }
 }
 
 type DailyRevenue = { date: string; amount: number }
@@ -96,7 +96,7 @@ export default function AdminRevenuePage() {
   const [stats, setStats] = useState({
     totalRevenue: 0,
     activeSubscriptions: 0,
-    totalOrganizations: 0,
+    totalUsers: 0,
     transactionCount: 0,
     failedCount: 0,
     refundedCount: 0,
@@ -119,7 +119,7 @@ export default function AdminRevenuePage() {
       setStats({
         totalRevenue: (payload.total_revenue ?? 0) / 100, // paise to Rs
         activeSubscriptions: payload.active_subscriptions ?? 0,
-        totalOrganizations: payload.total_organizations ?? 0,
+        totalUsers: payload.total_users ?? 0,
         transactionCount: payload.transaction_count ?? 0,
         failedCount: payload.failed_count ?? 0,
         refundedCount: payload.refunded_count ?? 0,
@@ -216,7 +216,7 @@ export default function AdminRevenuePage() {
             <span className="text-2xl font-bold text-slate-900 mt-1 block">
               {loading ? "…" : stats.activeSubscriptions}
             </span>
-            <span className="text-[10px] text-slate-400 font-semibold">of {stats.totalOrganizations} organizations</span>
+            <span className="text-[10px] text-slate-400 font-semibold">of {stats.totalUsers} registered users</span>
           </div>
         </Card>
       </div>
@@ -264,7 +264,7 @@ export default function AdminRevenuePage() {
                 <thead>
                   <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/50">
                     <th className="p-4">Payment ID</th>
-                    <th className="p-4">Organization</th>
+                    <th className="p-4">User</th>
                     <th className="p-4">Amount</th>
                     <th className="p-4">Method</th>
                     <th className="p-4">Date</th>
@@ -278,7 +278,7 @@ export default function AdminRevenuePage() {
                         <div className="font-mono text-slate-800 font-bold">{tx.razorpay_payment_id || "N/A"}</div>
                         <div className="text-[10px] text-slate-400 mt-0.5">Order: {tx.razorpay_order_id || "N/A"}</div>
                       </td>
-                      <td className="p-4 font-semibold text-slate-700">{tx.user?.name || "N/A"}</td>
+                      <td className="p-4 font-semibold text-slate-700">{tx.user?.full_name || "N/A"}</td>
                       <td className="p-4 font-extrabold text-slate-800 text-sm">₹{(tx.amount / 100).toLocaleString("en-IN")}</td>
                       <td className="p-4 uppercase text-slate-400 font-bold text-[10px]">{tx.payment_method || "N/A"}</td>
                       <td className="p-4 text-slate-400 font-semibold">

@@ -56,16 +56,29 @@ export const POST = defineRoute({
     if (body.plan_id === "free") return ok({ plan: "free" })
     if (!isRazorpayConfigured()) return fail("BILLING_UNAVAILABLE", "Razorpay not configured", 503)
     const supabase = await createClient()
-    const { data: existing } = await supabase
-      .from("users")
-      .select("razorpay_customer_id, full_name")
-      .eq("id", auth.user!.id)
-      .single()
-    let customerId = existing?.razorpay_customer_id ?? null
+    const { data: existingSub } = await supabase
+      .from("subscriptions")
+      .select("razorpay_customer_id, user:users(full_name)")
+      .eq("user_id", auth.user!.id)
+      .in("status", ["active", "past_due"])
+      .limit(1)
+      .maybeSingle()
+
+    const hostUser = existingSub?.user as any
+    let customerId = existingSub?.razorpay_customer_id ?? null
     if (!customerId) {
-      const c = await createRazorpayCustomer({ name: existing?.full_name ?? auth.user!.email, email: auth.user!.email })
+      const { data: userProfile } = await supabase
+        .from("users")
+        .select("full_name")
+        .eq("id", auth.user!.id)
+        .single()
+      
+      const c = await createRazorpayCustomer({ name: userProfile?.full_name ?? auth.user!.email, email: auth.user!.email })
       customerId = c.id
-      await supabase.from("users").update({ razorpay_customer_id: customerId }).eq("id", auth.user!.id)
+      await supabase
+        .from("subscriptions")
+        .update({ razorpay_customer_id: customerId })
+        .eq("user_id", auth.user!.id)
     }
     const price = await calculatePrice(supabase, body.plan_id, 0, 0, body.coupon_code)
     const amount = price * 100
@@ -109,11 +122,7 @@ export const DELETE = defineRoute({
       .update({ status: "cancelled" })
       .eq("id", sub.id)
 
-    // Reset user plan back to free
-    await supabase
-      .from("users")
-      .update({ plan: "free" })
-      .eq("id", auth.user!.id)
+
 
     return ok({ success: true })
   },

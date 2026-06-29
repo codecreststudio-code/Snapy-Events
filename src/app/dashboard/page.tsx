@@ -52,7 +52,7 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
       status,
       galleries(id, photo_count)
     `)
-    .eq("user_id", orgId)
+    .eq("host_id", orgId)
     .order("created_at", { ascending: false })
     .limit(5)
 
@@ -60,7 +60,7 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
   const { data: allEvents, count: totalEventCount } = await supabase
     .from("events")
     .select("id", { count: "exact", head: true })
-    .eq("user_id", orgId)
+    .eq("host_id", orgId)
 
   const allEventIds = allEvents?.map((e) => e.id) || []
 
@@ -113,7 +113,7 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
 
 export default function DashboardPage() {
   const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.user_id
+  const orgId = profile?.id
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["dashboard-stats", orgId],

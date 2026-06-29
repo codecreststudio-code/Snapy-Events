@@ -70,7 +70,7 @@ async function getEvents(orgId: string) {
   const { data, error } = await supabase
     .from("events")
     .select("id")
-    .eq("user_id", orgId)
+    .eq("host_id", orgId)
 
   if (error) throw error
   return data || []
@@ -112,7 +112,7 @@ async function downloadMultiple(items: DownloadItem[]) {
 
 export default function DownloadsPage() {
   const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.user_id
+  const orgId = profile?.id
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isDownloading, setIsDownloading] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState(0)

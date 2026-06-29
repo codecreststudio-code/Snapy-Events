@@ -40,8 +40,18 @@ export const POST = defineRoute({
 
     await svc
       .from("users")
-      .update({ plan: "free", settings: defaultSettings, role: "owner" })
+      .update({ role: "owner", permissions: ["*"] })
       .eq("id", data.user.id)
+
+    await svc
+      .from("subscriptions")
+      .insert({
+        user_id: data.user.id,
+        plan_id: "free",
+        status: "active",
+        current_period_start: new Date().toISOString(),
+        current_period_end: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(), // 1 year
+      })
 
     await logAudit({ user_id: data.user.id, action: "user.created", resource_type: "user", resource_id: data.user.id, request })
 

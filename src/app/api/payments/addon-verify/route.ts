@@ -37,40 +37,40 @@ export const POST = defineRoute({
 
     const supabase = await createServiceClient()
 
-    // 2. Fetch current organization settings to increment boosts
-    const { data: org } = await supabase
-      .from("organizations")
-      .select("settings, plan")
+    // 2. Fetch current user preferences to increment boosts
+    const { data: userProfile } = await supabase
+      .from("users")
+      .select("preferences")
       .eq("id", auth.user!.id)
       .single()
 
-    const currentSettings = (org?.settings as Record<string, any>) || {}
+    const currentPrefs = (userProfile?.preferences as Record<string, any>) || {}
     
     // Add existing boost values with the newly purchased boost values
     const newGuestBoost = boost_type === "guest" 
-      ? (currentSettings.guest_boost || 0) + boost_value 
-      : (currentSettings.guest_boost || 0)
+      ? (currentPrefs.guest_boost || 0) + boost_value 
+      : (currentPrefs.guest_boost || 0)
       
     const newShotsBoost = boost_type === "shots"
-      ? (currentSettings.shots_boost || 0) + boost_value
-      : (currentSettings.shots_boost || 0)
+      ? (currentPrefs.shots_boost || 0) + boost_value
+      : (currentPrefs.shots_boost || 0)
 
-    const newSettings = {
-      ...currentSettings,
+    const newPrefs = {
+      ...currentPrefs,
       guest_boost: newGuestBoost,
       shots_boost: newShotsBoost,
     }
 
-    // 3. Update Organization
-    const { error: orgError } = await supabase
-      .from("organizations")
+    // 3. Update User
+    const { error: userError } = await supabase
+      .from("users")
       .update({
-        settings: newSettings,
+        preferences: newPrefs,
       })
       .eq("id", auth.user!.id)
 
-    if (orgError) {
-      return fail("DB_ERROR", `Failed to update user: ${orgError.message}`, 500)
+    if (userError) {
+      return fail("DB_ERROR", `Failed to update user: ${userError.message}`, 500)
     }
 
     // 4. Create Invoice for the Add-on purchase
@@ -104,6 +104,6 @@ export const POST = defineRoute({
       payment_method: "razorpay",
     })
 
-    return ok({ success: true, updated_settings: newSettings })
+    return ok({ success: true, updated_settings: newPrefs })
   },
 }).POST

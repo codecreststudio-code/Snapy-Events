@@ -23,8 +23,8 @@ type ReferralItem = {
   status: string
   reward_credited: boolean
   created_at: string
-  referrerOrg?: { name: string }
-  referredOrg?: { name: string }
+  referral_code: string
+  referrer?: { full_name: string }
 }
 
 export default function AdminMarketingPage() {
@@ -45,7 +45,7 @@ export default function AdminMarketingPage() {
     try {
       const [couponsRes, referralsRes] = await Promise.all([
         supabase.from("coupons").select("id, code, discount_type, discount_value, used_count, is_active, created_at").order("created_at", { ascending: false }),
-        supabase.from("referrals").select("id, status, reward_credited, created_at, referrerOrg:organizations!referrer_org_id(name), referredOrg:organizations!referred_org_id(name)").order("created_at", { ascending: false }).limit(10)
+        supabase.from("referrals").select("id, status, reward_credited, created_at, referral_code, referrer:users!referrer_user_id(full_name)").order("created_at", { ascending: false }).limit(10)
       ])
 
       if (couponsRes.error) throw couponsRes.error
@@ -194,8 +194,8 @@ export default function AdminMarketingPage() {
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
                       <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/20">
-                        <th className="p-4">Referrer Studio</th>
-                        <th className="p-4">Referred Studio</th>
+                        <th className="p-4">Referrer User</th>
+                        <th className="p-4">Referral Code</th>
                         <th className="p-4">Reward State</th>
                         <th className="p-4 text-right">Date</th>
                       </tr>
@@ -203,8 +203,8 @@ export default function AdminMarketingPage() {
                     <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
                       {referrals.map((ref) => (
                         <tr key={ref.id} className="hover:bg-slate-50/30 transition-colors">
-                          <td className="p-4 font-bold text-slate-800">{ref.referrerOrg?.name || "Member Studio"}</td>
-                          <td className="p-4 text-slate-700">{ref.referredOrg?.name || "Invited Studio"}</td>
+                          <td className="p-4 font-bold text-slate-800">{ref.referrer?.full_name || "N/A"}</td>
+                          <td className="p-4 text-slate-700 font-mono font-bold">{ref.referral_code || "—"}</td>
                           <td className="p-4">
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
                               ref.reward_credited ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-100 text-slate-600 border-slate-200"

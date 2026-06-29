@@ -12,7 +12,7 @@ type HealthData = {
   db_healthy: boolean
   db_error: string | null
   record_counts: {
-    organizations: number
+    subscriptions: number
     users: number
     events: number
     transactions: number
@@ -134,9 +134,9 @@ export default function AdminSystemHealthPage() {
             <Activity className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Organizations</span>
+            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Subscriptions</span>
             <span className="text-2xl font-bold text-slate-900 mt-1 block">
-              {loading ? "…" : health?.record_counts.organizations.toLocaleString() ?? "—"}
+              {loading ? "…" : health?.record_counts.subscriptions.toLocaleString() ?? "—"}
             </span>
             <span className="text-[10px] text-emerald-600 font-bold block mt-0.5">● Live count</span>
           </div>

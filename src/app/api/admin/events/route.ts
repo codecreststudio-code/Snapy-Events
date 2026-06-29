@@ -18,7 +18,7 @@ export const GET = defineRoute({
 
     const { data, count, error } = await sb
       .from("events")
-      .select("*, user:organizations(name, slug, plan)", { count: "exact" })
+      .select("*, host:users(id, email, full_name)", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(from, to)
 

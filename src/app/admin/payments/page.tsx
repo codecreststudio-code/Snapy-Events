@@ -18,7 +18,7 @@ type PaymentTx = {
   payment_method: string | null
   created_at: string
   user?: {
-    name: string
+    full_name: string
   }
 }
 
@@ -35,7 +35,7 @@ export default function AdminPaymentsPage() {
     try {
       const { data, error } = await supabase
         .from("transactions")
-        .select("id, razorpay_payment_id, razorpay_order_id, amount, currency, status, payment_method, created_at, user:organizations(name)")
+        .select("id, razorpay_payment_id, razorpay_order_id, amount, currency, status, payment_method, created_at, user:users(full_name)")
         .order("created_at", { ascending: false })
 
       if (error) throw error
@@ -81,7 +81,7 @@ export default function AdminPaymentsPage() {
     return (
       (tx.razorpay_payment_id || "").toLowerCase().includes(term) ||
       (tx.razorpay_order_id || "").toLowerCase().includes(term) ||
-      (tx.user?.name || "").toLowerCase().includes(term)
+      (tx.user?.full_name || "").toLowerCase().includes(term)
     )
   })
 
@@ -164,7 +164,7 @@ export default function AdminPaymentsPage() {
                 <thead>
                   <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/50">
                     <th className="p-4">Razorpay Payment ID</th>
-                    <th className="p-4">Organization</th>
+                    <th className="p-4">User</th>
                     <th className="p-4">Amount</th>
                     <th className="p-4">Method</th>
                     <th className="p-4">Timestamp</th>
@@ -179,7 +179,7 @@ export default function AdminPaymentsPage() {
                         <div className="font-mono text-slate-800 font-bold">{tx.razorpay_payment_id || "N/A"}</div>
                         <div className="text-[10px] text-slate-400 mt-0.5">Order: {tx.razorpay_order_id || "N/A"}</div>
                       </td>
-                      <td className="p-4 font-semibold text-slate-700">{tx.user?.name || "N/A"}</td>
+                      <td className="p-4 font-semibold text-slate-700">{tx.user?.full_name || "N/A"}</td>
                       <td className="p-4 font-extrabold text-slate-850 text-sm">
                         ₹{(tx.amount / 100).toLocaleString()}
                       </td>

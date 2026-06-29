@@ -29,7 +29,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     }
     const { data: gallery } = await supabase
       .from("galleries")
-      .select("event_id, event:events(user_id, settings, user:organizations(plan, settings))")
+      .select("event_id, event:events(host_id, settings)")
       .eq("id", id)
       .single()
 
@@ -37,12 +37,30 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
 
     // Enforce limits
     const event = gallery.event as any
-    const orgId = Array.isArray(event) ? event[0]?.user_id : event?.user_id
-    const orgPlan = Array.isArray(event) ? event[0]?.user?.plan : event?.user?.plan || "free"
-    const orgSettings = (Array.isArray(event) ? event[0]?.user?.settings : event?.user?.settings) || {}
+    const hostId = Array.isArray(event) ? event[0]?.host_id : event?.host_id
+    const orgId = hostId
+
+    // Fetch host user profile for settings/preferences
+    const { data: hostProfile } = await supabase
+      .from("users")
+      .select("preferences")
+      .eq("id", hostId)
+      .single()
+
+    // Fetch active subscription for the host user
+    const { data: subscription } = await supabase
+      .from("subscriptions")
+      .select("plan_id")
+      .eq("user_id", hostId)
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle()
+
+    const orgPlan = subscription?.plan_id || "free"
+    const hostPrefs = (hostProfile?.preferences as Record<string, any>) || {}
     
-    const guestBoost = orgSettings.guest_boost || 0
-    const shotsBoost = orgSettings.shots_boost || 0
+    const guestBoost = hostPrefs.guest_boost || 0
+    const shotsBoost = hostPrefs.shots_boost || 0
 
     let baseLimits = { guests_limit: 0, shots_limit: 0, storage_limit_gb: 1 }
     if (orgPlan) {

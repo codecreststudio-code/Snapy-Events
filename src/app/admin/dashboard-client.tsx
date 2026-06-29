@@ -310,7 +310,7 @@ export default function DashboardClient() {
   React.useEffect(() => {
     const channel = supabase
       .channel("admin-dashboard-changes-feed")
-      .on("postgres_changes", { event: "*", schema: "public", table: "organizations" }, () => {
+      .on("postgres_changes", { event: "*", schema: "public", table: "subscriptions" }, () => {
         loadAnalytics(selectedPreset, customStart, customEnd)
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "events" }, () => {

@@ -30,7 +30,7 @@ async function getEvents(orgId: string): Promise<Event[]> {
 
 export default function EventsPage() {
   const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.user_id
+  const orgId = profile?.id
 
   const { data: events, isLoading: eventsLoading } = useQuery({
     queryKey: ["events", orgId],

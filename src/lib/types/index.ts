@@ -24,27 +24,13 @@ export type Permission =
   | "admin:events"
   | "admin:revenue"
 
-export interface Organization {
-  id: string
-  name: string
-  slug: string
-  plan: PlanId
-  feature_flags: Record<string, boolean>
-  settings: Record<string, unknown>
-  created_at: string
-  updated_at: string
-}
-
 export interface User {
   id: string
-  user_id: string | null
   email: string
   full_name: string | null
   avatar_url: string | null
   role: UserRole
   is_admin?: boolean
-  plan: PlanId
-  settings: Record<string, unknown>
   permissions: Permission[]
   preferences: Record<string, unknown>
   created_at: string
@@ -389,7 +375,6 @@ export interface Pagination {
 
 // Extended types with relations
 export interface EventWithDetails extends Event {
-  user?: Organization
   host?: User
   galleries?: Gallery[]
   qr_codes?: QRCode[]
@@ -412,7 +397,6 @@ export interface GalleryWithPhotos extends Gallery {
 // }
 
 // Database insert types
-export type OrganizationInsert = Omit<Organization, "id" | "created_at" | "updated_at">
 export type UserInsert = Omit<User, "id" | "created_at" | "updated_at">
 export type EventInsert = Omit<Event, "id" | "created_at" | "updated_at" | "view_count">
 export type GalleryInsert = Omit<Gallery, "id" | "created_at" | "updated_at" | "photo_count">
@@ -430,7 +414,6 @@ export type AuditLogInsert = Omit<AuditLog, "id" | "created_at">
 export type StorageUsageInsert = Omit<StorageUsage, "id" | "updated_at">;
 
 // Database update types
-export type OrganizationUpdate = Partial<OrganizationInsert>
 export type UserUpdate = Partial<UserInsert>
 export type EventUpdate = Partial<EventInsert>
 export type GalleryUpdate = Partial<GalleryInsert>

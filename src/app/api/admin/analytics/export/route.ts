@@ -156,12 +156,11 @@ export const GET = defineRoute({
       }
     }))
 
-    // Load top performing lists
-    const { data: orgsTopList } = await sb.from("users").select("id, name")
+    const { data: orgsTopList } = await sb.from("users").select("id, full_name")
     const topOrgsRevenue = await Promise.all((orgsTopList || []).map(async (org) => {
       const { data: txs } = await sb.from("transactions").select("amount").eq("user_id", org.id).eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
       const sum = (txs || []).reduce((s, t) => s + (t.amount || 0), 0) / 100
-      return { name: org.name, revenue: sum }
+      return { name: org.full_name, revenue: sum }
     }))
     const sortedTopOrgs = topOrgsRevenue.sort((a, b) => b.revenue - a.revenue).slice(0, 5)
 
@@ -196,13 +195,20 @@ export const GET = defineRoute({
       }
     })
 
-    const { data: activeOrgsPlans } = await sb.from("users").select("plan").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
+    const { data: activeOrgsPlans } = await sb
+      .from("subscriptions")
+      .select("plan_id")
+      .eq("status", "active")
+      .gte("created_at", startDate.toISOString())
+      .lte("created_at", endDate.toISOString())
+
     const planDistribution: Record<string, number> = { free: 0, starter: 0, standard: 0, premium: 0 }
     let totalActiveOrgs = 0;
     
     (activeOrgsPlans || []).forEach((o: any) => {
-      if (o.plan in planDistribution) {
-        planDistribution[o.plan]++
+      const plan = o.plan_id
+      if (plan in planDistribution) {
+        planDistribution[plan]++
         totalActiveOrgs++
       }
     })
