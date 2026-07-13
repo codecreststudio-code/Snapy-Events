@@ -379,12 +379,10 @@ export default function BillingPage() {
   const currentGuestBoost = currentSettings.guest_boost || 0
   const currentShotsBoost = currentSettings.shots_boost || 0
 
-  // Set default selection based on current organization plan/settings on load
+  // Set default plan selection based on current organization plan on load
   useEffect(() => {
     if (userProfile) {
       setSelectedPlan(userProfile.plan || "free")
-      setGuestBoost((userProfile.settings as any)?.guest_boost || 0)
-      setShotBoost((userProfile.settings as any)?.shots_boost || 0)
     }
   }, [userProfile])
 
