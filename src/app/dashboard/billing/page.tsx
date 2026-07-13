@@ -55,75 +55,67 @@ interface PlanInfo {
 
 const PLAN_INFO: PlanInfo[] = [
   {
-    id: "free",
-    name: "Free",
-    description: "Get started with one event",
-    price: 0,
-    priceUsd: 0,
-    priceMonthly: 0,
-    features: [
-      "10 guests",
-      "10 shots per guest",
-      "Standard reveal",
-      "Basic gallery",
-    ],
-    limits: { events: 1, storage: 1, photos: 100 },
-  },
-  {
     id: "starter",
     name: "Starter",
-    description: "For photographers running a few events per year.",
+    description: "For small events and personal use",
     price: 499,
     priceUsd: 6,
     priceMonthly: 499,
     features: [
-      "5 events",
-      "10 GB storage",
-      "5,000 photos",
-      "10 QR codes per event",
-      "Custom gallery URL",
-      "Email support",
+      "10 guests limit",
+      "10 shots per guest",
+      "Custom reveal time",
+      "All image filters enabled",
     ],
-    limits: { events: 5, storage: 10, photos: 5000 },
+    limits: { events: 1, storage: 1, photos: 100 },
   },
   {
     id: "standard",
     name: "Standard",
-    description: "For studios running multiple weddings or events each month.",
+    description: "For growing photographers",
     price: 1499,
-    priceUsd: 18,
+    priceUsd: 19,
     priceMonthly: 1499,
     features: [
-      "25 events",
-      "100 GB storage",
-      "50,000 photos",
-      "Live photo wall",
-      "Slideshow mode",
-      "Watermarking",
-      "Custom branding",
-      "AI face search (500/mo)",
+      "50 guests limit",
+      "15 shots per guest",
+      "AI Face Search matching",
+      "Download all photos",
+      "Priority customer support",
     ],
     limits: { events: 25, storage: 100, photos: 50000 },
   },
   {
     id: "premium",
     name: "Premium",
-    description: "For agencies and enterprises at scale.",
+    description: "For professional photographers and large events",
     price: 3999,
-    priceUsd: 49,
+    priceUsd: 50,
     priceMonthly: 3999,
     features: [
-      "Unlimited events",
-      "1 TB storage",
-      "Unlimited photos",
-      "Unlimited QR codes",
-      "AI face search (unlimited)",
-      "White label",
-      "Custom domain",
-      "Priority support",
-      "Dedicated success manager",
+      "100 guests limit",
+      "25 shots per guest",
+      "Live Photo Wall stream",
+      "Print-ready download gallery",
+      "WhatsApp notification alerts",
+      "24/7 Priority support",
     ],
     limits: { events: -1, storage: 1000, photos: -1 },
+  },
+  {
+    id: "free",
+    name: "Free",
+    description: "Perfect for trying out Snapsy",
+    price: 0,
+    priceUsd: 0,
+    priceMonthly: 0,
+    features: [
+      "5 guests limit",
+      "5 shots per guest",
+      "Standard photo reveal",
+      "Basic web gallery",
+    ],
+    limits: { events: 1, storage: 1, photos: 100 },
   },
 ]
 
@@ -419,10 +411,12 @@ export default function BillingPage() {
                 }
               }
             })
-            // Add free tier if not returned in API to preserve basic functionality
-            if (!mapped.find((m: any) => m.id === "free")) {
-              mapped.unshift(PLAN_INFO[0])
-            }
+            const PLAN_ORDER = ["starter", "standard", "premium", "free"]
+            mapped.sort((a: any, b: any) => {
+              const ia = PLAN_ORDER.indexOf(a.id)
+              const ib = PLAN_ORDER.indexOf(b.id)
+              return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib)
+            })
             setPlansList(mapped)
           }
         }

@@ -43,8 +43,8 @@ const PLAN_DEFAULT_PRICES: Record<string, number> = {
 
 const PLAN_DEFAULT_USD: Record<string, number> = {
   starter: 6,
-  standard: 18,
-  premium: 49,
+  standard: 19,
+  premium: 50,
 }
 
 function CheckoutForm() {
