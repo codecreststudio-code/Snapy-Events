@@ -83,18 +83,24 @@ export const POST = defineRoute({
     const ext = body.file_name.split(".").pop() || "bin"
     const storagePath = `${effectiveOrgId}/${gallery.event_id}/${body.gallery_id}/${fileId}.${ext}`
 
-    // Automatically update photos bucket config in Supabase Storage to ensure videos and audio are allowed
+    // Programmatically ensure photos bucket policy allows images, videos, and voice notes up to 100MB
     try {
       await supabase.storage.updateBucket("photos", {
         public: true,
-        allowedMimeTypes: null,
+        allowedMimeTypes: [
+          "image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "image/gif",
+          "video/mp4", "video/quicktime", "video/webm", "video/x-msvideo", "video/3gpp",
+          "audio/mpeg", "audio/mp4", "audio/wav", "audio/webm", "audio/ogg", "audio/m4a", "audio/aac"
+        ],
         fileSizeLimit: 104857600,
       })
-    } catch {}
+    } catch (e) {
+      console.warn("[updateBucket photos warning]", e)
+    }
 
     const { data: signedData, error: signedErr } = await supabase.storage
       .from("photos")
-      .createSignedUploadUrl(storagePath)
+      .createSignedUploadUrl(storagePath, { upsert: true })
 
     if (signedErr || !signedData) {
       return fail("STORAGE_ERROR", signedErr?.message || "Failed to create upload URL", 500)

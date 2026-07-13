@@ -244,6 +244,18 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       const ext = uploadMime === "image/jpeg" ? "jpg" : uploadMime.split("/").pop() || "bin"
       const generatedPath = `${effectiveOrgId}/${gallery.event_id}/${id}/${fileId}.${ext}`
 
+      try {
+        await supabase.storage.updateBucket("photos", {
+          public: true,
+          allowedMimeTypes: [
+            "image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "image/gif",
+            "video/mp4", "video/quicktime", "video/webm", "video/x-msvideo", "video/3gpp",
+            "audio/mpeg", "audio/mp4", "audio/wav", "audio/webm", "audio/ogg", "audio/m4a", "audio/aac"
+          ],
+          fileSizeLimit: 104857600,
+        })
+      } catch {}
+
       const uploadBlob = new Blob([new Uint8Array(uploadBuffer)], { type: uploadMime })
       const uploadOpts = { bucket: "PHOTOS" as const, path: generatedPath, file: uploadBlob, contentType: uploadMime, cacheControl: "31536000" }
 
