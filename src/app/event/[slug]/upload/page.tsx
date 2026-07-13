@@ -487,7 +487,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/*,video/*,audio/*"
               multiple
               className="hidden"
               onChange={(e) => handleFileSelect(e.target.files)}
@@ -496,8 +496,8 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
               <ImageIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#9333EA]" />
             </div>
             <div className="text-center">
-              <p className="font-medium text-[#1C1A17]">Upload Gallery</p>
-              <p className="text-xs text-[#9C958E] mt-1">Select PNG, JPG up to 50MB</p>
+              <p className="font-medium text-[#1C1A17]">Upload Media</p>
+              <p className="text-xs text-[#9C958E] mt-1">Select PNG, JPG, MP4, MOV up to 100MB</p>
             </div>
           </div>
         </div>

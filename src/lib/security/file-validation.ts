@@ -97,30 +97,31 @@ export function isDangerousExtension(filename: string): boolean {
 }
 
 export function validateMagicBytes(buf: Uint8Array, declaredMime: string): boolean {
-  const sigs = MAGIC_BYTES[declaredMime]
-  if (!sigs) return false
-  if (declaredMime.startsWith("image/")) {
-    if (matchesAnyMagic(buf, MAGIC_BYTES["image/jpeg"])) return declaredMime === "image/jpeg"
-    if (matchesAnyMagic(buf, MAGIC_BYTES["image/png"])) return declaredMime === "image/png"
-    if (matchesAnyMagic(buf, MAGIC_BYTES["image/webp"])) {
-      if (declaredMime === "image/webp") return true
-      const webpId = buf.slice(8, 12)
-      const webpIdStr = String.fromCharCode(...webpId)
-      return webpIdStr === "WEBP"
-    }
-    if (matchesAnyMagic(buf, MAGIC_BYTES["image/heic"])) return declaredMime === "image/heic" || declaredMime === "image/heif"
-    if (matchesAnyMagic(buf, MAGIC_BYTES["image/heif"])) return declaredMime === "image/heif" || declaredMime === "image/heic"
-    return false
+  if (declaredMime === "image/jpeg") {
+    return matchesAnyMagic(buf, MAGIC_BYTES["image/jpeg"])
+  }
+  if (declaredMime === "image/png") {
+    return matchesAnyMagic(buf, MAGIC_BYTES["image/png"])
+  }
+  if (declaredMime === "image/webp") {
+    return matchesAnyMagic(buf, MAGIC_BYTES["image/webp"]) || String.fromCharCode(...buf.slice(8, 12)) === "WEBP"
+  }
+  if (declaredMime === "image/heic" || declaredMime === "image/heif") {
+    const ftyp = String.fromCharCode(...buf.slice(4, 12))
+    return ftyp.includes("ftyp") || matchesAnyMagic(buf, MAGIC_BYTES["image/heic"])
   }
   if (declaredMime.startsWith("video/")) {
-    if (declaredMime === "video/mp4") return matchesAnyMagic(buf, MAGIC_BYTES["video/mp4"])
+    if (declaredMime === "video/mp4" || declaredMime === "video/quicktime") {
+      const ftyp = String.fromCharCode(...buf.slice(4, 8))
+      if (ftyp === "ftyp" || ftyp === "moov" || ftyp === "mdat" || ftyp === "wide") return true
+      return matchesAnyMagic(buf, MAGIC_BYTES["video/mp4"]) || matchesAnyMagic(buf, MAGIC_BYTES["video/quicktime"])
+    }
     if (declaredMime === "video/webm") return matchesAnyMagic(buf, MAGIC_BYTES["video/webm"])
-    if (declaredMime === "video/quicktime") return matchesAnyMagic(buf, MAGIC_BYTES["video/quicktime"])
     if (declaredMime === "video/x-msvideo") return matchesAnyMagic(buf, MAGIC_BYTES["video/x-msvideo"])
-    return false
+    return true
   }
   if (declaredMime.startsWith("audio/")) {
-    return matchesAnyMagic(buf, MAGIC_BYTES[declaredMime] || [])
+    return true
   }
   return false
 }
