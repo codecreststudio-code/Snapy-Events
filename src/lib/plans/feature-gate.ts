@@ -17,10 +17,10 @@ export async function checkEventFeatureAccess(
   try {
     const supabase = await createServiceClient()
 
-    // 1. Fetch Event & Organization ID
+    // 1. Fetch Event & Organization ID & Host ID
     const { data: event, error: eventErr } = await supabase
       .from("events")
-      .select("organization_id, settings")
+      .select("organization_id, host_id, settings")
       .eq("id", eventId)
       .single()
 
@@ -34,14 +34,26 @@ export async function checkEventFeatureAccess(
       return { allowed: false, planId: "free", reason: "Feature disabled in event settings" }
     }
 
-    // 2. Fetch Organization Plan
-    const { data: org } = await supabase
-      .from("organizations")
-      .select("plan")
-      .eq("id", event.organization_id)
+    // 2. Fetch Active Subscription Plan
+    let planId = "free"
+    const { data: sub } = await supabase
+      .from("subscriptions")
+      .select("plan_id")
+      .or(`user_id.eq.${event.host_id}${event.organization_id ? `,organization_id.eq.${event.organization_id}` : ""}`)
+      .eq("status", "active")
+      .limit(1)
       .maybeSingle()
 
-    const planId = org?.plan || "free"
+    if (sub?.plan_id) {
+      planId = sub.plan_id
+    } else if (event.organization_id) {
+      const { data: org } = await supabase
+        .from("organizations")
+        .select("plan")
+        .eq("id", event.organization_id)
+        .maybeSingle()
+      if (org?.plan) planId = org.plan
+    }
 
     // 3. Fetch Plan Limits & Toggles
     const { data: planRecord } = await supabase
@@ -89,13 +101,25 @@ export async function checkOrgFeatureAccess(
   try {
     const supabase = await createServiceClient()
 
-    const { data: org } = await supabase
-      .from("organizations")
-      .select("plan")
-      .eq("id", orgId)
+    let planId = "free"
+    const { data: sub } = await supabase
+      .from("subscriptions")
+      .select("plan_id")
+      .or(`organization_id.eq.${orgId},user_id.eq.${orgId}`)
+      .eq("status", "active")
+      .limit(1)
       .maybeSingle()
 
-    const planId = org?.plan || "free"
+    if (sub?.plan_id) {
+      planId = sub.plan_id
+    } else {
+      const { data: org } = await supabase
+        .from("organizations")
+        .select("plan")
+        .eq("id", orgId)
+        .maybeSingle()
+      if (org?.plan) planId = org.plan
+    }
 
     const { data: planRecord } = await supabase
       .from("plans")
