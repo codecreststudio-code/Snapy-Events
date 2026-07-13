@@ -11,7 +11,16 @@ const COOKIE = "csrf_token"
 const HEADER = "x-csrf-token"
 
 function secret(): string {
-  return serverEnv.SUPABASE_SERVICE_ROLE_KEY ?? "csrf-dev-secret"
+  const csrfSecret = process.env.CSRF_SECRET
+  if (!csrfSecret) {
+    if (process.env.NODE_ENV === "production") {
+      // In production, CSRF_SECRET MUST be set. Fail loudly.
+      throw new Error("CSRF_SECRET environment variable is not set. This is a security configuration error.")
+    }
+    // In development, use a predictable dev secret so developers can work without full env setup.
+    return "csrf-dev-secret-do-not-use-in-production"
+  }
+  return csrfSecret
 }
 
 export async function ensureCsrfCookie(): Promise<string> {

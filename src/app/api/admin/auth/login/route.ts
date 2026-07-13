@@ -15,8 +15,19 @@ export const POST = defineRoute({
   body: bodySchema,
   rateLimit: { key: "admin:login", limit: API_RATE_LIMITS.AUTH_LOGIN, windowSeconds: 60 },
   handler: async ({ body }) => {
-    const adminEmail = process.env.ADMIN_EMAIL || "syedfarrukh55@gmail.com"
-    const adminPassword = process.env.ADMIN_PASSWORD || "Sofb@1432"
+    // SECURITY: Admin credentials MUST be set via environment variables.
+    // Never fall back to hardcoded credentials.
+    const adminEmail = process.env.ADMIN_EMAIL
+    const adminPassword = process.env.ADMIN_PASSWORD
+
+    if (!adminEmail || !adminPassword) {
+      // Prevent authentication when env vars are missing — fail closed.
+      return fail(
+        "CONFIG_ERROR",
+        "Admin authentication is not configured. Set ADMIN_EMAIL and ADMIN_PASSWORD environment variables.",
+        503
+      )
+    }
 
     const supabase = await createClient()
 

@@ -12,6 +12,11 @@ const serverSchema = z.object({
   RAZORPAY_KEY_ID: z.string().optional(),
   RAZORPAY_KEY_SECRET: z.string().optional(),
   RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
+  // Admin credentials (MUST be set in production via environment variables — never hardcode)
+  ADMIN_EMAIL: z.string().email().optional(),
+  ADMIN_PASSWORD: z.string().min(12).optional(),
+  // Security
+  CSRF_SECRET: z.string().min(32).optional(),
   // Messaging
   WHATSAPP_BUSINESS_API_KEY: z.string().optional(),
   WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),

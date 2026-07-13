@@ -87,12 +87,17 @@ export async function proxy(request: NextRequest) {
   )
 
   // 3. Trigger session refresh to write updated cookies to response
-  console.log(`[Proxy Request] Pathname: ${pathname}, Cookies: ${request.cookies.getAll().map(c => `${c.name}=${c.value.substring(0, 15)}...`).join(', ')}`)
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError) {
-    console.error(`[Proxy Auth Error] Pathname: ${pathname}, Error:`, authError.message)
+  if (process.env.NODE_ENV === "development") {
+    // Only log in development, never in production
+    console.log(`[Proxy Request] ${pathname} (${request.cookies.getAll().length} cookies)`)
   }
-  console.log(`[Proxy Auth Result] Pathname: ${pathname}:`, user ? user.email : "null")
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError && process.env.NODE_ENV === "development") {
+    console.error(`[Proxy Auth Error] ${pathname}:`, authError.message)
+  }
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[Proxy Auth] ${pathname}:`, user ? "authenticated" : "unauthenticated")
+  }
 
   // 4. Set security headers
   response.headers.set("X-Frame-Options", "DENY")

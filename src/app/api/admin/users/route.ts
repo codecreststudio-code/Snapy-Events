@@ -118,12 +118,14 @@ export const PATCH = defineRoute({
       if (subError) return fail("DB_ERROR", subError.message, 500)
     } 
     else if (action === "reset_password") {
-      const pwd = newPassword || "Reset@123"
+      if (!newPassword) return fail("VALIDATION_ERROR", "newPassword is required for reset_password action", 422)
+      // Enforce minimum strength on admin-set passwords too
+      if (newPassword.length < 8) return fail("VALIDATION_ERROR", "newPassword must be at least 8 characters", 422)
       const { error: authErr } = await sb.auth.admin.updateUserById(userId, {
-        password: pwd,
+        password: newPassword,
       })
       if (authErr) return fail("AUTH_ERROR", authErr.message, 500)
-      return ok({ success: true, message: `Password reset to: ${pwd}` })
+      return ok({ success: true, message: "Password reset successfully" })
     }
     else if (action === "change_role") {
       if (!role) return fail("VALIDATION_ERROR", "role is required to change role", 422)
