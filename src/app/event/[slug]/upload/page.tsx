@@ -30,7 +30,7 @@ async function getEvent(slug: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, slug, settings, host_id, organization_id, end_date, organization:organizations(plan, settings)")
+    .select("id, name, slug, settings, host_id, end_date, host:users(plan, preferences)")
     .eq("slug", slug)
     .eq("status", "published")
     .single()
@@ -169,14 +169,14 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
     try {
       // 1. Quota checks
-      const userPlan = (event.organization as any)?.plan || "free"
-      const orgSettings = (event.organization as any)?.settings || {}
+      const userPlan = (event.host as any)?.plan || "free"
+      const hostPreferences = (event.host as any)?.preferences || {}
       
       const { data: planData } = await supabase.from("plans").select("limits").eq("id", userPlan).single()
       const planLimits = planData?.limits || {}
       
-      const guestBoost = orgSettings.guest_boost || 0
-      const shotsBoost = orgSettings.shots_boost || 0
+      const guestBoost = hostPreferences.guest_boost || 0
+      const shotsBoost = hostPreferences.shots_boost || 0
 
       // Default to Infinity if the limit isn't explicitly defined for guests/shots
       const maxGuests = planLimits.guests_limit !== undefined ? planLimits.guests_limit + guestBoost : Infinity

@@ -29,16 +29,26 @@ export async function POST(request: NextRequest) {
           subscription_id?: string
           notes?: { 
             user_id?: string
+            organization_id?: string
             plan_id?: string
             guest_boost?: string
             shots_boost?: string
           }
         }
         
-        if (p.notes?.user_id) {
+        if (p.notes?.user_id || p.notes?.organization_id) {
+          const targetId = p.notes.user_id || p.notes.organization_id
+          const { data: userRow } = await supabase
+            .from("users")
+            .select("id, organization_id, email, full_name, preferences")
+            .eq("id", targetId)
+            .maybeSingle()
+
+          const orgId = userRow?.organization_id || targetId
+
           // First, create transaction record for this payment
           await supabase.from("transactions").insert({
-            user_id: p.notes.user_id,
+            organization_id: orgId,
             razorpay_payment_id: p.id,
             amount: p.amount,
             currency: p.currency,
@@ -52,7 +62,7 @@ export async function POST(request: NextRequest) {
             const { data: existingSub } = await supabase
               .from("subscriptions")
               .select("id")
-              .eq("user_id", p.notes.user_id)
+              .eq("organization_id", orgId)
               .in("status", ["active", "past_due"])
               .limit(1)
               .maybeSingle()
@@ -72,7 +82,7 @@ export async function POST(request: NextRequest) {
               await supabase
                 .from("subscriptions")
                 .insert({
-                  user_id: p.notes.user_id,
+                  organization_id: orgId,
                   plan_id: p.notes.plan_id,
                   status: "active",
                   razorpay_subscription_id: p.subscription_id || null,
@@ -81,32 +91,28 @@ export async function POST(request: NextRequest) {
                 })
             }
 
-            // Update user boosts in preferences
-            const { data: userProfile } = await supabase
-              .from("users")
-              .select("preferences")
-              .eq("id", p.notes.user_id)
-              .single()
+            // Update organization plan
+            await supabase
+              .from("organizations")
+              .update({ plan: p.notes.plan_id })
+              .eq("id", orgId)
 
-            const currentPrefs = (userProfile?.preferences as Record<string, any>) || {}
-            const newPrefs = {
-              ...currentPrefs,
-              guest_boost: (currentPrefs.guest_boost || 0) + (p.notes.guest_boost ? parseInt(p.notes.guest_boost) : 0),
-              shots_boost: (currentPrefs.shots_boost || 0) + (p.notes.shots_boost ? parseInt(p.notes.shots_boost) : 0),
+            // Update user boosts in preferences if userRow exists
+            if (userRow) {
+              const currentPrefs = (userRow.preferences as Record<string, any>) || {}
+              const newPrefs = {
+                ...currentPrefs,
+                guest_boost: (currentPrefs.guest_boost || 0) + (p.notes.guest_boost ? parseInt(p.notes.guest_boost) : 0),
+                shots_boost: (currentPrefs.shots_boost || 0) + (p.notes.shots_boost ? parseInt(p.notes.shots_boost) : 0),
+              }
+
+              await supabase
+                .from("users")
+                .update({ preferences: newPrefs })
+                .eq("id", userRow.id)
             }
 
-            await supabase
-              .from("users")
-              .update({ preferences: newPrefs })
-              .eq("id", p.notes.user_id)
-
             // Fetch user email for receipt
-            const { data: userRow } = await supabase
-              .from("users")
-              .select("email, full_name")
-              .eq("id", p.notes.user_id)
-              .single()
-
             if (userRow?.email) {
               const invoiceNumber = `INV-${p.id.slice(-8).toUpperCase()}`
               void sendEmail({
@@ -137,20 +143,29 @@ export async function POST(request: NextRequest) {
           id: string
           error_code?: string
           error_description?: string
-          notes?: { user_id?: string }
+          notes?: { user_id?: string; organization_id?: string }
         }
         
-        if (p.notes?.user_id) {
+        if (p.notes?.user_id || p.notes?.organization_id) {
+          const targetId = p.notes.user_id || p.notes.organization_id
+          const { data: userRow } = await supabase
+            .from("users")
+            .select("organization_id")
+            .eq("id", targetId)
+            .maybeSingle()
+
+          const orgId = userRow?.organization_id || targetId
+
           // Create transaction record for failed payment
           await supabase.from("transactions").insert({
-            user_id: p.notes.user_id,
+            organization_id: orgId,
             razorpay_payment_id: p.id,
             status: "failed",
             error_code: p.error_code,
             error_description: p.error_description,
             gateway_response: evt,
-            amount: evt.payload.payment.amount || 0,
-            currency: evt.payload.payment.currency || "INR",
+            amount: evt.payload.payment?.amount || 0,
+            currency: evt.payload.payment?.currency || "INR",
           })
         }
         break

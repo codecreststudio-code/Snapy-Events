@@ -80,8 +80,11 @@ export function useToasts() {
 
 export function Toaster() {
   const { toasts } = useToasts()
-  const [mounted, setMounted] = React.useState(false)
-  React.useEffect(() => setMounted(true), [])
+  const mounted = React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  )
   if (!mounted) return null
   return createPortal(
     <ToastProvider>

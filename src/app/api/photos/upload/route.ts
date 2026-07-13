@@ -29,7 +29,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     }
     const { data: gallery } = await supabase
       .from("galleries")
-      .select("event_id, event:events(host_id, settings)")
+      .select("event_id, event:events(organization_id, host_id, settings)")
       .eq("id", id)
       .single()
 
@@ -37,24 +37,32 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
 
     // Enforce limits
     const event = gallery.event as any
-    const hostId = Array.isArray(event) ? event[0]?.host_id : event?.host_id
-    const orgId = hostId
+    const eventObj = Array.isArray(event) ? event[0] : event
+    const hostId = eventObj?.host_id
+    let orgId = eventObj?.organization_id
+
+    if (!orgId && hostId) {
+      const { data: u } = await supabase.from("users").select("organization_id").eq("id", hostId).maybeSingle()
+      orgId = u?.organization_id
+    }
 
     // Fetch host user profile for settings/preferences
     const { data: hostProfile } = await supabase
       .from("users")
       .select("preferences")
       .eq("id", hostId)
-      .single()
-
-    // Fetch active subscription for the host user
-    const { data: subscription } = await supabase
-      .from("subscriptions")
-      .select("plan_id")
-      .eq("user_id", hostId)
-      .eq("status", "active")
-      .limit(1)
       .maybeSingle()
+
+    // Fetch active subscription for the organization
+    const { data: subscription } = orgId
+      ? await supabase
+          .from("subscriptions")
+          .select("plan_id")
+          .eq("organization_id", orgId)
+          .eq("status", "active")
+          .limit(1)
+          .maybeSingle()
+      : { data: null }
 
     const orgPlan = subscription?.plan_id || "free"
     const hostPrefs = (hostProfile?.preferences as Record<string, any>) || {}
@@ -79,11 +87,13 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const maxStorageBytes = baseLimits.storage_limit_gb * 1024 * 1024 * 1024
 
     // Check storage quota
-    const { data: storageUsage } = await supabase
-      .from("storage_usage")
-      .select("total_bytes, photo_count")
-      .eq("host_id", orgId)
-      .single()
+    const { data: storageUsage } = orgId
+      ? await supabase
+          .from("storage_usage")
+          .select("total_bytes, photo_count")
+          .eq("organization_id", orgId)
+          .maybeSingle()
+      : { data: null }
 
     const currentStorageBytes = storageUsage?.total_bytes ? BigInt(storageUsage.total_bytes) : BigInt(0)
     const currentPhotoCount = storageUsage?.photo_count || 0
@@ -124,7 +134,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     }
 
     const ext = file.name.split(".").pop() ?? "jpg"
-    const path = `${orgId}/${gallery.event_id}/${id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+    const path = `${orgId || "anon"}/${gallery.event_id}/${id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
     const up = await uploadFile({ bucket: "PHOTOS", path, file, contentType: file.type, cacheControl: "31536000" })
     const { data, error } = await supabase
       .from("photos")
@@ -146,19 +156,21 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     if (error) return fail("DB_ERROR", error.message, 500)
     
     // Update storage usage
-    try {
-      const { error: upsertError } = await supabase
-        .from("storage_usage")
-        .upsert({
-          host_id: orgId,
-          total_bytes: (currentStorageBytes + BigInt(file.size)).toString(),
-          photo_count: currentPhotoCount + 1,
-        })
-      if (upsertError) {
-        console.error("Failed to update storage usage:", upsertError.message)
+    if (orgId) {
+      try {
+        const { error: upsertError } = await supabase
+          .from("storage_usage")
+          .upsert({
+            organization_id: orgId,
+            total_bytes: (currentStorageBytes + BigInt(file.size)).toString(),
+            photo_count: currentPhotoCount + 1,
+          })
+        if (upsertError) {
+          console.error("Failed to update storage usage:", upsertError.message)
+        }
+      } catch (err) {
+        console.error("Failed to update storage usage:", err)
       }
-    } catch (err) {
-      console.error("Failed to update storage usage:", err)
     }
     
     void trackEvent({ user_id: auth.user?.id ?? undefined, event_type: "photo.uploaded", event_data: { gallery_id: id }, request })

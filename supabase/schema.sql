@@ -580,6 +580,170 @@ INSERT INTO plans (id, name, description, price_inr, price_usd, features, limits
   '{"events_limit": -1, "storage_limit_gb": 1000, "photo_limit": -1, "qr_codes_per_event": -1, "galleries_per_event": -1, "ai_searches": -1, "custom_branding": true, "priority_support": true}');
 
 -- ============================================
+-- ADDITIONAL TABLES (Synced with Prisma Schema)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS webhook_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  source TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  external_id TEXT,
+  payload JSONB NOT NULL DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS organization_invitations (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
+  email TEXT NOT NULL,
+  role TEXT DEFAULT 'member',
+  token TEXT UNIQUE NOT NULL,
+  invited_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS qr_scans (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE NOT NULL,
+  code TEXT NOT NULL,
+  ip_address TEXT,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS coupon_redemptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
+  coupon_id UUID REFERENCES coupons(id) ON DELETE CASCADE NOT NULL,
+  redeemed_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS face_clusters (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE NOT NULL,
+  name TEXT,
+  cover_photo_id UUID REFERENCES photos(id) ON DELETE SET NULL,
+  face_count INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS live_wall_items (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE NOT NULL,
+  photo_id UUID REFERENCES photos(id) ON DELETE CASCADE NOT NULL,
+  is_approved BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS slideshows (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE NOT NULL,
+  title TEXT NOT NULL,
+  settings JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS watermarks (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
+  name TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  settings JSONB DEFAULT '{}',
+  is_default BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS custom_domains (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
+  domain TEXT UNIQUE NOT NULL,
+  status TEXT DEFAULT 'pending',
+  ssl_active BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS support_tickets (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  subject TEXT NOT NULL,
+  status TEXT DEFAULT 'open',
+  priority TEXT DEFAULT 'medium',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS support_ticket_messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  ticket_id UUID REFERENCES support_tickets(id) ON DELETE CASCADE NOT NULL,
+  sender_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  message TEXT NOT NULL,
+  is_staff BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS download_bundles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  storage_path TEXT NOT NULL,
+  file_size BIGINT,
+  download_count INT DEFAULT 0,
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS ai_usages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
+  feature TEXT NOT NULL,
+  tokens_used INT DEFAULT 0,
+  images_processed INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS platform_settings (
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL DEFAULT '{}',
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS notification_queues (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  channel TEXT NOT NULL,
+  recipient TEXT NOT NULL,
+  payload JSONB NOT NULL DEFAULT '{}',
+  status TEXT DEFAULT 'pending',
+  attempts INT DEFAULT 0,
+  scheduled_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- RLS Enable for new tables
+ALTER TABLE webhook_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE organization_invitations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE qr_scans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE coupon_redemptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE face_clusters ENABLE ROW LEVEL SECURITY;
+ALTER TABLE live_wall_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE slideshows ENABLE ROW LEVEL SECURITY;
+ALTER TABLE watermarks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE custom_domains ENABLE ROW LEVEL SECURITY;
+ALTER TABLE support_tickets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE support_ticket_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE download_bundles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_usages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE platform_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notification_queues ENABLE ROW LEVEL SECURITY;
+
+-- Service role default policies for webhooks and queues
+CREATE POLICY "Service role full access on webhook_events" ON webhook_events FOR ALL USING (true);
+CREATE POLICY "Service role full access on notification_queues" ON notification_queues FOR ALL USING (true);
+CREATE POLICY "Admins can manage custom domains" ON custom_domains FOR ALL USING (organization_id IN (SELECT organization_id FROM users WHERE id = auth.uid() AND role IN ('owner', 'admin')));
+CREATE POLICY "Users can view support tickets" ON support_tickets FOR SELECT USING (organization_id IN (SELECT organization_id FROM users WHERE id = auth.uid()));
+
+-- ============================================
 -- STORAGE BUCKETS (Run in Supabase Dashboard)
 -- ============================================
 -- These should be created in Supabase Storage:
