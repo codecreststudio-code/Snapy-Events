@@ -54,6 +54,7 @@ model User {
   photos         Photo[]
   faceSearchLogs FaceSearchLog[]
   auditLogs      AuditLog[]
+  storageUsage   StorageUsage?
 
   @@map("users")
 }
@@ -366,13 +367,13 @@ model AuditLog {
 }
 
 model StorageUsage {
-  id             String   @id @default(uuid())
-  organizationId String   @unique @map("organization_id")
-  totalBytes     BigInt   @default(0) @map("total_bytes")
-  photoCount     Int      @default(0) @map("photo_count")
-  updatedAt      DateTime @default(now()) @map("updated_at")
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  totalBytes BigInt   @default(0) @map("total_bytes")
+  photoCount Int      @default(0) @map("photo_count")
+  updatedAt DateTime @default(now()) @map("updated_at")
 
-  organization Organization @relation(fields: [organizationId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@map("storage_usage")
 }

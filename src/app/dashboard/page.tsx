@@ -69,7 +69,7 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
   let qrCount = 0
 
   if (allEventIds.length > 0) {
-    // Get photo count from storage_usage for the organization (more efficient than counting)
+    // Get photo count from storage_usage for the user (more efficient than counting)
     const { data: storageData } = await supabase
       .from("storage_usage")
       .select("photo_count")

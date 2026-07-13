@@ -128,7 +128,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       ? await supabase
           .from("storage_usage")
           .select("total_bytes, photo_count")
-          .eq("organization_id", orgId)
+          .eq("user_id", orgId)
           .maybeSingle()
       : { data: null }
 
@@ -258,7 +258,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       try {
         await supabase.from("storage_usage").upsert(
           {
-            organization_id: orgId,
+            user_id: orgId,
             total_bytes: (currentStorageBytes + BigInt(uploadBuffer.length)).toString(),
             photo_count: currentPhotoCount + 1,
           },
