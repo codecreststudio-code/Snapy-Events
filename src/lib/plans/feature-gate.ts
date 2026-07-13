@@ -68,7 +68,7 @@ export async function checkEventFeatureAccess(
     }
 
     // Default Fallback Rules based on Plan Tier
-    if (["ai_face_search", "live_photo_wall", "print_ready_downloads", "whatsapp_alerts", "priority_support"].includes(featureKey)) {
+    if (["ai_face_search", "live_photo_wall", "video_uploads", "voice_notes", "print_ready_downloads", "whatsapp_alerts", "priority_support"].includes(featureKey)) {
       const isPaid = planId !== "free"
       return {
         allowed: isPaid,
@@ -131,7 +131,7 @@ export async function checkOrgFeatureAccess(
       }
     }
 
-    if (["ai_face_search", "live_photo_wall", "print_ready_downloads", "whatsapp_alerts", "priority_support"].includes(featureKey)) {
+    if (["ai_face_search", "live_photo_wall", "video_uploads", "voice_notes", "print_ready_downloads", "whatsapp_alerts", "priority_support"].includes(featureKey)) {
       const isPaid = planId !== "free"
       return { allowed: isPaid, planId }
     }

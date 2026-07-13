@@ -86,6 +86,7 @@ export const POST = defineRoute({
         const { data: updated } = await supabase
           .from("subscriptions")
           .update({
+            user_id: auth.user!.id,
             plan_id: plan_id,
             status: "active",
             razorpay_subscription_id: razorpay_payment_id,
@@ -100,6 +101,7 @@ export const POST = defineRoute({
         const { data: inserted } = await supabase
           .from("subscriptions")
           .insert({
+            user_id: auth.user!.id,
             organization_id: orgId,
             plan_id: plan_id,
             status: "active",

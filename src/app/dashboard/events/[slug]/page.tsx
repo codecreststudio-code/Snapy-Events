@@ -29,7 +29,6 @@ import {
   Clock,
   Sparkles,
   Play,
-  Pause,
   MessageSquare,
   Mic,
   Video,
@@ -189,8 +188,6 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [activeMediaTab, setActiveMediaTab] = useState<"all" | "photos" | "videos" | "voices" | "messages">("all")
-  const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null)
-  const [voiceSpeed, setVoiceSpeed] = useState(1.0)
   const [countdownText, setCountdownText] = useState("")
   const [copied, setCopied] = useState(false)
 
@@ -717,15 +714,15 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     {item.type === "video" && (
                       <div className="space-y-2">
                         <div className="aspect-video bg-stone-900 rounded-xl overflow-hidden relative flex items-center justify-center group shadow-inner">
-                          <img src={item.thumbnail} alt="Video thumbnail" className="w-full h-full object-cover opacity-80" />
-                          <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-all">
-                            <div className="w-12 h-12 rounded-full bg-white/30 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-lg cursor-pointer hover:scale-105 transition-transform">
-                              <Play className="h-5 w-5 fill-white ml-0.5" />
-                            </div>
-                          </div>
-                          <span className="absolute bottom-2 right-2 bg-black/55 text-white font-mono text-[9px] px-1.5 py-0.5 rounded">
-                            {item.duration}
-                          </span>
+                          <video
+                            src={getImageUrl(item.thumbnail)}
+                            controls
+                            playsInline
+                            preload="metadata"
+                            className="w-full h-full object-contain"
+                          >
+                            Your browser does not support video playback.
+                          </video>
                         </div>
                         <p className="text-xs font-semibold text-[#1C1A17]">{item.title}</p>
                       </div>
@@ -735,46 +732,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     {item.type === "voice" && (
                       <div className="space-y-2.5">
                         <div className="flex items-center gap-3 bg-[#FAF9F6] border border-[#F2EDE7] p-3 rounded-xl">
-                          <button
-                            onClick={() => setPlayingVoiceId(playingVoiceId === item.id ? null : item.id)}
-                            className="w-10 h-10 rounded-full bg-[#A58263] flex items-center justify-center text-white cursor-pointer hover:bg-[#8D6B50] transition-colors shrink-0 shadow-sm"
+                          <audio
+                            src={getImageUrl(item.thumbnail)}
+                            controls
+                            preload="none"
+                            className="flex-1 h-10"
                           >
-                            {playingVoiceId === item.id ? (
-                              <Pause className="h-4.5 w-4.5" />
-                            ) : (
-                              <Play className="h-4.5 w-4.5 fill-white ml-0.5" />
-                            )}
-                          </button>
-                          
-                          <div className="flex-1 space-y-1.5">
-                            {/* Simulated waveform sound lines */}
-                            <div className="h-5 flex items-center gap-0.5 overflow-hidden">
-                              {Array.from({ length: 30 }).map((_, idx) => (
-                                <div
-                                  key={idx}
-                                  className="w-0.75 bg-[#A58263] rounded-full transition-all duration-300"
-                                  style={{
-                                    height: playingVoiceId === item.id 
-                                      ? `${Math.max(10, Math.sin(idx + Date.now()/300) * 100)}%` 
-                                      : `${Math.max(15, (idx % 4) * 20)}%`,
-                                    opacity: playingVoiceId === item.id ? 1 : 0.4
-                                  }}
-                                />
-                              ))}
-                            </div>
-                            <div className="flex justify-between items-center text-[9px] text-[#9C958E]">
-                              <span>{item.category} Note</span>
-                              <span>0:00 / {item.duration}</span>
-                            </div>
-                          </div>
-
-                          {/* Playback speed toggle */}
-                          <button
-                            onClick={() => setVoiceSpeed(prev => prev === 2.0 ? 1.0 : prev + 0.5)}
-                            className="text-[9px] font-bold bg-white border border-[#EAE5DF] rounded px-1.5 py-0.5 text-[#69635C] hover:bg-stone-50 cursor-pointer shrink-0"
-                          >
-                            {voiceSpeed}x
-                          </button>
+                            Your browser does not support audio playback.
+                          </audio>
                         </div>
                       </div>
                     )}

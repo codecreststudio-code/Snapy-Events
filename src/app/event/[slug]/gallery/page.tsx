@@ -18,6 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Camera,
+  Play,
+  Volume2,
 } from "lucide-react"
 import type { Gallery, Photo } from "@/lib/types"
 
@@ -58,6 +60,17 @@ async function getPhotos(galleryId: string): Promise<Photo[]> {
   if (error) throw error
   return data || []
 }
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+
+function getMediaUrl(path: string | null | undefined): string {
+  if (!path) return "/placeholder.png"
+  if (path.startsWith("http") || path.startsWith("blob:") || path.startsWith("data:")) return path
+  return `${supabaseUrl}/storage/v1/object/public/photos/${path}`
+}
+
+function isVideo(photo: Photo) { return photo.mime_type?.startsWith("video/") }
+function isAudio(photo: Photo) { return photo.mime_type?.startsWith("audio/") }
 
 interface GallerySettings {
   allow_downloads: boolean
@@ -172,11 +185,27 @@ function PhotoGrid({
             className="relative aspect-square overflow-hidden rounded-lg bg-muted group"
           >
             {photo.thumbnail_path || photo.storage_path ? (
-              <img
-                src={photo.storage_path}
-                alt={photo.original_filename || "Photo"}
-                className="h-full w-full object-cover transition-transform group-hover:scale-105"
-              />
+              <>
+                <img
+                  src={getMediaUrl(photo.thumbnail_path || photo.storage_path)}
+                  alt={photo.original_filename || "Photo"}
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                />
+                {isVideo(photo) && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
+                      <Play className="h-5 w-5 text-white fill-white ml-0.5" />
+                    </div>
+                  </div>
+                )}
+                {isAudio(photo) && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
+                      <Volume2 className="h-5 w-5 text-white" />
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
                 <ImageIcon className="h-8 w-8 text-muted-foreground" />
@@ -232,12 +261,42 @@ function PhotoGrid({
             <ChevronRight className="h-6 w-6" />
           </button>
 
-          <div className="max-w-5xl max-h-[90vh]">
-            <img
-              src={photos[currentIndex].storage_path}
-              alt={photos[currentIndex].original_filename || "Photo"}
-              className="max-w-full max-h-[90vh] object-contain"
-            />
+          <div className="max-w-5xl max-h-[90vh] flex items-center justify-center">
+            {(() => {
+              const p = photos[currentIndex]
+              const url = getMediaUrl(p.storage_path)
+              if (isVideo(p)) {
+                return (
+                  <video
+                    src={url}
+                    controls
+                    autoPlay
+                    playsInline
+                    className="max-w-full max-h-[90vh] rounded-lg"
+                  >
+                    Your browser does not support video playback.
+                  </video>
+                )
+              }
+              if (isAudio(p)) {
+                return (
+                  <div className="flex flex-col items-center gap-4 p-8">
+                    <Volume2 className="h-16 w-16 text-white/60" />
+                    <p className="text-white/70 text-sm">{p.original_filename || "Audio"}</p>
+                    <audio src={url} controls autoPlay className="w-80 max-w-full">
+                      Your browser does not support audio playback.
+                    </audio>
+                  </div>
+                )
+              }
+              return (
+                <img
+                  src={url}
+                  alt={p.original_filename || "Photo"}
+                  className="max-w-full max-h-[90vh] object-contain"
+                />
+              )
+            })()}
           </div>
 
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4">
