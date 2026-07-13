@@ -8,6 +8,9 @@ import { Check, Sparkles, Crown } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { motion } from "framer-motion"
 
+import { useCurrency } from "@/lib/context/currency-context"
+import { CurrencyToggle } from "@/lib/components/ui/currency-toggle"
+
 const playfair = Playfair_Display({
   subsets: ["latin"],
   display: "swap",
@@ -22,6 +25,7 @@ interface PricingPlan {
   id: string
   name: string
   price: number
+  priceUsd: number
   period: string
   description: string
   cta: string
@@ -35,6 +39,7 @@ const plans: PricingPlan[] = [
     id: "free",
     name: "Free",
     price: 0,
+    priceUsd: 0,
     period: "forever",
     description: "Perfect for trying out Snapsy",
     cta: "Start free",
@@ -43,7 +48,8 @@ const plans: PricingPlan[] = [
   {
     id: "starter",
     name: "Starter",
-    price: 99,
+    price: 499,
+    priceUsd: 6,
     period: "per event",
     description: "For small events and personal use",
     cta: "Choose Starter",
@@ -57,7 +63,8 @@ const plans: PricingPlan[] = [
   {
     id: "standard",
     name: "Standard",
-    price: 499,
+    price: 1499,
+    priceUsd: 18,
     period: "per event",
     description: "For growing photographers",
     cta: "Choose Standard",
@@ -73,7 +80,8 @@ const plans: PricingPlan[] = [
   {
     id: "premium",
     name: "Premium",
-    price: 1499,
+    price: 3999,
+    priceUsd: 49,
     period: "per event",
     description: "For professional photographers and large events",
     cta: "Choose Premium",
@@ -90,63 +98,35 @@ const plans: PricingPlan[] = [
 ]
 
 function PricingCard({ plan }: { plan: PricingPlan }) {
-  const [coords, setCoords] = useState({ x: 0, y: 0 })
-  const [isHovered, setIsHovered] = useState(false)
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    setCoords({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    })
-  }
+  const { symbol, getPrice } = useCurrency()
+  const displayPrice = getPrice(plan.price, plan.priceUsd)
 
   return (
     <motion.div
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
-      className={`relative rounded-3xl border bg-white p-8 flex flex-col justify-between transition-all duration-300 ${
+      className={`relative rounded-3xl border bg-white p-8 cursor-pointer flex flex-col justify-between transition-shadow duration-300 ${
         plan.popular
-          ? "border-violet-500 shadow-[0_20px_50px_rgba(139,92,246,0.15)] ring-1 ring-violet-500 md:scale-[1.04] z-10"
-          : "border-slate-200 hover:border-slate-350 hover:shadow-xl"
+          ? "border-violet-500 ring-2 ring-violet-500/20 shadow-[0_20px_50px_rgba(139,92,246,0.15)] md:scale-105 z-10"
+          : "border-slate-200 hover:border-slate-300 hover:shadow-xl"
       }`}
     >
-      {/* Background Spotlight Glow Wrapper */}
-      <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
-        {isHovered && (
-          <div
-            className="absolute -inset-px transition duration-300 opacity-100"
-            style={{
-              background: `radial-gradient(350px circle at ${coords.x}px ${coords.y}px, ${
-                plan.popular ? "rgba(139, 92, 246, 0.12)" : "rgba(139, 92, 246, 0.06)"
-              }, transparent 80%)`,
-            }}
-          />
-        )}
-      </div>
-
-      {/* Badges Container */}
       {plan.popular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-1.5 text-[10px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-1 text-[10px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1">
           <Sparkles className="h-3 w-3" />
           POPULAR
         </div>
       )}
-
       {plan.bestValue && (
-        <div className="absolute -top-4 right-6 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1.5 text-[10px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
-          <Crown className="h-3.5 w-3.5" />
+        <div className="absolute -top-3 right-4 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1 text-[10px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1">
+          <Crown className="h-3 w-3" />
           BEST VALUE
         </div>
       )}
 
-      {/* Plan Header */}
-      <div className="relative z-10">
+      <div>
         <div className="flex justify-between items-start">
           <div>
             <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
@@ -162,7 +142,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
         </div>
 
         <div className="mt-6 flex items-baseline gap-1">
-          <span className="text-4xl font-extrabold text-slate-900">₹{plan.price}</span>
+          <span className="text-4xl font-extrabold text-slate-900">{symbol}{displayPrice}</span>
           <span className="text-slate-400 text-xs font-light">/ {plan.period}</span>
         </div>
 
@@ -207,6 +187,7 @@ export default function PricingPage() {
               id: p.id,
               name: p.name,
               price: p.price_inr,
+              priceUsd: p.price_usd || Math.round(p.price_inr / 80) || 1,
               period: p.billing_interval === "monthly" ? "month" : "per event",
               description: p.description || "",
               cta: p.id === "free" ? "Start free" : `Choose ${p.name}`,
@@ -214,7 +195,6 @@ export default function PricingPage() {
               popular: p.is_popular || false,
               bestValue: p.best_value || false,
             }))
-            // Add free tier if not returned in API to preserve basic signup
             if (!mapped.find((m: any) => m.id === "free")) {
               mapped.unshift(plans[0])
             }
@@ -233,7 +213,6 @@ export default function PricingPage() {
       <PublicNavbar />
       
       <main className="flex-1 bg-slate-50/30 overflow-hidden relative py-12 md:py-20">
-        {/* Subtle mesh light glow */}
         <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-25 blur-3xl">
           <div className="h-[400px] w-[500px] rounded-full bg-gradient-to-tr from-violet-100 via-fuchsia-50 to-pink-50" />
         </div>
@@ -265,6 +244,15 @@ export default function PricingPage() {
           >
             Choose the plan that matches your event volume. Upgrade or adjust bounds at any time.
           </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="pt-2"
+          >
+            <CurrencyToggle />
+          </motion.div>
         </section>
 
         <section className="mx-auto max-w-7xl px-6 pb-24">

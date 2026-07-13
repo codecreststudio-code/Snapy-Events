@@ -5,6 +5,8 @@ import { QueryProvider } from "@/lib/hooks/query-provider"
 import { AuthProvider } from "@/lib/hooks/use-auth"
 import { TooltipProvider } from "@/lib/components/ui/tooltip"
 
+import { CurrencyProvider } from "@/lib/context/currency-context"
+
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
@@ -45,9 +47,11 @@ export default function RootLayout({
       <body className={inter.className} suppressHydrationWarning>
         <QueryProvider>
           <AuthProvider>
-            <TooltipProvider>
-              {children}
-            </TooltipProvider>
+            <CurrencyProvider>
+              <TooltipProvider>
+                {children}
+              </TooltipProvider>
+            </CurrencyProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

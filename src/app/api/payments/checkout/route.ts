@@ -10,35 +10,42 @@ const checkoutBodySchema = z.object({
   coupon_code: z.string().optional(),
   guest_boost: z.number().default(0),
   shots_boost: z.number().default(0),
+  currency: z.enum(["INR", "USD"]).default("INR"),
 })
 
-export async function calculatePrice(supabase: any, planId: string, guestBoost: number, shotsBoost: number, couponCode?: string) {
+export async function calculatePrice(
+  supabase: any,
+  planId: string,
+  guestBoost: number,
+  shotsBoost: number,
+  couponCode?: string,
+  currency: "INR" | "USD" = "INR"
+) {
   let price = 0
   const { data: planRecord } = await supabase
     .from("plans")
-    .select("price_inr")
+    .select("price_inr, price_usd")
     .eq("id", planId)
     .single()
 
   if (planRecord) {
-    price = planRecord.price_inr
+    if (currency === "USD") {
+      price = planRecord.price_usd > 0 ? planRecord.price_usd : Math.round(planRecord.price_inr / 80) || 1
+    } else {
+      price = planRecord.price_inr
+    }
   } else {
     throw new Error("Plan not found")
   }
 
-  // Fetch active addons from the new schema
-  try {
-    const sb = await adminDb()
-    const { data: addons } = await sb.from("addons").select("*").eq("is_active", true)
-    
-    // Quick legacy mapping if old checkout passes raw boost numbers
-    // In a full implementation, the frontend would pass an array of addon_ids
-    if (addons && guestBoost > 0) {
-      // Find a guest addon that provides this boost (approx logic for legacy support)
-    }
-  } catch (err) {
-    console.error("Failed to query addons:", err)
-  }
+  // Calculate guest and shot add-ons
+  const guestAddonPriceInr = DEFAULT_GUEST_BOOSTS.find(b => b.value === guestBoost)?.price || 0
+  const shotAddonPriceInr = DEFAULT_SHOT_BOOSTS.find(b => b.value === shotsBoost)?.price || 0
+  
+  const guestAddonPrice = currency === "USD" ? (Math.round(guestAddonPriceInr / 80) || 0) : guestAddonPriceInr
+  const shotAddonPrice = currency === "USD" ? (Math.round(shotAddonPriceInr / 80) || 0) : shotAddonPriceInr
+  
+  price = price + guestAddonPrice + shotAddonPrice
 
   // Apply Coupon if exists
   if (couponCode) {
@@ -48,13 +55,14 @@ export async function calculatePrice(supabase: any, planId: string, guestBoost: 
       if (coupon.discount_type === "percentage") {
         price = price - (price * (coupon.discount_value / 100))
       } else {
-        price = price - coupon.discount_value
+        const disc = currency === "USD" ? Math.round(coupon.discount_value / 80) : coupon.discount_value
+        price = price - disc
       }
       if (price < 0) price = 0
     }
   }
 
-  return price // in INR
+  return price
 }
 
 
@@ -68,14 +76,15 @@ export const POST = defineRoute({
     }
 
     const supabase = await createClient()
+    const targetCurrency = body.currency || "INR"
 
     let price = 0
     try {
-      price = await calculatePrice(supabase, body.plan_id, body.guest_boost, body.shots_boost, body.coupon_code)
+      price = await calculatePrice(supabase, body.plan_id, body.guest_boost, body.shots_boost, body.coupon_code, targetCurrency)
     } catch (err: any) {
       return fail("BAD_REQUEST", err.message, 400)
     }
-    const amountInPaise = price * 100
+    const amountSubunits = Math.round(price * 100)
 
     // 1. Fetch or create Customer ID
     const { data: userRecord } = await supabase
@@ -97,8 +106,6 @@ export const POST = defineRoute({
           .update({ razorpay_customer_id: customerId })
           .eq("id", auth.user!.id)
       } catch (err: any) {
-        // Customer creation is non-critical — Razorpay standard checkout works
-        // without a pre-created customer_id. Log and continue to order creation.
         const msg = err.error?.description || err.description || err.message || String(err)
         console.warn(`[razorpay] Customer creation skipped (${msg}). Proceeding with order-only checkout.`)
         customerId = null
@@ -108,21 +115,22 @@ export const POST = defineRoute({
     // 2. Create Razorpay Order
     try {
       const order = await createRazorpayOrder({
-        amount: amountInPaise,
-        currency: "INR",
+        amount: amountSubunits,
+        currency: targetCurrency,
         receipt: `chk_${Date.now().toString(36)}_${auth.user!.id.slice(0, 8)}`,
         notes: {
           user_id: auth.user!.id,
           plan_id: body.plan_id,
           guest_boost: String(body.guest_boost),
           shots_boost: String(body.shots_boost),
+          currency: targetCurrency,
         },
       })
 
       return ok({
         order_id: order.id,
-        amount: amountInPaise,
-        currency: "INR",
+        amount: amountSubunits,
+        currency: targetCurrency,
         key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
         customer_id: customerId,
         total_price: price,

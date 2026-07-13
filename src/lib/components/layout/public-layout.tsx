@@ -9,6 +9,8 @@ import { Button } from "@/lib/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { Logo } from "./logo"
 
+import { CurrencyToggle } from "@/lib/components/ui/currency-toggle"
+
 export function PublicNavbar() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
@@ -73,7 +75,8 @@ export function PublicNavbar() {
         </nav>
 
         {/* Right: Desktop CTAs */}
-        <div className="hidden md:flex flex-1 md:flex-none justify-end items-center gap-5">
+        <div className="hidden md:flex flex-1 md:flex-none justify-end items-center gap-3">
+          <CurrencyToggle />
           <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-950 transition-colors">
             Sign in
           </Link>

@@ -25,6 +25,9 @@ import {
 import type { PlanId, Subscription } from "@/lib/types"
 import { Playfair_Display, Inter } from "next/font/google"
 
+import { useCurrency } from "@/lib/context/currency-context"
+import { CurrencyToggle } from "@/lib/components/ui/currency-toggle"
+
 const playfair = Playfair_Display({
   subsets: ["latin"],
   display: "swap",
@@ -40,6 +43,7 @@ interface PlanInfo {
   name: string
   description: string
   price: number
+  priceUsd: number
   priceMonthly: number
   features: string[]
   limits: {
@@ -55,6 +59,7 @@ const PLAN_INFO: PlanInfo[] = [
     name: "Free",
     description: "Get started with one event",
     price: 0,
+    priceUsd: 0,
     priceMonthly: 0,
     features: [
       "10 guests",
@@ -69,6 +74,7 @@ const PLAN_INFO: PlanInfo[] = [
     name: "Starter",
     description: "For photographers running a few events per year.",
     price: 499,
+    priceUsd: 6,
     priceMonthly: 499,
     features: [
       "5 events",
@@ -85,6 +91,7 @@ const PLAN_INFO: PlanInfo[] = [
     name: "Standard",
     description: "For studios running multiple weddings or events each month.",
     price: 1499,
+    priceUsd: 18,
     priceMonthly: 1499,
     features: [
       "25 events",
@@ -103,6 +110,7 @@ const PLAN_INFO: PlanInfo[] = [
     name: "Premium",
     description: "For agencies and enterprises at scale.",
     price: 3999,
+    priceUsd: 49,
     priceMonthly: 3999,
     features: [
       "Unlimited events",
@@ -224,6 +232,9 @@ function PricingCard({
     }
   }
 
+  const { symbol, getPrice } = useCurrency()
+  const displayPrice = getPrice(plan.price, plan.priceUsd || Math.round(plan.price / 80))
+
   return (
     <motion.div
       onMouseMove={handleMouseMove}
@@ -295,7 +306,7 @@ function PricingCard({
         </div>
 
         <div className="mt-4 flex items-baseline gap-1">
-          <span className="text-3xl font-extrabold text-slate-900">₹{plan.price}</span>
+          <span className="text-3xl font-extrabold text-slate-900">{symbol}{displayPrice}</span>
           <span className="text-slate-400 text-xs font-light">/ event</span>
         </div>
 
@@ -346,6 +357,7 @@ function PricingCard({
 export default function BillingPage() {
   const queryClient = useQueryClient()
   const router = useRouter()
+  const { symbol, getPrice } = useCurrency()
   const [plansList, setPlansList] = useState<PlanInfo[]>(PLAN_INFO)
   const [guestBoostsList, setGuestBoostsList] = useState(GUEST_BOOSTS)
   const [shotBoostsList, setShotBoostsList] = useState(SHOT_BOOSTS)
@@ -579,9 +591,12 @@ export default function BillingPage() {
   return (
     <div className={`space-y-8 pb-16 selection:bg-violet-100 ${inter.className}`}>
       {/* Title Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Billing</h1>
-        <p className="text-muted-foreground">Manage your workspace subscription and limits</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Billing</h1>
+          <p className="text-muted-foreground">Manage your workspace subscription and limits</p>
+        </div>
+        <CurrencyToggle />
       </div>
 
       {/* Subscription Details if active */}
@@ -725,7 +740,7 @@ export default function BillingPage() {
                     >
                       <span>{boost.label}</span>
                       <span className="opacity-80 font-normal">
-                        {boost.price === 0 ? "₹0" : `+₹${boost.price}`}
+                        {boost.price === 0 ? `${symbol}0` : `+${symbol}${getPrice(boost.price, Math.round(boost.price / 80))}`}
                       </span>
                     </button>
                   ))}
@@ -741,7 +756,9 @@ export default function BillingPage() {
         <div className="text-center sm:text-left">
           <span className="text-xs text-slate-400 uppercase tracking-widest font-semibold">Total Price</span>
           <div className="flex items-baseline gap-1.5 justify-center sm:justify-start mt-1">
-            <span className="text-3xl font-extrabold text-slate-900">₹{totalPrice}</span>
+            <span className="text-3xl font-extrabold text-slate-900">
+              {symbol}{getPrice(totalPrice, Math.round(totalPrice / 80))}
+            </span>
             <span className="text-sm text-slate-500 font-light">
               {selectedPlan === "free" ? "forever" : "per event"}
             </span>
@@ -749,9 +766,9 @@ export default function BillingPage() {
           <p className="text-xs text-slate-400 mt-1.5 font-light">
             {selectedPlan !== "free" && (
               <>
-                Base ₹{basePrice}
-                {guestBoost > 0 && ` + Guest Boost ₹${guestAddOnPrice}`}
-                {shotBoost > 0 && ` + Shots Boost ₹${shotAddOnPrice}`}
+                Base {symbol}{getPrice(basePrice, Math.round(basePrice / 80))}
+                {guestBoost > 0 && ` + Guest Boost ${symbol}${getPrice(guestAddOnPrice, Math.round(guestAddOnPrice / 80))}`}
+                {shotBoost > 0 && ` + Shots Boost ${symbol}${getPrice(shotAddOnPrice, Math.round(shotAddOnPrice / 80))}`}
               </>
             )}
           </p>

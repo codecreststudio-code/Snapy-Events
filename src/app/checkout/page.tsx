@@ -11,6 +11,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib
 import { useAuth } from "@/lib/hooks"
 import { toast } from "@/lib/components/ui/toaster"
 
+import { useCurrency } from "@/lib/context/currency-context"
+import { CurrencyToggle } from "@/lib/components/ui/currency-toggle"
+
 const GUEST_PRICES: Record<number, number> = {
   0: 0,
   10: 199,
@@ -38,10 +41,17 @@ const PLAN_DEFAULT_PRICES: Record<string, number> = {
   premium: 3999,
 }
 
+const PLAN_DEFAULT_USD: Record<string, number> = {
+  starter: 6,
+  standard: 18,
+  premium: 49,
+}
+
 function CheckoutForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user, profile, isLoading: authLoading } = useAuth()
+  const { currency, symbol, getPrice } = useCurrency()
   
   const plan = searchParams?.get("plan") || "starter"
   const guests = parseInt(searchParams?.get("guests") || "0")
@@ -50,6 +60,7 @@ function CheckoutForm() {
   const [initiating, setInitiating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [planPrices, setPlanPrices] = useState<Record<string, number>>(PLAN_DEFAULT_PRICES)
+  const [planUsdPrices, setPlanUsdPrices] = useState<Record<string, number>>(PLAN_DEFAULT_USD)
   const [guestPrices, setGuestPrices] = useState<Record<number, number>>(GUEST_PRICES)
   const [shotPrices, setShotPrices] = useState<Record<number, number>>(SHOT_PRICES)
 
@@ -58,10 +69,20 @@ function CheckoutForm() {
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponError, setCouponError] = useState("")
 
-  // Calculations
-  const basePrice = planPrices[plan] || PLAN_DEFAULT_PRICES[plan] || 0
-  const guestAddonPrice = guestPrices[guests] || 0
-  const shotAddonPrice = shotPrices[shots] || 0
+  // Dynamic Multi-Currency Calculations
+  const rawBaseInr = planPrices[plan] || PLAN_DEFAULT_PRICES[plan] || 0
+  const rawBaseUsd = planUsdPrices[plan] || PLAN_DEFAULT_USD[plan] || Math.round(rawBaseInr / 80) || 1
+  
+  const rawGuestInr = guestPrices[guests] || 0
+  const rawGuestUsd = Math.round(rawGuestInr / 80) || (guests > 0 ? 3 : 0)
+  
+  const rawShotInr = shotPrices[shots] || 0
+  const rawShotUsd = Math.round(rawShotInr / 80) || (shots > 0 ? 2 : 0)
+
+  const basePrice = getPrice(rawBaseInr, rawBaseUsd)
+  const guestAddonPrice = getPrice(rawGuestInr, rawGuestUsd)
+  const shotAddonPrice = getPrice(rawShotInr, rawShotUsd)
+  
   let totalPrice = basePrice + guestAddonPrice + shotAddonPrice
   let discountAmount = 0
   
@@ -69,7 +90,7 @@ function CheckoutForm() {
     if (appliedCoupon.discount_type === "percentage") {
       discountAmount = totalPrice * (appliedCoupon.discount_value / 100)
     } else {
-      discountAmount = appliedCoupon.discount_value
+      discountAmount = currency === "USD" ? Math.round(appliedCoupon.discount_value / 80) : appliedCoupon.discount_value
     }
     totalPrice = Math.max(0, totalPrice - discountAmount)
   }
@@ -103,11 +124,14 @@ function CheckoutForm() {
         if (res.ok) {
           const result = await res.json()
           if (result.success && Array.isArray(result.data)) {
-            const mapped: Record<string, number> = {}
+            const mappedInr: Record<string, number> = {}
+            const mappedUsd: Record<string, number> = {}
             result.data.forEach((p: any) => {
-              mapped[p.id] = p.price_inr
+              mappedInr[p.id] = p.price_inr
+              mappedUsd[p.id] = p.price_usd || Math.round(p.price_inr / 80) || 1
             })
-            setPlanPrices(prev => ({ ...prev, ...mapped }))
+            setPlanPrices(prev => ({ ...prev, ...mappedInr }))
+            setPlanUsdPrices(prev => ({ ...prev, ...mappedUsd }))
           }
         }
       } catch (e) {
@@ -156,7 +180,7 @@ function CheckoutForm() {
     setError(null)
 
     try {
-      // 1. Create Razorpay order on server
+      // 1. Create Razorpay order on server with currency
       const orderRes = await fetch("/api/payments/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -164,7 +188,8 @@ function CheckoutForm() {
           plan_id: plan,
           guest_boost: guests,
           shots_boost: shots,
-          coupon_code: appliedCoupon?.code
+          coupon_code: appliedCoupon?.code,
+          currency: currency,
         }),
       })
 
@@ -268,10 +293,15 @@ function CheckoutForm() {
           <Card className="md:col-span-3 bg-white border-slate-200 p-6 flex flex-col justify-between shadow-sm">
             <div>
               <CardHeader className="p-0 mb-6">
-                <CardTitle className="text-xl font-bold text-slate-900">Review your subscription</CardTitle>
-                <CardDescription className="text-slate-500 text-sm">
-                  Complete payment to activate limits and features.
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-xl font-bold text-slate-900">Review your subscription</CardTitle>
+                    <CardDescription className="text-slate-500 text-sm">
+                      Complete payment to activate limits and features.
+                    </CardDescription>
+                  </div>
+                  <CurrencyToggle />
+                </div>
               </CardHeader>
 
               <div className="space-y-4">
@@ -281,7 +311,7 @@ function CheckoutForm() {
                     <span className="font-semibold text-slate-800">{PLAN_NAMES[plan]}</span>
                     <p className="text-xs text-slate-400">Base event plan features</p>
                   </div>
-                  <span className="font-bold text-slate-800">₹{basePrice}</span>
+                  <span className="font-bold text-slate-800">{symbol}{basePrice}</span>
                 </div>
 
                 {/* Guest Boost */}
@@ -291,7 +321,7 @@ function CheckoutForm() {
                       <span className="font-semibold text-slate-800">Guest Quota Boost</span>
                       <p className="text-xs text-slate-400">+{guests} guests invite limit</p>
                     </div>
-                    <span className="font-bold text-slate-800">₹{guestAddonPrice}</span>
+                    <span className="font-bold text-slate-800">{symbol}{guestAddonPrice}</span>
                   </div>
                 )}
 
@@ -302,7 +332,7 @@ function CheckoutForm() {
                       <span className="font-semibold text-slate-800">Shots Quota Boost</span>
                       <p className="text-xs text-slate-400">+{shots} shots limit per guest</p>
                     </div>
-                    <span className="font-bold text-slate-800">₹{shotAddonPrice}</span>
+                    <span className="font-bold text-slate-800">{symbol}{shotAddonPrice}</span>
                   </div>
                 )}
               </div>
@@ -339,12 +369,12 @@ function CheckoutForm() {
                   <span className="text-sm font-semibold text-emerald-600 flex items-center gap-1">
                     <Check className="h-3.5 w-3.5" /> Discount Applied
                   </span>
-                  <span className="text-sm font-bold text-emerald-600">-₹{Math.floor(discountAmount)}</span>
+                  <span className="text-sm font-bold text-emerald-600">-{symbol}{Math.floor(discountAmount)}</span>
                 </div>
               )}
               <div className="flex items-center justify-between mb-6 pt-2 border-t border-slate-100/50">
-                <span className="text-base font-medium text-slate-650">Total Price (INR)</span>
-                <span className="text-3xl font-extrabold text-slate-900">₹{Math.floor(totalPrice)}</span>
+                <span className="text-base font-medium text-slate-650">Total Price ({currency})</span>
+                <span className="text-3xl font-extrabold text-slate-900">{symbol}{Math.floor(totalPrice)}</span>
               </div>
 
               {error && (
