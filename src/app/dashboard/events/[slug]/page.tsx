@@ -214,18 +214,27 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
     const svgData = new XMLSerializer().serializeToString(svgEl)
     const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" })
-    const url = URL.createObjectURL(svgBlob)
+    const svgUrl = URL.createObjectURL(svgBlob)
 
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.createElement("canvas")
-      canvas.width = 500
-      canvas.height = 500
-      const ctx = canvas.getContext("2d")
-      if (ctx) {
-        ctx.fillStyle = "#ffffff"
-        ctx.fillRect(0, 0, 500, 500)
-        ctx.drawImage(img, 25, 25, 450, 450)
+    const canvas = document.createElement("canvas")
+    canvas.width = 600
+    canvas.height = 600
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    ctx.fillStyle = "#ffffff"
+    ctx.fillRect(0, 0, 600, 600)
+
+    const logoImg = new Image()
+    logoImg.crossOrigin = "anonymous"
+    logoImg.onload = () => {
+      ctx.globalAlpha = 0.25
+      ctx.drawImage(logoImg, 50, 50, 500, 500)
+      ctx.globalAlpha = 1.0
+
+      const qrImg = new Image()
+      qrImg.onload = () => {
+        ctx.drawImage(qrImg, 30, 30, 540, 540)
         const pngUrl = canvas.toDataURL("image/png")
         const downloadLink = document.createElement("a")
         downloadLink.href = pngUrl
@@ -233,10 +242,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         document.body.appendChild(downloadLink)
         downloadLink.click()
         document.body.removeChild(downloadLink)
+        URL.revokeObjectURL(svgUrl)
       }
-      URL.revokeObjectURL(url)
+      qrImg.src = svgUrl
     }
-    img.src = url
+    logoImg.src = "/Logo.png"
   }
 
   // Server state queries
@@ -761,29 +771,34 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               </span>
             </div>
 
-            {/* Custom Branded QR Code Display */}
+            {/* Custom Branded QR Code Display (Full Logo Embedded behind QR matrix) */}
             <div className="p-4 bg-gradient-to-b from-[#FAF9F6] to-white border border-[#EAE5DF] rounded-2xl flex flex-col items-center justify-center space-y-3 shadow-inner group">
-              <div className="p-3 bg-white rounded-2xl shadow-md border border-[#EAE5DF] relative">
+              <div className="p-3 bg-white rounded-2xl shadow-md border border-[#EAE5DF] relative overflow-hidden flex items-center justify-center">
+                <img
+                  src="/Favicon.png"
+                  alt="Snapsy Logo Background"
+                  className="absolute inset-0 w-full h-full object-contain opacity-25 p-2 pointer-events-none filter saturate-150"
+                />
                 <QRCodeSVG
                   id="event-dashboard-qr"
                   value={publicEventUrl}
-                  size={160}
-                  bgColor={"#ffffff"}
+                  size={180}
+                  bgColor={"transparent"}
                   fgColor={"#1c1a17"}
                   level={"H"}
                   imageSettings={{
                     src: "/Favicon.png",
                     x: undefined,
                     y: undefined,
-                    height: 36,
-                    width: 36,
+                    height: 44,
+                    width: 44,
                     excavate: true,
                   }}
+                  className="relative z-10"
                 />
               </div>
-              <div className="space-y-0.5">
+              <div className="space-y-0.5 text-center">
                 <p className="text-xs font-bold text-[#1C1A17]">Scan to Upload Photos</p>
-                <p className="text-[10px] text-[#9C958E]">Snapsy Custom Logo Embedded</p>
               </div>
             </div>
 

@@ -35,6 +35,7 @@ import {
   User
 } from "lucide-react"
 import QRCode from "qrcode"
+import { QRCodeSVG } from "qrcode.react"
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -1176,13 +1177,32 @@ export function NewEventForm() {
                 </p>
               </div>
 
-              {/* Real QR Card Output */}
+              {/* Real Custom Snapsy Logo QR Card Output */}
               <div className="border border-[#EAE5DF] rounded-2xl p-4 bg-white flex flex-col sm:flex-row items-center gap-4 shadow-sm">
-                {qrCodeUrl ? (
-                  <img src={qrCodeUrl} alt="Event QR Code" className="w-32 h-32 rounded-lg border border-stone-100 shadow-inner" />
-                ) : (
-                  <div className="w-32 h-32 bg-stone-150 rounded-lg flex items-center justify-center text-[#9C958E] text-[10px]">Loading QR...</div>
-                )}
+                <div className="p-2 bg-white rounded-xl border border-[#EAE5DF] relative overflow-hidden flex items-center justify-center shrink-0">
+                  <img
+                    src="/Favicon.png"
+                    alt="Snapsy Logo Background"
+                    className="absolute inset-0 w-full h-full object-contain opacity-25 p-1 pointer-events-none"
+                  />
+                  <QRCodeSVG
+                    id="new-event-modal-qr"
+                    value={createdEvent ? `${typeof window !== "undefined" ? window.location.origin : "https://snapsy-events.vercel.app"}/event/${createdEvent.slug}` : "https://snapsy-events.vercel.app"}
+                    size={120}
+                    bgColor={"transparent"}
+                    fgColor={"#1c1a17"}
+                    level={"H"}
+                    imageSettings={{
+                      src: "/Favicon.png",
+                      x: undefined,
+                      y: undefined,
+                      height: 32,
+                      width: 32,
+                      excavate: true,
+                    }}
+                    className="relative z-10"
+                  />
+                </div>
 
                 <div className="flex-1 space-y-3 w-full text-center sm:text-left">
                   <div className="space-y-0.5">

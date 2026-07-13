@@ -6,6 +6,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/lib/hooks"
 import { generateCode } from "@/lib/utils"
+import { QRCodeSVG } from "qrcode.react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
@@ -132,44 +133,82 @@ async function generateQRImage(data: string): Promise<string | null> {
     return null
   }
 }
-
 function QRCodeCard({ qr, onDelete }: { qr: QRCodeWithEvent; onDelete: (id: string) => void }) {
-  const [qrImage, setQrImage] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-
   const scanUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://snapsy-events.vercel.app"}/event/scan/${qr.code}`
-
-  async function loadQRImage() {
-    if (qrImage) return
-    setLoading(true)
-    const image = await generateQRImage(scanUrl)
-    setQrImage(image)
-    setLoading(false)
-  }
 
   function copyToClipboard(text: string) {
     navigator.clipboard.writeText(text)
     toast({ title: "Link copied to clipboard" })
   }
 
+  function downloadSvgQr() {
+    const svgEl = document.getElementById(`global-qr-svg-${qr.id}`) as SVGElement | null
+    if (!svgEl) return
+    const svgData = new XMLSerializer().serializeToString(svgEl)
+    const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" })
+    const svgUrl = URL.createObjectURL(svgBlob)
+
+    const canvas = document.createElement("canvas")
+    canvas.width = 600
+    canvas.height = 600
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    ctx.fillStyle = "#ffffff"
+    ctx.fillRect(0, 0, 600, 600)
+
+    const logoImg = new Image()
+    logoImg.crossOrigin = "anonymous"
+    logoImg.onload = () => {
+      ctx.globalAlpha = 0.25
+      ctx.drawImage(logoImg, 50, 50, 500, 500)
+      ctx.globalAlpha = 1.0
+
+      const qrImg = new Image()
+      qrImg.onload = () => {
+        ctx.drawImage(qrImg, 30, 30, 540, 540)
+        const pngUrl = canvas.toDataURL("image/png")
+        const downloadLink = document.createElement("a")
+        downloadLink.href = pngUrl
+        downloadLink.download = `${qr.name || qr.code}-snapsy-qr.png`
+        document.body.appendChild(downloadLink)
+        downloadLink.click()
+        document.body.removeChild(downloadLink)
+        URL.revokeObjectURL(svgUrl)
+      }
+      qrImg.src = svgUrl
+    }
+    logoImg.src = "/Favicon.png"
+  }
+
   return (
     <Card className="overflow-hidden border border-border/40 bg-card/60 backdrop-blur-md hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group">
-      <div className="aspect-square bg-white flex items-center justify-center p-6 relative select-none">
-        {loading ? (
-          <Skeleton className="h-48 w-48 rounded-lg" />
-        ) : qrImage ? (
-          <img src={qrImage} alt="QR Code" className="h-48 w-48 object-contain transition-transform duration-300 group-hover:scale-[1.03]" />
-        ) : (
-          <button
-            onClick={loadQRImage}
-            className="flex flex-col items-center gap-3 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
-          >
-            <div className="p-4 rounded-full bg-slate-50 border border-slate-100 group-hover:bg-primary/5 group-hover:border-primary/10 transition-colors">
-              <QrCode className="h-12 w-12 text-slate-400 group-hover:text-primary transition-colors" />
-            </div>
-            <span className="text-xs font-semibold tracking-wide uppercase">Click to preview</span>
-          </button>
-        )}
+      <div className="aspect-square bg-white flex flex-col items-center justify-center p-4 relative select-none">
+        <div className="p-3 bg-white rounded-2xl shadow-sm border border-[#EAE5DF] relative overflow-hidden flex items-center justify-center">
+          <img
+            src="/Favicon.png"
+            alt="Snapsy Logo Background"
+            className="absolute inset-0 w-full h-full object-contain opacity-25 p-2 pointer-events-none filter saturate-150"
+          />
+          <QRCodeSVG
+            id={`global-qr-svg-${qr.id}`}
+            value={scanUrl}
+            size={160}
+            bgColor={"transparent"}
+            fgColor={"#1c1a17"}
+            level={"H"}
+            imageSettings={{
+              src: "/Favicon.png",
+              x: undefined,
+              y: undefined,
+              height: 38,
+              width: 38,
+              excavate: true,
+            }}
+            className="relative z-10"
+          />
+        </div>
+
         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -182,14 +221,10 @@ function QRCodeCard({ qr, onDelete }: { qr: QRCodeWithEvent; onDelete: (id: stri
                 <Copy className="h-4 w-4 text-muted-foreground" />
                 Copy Link
               </DropdownMenuItem>
-              {qrImage && (
-                <DropdownMenuItem asChild className="gap-2 cursor-pointer">
-                  <a href={qrImage} download={`${qr.name || qr.code}-qr.png`}>
-                    <Download className="h-4 w-4 text-muted-foreground" />
-                    Download
-                  </a>
-                </DropdownMenuItem>
-              )}
+              <DropdownMenuItem onClick={downloadSvgQr} className="gap-2 cursor-pointer">
+                <Download className="h-4 w-4 text-muted-foreground" />
+                Download PNG
+              </DropdownMenuItem>
               {qr.event && (
                 <DropdownMenuItem asChild className="gap-2 cursor-pointer">
                   <Link href={`/event/${qr.event.slug}`} target="_blank">
@@ -198,36 +233,24 @@ function QRCodeCard({ qr, onDelete }: { qr: QRCodeWithEvent; onDelete: (id: stri
                   </Link>
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => onDelete(qr.id)} className="text-destructive gap-2 cursor-pointer">
-                <Trash2 className="h-4 w-4" />
-                Delete
+              <DropdownMenuItem onClick={() => onDelete(qr.id)} className="gap-2 text-destructive cursor-pointer">
+                <Trash2 className="h-4 w-4 text-destructive" />
+                Delete Code
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
-
-      <CardContent className="p-5 border-t border-border/30 bg-muted/20">
-        <div className="flex items-start justify-between gap-2">
-          <div className="space-y-1 overflow-hidden">
-            <h3 className="font-semibold text-foreground truncate">{qr.name || "QR Code"}</h3>
-            {qr.event && (
-              <Link
-                href={`/dashboard/events/${qr.event.slug}`}
-                className="text-xs text-primary font-medium hover:underline flex items-center gap-1"
-              >
-                <Camera className="h-3 w-3" />
-                {qr.event.name}
-              </Link>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border bg-background text-[10px] font-bold text-muted-foreground shadow-sm">
-            <span>{qr.scan_count || 0} scans</span>
-          </div>
+      <CardContent className="p-4 bg-slate-50/50 border-t border-slate-100">
+        <h3 className="font-semibold text-sm text-slate-900 group-hover:text-primary transition-colors">{qr.name || "QR Code"}</h3>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-xs text-slate-500 font-medium">
+            {qr.event?.name || "General Code"}
+          </p>
+          <span className="text-[10px] bg-emerald-50 text-emerald-600 font-bold px-2 py-0.5 rounded-full border border-emerald-100">
+            {qr.scan_count || 0} scans
+          </span>
         </div>
-        <p className="text-[10px] text-muted-foreground font-mono mt-3 break-all bg-background/50 border rounded p-1.5 truncate">
-          {scanUrl}
-        </p>
       </CardContent>
     </Card>
   )

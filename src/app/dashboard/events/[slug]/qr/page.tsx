@@ -167,12 +167,17 @@ function QRCodeCard({ qr, eventSlug, onDelete }: { qr: QRCode; eventSlug: string
   return (
     <Card className="overflow-hidden">
       <div className="aspect-square bg-white flex flex-col items-center justify-center p-4 relative border-b border-stone-100">
-        <div className="p-3 bg-white rounded-2xl shadow-sm border border-[#EAE5DF]">
+        <div className="p-3 bg-white rounded-2xl shadow-sm border border-[#EAE5DF] relative overflow-hidden flex items-center justify-center">
+          <img
+            src="/Logo.png"
+            alt="Snapsy Logo Background"
+            className="absolute inset-0 w-full h-full object-contain opacity-25 p-2 pointer-events-none filter saturate-150"
+          />
           <QRCodeSVG
             id={`qr-card-svg-${qr.id}`}
             value={scanUrl}
             size={160}
-            bgColor={"#ffffff"}
+            bgColor={"transparent"}
             fgColor={"#1c1a17"}
             level={"H"}
             imageSettings={{
@@ -183,6 +188,7 @@ function QRCodeCard({ qr, eventSlug, onDelete }: { qr: QRCode; eventSlug: string
               width: 36,
               excavate: true,
             }}
+            className="relative z-10"
           />
         </div>
 
