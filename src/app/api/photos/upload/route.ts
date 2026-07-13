@@ -42,7 +42,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       const body = await request.json()
       preUploadedPath = body.storage_path ?? null
       originalFilename = body.file_name || "upload.bin"
-      mimeType = body.mime_type || "image/jpeg"
+      mimeType = body.mime_type || body.file_type || "image/jpeg"
       fileSize = body.file_size || 0
       uploaderName = body.uploader_name ?? null
       uploaderEmail = body.uploader_email ?? null
@@ -288,13 +288,14 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       .single()
 
     if (error) {
+      console.error("[photos DB insert error]", error)
       if (!preUploadedPath && finalStoragePath) {
         try { await deleteFile("PHOTOS", finalStoragePath) } catch {}
         if (thumbnailUploadPath) {
           try { await deleteFile("PHOTOS", thumbnailUploadPath) } catch {}
         }
       }
-      return fail("DB_ERROR", "Failed to save photo record", 500)
+      return fail("DB_ERROR", `Failed to save photo record: ${error.message}`, 500)
     }
 
     if (hostId) {

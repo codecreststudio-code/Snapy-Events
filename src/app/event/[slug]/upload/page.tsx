@@ -333,6 +333,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
               body: JSON.stringify({
                 storage_path: path,
                 file_name: uploadFile.file.name,
+                file_type: uploadFile.file.type,
                 mime_type: uploadFile.file.type,
                 file_size: uploadFile.file.size,
                 uploader_name: cleanName,
