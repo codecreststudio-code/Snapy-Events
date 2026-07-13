@@ -733,7 +733,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       <div className="space-y-2.5">
                         <div className="flex items-center gap-3 bg-[#FAF9F6] border border-[#F2EDE7] p-3 rounded-xl">
                           <audio
-                            src={getImageUrl(item.thumbnail)}
+                            src={item.audioUrl}
                             controls
                             preload="none"
                             className="flex-1 h-10"
