@@ -42,6 +42,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
   const getPrice = (priceInr: number, priceUsd: number) => {
     if (currency === "USD") {
+      if (priceInr === 0) return 0
       // If priceUsd is not explicitly set, calculate fallback approximation ($1 = ~₹83)
       return priceUsd > 0 ? priceUsd : Math.round(priceInr / 80) || 1
     }

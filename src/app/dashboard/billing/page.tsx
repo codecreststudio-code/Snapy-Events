@@ -280,8 +280,9 @@ function PricingCard({
 
       {/* Current Plan Indicator for existing active plan */}
       {isCurrent && (
-        <div className="absolute -top-3 left-4 rounded-full bg-slate-900 px-3 py-1 text-[8px] font-bold text-white tracking-widest uppercase shadow-md z-20">
-          CURRENT
+        <div className="absolute -top-3 left-4 rounded-full bg-emerald-600 px-3 py-1 text-[8px] font-bold text-white tracking-widest uppercase shadow-md z-20 flex items-center gap-1">
+          <Check className="h-3 w-3" />
+          YOUR ACTIVE PLAN
         </div>
       )}
 
@@ -336,18 +337,20 @@ function PricingCard({
         <button
           type="button"
           className={`w-full font-bold py-2.5 rounded-xl transition-all active:scale-[0.98] text-xs border-none ${
-            isSelected
-              ? plan.id === "free"
-                ? "bg-slate-950 text-white shadow-md"
-                : plan.id === "starter"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10"
-                : isPopular
-                ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/20"
-                : "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/20"
-              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+            isCurrent
+              ? "bg-emerald-600 text-white shadow-md cursor-default"
+              : isSelected
+                ? plan.id === "free"
+                  ? "bg-slate-950 text-white shadow-md"
+                  : plan.id === "starter"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10"
+                  : isPopular
+                  ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/20"
+                  : "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/20"
+                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
           }`}
         >
-          {isSelected ? "Selected" : `Choose ${plan.name}`}
+          {isCurrent ? "Current Active Plan" : isSelected ? "Selected" : `Choose ${plan.name}`}
         </button>
       </div>
     </motion.div>
@@ -555,12 +558,12 @@ export default function BillingPage() {
   const getActionButtonText = () => {
     if (cancelMutation.isPending) return "Processing Downgrade..."
     if (selectedPlan === "free") {
-      if (currentPlan === "free") return "Current Plan"
+      if (currentPlan === "free") return "Current Plan Active"
       return "Downgrade to Free"
     }
-    if (isActionDisabled) return "Current Plan"
-    if (selectedPlan === currentPlan) return "Update Settings & Pay"
-    return "Proceed to Payment"
+    if (isActionDisabled) return "Current Plan Active"
+    if (selectedPlan === currentPlan) return "Purchase Add-Ons"
+    return "Upgrade Plan Tier"
   }
 
   const handleActionClick = () => {
@@ -707,7 +710,7 @@ export default function BillingPage() {
                     >
                       <span>{boost.label}</span>
                       <span className="opacity-80 font-normal">
-                        {boost.price === 0 ? "₹0" : `+₹${boost.price}`}
+                        {boost.price === 0 ? `${symbol}0` : `+${symbol}${getPrice(boost.price, Math.round(boost.price / 80))}`}
                       </span>
                     </button>
                   ))}
@@ -758,7 +761,12 @@ export default function BillingPage() {
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1.5 font-light">
-            {selectedPlan !== "free" && (
+            {isActionDisabled ? (
+              <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                <Check className="h-3.5 w-3.5 shrink-0" />
+                Your workspace is active on the {activePlanDetails.name} plan. Select add-ons above if you wish to boost event limits.
+              </span>
+            ) : selectedPlan !== "free" && (
               <>
                 Base {symbol}{getPrice(basePrice, Math.round(basePrice / 80))}
                 {guestBoost > 0 && ` + Guest Boost ${symbol}${getPrice(guestAddOnPrice, Math.round(guestAddOnPrice / 80))}`}
