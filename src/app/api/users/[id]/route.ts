@@ -11,25 +11,12 @@ export const GET = defineRoute<unknown, unknown, { id: string }>({
   handler: async ({ params, auth }) => {
     const { id } = params
     if (id !== auth.user!.id && !auth.isAdmin) {
-      const supabase = await createClient()
-      const { data: profile } = await supabase
-        .from("users")
-        .select("organization_id")
-        .eq("id", auth.user!.id)
-        .single()
-      const { data: target } = await supabase
-        .from("users")
-        .select("organization_id")
-        .eq("id", id)
-        .single()
-      if (!profile || !target || profile.organization_id !== target.organization_id) {
-        return fail("FORBIDDEN", "Access denied", 403)
-      }
+      return fail("FORBIDDEN", "Access denied", 403)
     }
     const supabase = await createClient()
     const { data, error } = await supabase
       .from("users")
-      .select("id, email, full_name, avatar_url, role, permissions, organization_id, created_at")
+      .select("id, email, full_name, avatar_url, role, permissions, created_at")
       .eq("id", id)
       .single()
     if (error) return fail("DB_ERROR", "Failed to fetch user", 500)
@@ -66,7 +53,7 @@ export const DELETE = defineRoute<unknown, unknown, { id: string }>({
     const { id } = params
     if (id === auth.user!.id) return fail("CONFLICT", "Cannot delete yourself", 409)
     const supabase = await createClient()
-    const { error } = await supabase.from("users").update({ organization_id: null, role: "viewer" }).eq("id", id)
+    const { error } = await supabase.from("users").update({ role: "viewer" }).eq("id", id)
     if (error) return fail("DB_ERROR", "Failed to delete user", 400)
     return ok({ removed: true })
   },

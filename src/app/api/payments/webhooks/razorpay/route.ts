@@ -39,26 +39,23 @@ export async function POST(request: NextRequest) {
           subscription_id?: string
           notes?: { 
             user_id?: string
-            organization_id?: string
             plan_id?: string
             guest_boost?: string
             shots_boost?: string
           }
         }
         
-        if (p.notes?.user_id || p.notes?.organization_id) {
-          const targetId = p.notes.user_id || p.notes.organization_id
+        const userId = p.notes?.user_id
+        if (userId) {
           const { data: userRow } = await supabase
             .from("users")
-            .select("id, organization_id, email, full_name, preferences")
-            .eq("id", targetId)
+            .select("id, email, full_name, preferences")
+            .eq("id", userId)
             .maybeSingle()
-
-          const orgId = userRow?.organization_id || targetId
 
           // First, create transaction record for this payment
           await supabase.from("transactions").insert({
-            organization_id: orgId,
+            user_id: userId,
             razorpay_payment_id: p.id,
             amount: p.amount,
             currency: p.currency,
@@ -68,11 +65,11 @@ export async function POST(request: NextRequest) {
           })
 
           // If this is a subscription payment, update/create subscription
-          if (p.notes.plan_id) {
+          if (p.notes?.plan_id) {
             const { data: existingSub } = await supabase
               .from("subscriptions")
               .select("id")
-              .eq("organization_id", orgId)
+              .eq("user_id", userId)
               .in("status", ["active", "past_due"])
               .limit(1)
               .maybeSingle()
@@ -92,7 +89,7 @@ export async function POST(request: NextRequest) {
               await supabase
                 .from("subscriptions")
                 .insert({
-                  organization_id: orgId,
+                  user_id: userId,
                   plan_id: p.notes.plan_id,
                   status: "active",
                   razorpay_subscription_id: p.subscription_id || null,
@@ -100,12 +97,6 @@ export async function POST(request: NextRequest) {
                   current_period_end: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
                 })
             }
-
-            // Update organization plan
-            await supabase
-              .from("organizations")
-              .update({ plan: p.notes.plan_id })
-              .eq("id", orgId)
 
             // Update user boosts in preferences if userRow exists
             if (userRow) {
@@ -153,22 +144,13 @@ export async function POST(request: NextRequest) {
           id: string
           error_code?: string
           error_description?: string
-          notes?: { user_id?: string; organization_id?: string }
+          notes?: { user_id?: string }
         }
         
-        if (p.notes?.user_id || p.notes?.organization_id) {
-          const targetId = p.notes.user_id || p.notes.organization_id
-          const { data: userRow } = await supabase
-            .from("users")
-            .select("organization_id")
-            .eq("id", targetId)
-            .maybeSingle()
-
-          const orgId = userRow?.organization_id || targetId
-
-          // Create transaction record for failed payment
+        const userId = p.notes?.user_id
+        if (userId) {
           await supabase.from("transactions").insert({
-            organization_id: orgId,
+            user_id: userId,
             razorpay_payment_id: p.id,
             status: "failed",
             error_code: p.error_code,

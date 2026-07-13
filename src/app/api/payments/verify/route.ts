@@ -39,15 +39,14 @@ export const POST = defineRoute({
     }
 
     const supabase = await createServiceClient()
+    const userId = auth.user!.id
 
-    // 2. Fetch user & organization
+    // 2. Fetch user preferences
     const { data: userRecord } = await supabase
       .from("users")
-      .select("id, organization_id, preferences")
-      .eq("id", auth.user!.id)
+      .select("id, preferences")
+      .eq("id", userId)
       .maybeSingle()
-
-    const orgId = userRecord?.organization_id || auth.user!.id
 
     // Update user boosts in preferences
     if (userRecord) {
@@ -63,59 +62,47 @@ export const POST = defineRoute({
         .eq("id", userRecord.id)
     }
 
-    // 3. Update Organization Plan
-    if (orgId) {
-      await supabase
-        .from("organizations")
-        .update({ plan: plan_id })
-        .eq("id", orgId)
-    }
-
-    // 4. Create or update Subscription
+    // 3. Create or update Subscription
     let subscriptionId: string | null = null
-    if (orgId) {
-      const { data: existingSub } = await supabase
-        .from("subscriptions")
-        .select("id")
-        .eq("organization_id", orgId)
-        .in("status", ["active", "past_due"])
-        .limit(1)
-        .maybeSingle()
+    const { data: existingSub } = await supabase
+      .from("subscriptions")
+      .select("id")
+      .eq("user_id", userId)
+      .in("status", ["active", "past_due"])
+      .limit(1)
+      .maybeSingle()
 
-      if (existingSub) {
-        const { data: updated } = await supabase
-          .from("subscriptions")
-          .update({
-            user_id: auth.user!.id,
-            plan_id: plan_id,
-            status: "active",
-            razorpay_subscription_id: razorpay_payment_id,
-            current_period_start: new Date().toISOString(),
-            current_period_end: null,
-          })
-          .eq("id", existingSub.id)
-          .select("id")
-          .single()
-        subscriptionId = updated?.id ?? existingSub.id
-      } else {
-        const { data: inserted } = await supabase
-          .from("subscriptions")
-          .insert({
-            user_id: auth.user!.id,
-            organization_id: orgId,
-            plan_id: plan_id,
-            status: "active",
-            razorpay_subscription_id: razorpay_payment_id,
-            current_period_start: new Date().toISOString(),
-            current_period_end: null,
-          })
-          .select("id")
-          .single()
-        subscriptionId = inserted?.id ?? null
-      }
+    if (existingSub) {
+      const { data: updated } = await supabase
+        .from("subscriptions")
+        .update({
+          plan_id: plan_id,
+          status: "active",
+          razorpay_subscription_id: razorpay_payment_id,
+          current_period_start: new Date().toISOString(),
+          current_period_end: null,
+        })
+        .eq("id", existingSub.id)
+        .select("id")
+        .single()
+      subscriptionId = updated?.id ?? existingSub.id
+    } else {
+      const { data: inserted } = await supabase
+        .from("subscriptions")
+        .insert({
+          user_id: userId,
+          plan_id: plan_id,
+          status: "active",
+          razorpay_subscription_id: razorpay_payment_id,
+          current_period_start: new Date().toISOString(),
+          current_period_end: null,
+        })
+        .select("id")
+        .single()
+      subscriptionId = inserted?.id ?? null
     }
 
-    // 5. Calculate total paid amount
+    // 4. Calculate total paid amount
     let price = 0
     try {
       price = await calculatePrice(supabase, plan_id, guest_boost, shots_boost, coupon_code, currency)
@@ -124,41 +111,37 @@ export const POST = defineRoute({
     }
     const amountInPaise = price * 100
 
-    // 6. Create Invoice
+    // 5. Create Invoice
     let invoiceId: string | null = null
-    if (orgId) {
-      const invoiceNumber = `INV-${Date.now().toString().slice(-6)}-${auth.user!.id.slice(0, 4)}`
-      const { data: invoice } = await supabase
-        .from("invoices")
-        .insert({
-          organization_id: orgId,
-          subscription_id: subscriptionId,
-          invoice_number: invoiceNumber,
-          status: "paid",
-          currency: "INR",
-          subtotal: amountInPaise,
-          tax: 0,
-          total: amountInPaise,
-          paid_at: new Date().toISOString(),
-        })
-        .select("id")
-        .single()
-      invoiceId = invoice?.id ?? null
-    }
-
-    // 7. Record Transaction
-    if (orgId) {
-      await supabase.from("transactions").insert({
-        organization_id: orgId,
-        invoice_id: invoiceId,
-        razorpay_payment_id: razorpay_payment_id,
-        razorpay_order_id: razorpay_order_id,
-        amount: amountInPaise,
+    const invoiceNumber = `INV-${Date.now().toString().slice(-6)}-${userId.slice(0, 4)}`
+    const { data: invoice } = await supabase
+      .from("invoices")
+      .insert({
+        user_id: userId,
+        subscription_id: subscriptionId,
+        invoice_number: invoiceNumber,
+        status: "paid",
         currency: "INR",
-        status: "success",
-        payment_method: "razorpay",
+        subtotal: amountInPaise,
+        tax: 0,
+        total: amountInPaise,
+        paid_at: new Date().toISOString(),
       })
-    }
+      .select("id")
+      .single()
+    invoiceId = invoice?.id ?? null
+
+    // 6. Record Transaction
+    await supabase.from("transactions").insert({
+      user_id: userId,
+      invoice_id: invoiceId,
+      razorpay_payment_id: razorpay_payment_id,
+      razorpay_order_id: razorpay_order_id,
+      amount: amountInPaise,
+      currency: "INR",
+      status: "success",
+      payment_method: "razorpay",
+    })
 
     return ok({ success: true, plan: plan_id })
   },
