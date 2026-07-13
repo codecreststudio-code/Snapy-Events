@@ -112,9 +112,9 @@ export function defineRoute<TBody = unknown, TQuery = unknown, C = unknown>(opts
         const res = await opts.handler({ body, query, params: resolvedParams, request, auth })
 
         // Audit + analytics (fire-and-forget)
-        if (opts.audit && auth.user) {
+        if (opts.audit) {
           void logAudit({
-            user_id: auth.user.id,
+            user_id: auth.user?.id ?? null,
             action: opts.audit,
             resource_type: "route",
             resource_id: null,

@@ -86,23 +86,18 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
   useEffect(() => {
     async function fetchGuestQuota() {
       if (!event?.id || !guestName.trim()) return
-      const supabase = createClient()
       try {
+        const params = new URLSearchParams({ slug })
         const identifier = guestEmail.trim().toLowerCase() || guestName.trim().toLowerCase()
-        const { data: uploads } = await supabase
-          .from("photos")
-          .select("uploader_email, uploader_name")
-          .eq("event_id", event.id)
+        params.set("guest_email", identifier)
 
-        const guestCount = (uploads || []).filter(
-          (p) => (p.uploader_email?.toLowerCase() === identifier || p.uploader_name?.toLowerCase() === identifier)
-        ).length
-
-        const infoRes = await fetch(`/api/events/public-info?slug=${encodeURIComponent(slug)}`)
+        const infoRes = await fetch(`/api/events/public-info?${params.toString()}`)
         let maxAllowed = 25
+        let guestCount = 0
         if (infoRes.ok) {
           const { data: infoData } = await infoRes.json()
           if (infoData?.max_shots) maxAllowed = infoData.max_shots
+          if (typeof infoData?.current_shots === "number") guestCount = infoData.current_shots
         }
 
         setQuotaInfo({ uploaded: guestCount, max: maxAllowed })
@@ -198,53 +193,42 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     }
 
     setIsUploading(true)
-    const supabase = createClient()
 
     try {
       // 1. Quota checks via secure service route
       let maxGuests = 100
       let maxShots = 25
 
-      const infoRes = await fetch(`/api/events/public-info?slug=${encodeURIComponent(slug)}`)
+      const infoParams = new URLSearchParams({ slug })
+      if (cleanEmail) infoParams.set("guest_email", cleanEmail)
+      if (cleanName) infoParams.set("guest_name", cleanName)
+
+      const infoRes = await fetch(`/api/events/public-info?${infoParams.toString()}`)
       if (infoRes.ok) {
         const { data: infoData } = await infoRes.json()
         if (infoData?.max_guests) maxGuests = infoData.max_guests
         if (infoData?.max_shots) maxShots = infoData.max_shots
-      }
 
-      // Fetch uploads list to calculate current usage
-      const { data: currentUploads, error: uploadsErr } = await supabase
-        .from("photos")
-        .select("uploader_email, uploader_name")
-        .eq("event_id", event.id)
+        const currentGuests = infoData?.current_guests ?? 0
+        const currentShots = infoData?.current_shots ?? 0
+        const identifier = (cleanEmail || cleanName.toLowerCase()).toLowerCase()
 
-      if (uploadsErr) throw uploadsErr
+        // Check if current guest is new (we build a virtual set server-side)
+        const isNewGuest = currentShots === 0
 
-      const uniqueGuests = new Set(
-        (currentUploads || [])
-          .map((p) => p.uploader_email?.toLowerCase() || p.uploader_name?.toLowerCase())
-          .filter(Boolean)
-      )
+        // A: Guest limit check
+        if (isNewGuest && currentGuests >= maxGuests) {
+          setLimitError(`This event has reached its limit of ${maxGuests} guests. The host needs to upgrade their plan to accept more guest uploads.`)
+          setIsUploading(false)
+          return
+        }
 
-      const guestIdentifier = cleanEmail || cleanName.toLowerCase()
-      const isNewGuest = !uniqueGuests.has(guestIdentifier)
-
-      // A: Guest limit check
-      if (isNewGuest && uniqueGuests.size >= maxGuests) {
-        setLimitError(`This event has reached its limit of ${maxGuests} guests. The host needs to upgrade their plan to accept more guest uploads.`)
-        setIsUploading(false)
-        return
-      }
-
-      // B: Shots limit check
-      const currentGuestShotsCount = (currentUploads || []).filter(
-        (p) => (p.uploader_email?.toLowerCase() === guestIdentifier || p.uploader_name?.toLowerCase() === guestIdentifier)
-      ).length
-
-      if (currentGuestShotsCount + files.length > maxShots) {
-        setLimitError(`You can upload at most ${maxShots} photos. You have already uploaded ${currentGuestShotsCount} photos, and are trying to upload ${files.length} more.`)
-        setIsUploading(false)
-        return
+        // B: Shots limit check
+        if (currentShots + files.length > maxShots) {
+          setLimitError(`You can upload at most ${maxShots} photos. You have already uploaded ${currentShots} photos, and are trying to upload ${files.length} more.`)
+          setIsUploading(false)
+          return
+        }
       }
 
       // 2. Perform uploads via secure API route (using direct signed upload for large files/videos)
