@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
               plan_id: "free",
               status: "active",
               current_period_start: new Date().toISOString(),
-              current_period_end: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
+              current_period_end: null,
             })
         }
       }

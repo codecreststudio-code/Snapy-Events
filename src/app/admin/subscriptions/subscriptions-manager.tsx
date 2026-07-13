@@ -176,7 +176,7 @@ export function SubscriptionsManager() {
                         {sub.cancel_at_period_end && <span className="ml-1 text-[9px] font-bold text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-100">Cancels at end</span>}
                       </td>
                       <td className="p-4 text-slate-400">
-                        {sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                        {sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "Per Event"}
                       </td>
                       <td className="p-4 text-right">
                         <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>

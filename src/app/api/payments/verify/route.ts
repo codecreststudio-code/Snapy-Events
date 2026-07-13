@@ -90,7 +90,7 @@ export const POST = defineRoute({
             status: "active",
             razorpay_subscription_id: razorpay_payment_id,
             current_period_start: new Date().toISOString(),
-            current_period_end: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
+            current_period_end: null,
           })
           .eq("id", existingSub.id)
           .select("id")
@@ -105,7 +105,7 @@ export const POST = defineRoute({
             status: "active",
             razorpay_subscription_id: razorpay_payment_id,
             current_period_start: new Date().toISOString(),
-            current_period_end: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
+            current_period_end: null,
           })
           .select("id")
           .single()

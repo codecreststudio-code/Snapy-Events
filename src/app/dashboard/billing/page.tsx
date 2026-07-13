@@ -619,22 +619,16 @@ export default function BillingPage() {
           <CardContent className="p-6 space-y-4">
             <div className="grid gap-6 md:grid-cols-3">
               <div>
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Plan</p>
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Plan Tier</p>
                 <p className="text-lg font-bold text-slate-800 capitalize mt-1">{subscription.plan_id}</p>
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Current Period</p>
-                <p className="text-sm font-medium text-slate-700 mt-1">
-                  {subscription.current_period_start
-                    ? `${formatDate(subscription.current_period_start)} - ${formatDate(subscription.current_period_end!)}`
-                    : "—"}
-                </p>
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Billing Model</p>
+                <p className="text-sm font-medium text-slate-700 mt-1">Per Event (Pay-per-Event)</p>
               </div>
               <div>
                 <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Next Billing Date</p>
-                <p className="text-sm font-medium text-slate-700 mt-1">
-                  {subscription.current_period_end ? formatDate(subscription.current_period_end) : "—"}
-                </p>
+                <p className="text-sm font-medium text-slate-700 mt-1">N/A (No Recurring Subscription)</p>
               </div>
             </div>
             
