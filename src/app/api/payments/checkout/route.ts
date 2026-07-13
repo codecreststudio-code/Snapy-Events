@@ -128,8 +128,12 @@ export const POST = defineRoute({
         total_price: price,
       })
     } catch (err: any) {
-      const msg = err.error?.description || err.description || err.message || JSON.stringify(err)
-      return fail("PAYMENT_ERROR", `Failed to create payment order: ${msg}`, 500)
+      const rawMsg = err.error?.description || err.description || err.message || JSON.stringify(err)
+      let userMsg = rawMsg
+      if (typeof rawMsg === "string" && rawMsg.toLowerCase().includes("authentication failed")) {
+        userMsg = "Razorpay API credentials invalid. Please check RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your Vercel project environment settings."
+      }
+      return fail("PAYMENT_ERROR", `Failed to create payment order: ${userMsg}`, 500)
     }
   },
 }).POST
