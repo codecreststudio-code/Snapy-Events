@@ -30,9 +30,9 @@ async function getEvent(slug: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, slug, settings, host_id, end_date, host:users(plan, preferences)")
+    .select("id, name, slug, settings, host_id, end_date, status, host:users(preferences)")
     .eq("slug", slug)
-    .eq("status", "published")
+    .neq("status", "archived")
     .single()
   if (error) throw error
   return data
@@ -169,7 +169,20 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
     try {
       // 1. Quota checks
-      const userPlan = (event.host as any)?.plan || "free"
+      let userPlan = "free"
+      if (event.host_id) {
+        const { data: u } = await supabase.from("users").select("organization_id").eq("id", event.host_id).maybeSingle()
+        if (u?.organization_id) {
+          const { data: sub } = await supabase
+            .from("subscriptions")
+            .select("plan_id")
+            .eq("organization_id", u.organization_id)
+            .eq("status", "active")
+            .limit(1)
+            .maybeSingle()
+          if (sub?.plan_id) userPlan = sub.plan_id
+        }
+      }
       const hostPreferences = (event.host as any)?.preferences || {}
       
       const { data: planData } = await supabase.from("plans").select("limits").eq("id", userPlan).single()
