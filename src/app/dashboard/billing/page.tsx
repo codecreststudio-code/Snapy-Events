@@ -523,8 +523,11 @@ export default function BillingPage() {
 
   const activePlanDetails = plansList.find((p) => p.id === selectedPlan) || plansList[0]
   
-  // Calculate price dynamically
-  const basePrice = activePlanDetails?.price || 0
+  // Calculate price dynamically — if plan is already active, base price is 0
+  const isSamePlan = selectedPlan === currentPlan
+  const basePrice = isSamePlan ? 0 : (activePlanDetails?.price || 0)
+  const basePriceUsd = isSamePlan ? 0 : (activePlanDetails?.priceUsd || Math.round((activePlanDetails?.price || 0) / 80))
+  
   const guestAddOnPrice = guestBoostsList.find((b) => b.value === guestBoost)?.price || 0
   const shotAddOnPrice = shotBoostsList.find((b) => b.value === shotBoost)?.price || 0
   const totalPrice = basePrice + guestAddOnPrice + shotAddOnPrice
@@ -766,11 +769,21 @@ export default function BillingPage() {
                 <Check className="h-3.5 w-3.5 shrink-0" />
                 Your workspace is active on the {activePlanDetails.name} plan. Select add-ons above if you wish to boost event limits.
               </span>
-            ) : selectedPlan !== "free" && (
+            ) : (
               <>
-                Base {symbol}{getPrice(basePrice, Math.round(basePrice / 80))}
-                {guestBoost > 0 && ` + Guest Boost ${symbol}${getPrice(guestAddOnPrice, Math.round(guestAddOnPrice / 80))}`}
-                {shotBoost > 0 && ` + Shots Boost ${symbol}${getPrice(shotAddOnPrice, Math.round(shotAddOnPrice / 80))}`}
+                {isSamePlan ? (
+                  <span className="text-slate-600 font-medium">
+                    {activePlanDetails.name} Plan Active ({symbol}0 base)
+                    {guestBoost > 0 && ` + Guest Boost ${symbol}${getPrice(guestAddOnPrice, Math.round(guestAddOnPrice / 80))}`}
+                    {shotBoost > 0 && ` + Shots Boost ${symbol}${getPrice(shotAddOnPrice, Math.round(shotAddOnPrice / 80))}`}
+                  </span>
+                ) : selectedPlan !== "free" && (
+                  <>
+                    Base {symbol}{getPrice(basePrice, Math.round(basePrice / 80))}
+                    {guestBoost > 0 && ` + Guest Boost ${symbol}${getPrice(guestAddOnPrice, Math.round(guestAddOnPrice / 80))}`}
+                    {shotBoost > 0 && ` + Shots Boost ${symbol}${getPrice(shotAddOnPrice, Math.round(shotAddOnPrice / 80))}`}
+                  </>
+                )}
               </>
             )}
           </p>

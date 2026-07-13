@@ -19,32 +19,55 @@ export async function calculatePrice(
   guestBoost: number,
   shotsBoost: number,
   couponCode?: string,
-  currency: "INR" | "USD" = "INR"
+  currency: "INR" | "USD" = "INR",
+  userId?: string
 ) {
   let price = 0
-  const { data: planRecord } = await supabase
-    .from("plans")
-    .select("price_inr, price_usd")
-    .eq("id", planId)
-    .single()
 
-  if (planRecord) {
-    if (currency === "USD") {
-      price = planRecord.price_usd > 0 ? planRecord.price_usd : Math.round(planRecord.price_inr / 80) || 1
-    } else {
-      price = planRecord.price_inr
+  // If user already owns this plan tier and is purchasing add-ons, base plan price is $0
+  let isCurrentPlanActive = false
+  if (userId) {
+    const { data: userRec } = await supabase
+      .from("subscriptions")
+      .select("plan_id")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle()
+
+    if (userRec?.plan_id === planId && (guestBoost > 0 || shotsBoost > 0)) {
+      isCurrentPlanActive = true
     }
-  } else {
-    throw new Error("Plan not found")
+  }
+
+  if (!isCurrentPlanActive) {
+    const { data: planRecord } = await supabase
+      .from("plans")
+      .select("price_inr, price_usd")
+      .eq("id", planId)
+      .single()
+
+    if (planRecord) {
+      if (currency === "USD") {
+        price = planRecord.price_usd > 0 ? planRecord.price_usd : Math.round(planRecord.price_inr / 80) || 1
+      } else {
+        price = planRecord.price_inr
+      }
+    } else {
+      throw new Error("Plan not found")
+    }
   }
 
   // Calculate guest and shot add-ons
-  const guestAddonPriceInr = DEFAULT_GUEST_BOOSTS.find(b => b.value === guestBoost)?.price || 0
-  const shotAddonPriceInr = DEFAULT_SHOT_BOOSTS.find(b => b.value === shotsBoost)?.price || 0
-  
-  const guestAddonPrice = currency === "USD" ? (Math.round(guestAddonPriceInr / 80) || 0) : guestAddonPriceInr
-  const shotAddonPrice = currency === "USD" ? (Math.round(shotAddonPriceInr / 80) || 0) : shotAddonPriceInr
-  
+  const guestItem = DEFAULT_GUEST_BOOSTS.find(b => b.value === guestBoost)
+  const shotItem = DEFAULT_SHOT_BOOSTS.find(b => b.value === shotsBoost)
+
+  const guestAddonPriceInr = guestItem?.price || (guestBoost > 0 ? Math.round(guestBoost * 19.9) : 0)
+  const shotAddonPriceInr = shotItem?.price || (shotsBoost > 0 ? Math.round(shotsBoost * 19.9) : 0)
+
+  const guestAddonPrice = currency === "USD" ? (Math.round(guestAddonPriceInr / 80) || (guestBoost > 0 ? 3 : 0)) : guestAddonPriceInr
+  const shotAddonPrice = currency === "USD" ? (Math.round(shotAddonPriceInr / 80) || (shotsBoost > 0 ? 2 : 0)) : shotAddonPriceInr
+
   price = price + guestAddonPrice + shotAddonPrice
 
   // Apply Coupon if exists
@@ -80,7 +103,7 @@ export const POST = defineRoute({
 
     let price = 0
     try {
-      price = await calculatePrice(supabase, body.plan_id, body.guest_boost, body.shots_boost, body.coupon_code, targetCurrency)
+      price = await calculatePrice(supabase, body.plan_id, body.guest_boost, body.shots_boost, body.coupon_code, targetCurrency, auth.user!.id)
     } catch (err: any) {
       return fail("BAD_REQUEST", err.message, 400)
     }

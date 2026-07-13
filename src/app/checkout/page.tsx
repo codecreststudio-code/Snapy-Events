@@ -69,14 +69,39 @@ function CheckoutForm() {
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponError, setCouponError] = useState("")
 
+  const [userCurrentPlan, setUserCurrentPlan] = useState<string | null>(null)
+
+  // Fetch active subscription for current user
+  useEffect(() => {
+    const checkSub = async () => {
+      if (!user) return
+      const { createClient } = await import("@/lib/supabase/client")
+      const supabase = createClient()
+      const { data } = await supabase
+        .from("subscriptions")
+        .select("plan_id")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle()
+      if (data?.plan_id) {
+        setUserCurrentPlan(data.plan_id)
+      }
+    }
+    checkSub()
+  }, [user])
+
+  // Check if user is already on this active plan
+  const isCurrentPlanActive = userCurrentPlan === plan
+
   // Dynamic Multi-Currency Calculations
-  const rawBaseInr = planPrices[plan] || PLAN_DEFAULT_PRICES[plan] || 0
-  const rawBaseUsd = planUsdPrices[plan] || PLAN_DEFAULT_USD[plan] || Math.round(rawBaseInr / 80) || 1
+  const rawBaseInr = isCurrentPlanActive ? 0 : (planPrices[plan] || PLAN_DEFAULT_PRICES[plan] || 0)
+  const rawBaseUsd = isCurrentPlanActive ? 0 : (planUsdPrices[plan] || PLAN_DEFAULT_USD[plan] || Math.round((planPrices[plan] || 0) / 80) || 1)
   
-  const rawGuestInr = guestPrices[guests] || 0
+  const rawGuestInr = guestPrices[guests] || (guests > 0 ? Math.round(guests * 19.9) : 0)
   const rawGuestUsd = Math.round(rawGuestInr / 80) || (guests > 0 ? 3 : 0)
   
-  const rawShotInr = shotPrices[shots] || 0
+  const rawShotInr = shotPrices[shots] || (shots > 0 ? Math.round(shots * 19.9) : 0)
   const rawShotUsd = Math.round(rawShotInr / 80) || (shots > 0 ? 2 : 0)
 
   const basePrice = getPrice(rawBaseInr, rawBaseUsd)
@@ -308,10 +333,14 @@ function CheckoutForm() {
                 {/* Plan Base */}
                 <div className="flex items-center justify-between py-3 border-b border-slate-100">
                   <div className="space-y-0.5">
-                    <span className="font-semibold text-slate-800">{PLAN_NAMES[plan]}</span>
-                    <p className="text-xs text-slate-400">Base event plan features</p>
+                    <span className="font-semibold text-slate-800">{PLAN_NAMES[plan] || plan}</span>
+                    <p className="text-xs text-slate-400">
+                      {isCurrentPlanActive ? "Active workspace tier (Base price waived)" : "Base event plan features"}
+                    </p>
                   </div>
-                  <span className="font-bold text-slate-800">{symbol}{basePrice}</span>
+                  <span className="font-bold text-slate-800">
+                    {isCurrentPlanActive ? "Included ($0)" : `${symbol}${basePrice}`}
+                  </span>
                 </div>
 
                 {/* Guest Boost */}
