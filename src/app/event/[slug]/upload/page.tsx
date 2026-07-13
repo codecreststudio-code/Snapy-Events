@@ -238,7 +238,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         return
       }
 
-      // 2. Perform uploads via secure API route
+      // 2. Perform uploads via secure API route (using direct signed upload for large files/videos)
       for (const uploadFile of files) {
         if (uploadFile.status === "done") continue
 
@@ -249,22 +249,74 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
             )
           )
 
-          const formData = new FormData()
-          formData.append("file", uploadFile.file)
-          formData.append("uploader_name", cleanName)
-          if (cleanEmail) formData.append("uploader_email", cleanEmail)
-          formData.append("is_approved", String(settings.auto_approve_photos))
+          let res: Response
 
-          const res = await fetch(`/api/photos/upload?gallery_id=${selectedGallery}`, {
-            method: "POST",
-            body: formData,
-          })
+          // Use direct pre-signed URL upload for files > 3.5MB or non-image media to bypass Vercel serverless limits
+          if (uploadFile.file.size > 3.5 * 1024 * 1024 || !uploadFile.file.type.startsWith("image/")) {
+            const urlRes = await fetch("/api/photos/upload-url", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                gallery_id: selectedGallery,
+                file_name: uploadFile.file.name,
+                file_type: uploadFile.file.type,
+                file_size: uploadFile.file.size,
+                uploader_name: cleanName,
+                uploader_email: cleanEmail,
+              }),
+            })
+
+            if (!urlRes.ok) {
+              const errData = await urlRes.json()
+              throw new Error(errData?.error || "Failed to obtain signed upload URL")
+            }
+
+            const { data: signedData } = await urlRes.json()
+            const { signedUrl, path } = signedData
+
+            const directUploadRes = await fetch(signedUrl, {
+              method: "PUT",
+              headers: { "Content-Type": uploadFile.file.type },
+              body: uploadFile.file,
+            })
+
+            if (!directUploadRes.ok) {
+              throw new Error("Direct storage upload failed")
+            }
+
+            // Register photo record in database with pre-uploaded storage path
+            res = await fetch(`/api/photos/upload?gallery_id=${selectedGallery}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                storage_path: path,
+                file_name: uploadFile.file.name,
+                mime_type: uploadFile.file.type,
+                file_size: uploadFile.file.size,
+                uploader_name: cleanName,
+                uploader_email: cleanEmail,
+                is_approved: settings.auto_approve_photos,
+              }),
+            })
+          } else {
+            // Standard small file upload
+            const formData = new FormData()
+            formData.append("file", uploadFile.file)
+            formData.append("uploader_name", cleanName)
+            if (cleanEmail) formData.append("uploader_email", cleanEmail)
+            formData.append("is_approved", String(settings.auto_approve_photos))
+
+            res = await fetch(`/api/photos/upload?gallery_id=${selectedGallery}`, {
+              method: "POST",
+              body: formData,
+            })
+          }
 
           if (!res.ok) {
             const errData = await res.json()
             const msg = typeof errData?.error === "object"
               ? (errData.error.message || errData.error.code)
-              : (errData?.error || "Photo upload failed")
+              : (errData?.error || "Media upload failed")
             throw new Error(msg)
           }
 

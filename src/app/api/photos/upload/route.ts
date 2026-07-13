@@ -27,32 +27,60 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
   handler: async ({ request, query, auth }) => {
     const id = query.gallery_id
     const supabase = await createServiceClient()
-    const fd = await request.formData()
-    const file = fd.get("file") as File | null
-    const uploaderName = (fd.get("uploader_name") as string | null) ?? null
-    const uploaderEmail = (fd.get("uploader_email") as string | null) ?? null
-    const approvedFlag = (fd.get("is_approved") as string | null) === "true"
-    if (!file) return fail("VALIDATION_ERROR", "Missing file", 422)
+    const contentType = request.headers.get("content-type") || ""
 
-    if (file.size === 0) return fail("VALIDATION_ERROR", "File is empty", 422)
-    if (file.name.length > 255) return fail("VALIDATION_ERROR", "Filename too long", 422)
+    let preUploadedPath: string | null = null
+    let originalFilename = ""
+    let mimeType = "image/jpeg"
+    let fileSize = 0
+    let uploaderName: string | null = null
+    let uploaderEmail: string | null = null
+    let approvedFlag = true
+    let fileBuffer: Buffer | null = null
 
-    if (isDangerousExtension(file.name)) return fail("VALIDATION_ERROR", "File type not allowed", 415)
+    if (contentType.includes("application/json")) {
+      const body = await request.json()
+      preUploadedPath = body.storage_path ?? null
+      originalFilename = body.file_name || "upload.bin"
+      mimeType = body.mime_type || "image/jpeg"
+      fileSize = body.file_size || 0
+      uploaderName = body.uploader_name ?? null
+      uploaderEmail = body.uploader_email ?? null
+      approvedFlag = body.is_approved !== false
+      if (!preUploadedPath) return fail("VALIDATION_ERROR", "Missing storage_path in JSON payload", 422)
+    } else {
+      const fd = await request.formData()
+      const file = fd.get("file") as File | null
+      uploaderName = (fd.get("uploader_name") as string | null) ?? null
+      uploaderEmail = (fd.get("uploader_email") as string | null) ?? null
+      approvedFlag = (fd.get("is_approved") as string | null) === "true"
+      if (!file) return fail("VALIDATION_ERROR", "Missing file", 422)
+      if (file.size === 0) return fail("VALIDATION_ERROR", "File is empty", 422)
+      if (file.name.length > 255) return fail("VALIDATION_ERROR", "Filename too long", 422)
 
-    const category = getMimeCategory(file.type)
+      originalFilename = file.name
+      mimeType = file.type
+      fileSize = file.size
+
+      if (isDangerousExtension(originalFilename)) return fail("VALIDATION_ERROR", "File type not allowed", 415)
+
+      fileBuffer = Buffer.from(await file.arrayBuffer())
+
+      if (isSvgContent(new Uint8Array(fileBuffer))) {
+        return fail("VALIDATION_ERROR", "SVG files are not allowed", 415)
+      }
+
+      const validation = validateFile(new Uint8Array(fileBuffer), originalFilename, mimeType, fileSize)
+      if (!validation.valid) return fail("VALIDATION_ERROR", validation.error!, 415)
+    }
+
+    if (isDangerousExtension(originalFilename)) return fail("VALIDATION_ERROR", "File type not allowed", 415)
+
+    const category = getMimeCategory(mimeType)
     if (!category) return fail("VALIDATION_ERROR", "Unsupported file type", 415)
 
     const maxAllowedSize = MAX_FILE_SIZES[category]
-    if (file.size > maxAllowedSize) return fail("VALIDATION_ERROR", "File too large", 413)
-
-    const fileBuffer = Buffer.from(await file.arrayBuffer())
-
-    if (isSvgContent(new Uint8Array(fileBuffer))) {
-      return fail("VALIDATION_ERROR", "SVG files are not allowed", 415)
-    }
-
-    const validation = validateFile(new Uint8Array(fileBuffer), file.name, file.type, file.size)
-    if (!validation.valid) return fail("VALIDATION_ERROR", validation.error!, 415)
+    if (fileSize > maxAllowedSize) return fail("VALIDATION_ERROR", "File too large", 413)
 
     const { data: gallery } = await supabase
       .from("galleries")
@@ -145,7 +173,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const currentPhotoCount = storageUsage?.photo_count || 0
     const effectiveOrgId = orgId || "anon"
 
-    if (currentStorageBytes + BigInt(fileBuffer.length) > BigInt(maxStorageBytes)) {
+    if (currentStorageBytes + BigInt(fileSize) > BigInt(maxStorageBytes)) {
       return fail(
         "STORAGE_QUOTA_EXCEEDED",
         `Storage quota exceeded. You are using ${Math.round(Number(currentStorageBytes) / (1024 * 1024))}MB of ${baseLimits.storage_limit_gb}GB. Please upgrade your plan.`,
@@ -181,56 +209,66 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       return fail("PLAN_LIMIT_REACHED", `You have reached your limit of ${maxShots} uploads for this event.`, 403)
     }
 
-    let uploadBuffer: Buffer = fileBuffer
-    let uploadMime = file.type
+    let finalStoragePath = preUploadedPath
+    let uploadMime = mimeType
+    let uploadSize = fileSize
     let imageWidth: number | null = null
     let imageHeight: number | null = null
     let thumbnailUploadPath: string | null = null
-    let thumbnailBuffer: Buffer | null = null
 
-    if (category === "PHOTO") {
-      try {
-        const dimCheck = await validateImageDimensions(fileBuffer)
-        if (!dimCheck.valid) return fail("VALIDATION_ERROR", dimCheck.error!, 422)
+    if (!finalStoragePath) {
+      if (!fileBuffer) return fail("VALIDATION_ERROR", "Missing file buffer", 422)
 
-        imageWidth = dimCheck.width
-        imageHeight = dimCheck.height
+      let uploadBuffer: Buffer = fileBuffer
+      thumbnailUploadPath = null
+      let thumbnailBuffer: Buffer | null = null
 
-        const result = await processImage(fileBuffer, file.type, effectiveOrgId, gallery.event_id, id)
-        uploadBuffer = result.processed.buffer as Buffer
-        uploadMime = result.processed.mimeType
-        imageWidth = result.processed.width
-        imageHeight = result.processed.height
+      if (category === "PHOTO") {
+        try {
+          const dimCheck = await validateImageDimensions(fileBuffer)
+          if (!dimCheck.valid) return fail("VALIDATION_ERROR", dimCheck.error!, 422)
 
-        if (result.thumbnail) {
-          thumbnailBuffer = result.thumbnail.buffer as Buffer
-          thumbnailUploadPath = result.thumbnailUploadPath
+          imageWidth = dimCheck.width
+          imageHeight = dimCheck.height
+
+          const result = await processImage(fileBuffer, mimeType, effectiveOrgId, gallery.event_id, id)
+          uploadBuffer = result.processed.buffer as Buffer
+          uploadMime = result.processed.mimeType
+          imageWidth = result.processed.width
+          imageHeight = result.processed.height
+
+          if (result.thumbnail) {
+            thumbnailBuffer = result.thumbnail.buffer as Buffer
+            thumbnailUploadPath = result.thumbnailUploadPath
+          }
+        } catch {
+          return fail("PROCESSING_ERROR", "Failed to process image", 500)
         }
-      } catch {
-        return fail("PROCESSING_ERROR", "Failed to process image", 500)
       }
-    }
 
-    const fileId = crypto.randomUUID()
-    const ext = uploadMime === "image/jpeg" ? "jpg" : uploadMime.split("/").pop() || "bin"
-    const storagePath = `${effectiveOrgId}/${gallery.event_id}/${id}/${fileId}.${ext}`
+      const fileId = crypto.randomUUID()
+      const ext = uploadMime === "image/jpeg" ? "jpg" : uploadMime.split("/").pop() || "bin"
+      const generatedPath = `${effectiveOrgId}/${gallery.event_id}/${id}/${fileId}.${ext}`
 
-    const uploadBlob = new Blob([new Uint8Array(uploadBuffer)], { type: uploadMime })
-    const uploadOpts = { bucket: "PHOTOS" as const, path: storagePath, file: uploadBlob, contentType: uploadMime, cacheControl: "31536000" }
+      const uploadBlob = new Blob([new Uint8Array(uploadBuffer)], { type: uploadMime })
+      const uploadOpts = { bucket: "PHOTOS" as const, path: generatedPath, file: uploadBlob, contentType: uploadMime, cacheControl: "31536000" }
 
-    const up = await uploadFile(uploadOpts)
+      const up = await uploadFile(uploadOpts)
+      finalStoragePath = up.path
+      uploadSize = uploadBuffer.length
 
-    if (thumbnailBuffer && thumbnailUploadPath) {
-      try {
-        await uploadFile({
-          bucket: "PHOTOS" as const,
-          path: thumbnailUploadPath,
-          file: new Blob([new Uint8Array(thumbnailBuffer)], { type: "image/jpeg" }),
-          contentType: "image/jpeg",
-          cacheControl: "31536000",
-        })
-      } catch {
-        thumbnailUploadPath = null
+      if (thumbnailBuffer && thumbnailUploadPath) {
+        try {
+          await uploadFile({
+            bucket: "PHOTOS" as const,
+            path: thumbnailUploadPath,
+            file: new Blob([new Uint8Array(thumbnailBuffer)], { type: "image/jpeg" }),
+            contentType: "image/jpeg",
+            cacheControl: "31536000",
+          })
+        } catch {
+          thumbnailUploadPath = null
+        }
       }
     }
 
@@ -242,11 +280,11 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
         uploader_id: auth.user?.id ?? null,
         uploader_name: uploaderName,
         uploader_email: uploaderEmail,
-        storage_path: up.path,
+        storage_path: finalStoragePath,
         thumbnail_path: thumbnailUploadPath,
-        original_filename: file.name,
+        original_filename: originalFilename,
         mime_type: uploadMime,
-        file_size: uploadBuffer.length,
+        file_size: uploadSize,
         width: imageWidth,
         height: imageHeight,
         is_approved: approvedFlag,
@@ -256,9 +294,11 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       .single()
 
     if (error) {
-      try { await deleteFile("PHOTOS", up.path) } catch {}
-      if (thumbnailUploadPath) {
-        try { await deleteFile("PHOTOS", thumbnailUploadPath) } catch {}
+      if (!preUploadedPath && finalStoragePath) {
+        try { await deleteFile("PHOTOS", finalStoragePath) } catch {}
+        if (thumbnailUploadPath) {
+          try { await deleteFile("PHOTOS", thumbnailUploadPath) } catch {}
+        }
       }
       return fail("DB_ERROR", "Failed to save photo record", 500)
     }
@@ -268,7 +308,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
         await supabase.from("storage_usage").upsert(
           {
             user_id: orgId,
-            total_bytes: (currentStorageBytes + BigInt(uploadBuffer.length)).toString(),
+            total_bytes: (currentStorageBytes + BigInt(uploadSize)).toString(),
             photo_count: currentPhotoCount + 1,
           },
         )
