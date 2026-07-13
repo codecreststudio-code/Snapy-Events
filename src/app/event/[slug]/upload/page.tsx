@@ -102,9 +102,9 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         if (event.host_id) {
           const { data: sub } = await supabase
             .from("subscriptions")
-            .select("plan_id")
-            .or(`user_id.eq.${event.host_id}`)
-            .eq("status", "active")
+            .select("plan_id, status")
+            .eq("user_id", event.host_id)
+            .order("created_at", { ascending: false })
             .limit(1)
             .maybeSingle()
           if (sub?.plan_id) userPlan = sub.plan_id
@@ -215,9 +215,9 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
       if (event.host_id) {
         const { data: sub } = await supabase
           .from("subscriptions")
-          .select("plan_id")
-          .or(`user_id.eq.${event.host_id}`)
-          .eq("status", "active")
+          .select("plan_id, status")
+          .eq("user_id", event.host_id)
+          .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle()
         if (sub?.plan_id) userPlan = sub.plan_id

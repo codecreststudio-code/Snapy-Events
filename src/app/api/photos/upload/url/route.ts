@@ -44,11 +44,25 @@ export const POST = defineRoute({
 
     const { data: gallery } = await supabase
       .from("galleries")
-      .select("event_id, event:events(organization_id, host_id, settings)")
+      .select("event_id, event:events(host_id, settings)")
       .eq("id", body.gallery_id)
       .maybeSingle()
 
     if (!gallery) return fail("NOT_FOUND", "Gallery not found", 404)
+
+    const event = gallery.event as any
+    const eventObj = Array.isArray(event) ? event[0] : event
+    const hostId = eventObj?.host_id
+
+    const { data: subscription } = hostId
+      ? await supabase
+          .from("subscriptions")
+          .select("plan_id")
+          .eq("user_id", hostId)
+          .eq("status", "active")
+          .limit(1)
+          .maybeSingle()
+      : { data: null }
 
     if (category === "VIDEO") {
       const videoGate = await checkEventFeatureAccess(gallery.event_id, "video_uploads")
@@ -64,12 +78,7 @@ export const POST = defineRoute({
       }
     }
 
-    const event = gallery.event as any
-    const eventObj = Array.isArray(event) ? event[0] : event
-    const hostId = eventObj?.host_id
-    let orgId = eventObj?.organization_id
-
-    const effectiveOrgId = orgId || hostId || "anon"
+    const effectiveOrgId = hostId || "anon"
     const fileId = crypto.randomUUID()
     const ext = body.file_name.split(".").pop() || "bin"
     const storagePath = `${effectiveOrgId}/${gallery.event_id}/${body.gallery_id}/${fileId}.${ext}`

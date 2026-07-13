@@ -84,7 +84,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
 
     const { data: gallery } = await supabase
       .from("galleries")
-      .select("event_id, event:events(organization_id, host_id, settings)")
+      .select("event_id, event:events(host_id, settings)")
       .eq("id", id)
       .single()
 
@@ -107,12 +107,6 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const event = gallery.event as any
     const eventObj = Array.isArray(event) ? event[0] : event
     const hostId = eventObj?.host_id
-    let orgId = eventObj?.organization_id
-
-    if (!orgId && hostId) {
-      const { data: u } = await supabase.from("users").select("organization_id").eq("id", hostId).maybeSingle()
-      orgId = u?.organization_id
-    }
 
     const { data: hostProfile } = await supabase
       .from("users")
@@ -124,7 +118,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       ? await supabase
           .from("subscriptions")
           .select("plan_id")
-          .or(`user_id.eq.${hostId}${orgId ? `,organization_id.eq.${orgId}` : ""}`)
+          .eq("user_id", hostId)
           .eq("status", "active")
           .limit(1)
           .maybeSingle()
@@ -161,17 +155,17 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const maxShots = baseLimits.shots_limit + shotsBoost
     const maxStorageBytes = baseLimits.storage_limit_gb * 1024 * 1024 * 1024
 
-    const { data: storageUsage } = orgId
+    const { data: storageUsage } = hostId
       ? await supabase
           .from("storage_usage")
           .select("total_bytes, photo_count")
-          .eq("user_id", orgId)
+          .eq("user_id", hostId)
           .maybeSingle()
       : { data: null }
 
     const currentStorageBytes = storageUsage?.total_bytes ? BigInt(storageUsage.total_bytes) : BigInt(0)
     const currentPhotoCount = storageUsage?.photo_count || 0
-    const effectiveOrgId = orgId || "anon"
+    const effectiveOrgId = hostId || "anon"
 
     if (currentStorageBytes + BigInt(fileSize) > BigInt(maxStorageBytes)) {
       return fail(
@@ -303,11 +297,11 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       return fail("DB_ERROR", "Failed to save photo record", 500)
     }
 
-    if (orgId) {
+    if (hostId) {
       try {
         await supabase.from("storage_usage").upsert(
           {
-            user_id: orgId,
+            user_id: hostId,
             total_bytes: (currentStorageBytes + BigInt(uploadSize)).toString(),
             photo_count: currentPhotoCount + 1,
           },
