@@ -230,9 +230,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         return
       }
 
-      // 2. Perform uploads
-      const { data: { user } } = await supabase.auth.getUser()
-
+      // 2. Perform uploads via secure API route
       for (const uploadFile of files) {
         if (uploadFile.status === "done") continue
 
@@ -243,39 +241,24 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
             )
           )
 
-          const filename = `${Date.now()}-${uploadFile.file.name}`
-          const { error: uploadError } = await supabase.storage
-            .from("photos")
-            .upload(filename, uploadFile.file, {
-              contentType: uploadFile.file.type,
-              upsert: false,
-            })
+          const formData = new FormData()
+          formData.append("file", uploadFile.file)
+          formData.append("uploader_name", cleanName)
+          if (cleanEmail) formData.append("uploader_email", cleanEmail)
+          formData.append("is_approved", String(settings.auto_approve_photos))
 
-          if (uploadError) throw uploadError
+          const res = await fetch(`/api/photos/upload?gallery_id=${selectedGallery}`, {
+            method: "POST",
+            body: formData,
+          })
 
-          const photoData = {
-            gallery_id: selectedGallery,
-            event_id: event.id,
-            uploader_id: user?.id || null,
-            uploader_name: cleanName,
-            uploader_email: cleanEmail || null,
-            storage_path: filename,
-            thumbnail_path: null,
-            original_filename: uploadFile.file.name,
-            mime_type: uploadFile.file.type,
-            file_size: uploadFile.file.size,
-            width: null,
-            height: null,
-            metadata: {},
-            is_approved: settings.auto_approve_photos,
-            is_featured: false,
-            face_count: 0,
-            download_count: 0,
+          if (!res.ok) {
+            const errData = await res.json()
+            const msg = typeof errData?.error === "object"
+              ? (errData.error.message || errData.error.code)
+              : (errData?.error || "Photo upload failed")
+            throw new Error(msg)
           }
-
-          const { error: dbError } = await supabase.from("photos").insert(photoData)
-
-          if (dbError) throw dbError
 
           setFiles((prev) =>
             prev.map((f) =>
