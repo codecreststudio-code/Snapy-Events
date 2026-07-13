@@ -293,20 +293,19 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
           let res: Response
 
-          // Use direct pre-signed URL upload for files > 3.5MB or non-image media to bypass Vercel serverless limits
-          if (uploadFile.file.size > 3.5 * 1024 * 1024 || !uploadFile.file.type.startsWith("image/")) {
-            const urlRes = await fetch("/api/photos/upload/url", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                gallery_id: selectedGallery,
-                file_name: uploadFile.file.name,
-                file_type: uploadFile.file.type,
-                file_size: uploadFile.file.size,
-                uploader_name: cleanName,
-                uploader_email: cleanEmail,
-              }),
-            })
+          // Perform direct pre-signed URL upload to Supabase storage to bypass Vercel serverless limits & sharp processing crashes
+          const urlRes = await fetch("/api/photos/upload/url", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              gallery_id: selectedGallery,
+              file_name: uploadFile.file.name,
+              file_type: uploadFile.file.type,
+              file_size: uploadFile.file.size,
+              uploader_name: cleanName,
+              uploader_email: cleanEmail,
+            }),
+          })
 
             if (!urlRes.ok) {
               const errData = await urlRes.json()
@@ -341,19 +340,6 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 is_approved: settings.auto_approve_photos,
               }),
             })
-          } else {
-            // Standard small file upload
-            const formData = new FormData()
-            formData.append("file", uploadFile.file)
-            formData.append("uploader_name", cleanName)
-            if (cleanEmail) formData.append("uploader_email", cleanEmail)
-            formData.append("is_approved", String(settings.auto_approve_photos))
-
-            res = await fetch(`/api/photos/upload?gallery_id=${selectedGallery}`, {
-              method: "POST",
-              body: formData,
-            })
-          }
 
           if (!res.ok) {
             const errData = await res.json()

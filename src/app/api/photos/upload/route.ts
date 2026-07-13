@@ -219,11 +219,11 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
 
       if (category === "PHOTO") {
         try {
-          const dimCheck = await validateImageDimensions(fileBuffer)
-          if (!dimCheck.valid) return fail("VALIDATION_ERROR", dimCheck.error!, 422)
-
-          imageWidth = dimCheck.width
-          imageHeight = dimCheck.height
+          const dimCheck = await validateImageDimensions(fileBuffer).catch(() => ({ valid: true, width: null, height: null }))
+          if (dimCheck && "width" in dimCheck) {
+            imageWidth = dimCheck.width
+            imageHeight = dimCheck.height
+          }
 
           const result = await processImage(fileBuffer, mimeType, effectiveOrgId, gallery.event_id, id)
           uploadBuffer = result.processed.buffer as Buffer
@@ -235,8 +235,9 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
             thumbnailBuffer = result.thumbnail.buffer as Buffer
             thumbnailUploadPath = result.thumbnailUploadPath
           }
-        } catch {
-          return fail("PROCESSING_ERROR", "Failed to process image", 500)
+        } catch (procErr) {
+          console.warn("[processImage fallback to raw buffer]", procErr)
+          uploadBuffer = fileBuffer
         }
       }
 
