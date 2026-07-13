@@ -313,14 +313,29 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
 
     if (hostId) {
       try {
-        await supabase.from("storage_usage").upsert(
-          {
-            user_id: hostId,
+        const { data: existingUsage } = await supabase
+          .from("storage_usage")
+          .select("id")
+          .eq("user_id", hostId)
+          .maybeSingle()
+
+        if (existingUsage?.id) {
+          await supabase.from("storage_usage").update({
             total_bytes: (currentStorageBytes + BigInt(uploadSize)).toString(),
             photo_count: currentPhotoCount + 1,
-          },
-        )
-      } catch {}
+            updated_at: new Date().toISOString()
+          }).eq("id", existingUsage.id)
+        } else {
+          await supabase.from("storage_usage").insert({
+            user_id: hostId,
+            total_bytes: uploadSize.toString(),
+            photo_count: 1,
+            updated_at: new Date().toISOString()
+          })
+        }
+      } catch (err) {
+        console.warn("[storage_usage update error]", err)
+      }
     }
 
     void trackEvent({ user_id: auth.user?.id ?? undefined, event_type: "photo.uploaded", event_data: { gallery_id: id }, request })

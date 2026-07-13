@@ -98,21 +98,12 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
           (p) => (p.uploader_email?.toLowerCase() === identifier || p.uploader_name?.toLowerCase() === identifier)
         ).length
 
-        let userPlan = "free"
-        if (event.host_id) {
-          const { data: sub } = await supabase
-            .from("subscriptions")
-            .select("plan_id, status")
-            .eq("user_id", event.host_id)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .maybeSingle()
-          if (sub?.plan_id) userPlan = sub.plan_id
+        const infoRes = await fetch(`/api/events/public-info?slug=${encodeURIComponent(slug)}`)
+        let maxAllowed = 25
+        if (infoRes.ok) {
+          const { data: infoData } = await infoRes.json()
+          if (infoData?.max_shots) maxAllowed = infoData.max_shots
         }
-
-        const PLAN_DEFAULT_LIMITS: Record<string, number> = { free: 5, starter: 10, standard: 15, premium: 25 }
-        const hostPreferences = (event.host as any)?.preferences || {}
-        const maxAllowed = (PLAN_DEFAULT_LIMITS[userPlan] || 5) + (hostPreferences.shots_boost || 0)
 
         setQuotaInfo({ uploaded: guestCount, max: maxAllowed })
       } catch (err) {
@@ -121,7 +112,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     }
 
     fetchGuestQuota()
-  }, [event?.id, event?.host, guestName, guestEmail])
+  }, [event?.id, slug, guestName, guestEmail])
 
   const { data: galleries, isLoading: galleriesLoading } = useQuery({
     queryKey: ["galleries", event?.id],
@@ -210,40 +201,16 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     const supabase = createClient()
 
     try {
-      // 1. Quota checks
-      let userPlan = "free"
-      if (event.host_id) {
-        const { data: sub } = await supabase
-          .from("subscriptions")
-          .select("plan_id, status")
-          .eq("user_id", event.host_id)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle()
-        if (sub?.plan_id) userPlan = sub.plan_id
+      // 1. Quota checks via secure service route
+      let maxGuests = 100
+      let maxShots = 25
+
+      const infoRes = await fetch(`/api/events/public-info?slug=${encodeURIComponent(slug)}`)
+      if (infoRes.ok) {
+        const { data: infoData } = await infoRes.json()
+        if (infoData?.max_guests) maxGuests = infoData.max_guests
+        if (infoData?.max_shots) maxShots = infoData.max_shots
       }
-      const hostPreferences = (event.host as any)?.preferences || {}
-      
-      const { data: planData } = await supabase.from("plans").select("limits").eq("id", userPlan).maybeSingle()
-      const planLimits = planData?.limits || {}
-
-      const PLAN_DEFAULT_LIMITS: Record<string, { guests: number; shots: number }> = {
-        free: { guests: 5, shots: 5 },
-        starter: { guests: 10, shots: 10 },
-        standard: { guests: 50, shots: 15 },
-        premium: { guests: 100, shots: 25 },
-      }
-
-      const fallback = PLAN_DEFAULT_LIMITS[userPlan] || PLAN_DEFAULT_LIMITS.free
-      
-      const guestBoost = hostPreferences.guest_boost || 0
-      const shotsBoost = hostPreferences.shots_boost || 0
-
-      const baseGuestLimit = planLimits.guests_limit ?? planLimits.guest_limit ?? fallback.guests
-      const baseShotLimit = planLimits.shots_limit ?? planLimits.shot_limit ?? fallback.shots
-
-      const maxGuests = baseGuestLimit + guestBoost
-      const maxShots = baseShotLimit + shotsBoost
 
       // Fetch uploads list to calculate current usage
       const { data: currentUploads, error: uploadsErr } = await supabase
