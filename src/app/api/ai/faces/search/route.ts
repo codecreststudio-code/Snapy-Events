@@ -6,14 +6,15 @@ import { detectFaces, searchByEmbedding } from "@/lib/integrations/face"
 import { trackEvent } from "@/lib/analytics/track"
 import { API_RATE_LIMITS } from "@/lib/constants"
 
+import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
+
 export const POST = defineRoute({
   method: "POST",
   body: faceSearchSchema,
-  requireAuth: true,
+  requireAuth: false,
   rateLimit: { key: "ai:search", limit: API_RATE_LIMITS.FACE_SEARCH, windowSeconds: 60 },
   audit: "ai.face.searched",
   handler: async ({ body, auth, request }) => {
-    if (!(auth.user as any)?.settings?.["ai_face_search"]) return fail("FORBIDDEN", "AI search not enabled on your plan", 403)
     const t0 = Date.now()
     const supabase = await createClient()
 
@@ -26,6 +27,13 @@ export const POST = defineRoute({
         .eq("id", body.gallery_id)
         .single()
       eventId = gallery?.event_id ?? null
+    }
+
+    if (eventId) {
+      const gate = await checkEventFeatureAccess(eventId, "ai_face_search")
+      if (!gate.allowed) {
+        return fail("FORBIDDEN", gate.reason || "AI Face Search is disabled for this event.", 403)
+      }
     }
 
     const det = await detectFaces({ imageUrl: body.photo_id ? undefined : body.image_data, imageBase64: body.image_data })
@@ -46,7 +54,7 @@ export const POST = defineRoute({
     const hits = searchByEmbedding({ embedding: det.faces[0]!.embedding, candidates, topK: body.max_results ?? 20 })
     const duration = Date.now() - t0
     await supabase.from("face_search_logs").insert({
-      user_id: auth.user!.id,
+      user_id: auth.user?.id ?? null,
       event_id: eventId,
       search_type: body.photo_id ? "upload" : "selfie",
       query_photo_id: body.photo_id ?? null,
@@ -54,7 +62,7 @@ export const POST = defineRoute({
       result_count: hits.length,
       search_duration_ms: duration,
     })
-    void trackEvent({ user_id: auth.user!.id, event_type: "ai.face.searched", event_data: { count: hits.length }, request })
+    void trackEvent({ user_id: auth.user?.id ?? undefined, event_type: "ai.face.searched", event_data: { count: hits.length }, request })
     return ok({ results: hits, duration_ms: duration })
   },
 }).POST

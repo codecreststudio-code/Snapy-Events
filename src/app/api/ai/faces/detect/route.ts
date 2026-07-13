@@ -3,6 +3,8 @@ import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { detectFaces } from "@/lib/integrations/face"
 
+import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
+
 const body = z.object({ photo_id: z.string().uuid(), event_id: z.string().uuid() })
 
 export const POST = defineRoute({
@@ -11,7 +13,10 @@ export const POST = defineRoute({
   requireAuth: true,
   audit: "ai.face.detect",
   handler: async ({ body, auth }) => {
-    if (!(auth.user as any)?.settings?.["ai_face_search"]) return fail("FORBIDDEN", "AI search not enabled", 403)
+    const gate = await checkEventFeatureAccess(body.event_id, "ai_face_search")
+    if (!gate.allowed) {
+      return fail("FORBIDDEN", gate.reason || "AI Face Search is disabled for this event", 403)
+    }
     const supabase = await createClient()
     const { data: photo } = await supabase.from("photos").select("storage_path").eq("id", body.photo_id).single()
     if (!photo) return fail("NOT_FOUND", "Photo not found", 404)

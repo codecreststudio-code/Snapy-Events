@@ -3,8 +3,8 @@ import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { adminDb } from "@/lib/supabase/admin"
 
 const postBodySchema = z.object({
-  key: z.string().min(1),
-  value: z.any(),
+  key: z.string().min(1).max(100).regex(/^[a-zA-Z0-9_.-]+$/, "Key must be alphanumeric with underscores, dots, or hyphens"),
+  value: z.unknown(),
 })
 
 export const GET = defineRoute({

@@ -5,13 +5,14 @@ import crypto from "node:crypto"
 import { calculatePrice } from "../checkout/route"
 
 const verifyBodySchema = z.object({
-  razorpay_payment_id: z.string(),
-  razorpay_order_id: z.string(),
-  razorpay_signature: z.string(),
+  razorpay_payment_id: z.string().min(1).max(200),
+  razorpay_order_id: z.string().min(1).max(200),
+  razorpay_signature: z.string().min(1).max(512),
   plan_id: z.string().min(1),
   coupon_code: z.string().optional(),
-  guest_boost: z.number().default(0),
-  shots_boost: z.number().default(0),
+  guest_boost: z.number().int().min(0).max(1000).default(0),
+  shots_boost: z.number().int().min(0).max(10000).default(0),
+  currency: z.enum(["INR", "USD"]).default("INR"),
 })
 
 export const POST = defineRoute({
@@ -19,7 +20,7 @@ export const POST = defineRoute({
   body: verifyBodySchema,
   requireAuth: true,
   handler: async ({ body, auth }) => {
-    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, plan_id, guest_boost, shots_boost, coupon_code } = body
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, plan_id, guest_boost, shots_boost, coupon_code, currency } = body
 
     // 1. Verify Razorpay Signature
     const secret = (process.env.RAZORPAY_KEY_SECRET || "").trim()
@@ -115,7 +116,7 @@ export const POST = defineRoute({
     // 5. Calculate total paid amount
     let price = 0
     try {
-      price = await calculatePrice(supabase, plan_id, guest_boost, shots_boost, coupon_code)
+      price = await calculatePrice(supabase, plan_id, guest_boost, shots_boost, coupon_code, currency)
     } catch {
       price = 0
     }

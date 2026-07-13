@@ -1,4 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
+
+const VALID_TYPES = ["seo_title", "seo_description", "excerpt", "outline", "ideas", "social"] as const
+
+const requestSchema = z.object({
+  type: z.enum(VALID_TYPES),
+  title: z.string().max(300).optional().default(""),
+  excerpt: z.string().max(1000).optional().default(""),
+})
 
 const PROMPTS: Record<string, (title: string, excerpt: string) => string> = {
   seo_title: (title) =>
@@ -17,13 +26,23 @@ const PROMPTS: Record<string, (title: string, excerpt: string) => string> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { type, title, excerpt } = await req.json()
-
-    if (!type || !(type in PROMPTS)) {
-      return NextResponse.json({ success: false, error: "Invalid type" }, { status: 400 })
+    let rawBody: unknown
+    try {
+      rawBody = await req.json()
+    } catch {
+      return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 })
     }
 
-    const prompt = PROMPTS[type](title ?? "", excerpt ?? "")
+    const parsed = requestSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: "Validation failed", issues: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      )
+    }
+
+    const { type, title, excerpt } = parsed.data
+    const prompt = PROMPTS[type](title, excerpt)
 
     // Use OpenAI if key is available, otherwise return a placeholder
     const apiKey = process.env.OPENAI_API_KEY

@@ -3,6 +3,8 @@ import { defineRoute, fail } from "@/lib/api/handler"
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { z } from "zod"
 
+import { API_RATE_LIMITS } from "@/lib/constants"
+
 const loginBody = z.object({
   email: z.string().email(),
   password: z.string().min(8),
@@ -11,7 +13,7 @@ const loginBody = z.object({
 export const POST = defineRoute({
   method: "POST",
   body: loginBody,
-  rateLimit: { key: "auth:login", limit: 10, windowSeconds: 60 },
+  rateLimit: { key: "auth:login", limit: API_RATE_LIMITS.AUTH_LOGIN, windowSeconds: 60 },
   handler: async ({ body }) => {
     const supabase = await createClient()
     const { data, error } = await supabase.auth.signInWithPassword(body)

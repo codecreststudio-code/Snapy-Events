@@ -100,19 +100,38 @@ export const FACE_SIMILARITY_THRESHOLDS = {
 } as const
 
 export const API_RATE_LIMITS = {
-  API_DEFAULT: 100, // requests per minute
-  UPLOAD_PHOTOS: 50, // photos per minute per event
-  FACE_SEARCH: 20, // searches per minute per user
+  // 1. Authentication Routes (Strict anti-bruteforce)
+  AUTH_LOGIN: Number(process.env.RATE_LIMIT_AUTH_LOGIN) || 5, // 5 attempts per min
+  AUTH_SIGNUP: Number(process.env.RATE_LIMIT_AUTH_SIGNUP) || 3, // 3 signups per 5 mins
+  AUTH_PASSWORD: Number(process.env.RATE_LIMIT_AUTH_PASSWORD) || 3, // 3 resets per 5 mins
+
+  // 2. Public Routes (Anti-enumeration & anti-spam)
+  QR_SCAN: Number(process.env.RATE_LIMIT_QR_SCAN) || 30, // 30 scans per min
+  PUBLIC_DEFAULT: Number(process.env.RATE_LIMIT_PUBLIC_DEFAULT) || 60, // 60 requests per min
+  FACE_SEARCH: Number(process.env.RATE_LIMIT_AI_FACE_SEARCH) || 10, // 10 searches per min
+  UPLOAD_PHOTOS: Number(process.env.RATE_LIMIT_UPLOAD_PHOTOS) || 30, // 30 uploads per min
+
+  // 3. Authenticated User Routes
+  USER_DEFAULT: Number(process.env.RATE_LIMIT_USER_DEFAULT) || 120, // 120 requests per min
+  MEDIA_UPLOAD: Number(process.env.RATE_LIMIT_MEDIA_UPLOAD) || 30, // 30 uploads per min
+
+  // 4. Admin Routes (Strict high-security limit)
+  ADMIN_STRICT: Number(process.env.RATE_LIMIT_ADMIN_STRICT) || 30, // 30 admin requests per min
+  API_DEFAULT: Number(process.env.RATE_LIMIT_DEFAULT) || 100, // 100 requests per min
 } as const
 
 export const MAX_FILE_SIZES = {
   PHOTO: 50 * 1024 * 1024, // 50MB
+  VIDEO: 100 * 1024 * 1024, // 100MB
+  AUDIO: 20 * 1024 * 1024, // 20MB
   COVER_IMAGE: 10 * 1024 * 1024, // 10MB
   AVATAR: 5 * 1024 * 1024, // 5MB
 } as const
 
 export const ALLOWED_MIME_TYPES = {
   PHOTO: ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"],
+  VIDEO: ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"],
+  AUDIO: ["audio/mpeg", "audio/wav", "audio/webm", "audio/mp4", "audio/ogg", "audio/m4a"],
   COVER: ["image/jpeg", "image/png", "image/webp"],
 } as const
 

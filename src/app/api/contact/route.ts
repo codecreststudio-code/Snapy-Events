@@ -19,7 +19,7 @@ function escapeHtml(text: string): string {
 const form = z.object({
   name: z.string().min(1).max(100),
   email: z.string().email(),
-  phone: z.string().optional(),
+  phone: z.string().regex(/^\+?[1-9]\d{6,14}$/, "Phone must be a valid international number (7-15 digits, optionally prefixed with +)").optional(),
   subject: z.string().min(1).max(200).optional(),
   message: z.string().min(10).max(5000),
 })

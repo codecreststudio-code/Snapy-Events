@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { adminDb } from "@/lib/supabase/admin"
+import { API_RATE_LIMITS } from "@/lib/constants"
 
 const updatePlanSchema = z.object({
   name: z.string().min(1).optional(),
@@ -21,6 +22,7 @@ const updatePlanSchema = z.object({
 export const PATCH = defineRoute({
   method: "PATCH",
   requireAuth: "admin",
+  rateLimit: { key: "admin:plans:patch", limit: API_RATE_LIMITS.ADMIN_STRICT, windowSeconds: 60 },
   body: updatePlanSchema,
   handler: async ({ request, body }) => {
     const url = new URL(request.url)

@@ -3,6 +3,8 @@ import { z } from "zod"
 import { defineRoute, fail, created } from "@/lib/api/handler"
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 
+import { API_RATE_LIMITS } from "@/lib/constants"
+
 const bodySchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
@@ -11,7 +13,7 @@ const bodySchema = z.object({
 export const POST = defineRoute({
   method: "POST",
   body: bodySchema,
-  rateLimit: { key: "admin:login", limit: 5, windowSeconds: 60 },
+  rateLimit: { key: "admin:login", limit: API_RATE_LIMITS.AUTH_LOGIN, windowSeconds: 60 },
   handler: async ({ body }) => {
     const adminEmail = process.env.ADMIN_EMAIL || "syedfarrukh55@gmail.com"
     const adminPassword = process.env.ADMIN_PASSWORD || "Sofb@1432"

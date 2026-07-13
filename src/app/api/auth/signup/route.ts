@@ -4,16 +4,23 @@ import { logAudit } from "@/lib/audit/log"
 import { sendEmail } from "@/lib/integrations/resend"
 import { z } from "zod"
 
+import { API_RATE_LIMITS } from "@/lib/constants"
+
 const signupSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
-  full_name: z.string().min(2),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number"),
+  full_name: z.string().min(2).max(100),
 })
 
 export const POST = defineRoute({
   method: "POST",
   body: signupSchema,
-  rateLimit: { key: "auth:signup", limit: 5, windowSeconds: 60 },
+  rateLimit: { key: "auth:signup", limit: API_RATE_LIMITS.AUTH_SIGNUP, windowSeconds: 300 },
   audit: "auth.signup",
   handler: async ({ body, request }) => {
     const svc = await createServiceClient()

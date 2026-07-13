@@ -3,11 +3,13 @@ import { defineRoute, ok, fail, redirect } from "@/lib/api/handler"
 import { createServiceClient } from "@/lib/supabase/server"
 import { headers } from "next/headers"
 
+import { API_RATE_LIMITS } from "@/lib/constants"
+
 const params = z.object({ code: z.string().min(4) })
 
 export const GET = defineRoute<unknown, unknown, { code: string }>({
   method: "GET",
-  rateLimit: { key: "qr:scan", limit: 600, windowSeconds: 60 },
+  rateLimit: { key: "qr:scan", limit: API_RATE_LIMITS.QR_SCAN, windowSeconds: 60 },
   handler: async ({ params, request }) => {
     const { code } = params
     const supabase = await createServiceClient()

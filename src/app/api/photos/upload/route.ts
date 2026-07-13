@@ -6,6 +6,8 @@ import { uploadFile } from "@/lib/integrations/storage"
 import { MAX_FILE_SIZES, ALLOWED_MIME_TYPES, API_RATE_LIMITS } from "@/lib/constants"
 import { trackEvent } from "@/lib/analytics/track"
 
+import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
+
 const querySchema = z.object({ gallery_id: z.string().uuid() })
 
 export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
@@ -23,10 +25,26 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const uploaderEmail = (fd.get("uploader_email") as string | null) ?? null
     const approvedFlag = (fd.get("is_approved") as string | null) === "true"
     if (!file) return fail("VALIDATION_ERROR", "Missing file", 422)
-    if (file.size > MAX_FILE_SIZES.PHOTO) return fail("VALIDATION_ERROR", "File too large", 413)
-    if (!ALLOWED_MIME_TYPES.PHOTO.includes(file.type as (typeof ALLOWED_MIME_TYPES.PHOTO)[number])) {
+
+    const isVideo = file.type.startsWith("video/")
+    const isAudio = file.type.startsWith("audio/")
+
+    const maxAllowedSize = isVideo
+      ? MAX_FILE_SIZES.VIDEO
+      : isAudio
+      ? MAX_FILE_SIZES.AUDIO
+      : MAX_FILE_SIZES.PHOTO
+
+    if (file.size > maxAllowedSize) return fail("VALIDATION_ERROR", "File too large", 413)
+
+    const isPhotoType = (ALLOWED_MIME_TYPES.PHOTO as readonly string[]).includes(file.type)
+    const isVideoType = (ALLOWED_MIME_TYPES.VIDEO as readonly string[]).includes(file.type)
+    const isAudioType = (ALLOWED_MIME_TYPES.AUDIO as readonly string[]).includes(file.type)
+
+    if (!isPhotoType && !isVideoType && !isAudioType) {
       return fail("VALIDATION_ERROR", "Unsupported file type", 415)
     }
+
     const { data: gallery } = await supabase
       .from("galleries")
       .select("event_id, event:events(organization_id, host_id, settings)")
@@ -34,6 +52,20 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       .single()
 
     if (!gallery) return ApiErrors.notFound("Gallery")
+
+    if (isVideoType) {
+      const videoGate = await checkEventFeatureAccess(gallery.event_id, "video_uploads")
+      if (!videoGate.allowed) {
+        return fail("FORBIDDEN", videoGate.reason || "Video uploads are disabled for this event. Upgrade plan to enable videos.", 403)
+      }
+    }
+
+    if (isAudioType) {
+      const audioGate = await checkEventFeatureAccess(gallery.event_id, "voice_notes")
+      if (!audioGate.allowed) {
+        return fail("FORBIDDEN", audioGate.reason || "Voice notes & audio are disabled for this event. Upgrade plan to enable audio greetings.", 403)
+      }
+    }
 
     // Enforce limits
     const event = gallery.event as any

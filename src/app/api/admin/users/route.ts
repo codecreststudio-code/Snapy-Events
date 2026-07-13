@@ -147,8 +147,12 @@ export const DELETE = defineRoute({
   requireAuth: "admin",
   handler: async ({ request }) => {
     const url = new URL(request.url)
-    const userId = url.searchParams.get("userId")
-    if (!userId) return fail("VALIDATION_ERROR", "userId query parameter is required", 422)
+    const rawUserId = url.searchParams.get("userId")
+    if (!rawUserId) return fail("VALIDATION_ERROR", "userId query parameter is required", 422)
+
+    const parseResult = z.string().uuid().safeParse(rawUserId)
+    if (!parseResult.success) return fail("VALIDATION_ERROR", "userId must be a valid UUID", 422)
+    const userId = parseResult.data
 
     const sb = admin()
 
