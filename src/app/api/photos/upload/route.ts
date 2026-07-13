@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { defineRoute, ok, fail, created, ApiErrors } from "@/lib/api/handler"
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { uploadPhotoSchema } from "@/lib/validators"
 import { uploadFile, deleteFile } from "@/lib/integrations/storage"
 import { processImage, validateImageDimensions } from "@/lib/integrations/image-processing"
@@ -26,7 +26,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
   audit: "photo.uploaded",
   handler: async ({ request, query, auth }) => {
     const id = query.gallery_id
-    const supabase = await createClient()
+    const supabase = await createServiceClient()
     const fd = await request.formData()
     const file = fd.get("file") as File | null
     const uploaderName = (fd.get("uploader_name") as string | null) ?? null

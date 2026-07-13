@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { defineRoute, ok, fail, created } from "@/lib/api/handler"
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { faceSearchSchema } from "@/lib/validators"
 import { detectFaces, searchByEmbedding } from "@/lib/integrations/face"
 import { trackEvent } from "@/lib/analytics/track"
@@ -16,7 +16,7 @@ export const POST = defineRoute({
   audit: "ai.face.searched",
   handler: async ({ body, auth, request }) => {
     const t0 = Date.now()
-    const supabase = await createClient()
+    const supabase = await createServiceClient()
 
     // Resolve event_id: if gallery_id is given, look up its parent event
     let eventId: string | null = null
