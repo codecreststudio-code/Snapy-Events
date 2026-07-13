@@ -7,7 +7,7 @@ const updatePlanSchema = z.object({
   description: z.string().nullable().optional(),
   price_inr: z.number().min(0).optional(),
   price_usd: z.number().min(0).optional(),
-  billing_interval: z.enum(["monthly", "yearly"]).optional(),
+  billing_interval: z.enum(["event", "monthly", "yearly"]).optional(),
   trial_days: z.number().min(0).optional(),
   theme_color: z.string().nullable().optional(),
   best_value: z.boolean().optional(),

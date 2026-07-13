@@ -296,7 +296,7 @@ function PricingCard({
 
         <div className="mt-4 flex items-baseline gap-1">
           <span className="text-3xl font-extrabold text-slate-900">₹{plan.price}</span>
-          <span className="text-slate-400 text-xs font-light">/ month</span>
+          <span className="text-slate-400 text-xs font-light">/ event</span>
         </div>
 
         <ul className="mt-5 space-y-3 border-t border-slate-100 pt-5">

@@ -279,7 +279,7 @@ function CheckoutForm() {
                 <div className="flex items-center justify-between py-3 border-b border-slate-100">
                   <div className="space-y-0.5">
                     <span className="font-semibold text-slate-800">{PLAN_NAMES[plan]}</span>
-                    <p className="text-xs text-slate-400">Base monthly plan features</p>
+                    <p className="text-xs text-slate-400">Base event plan features</p>
                   </div>
                   <span className="font-bold text-slate-800">₹{basePrice}</span>
                 </div>

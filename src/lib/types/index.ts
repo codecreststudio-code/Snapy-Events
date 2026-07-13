@@ -143,7 +143,7 @@ export interface Plan {
   description: string | null
   price_inr: number
   price_usd: number
-  billing_interval: "monthly" | "yearly"
+  billing_interval: "event" | "monthly" | "yearly"
   trial_days: number
   theme_color: string | null
   best_value: boolean

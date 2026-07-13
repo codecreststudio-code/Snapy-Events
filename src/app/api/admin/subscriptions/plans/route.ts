@@ -23,7 +23,7 @@ const createPlanSchema = z.object({
   description: z.string().optional().nullable(),
   price_inr: z.number().min(0),
   price_usd: z.number().min(0),
-  billing_interval: z.enum(["monthly", "yearly"]).default("monthly"),
+  billing_interval: z.enum(["event", "monthly", "yearly"]).default("event"),
   trial_days: z.number().min(0).default(0),
   theme_color: z.string().optional().nullable(),
   best_value: z.boolean().default(false),
