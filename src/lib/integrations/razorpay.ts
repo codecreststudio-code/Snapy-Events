@@ -11,18 +11,24 @@ let _client: Razorpay | null = null
 
 function client(): Razorpay {
   if (_client) return _client
-  if (!serverEnv.RAZORPAY_KEY_ID || !serverEnv.RAZORPAY_KEY_SECRET) {
+  const keyId = (process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "").trim()
+  const keySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim()
+
+  if (!keyId || !keySecret) {
     throw new Error("Razorpay is not configured (missing RAZORPAY_KEY_ID/RAZORPAY_KEY_SECRET)")
   }
+
   _client = new Razorpay({
-    key_id: serverEnv.RAZORPAY_KEY_ID,
-    key_secret: serverEnv.RAZORPAY_KEY_SECRET,
+    key_id: keyId,
+    key_secret: keySecret,
   })
   return _client
 }
 
 export function isRazorpayConfigured(): boolean {
-  return Boolean(serverEnv.RAZORPAY_KEY_ID && serverEnv.RAZORPAY_KEY_SECRET)
+  const keyId = (process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "").trim()
+  const keySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim()
+  return Boolean(keyId && keySecret)
 }
 
 export async function createRazorpayCustomer(opts: {

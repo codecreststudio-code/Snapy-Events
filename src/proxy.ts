@@ -113,7 +113,7 @@ export async function proxy(request: NextRequest) {
         "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://*.razorpay.com",
         "style-src 'self' 'unsafe-inline'",
         "font-src 'self' data: https://*.gstatic.com",
-        "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://api.razorpay.com https://*.resend.com https://graph.facebook.com",
+        "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://*.razorpay.com https://api.razorpay.com https://*.resend.com https://graph.facebook.com",
         "frame-ancestors 'none'",
         "base-uri 'self'",
         "form-action 'self'",
