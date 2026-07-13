@@ -6,7 +6,7 @@ import QRCode from "qrcode"
 
 export async function generateQrDataUrl(opts: { data: string; size?: number; margin?: number; dark?: string; light?: string }) {
   return QRCode.toDataURL(opts.data, {
-    errorCorrectionLevel: "M",
+    errorCorrectionLevel: "H",
     margin: opts.margin ?? 1,
     width: opts.size ?? 512,
     color: { dark: opts.dark ?? "#000000", light: opts.light ?? "#ffffff" },
@@ -15,7 +15,7 @@ export async function generateQrDataUrl(opts: { data: string; size?: number; mar
 
 export async function generateQrBuffer(opts: { data: string; size?: number; margin?: number }) {
   return QRCode.toBuffer(opts.data, {
-    errorCorrectionLevel: "M",
+    errorCorrectionLevel: "H",
     margin: opts.margin ?? 1,
     width: opts.size ?? 1024,
     type: "png",

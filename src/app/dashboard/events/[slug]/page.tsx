@@ -15,6 +15,7 @@ import { Skeleton } from "@/lib/components/ui/skeleton"
 import { toast } from "@/lib/components/ui/toaster"
 import { Playfair_Display } from "next/font/google"
 import { motion, AnimatePresence } from "framer-motion"
+import { QRCodeSVG } from "qrcode.react"
 import {
   ArrowLeft,
   Calendar,
@@ -39,7 +40,9 @@ import {
   Search,
   ExternalLink,
   ChevronRight,
-  Users
+  Users,
+  Copy,
+  Check
 } from "lucide-react"
 
 const playfair = Playfair_Display({
@@ -189,6 +192,52 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null)
   const [voiceSpeed, setVoiceSpeed] = useState(1.0)
   const [countdownText, setCountdownText] = useState("")
+  const [copied, setCopied] = useState(false)
+
+  const publicEventUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/event/${slug}`
+    : `https://snapsy-events.vercel.app/event/${slug}`
+
+  const handleCopyLink = () => {
+    if (!event) return
+    const link = typeof window !== "undefined" ? `${window.location.origin}/event/${event.slug}` : `https://snapsy-events.vercel.app/event/${event.slug}`
+    navigator.clipboard.writeText(link)
+    setCopied(true)
+    toast({ title: "Event link copied to clipboard!" })
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleDownloadQr = () => {
+    if (!event) return
+    const svgEl = document.getElementById("event-dashboard-qr") as SVGElement | null
+    if (!svgEl) return
+
+    const svgData = new XMLSerializer().serializeToString(svgEl)
+    const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" })
+    const url = URL.createObjectURL(svgBlob)
+
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement("canvas")
+      canvas.width = 500
+      canvas.height = 500
+      const ctx = canvas.getContext("2d")
+      if (ctx) {
+        ctx.fillStyle = "#ffffff"
+        ctx.fillRect(0, 0, 500, 500)
+        ctx.drawImage(img, 25, 25, 450, 450)
+        const pngUrl = canvas.toDataURL("image/png")
+        const downloadLink = document.createElement("a")
+        downloadLink.href = pngUrl
+        downloadLink.download = `${event.slug}-snapsy-qr.png`
+        document.body.appendChild(downloadLink)
+        downloadLink.click()
+        document.body.removeChild(downloadLink)
+      }
+      URL.revokeObjectURL(url)
+    }
+    img.src = url
+  }
 
   // Server state queries
   const { data: event, isLoading: eventLoading } = useQuery({
@@ -699,6 +748,68 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
         {/* RIGHT COLUMN: AI matching & Activity feeds */}
         <div className="space-y-8">
+
+          {/* Default Persistent Event QR Code Card with Custom Snapsy Logo */}
+          <div className="bg-white border border-[#EAE5DF] rounded-3xl p-5 space-y-4 shadow-sm text-center relative overflow-hidden">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <QrCode className="h-4.5 w-4.5 text-[#A58263]" />
+                <h3 className="text-sm font-bold text-[#1C1A17]">Event QR Code</h3>
+              </div>
+              <span className="text-[10px] bg-emerald-50 text-emerald-600 font-bold px-2 py-0.5 rounded-full border border-emerald-100 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live QR
+              </span>
+            </div>
+
+            {/* Custom Branded QR Code Display */}
+            <div className="p-4 bg-gradient-to-b from-[#FAF9F6] to-white border border-[#EAE5DF] rounded-2xl flex flex-col items-center justify-center space-y-3 shadow-inner group">
+              <div className="p-3 bg-white rounded-2xl shadow-md border border-[#EAE5DF] relative">
+                <QRCodeSVG
+                  id="event-dashboard-qr"
+                  value={publicEventUrl}
+                  size={160}
+                  bgColor={"#ffffff"}
+                  fgColor={"#1c1a17"}
+                  level={"H"}
+                  imageSettings={{
+                    src: "/Favicon.png",
+                    x: undefined,
+                    y: undefined,
+                    height: 36,
+                    width: 36,
+                    excavate: true,
+                  }}
+                />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-xs font-bold text-[#1C1A17]">Scan to Upload Photos</p>
+                <p className="text-[10px] text-[#9C958E]">Snapsy Custom Logo Embedded</p>
+              </div>
+            </div>
+
+            {/* QR Actions */}
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopyLink}
+                className="text-xs border-[#EAE5DF] hover:bg-stone-50 flex items-center justify-center gap-1 text-[#69635C] rounded-xl"
+              >
+                {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                <span>{copied ? "Copied!" : "Copy Link"}</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadQr}
+                className="text-xs border-[#EAE5DF] hover:bg-stone-50 flex items-center justify-center gap-1 text-[#69635C] rounded-xl"
+              >
+                <Download className="h-3.5 w-3.5" />
+                <span>Download</span>
+              </Button>
+            </div>
+          </div>
           
           {/* AI Matches clustered panel */}
           <div className="bg-white border border-[#EAE5DF] rounded-3xl p-5 space-y-4 shadow-sm">

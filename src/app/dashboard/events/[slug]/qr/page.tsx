@@ -7,6 +7,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { generateCode } from "@/lib/utils"
 import { useAuth } from "@/lib/hooks"
+import { QRCodeSVG } from "qrcode.react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
@@ -127,40 +128,64 @@ async function generateQRImage(data: string): Promise<string | null> {
 }
 
 function QRCodeCard({ qr, eventSlug, onDelete }: { qr: QRCode; eventSlug: string; onDelete: (id: string) => void }) {
-  const [qrImage, setQrImage] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-
   const scanUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://snapsy-events.vercel.app"}/event/scan/${qr.code}`
-
-  async function loadQRImage() {
-    if (qrImage) return
-    setLoading(true)
-    const image = await generateQRImage(scanUrl)
-    setQrImage(image)
-    setLoading(false)
-  }
 
   function copyToClipboard(text: string) {
     navigator.clipboard.writeText(text)
     toast({ title: "Copied to clipboard" })
   }
 
+  function downloadSvgQr() {
+    const svgEl = document.getElementById(`qr-card-svg-${qr.id}`) as SVGElement | null
+    if (!svgEl) return
+    const svgData = new XMLSerializer().serializeToString(svgEl)
+    const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" })
+    const url = URL.createObjectURL(svgBlob)
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement("canvas")
+      canvas.width = 500
+      canvas.height = 500
+      const ctx = canvas.getContext("2d")
+      if (ctx) {
+        ctx.fillStyle = "#ffffff"
+        ctx.fillRect(0, 0, 500, 500)
+        ctx.drawImage(img, 25, 25, 450, 450)
+        const pngUrl = canvas.toDataURL("image/png")
+        const downloadLink = document.createElement("a")
+        downloadLink.href = pngUrl
+        downloadLink.download = `${qr.name || qr.code}-snapsy-qr.png`
+        document.body.appendChild(downloadLink)
+        downloadLink.click()
+        document.body.removeChild(downloadLink)
+      }
+      URL.revokeObjectURL(url)
+    }
+    img.src = url
+  }
+
   return (
     <Card className="overflow-hidden">
-      <div className="aspect-square bg-white flex items-center justify-center p-4 relative">
-        {loading ? (
-          <Skeleton className="h-48 w-48" />
-        ) : qrImage ? (
-          <img src={qrImage} alt="QR Code" className="h-48 w-48" />
-        ) : (
-          <button
-            onClick={loadQRImage}
-            className="flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <QrCode className="h-16 w-16" />
-            <span className="text-sm">Click to generate</span>
-          </button>
-        )}
+      <div className="aspect-square bg-white flex flex-col items-center justify-center p-4 relative border-b border-stone-100">
+        <div className="p-3 bg-white rounded-2xl shadow-sm border border-[#EAE5DF]">
+          <QRCodeSVG
+            id={`qr-card-svg-${qr.id}`}
+            value={scanUrl}
+            size={160}
+            bgColor={"#ffffff"}
+            fgColor={"#1c1a17"}
+            level={"H"}
+            imageSettings={{
+              src: "/Favicon.png",
+              x: undefined,
+              y: undefined,
+              height: 36,
+              width: 36,
+              excavate: true,
+            }}
+          />
+        </div>
+
         <div className="absolute top-2 right-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -173,14 +198,10 @@ function QRCodeCard({ qr, eventSlug, onDelete }: { qr: QRCode; eventSlug: string
                 <Copy className="h-4 w-4" />
                 Copy Link
               </DropdownMenuItem>
-              {qrImage && (
-                <DropdownMenuItem asChild>
-                  <a href={qrImage} download={`${qr.name || qr.code}-qr.png`}>
-                    <Download className="h-4 w-4" />
-                    Download
-                  </a>
-                </DropdownMenuItem>
-              )}
+              <DropdownMenuItem onClick={downloadSvgQr}>
+                <Download className="h-4 w-4" />
+                Download PNG
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/event/${eventSlug}`} target="_blank">
                   <ExternalLink className="h-4 w-4" />
