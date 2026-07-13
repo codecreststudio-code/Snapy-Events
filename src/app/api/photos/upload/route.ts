@@ -92,11 +92,11 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       .eq("id", hostId)
       .maybeSingle()
 
-    const { data: subscription } = orgId
+    const { data: subscription } = hostId
       ? await supabase
           .from("subscriptions")
           .select("plan_id")
-          .eq("organization_id", orgId)
+          .or(`user_id.eq.${hostId}${orgId ? `,organization_id.eq.${orgId}` : ""}`)
           .eq("status", "active")
           .limit(1)
           .maybeSingle()
@@ -108,14 +108,23 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const guestBoost = hostPrefs.guest_boost || 0
     const shotsBoost = hostPrefs.shots_boost || 0
 
-    let baseLimits = { guests_limit: 0, shots_limit: 0, storage_limit_gb: 1 }
+    const PLAN_DEFAULT_LIMITS: Record<string, { guests: number; shots: number; storage: number }> = {
+      free: { guests: 5, shots: 5, storage: 1 },
+      starter: { guests: 10, shots: 10, storage: 10 },
+      standard: { guests: 50, shots: 15, storage: 100 },
+      premium: { guests: 100, shots: 25, storage: 1000 },
+    }
+
+    const fallback = PLAN_DEFAULT_LIMITS[orgPlan] || PLAN_DEFAULT_LIMITS.free
+
+    let baseLimits = { guests_limit: fallback.guests, shots_limit: fallback.shots, storage_limit_gb: fallback.storage }
     if (orgPlan) {
-      const { data: planData } = await supabase.from("plans").select("limits").eq("id", orgPlan).single()
+      const { data: planData } = await supabase.from("plans").select("limits").eq("id", orgPlan).maybeSingle()
       if (planData?.limits) {
         baseLimits = {
-          guests_limit: planData.limits.guests_limit ?? 0,
-          shots_limit: planData.limits.shots_limit ?? 0,
-          storage_limit_gb: planData.limits.storage_limit_gb ?? 1,
+          guests_limit: planData.limits.guests_limit ?? planData.limits.guest_limit ?? fallback.guests,
+          shots_limit: planData.limits.shots_limit ?? planData.limits.shot_limit ?? fallback.shots,
+          storage_limit_gb: planData.limits.storage_limit_gb ?? fallback.storage,
         }
       }
     }

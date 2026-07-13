@@ -17,7 +17,7 @@ const DEFAULT_PLANS = [
       "Custom reveal time",
       "All image filters enabled",
     ],
-    limits: { events_limit: 1, storage_limit_gb: 1, photo_limit: 100 },
+    limits: { events_limit: 1, storage_limit_gb: 10, photo_limit: 5000, guests_limit: 10, shots_limit: 10 },
   },
   {
     id: "standard",
@@ -36,7 +36,7 @@ const DEFAULT_PLANS = [
       "Download all photos",
       "Priority customer support",
     ],
-    limits: { events_limit: 25, storage_limit_gb: 100, photo_limit: 50000 },
+    limits: { events_limit: 25, storage_limit_gb: 100, photo_limit: 50000, guests_limit: 50, shots_limit: 15 },
   },
   {
     id: "premium",
@@ -56,7 +56,7 @@ const DEFAULT_PLANS = [
       "WhatsApp notification alerts",
       "24/7 Priority support",
     ],
-    limits: { events_limit: -1, storage_limit_gb: 1000, photo_limit: -1 },
+    limits: { events_limit: -1, storage_limit_gb: 1000, photo_limit: -1, guests_limit: 100, shots_limit: 25 },
   },
   {
     id: "free",
@@ -73,7 +73,7 @@ const DEFAULT_PLANS = [
       "Standard photo reveal",
       "Basic web gallery",
     ],
-    limits: { events_limit: 1, storage_limit_gb: 1, photo_limit: 100 },
+    limits: { events_limit: 1, storage_limit_gb: 1, photo_limit: 100, guests_limit: 5, shots_limit: 5 },
   },
 ]
 

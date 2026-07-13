@@ -171,29 +171,37 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
       // 1. Quota checks
       let userPlan = "free"
       if (event.host_id) {
-        const { data: u } = await supabase.from("users").select("organization_id").eq("id", event.host_id).maybeSingle()
-        if (u?.organization_id) {
-          const { data: sub } = await supabase
-            .from("subscriptions")
-            .select("plan_id")
-            .eq("organization_id", u.organization_id)
-            .eq("status", "active")
-            .limit(1)
-            .maybeSingle()
-          if (sub?.plan_id) userPlan = sub.plan_id
-        }
+        const { data: sub } = await supabase
+          .from("subscriptions")
+          .select("plan_id")
+          .or(`user_id.eq.${event.host_id}`)
+          .eq("status", "active")
+          .limit(1)
+          .maybeSingle()
+        if (sub?.plan_id) userPlan = sub.plan_id
       }
       const hostPreferences = (event.host as any)?.preferences || {}
       
-      const { data: planData } = await supabase.from("plans").select("limits").eq("id", userPlan).single()
+      const { data: planData } = await supabase.from("plans").select("limits").eq("id", userPlan).maybeSingle()
       const planLimits = planData?.limits || {}
+
+      const PLAN_DEFAULT_LIMITS: Record<string, { guests: number; shots: number }> = {
+        free: { guests: 5, shots: 5 },
+        starter: { guests: 10, shots: 10 },
+        standard: { guests: 50, shots: 15 },
+        premium: { guests: 100, shots: 25 },
+      }
+
+      const fallback = PLAN_DEFAULT_LIMITS[userPlan] || PLAN_DEFAULT_LIMITS.free
       
       const guestBoost = hostPreferences.guest_boost || 0
       const shotsBoost = hostPreferences.shots_boost || 0
 
-      // Default to Infinity if the limit isn't explicitly defined for guests/shots
-      const maxGuests = planLimits.guests_limit !== undefined ? planLimits.guests_limit + guestBoost : Infinity
-      const maxShots = planLimits.shots_limit !== undefined ? planLimits.shots_limit + shotsBoost : Infinity
+      const baseGuestLimit = planLimits.guests_limit ?? planLimits.guest_limit ?? fallback.guests
+      const baseShotLimit = planLimits.shots_limit ?? planLimits.shot_limit ?? fallback.shots
+
+      const maxGuests = baseGuestLimit + guestBoost
+      const maxShots = baseShotLimit + shotsBoost
 
       // Fetch uploads list to calculate current usage
       const { data: currentUploads, error: uploadsErr } = await supabase
