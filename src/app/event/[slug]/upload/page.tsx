@@ -76,10 +76,52 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
   const [limitError, setLimitError] = useState<string | null>(null)
   const [showCamera, setShowCamera] = useState(false)
 
+  const [quotaInfo, setQuotaInfo] = useState<{ uploaded: number; max: number } | null>(null)
+
   const { data: event, isLoading: eventLoading } = useQuery({
     queryKey: ["event", slug],
     queryFn: () => getEvent(slug),
   })
+
+  useEffect(() => {
+    async function fetchGuestQuota() {
+      if (!event?.id || !guestName.trim()) return
+      const supabase = createClient()
+      try {
+        const identifier = guestEmail.trim().toLowerCase() || guestName.trim().toLowerCase()
+        const { data: uploads } = await supabase
+          .from("photos")
+          .select("uploader_email, uploader_name")
+          .eq("event_id", event.id)
+
+        const guestCount = (uploads || []).filter(
+          (p) => (p.uploader_email?.toLowerCase() === identifier || p.uploader_name?.toLowerCase() === identifier)
+        ).length
+
+        let userPlan = "free"
+        if (event.host_id) {
+          const { data: sub } = await supabase
+            .from("subscriptions")
+            .select("plan_id")
+            .or(`user_id.eq.${event.host_id}`)
+            .eq("status", "active")
+            .limit(1)
+            .maybeSingle()
+          if (sub?.plan_id) userPlan = sub.plan_id
+        }
+
+        const PLAN_DEFAULT_LIMITS: Record<string, number> = { free: 5, starter: 10, standard: 15, premium: 25 }
+        const hostPreferences = (event.host as any)?.preferences || {}
+        const maxAllowed = (PLAN_DEFAULT_LIMITS[userPlan] || 5) + (hostPreferences.shots_boost || 0)
+
+        setQuotaInfo({ uploaded: guestCount, max: maxAllowed })
+      } catch (err) {
+        console.error("Failed to calculate quota info", err)
+      }
+    }
+
+    fetchGuestQuota()
+  }, [event?.id, event?.host, guestName, guestEmail])
 
   const { data: galleries, isLoading: galleriesLoading } = useQuery({
     queryKey: ["galleries", event?.id],
@@ -253,7 +295,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
           // Use direct pre-signed URL upload for files > 3.5MB or non-image media to bypass Vercel serverless limits
           if (uploadFile.file.size > 3.5 * 1024 * 1024 || !uploadFile.file.type.startsWith("image/")) {
-            const urlRes = await fetch("/api/photos/upload-url", {
+            const urlRes = await fetch("/api/photos/upload/url", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -477,6 +519,23 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
             </div>
           </div>
         </Card>
+
+        {/* Live Guest Quota Status Banner */}
+        {guestName.trim() && quotaInfo && (
+          <div className="bg-[#FAF2EB] border border-[#EAE4D9] rounded-2xl p-4 flex items-center justify-between shadow-sm">
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-bold text-[#A58263] uppercase tracking-widest">Your Guest Upload Quota</p>
+              <p className="text-sm font-medium text-[#1C1A17]">
+                Uploaded <span className="font-bold text-[#A58263]">{quotaInfo.uploaded}</span> of <span className="font-bold text-[#1C1A17]">{quotaInfo.max}</span> media uploads allowed for this event
+              </p>
+            </div>
+            <div className="text-right shrink-0">
+              <span className="text-xs bg-[#A58263] text-white font-bold px-3 py-1.5 rounded-full shadow-sm">
+                {Math.max(0, quotaInfo.max - quotaInfo.uploaded)} Slots Remaining
+              </span>
+            </div>
+          </div>
+        )}
 
         <Card className="bg-white border-[#EAE5DF] shadow-sm">
           <CardContent className="p-6">
