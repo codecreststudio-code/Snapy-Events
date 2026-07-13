@@ -92,7 +92,7 @@ export const POST = defineRoute({
           "video/mp4", "video/quicktime", "video/webm", "video/x-msvideo", "video/3gpp",
           "audio/mpeg", "audio/mp4", "audio/wav", "audio/webm", "audio/ogg", "audio/m4a", "audio/aac"
         ],
-        fileSizeLimit: 104857600,
+        fileSizeLimit: 52428800, // 50 MB limit
       })
     } catch (e) {
       console.warn("[updateBucket photos warning]", e)
