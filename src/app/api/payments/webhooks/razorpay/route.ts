@@ -6,11 +6,21 @@ import { sendEmail } from "@/lib/integrations/resend"
 
 export async function POST(request: NextRequest) {
   const sig = request.headers.get("x-razorpay-signature") ?? ""
-  const body = await request.text()
+  let body: string
+  try {
+    body = await request.text()
+  } catch {
+    return NextResponse.json({ success: false, error: "Invalid request body" }, { status: 400 })
+  }
   if (!(await verifyRazorpaySignature({ body, signature: sig }))) {
     return NextResponse.json({ success: false, error: "Invalid signature" }, { status: 400 })
   }
-  const evt = JSON.parse(body) as { event: string; payload: any }
+  let evt: { event: string; payload: any }
+  try {
+    evt = JSON.parse(body) as { event: string; payload: any }
+  } catch {
+    return NextResponse.json({ success: false, error: "Invalid JSON payload" }, { status: 400 })
+  }
   const supabase = await createServiceClient()
   await supabase.from("webhook_events").insert({
     source: "razorpay",

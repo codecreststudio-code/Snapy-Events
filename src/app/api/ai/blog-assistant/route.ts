@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
+import { defineRoute, ok, fail } from "@/lib/api/handler"
+import { createClient } from "@/lib/supabase/server"
 
 const VALID_TYPES = ["seo_title", "seo_description", "excerpt", "outline", "ideas", "social"] as const
 
@@ -24,30 +25,16 @@ const PROMPTS: Record<string, (title: string, excerpt: string) => string> = {
     `Write 3 social media posts (LinkedIn, Twitter, Instagram) promoting a blog article titled "${title}". Context: ${excerpt}. Include relevant hashtags.`,
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    let rawBody: unknown
-    try {
-      rawBody = await req.json()
-    } catch {
-      return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 })
-    }
-
-    const parsed = requestSchema.safeParse(rawBody)
-    if (!parsed.success) {
-      return NextResponse.json(
-        { success: false, error: "Validation failed", issues: parsed.error.flatten().fieldErrors },
-        { status: 400 }
-      )
-    }
-
-    const { type, title, excerpt } = parsed.data
+export const POST = defineRoute({
+  method: "POST",
+  body: requestSchema,
+  requireAuth: true,
+  handler: async ({ body, auth }) => {
+    const { type, title, excerpt } = body
     const prompt = PROMPTS[type](title, excerpt)
 
-    // Use OpenAI if key is available, otherwise return a placeholder
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
-      // Graceful fallback when no AI key is configured
       const fallbacks: Record<string, string> = {
         seo_title: `${title} - Complete Guide | Snapsy Blog`,
         seo_description: `Discover everything you need to know about ${title}. Expert tips, real examples, and step-by-step guides from the Snapsy team.`,
@@ -56,7 +43,7 @@ export async function POST(req: NextRequest) {
         ideas: `1. **Complete Beginner's Guide to ${title}** — Start-to-finish walkthrough\n2. **Top 10 Tips for ${title}** — Quick wins for immediate results\n3. **${title} vs Traditional Methods** — Honest comparison\n4. **Real Results: How Photographers Use ${title}** — Case studies\n5. **Future of ${title}** — What's coming next`,
         social: `LinkedIn: Excited to share our latest guide on ${title}! Discover how top professionals are using this to transform their events. Read more at snapsy.app/blog #EventPhotography #Snapsy\n\nTwitter: New blog post: Everything you need to know about ${title} 📸 Check it out → snapsy.app/blog #events #photography\n\nInstagram: 📖 New article alert! We've put together the ultimate guide on ${title}. Link in bio! #snapsy #eventphotography #tips`,
       }
-      return NextResponse.json({ success: true, result: fallbacks[type] })
+      return ok({ result: fallbacks[type] })
     }
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -82,15 +69,12 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
       const err = await response.text()
       console.error("[ai/blog-assistant] OpenAI error:", err)
-      return NextResponse.json({ success: false, error: "AI generation failed" }, { status: 500 })
+      return fail("INTERNAL_ERROR", "AI generation failed", 500)
     }
 
     const data = await response.json()
     const result = data.choices?.[0]?.message?.content?.trim()
 
-    return NextResponse.json({ success: true, result })
-  } catch (err) {
-    console.error("[ai/blog-assistant]", err)
-    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 })
-  }
-}
+    return ok({ result })
+  },
+}).POST

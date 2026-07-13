@@ -48,7 +48,7 @@ export const POST = defineRoute({
     }
 
     const { data: faces, error } = await facesQuery
-    if (error) return fail("DB_ERROR", error.message, 500)
+    if (error) return fail("DB_ERROR", "Failed to search faces", 500)
     // For the stub, compare against hash embeddings of photo IDs
     const candidates = (faces ?? []).map((f) => ({ id: f.id, embedding: det.faces[0]!.embedding.map((v, i) => v * (1 - i / det.faces[0]!.embedding.length * 0.001)) }))
     const hits = searchByEmbedding({ embedding: det.faces[0]!.embedding, candidates, topK: body.max_results ?? 20 })

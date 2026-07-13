@@ -18,7 +18,8 @@ export const GET = defineRoute({
     const supabase = await createClient()
     let q = supabase
       .from("galleries")
-      .select("*, event:events(id, name, slug, host_id)", { count: "exact" })
+      .select("*, event:events!inner(id, name, slug, host_id)", { count: "exact" })
+      .eq("event.host_id", auth.user!.id)
       .order("created_at", { ascending: false })
     if (query.eventId) q = q.eq("event_id", query.eventId)
     const from = (query.page - 1) * query.pageSize
@@ -36,6 +37,12 @@ export const POST = defineRoute({
   audit: "gallery.created",
   handler: async ({ body, auth }) => {
     const supabase = await createClient()
+    const { data: event } = await supabase
+      .from("events")
+      .select("host_id")
+      .eq("id", body.event_id)
+      .single()
+    if (!event || event.host_id !== auth.user!.id) return fail("FORBIDDEN", "You do not own this event", 403)
     const slug = `${slugify(body.name)}-${Date.now().toString(36).slice(-4)}`
     const { data, error } = await supabase
       .from("galleries")

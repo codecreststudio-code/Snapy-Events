@@ -2,13 +2,21 @@ import { z } from "zod"
 import { defineRoute, ok, fail, created, ApiErrors } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { uploadPhotoSchema } from "@/lib/validators"
-import { uploadFile } from "@/lib/integrations/storage"
+import { uploadFile, deleteFile } from "@/lib/integrations/storage"
+import { processImage, validateImageDimensions } from "@/lib/integrations/image-processing"
+import { validateFile, isDangerousExtension, isSvgContent } from "@/lib/security/file-validation"
 import { MAX_FILE_SIZES, ALLOWED_MIME_TYPES, API_RATE_LIMITS } from "@/lib/constants"
 import { trackEvent } from "@/lib/analytics/track"
-
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
 
 const querySchema = z.object({ gallery_id: z.string().uuid() })
+
+function getMimeCategory(mime: string): "PHOTO" | "VIDEO" | "AUDIO" | null {
+  if ((ALLOWED_MIME_TYPES.PHOTO as readonly string[]).includes(mime)) return "PHOTO"
+  if ((ALLOWED_MIME_TYPES.VIDEO as readonly string[]).includes(mime)) return "VIDEO"
+  if ((ALLOWED_MIME_TYPES.AUDIO as readonly string[]).includes(mime)) return "AUDIO"
+  return null
+}
 
 export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
   method: "POST",
@@ -26,24 +34,25 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const approvedFlag = (fd.get("is_approved") as string | null) === "true"
     if (!file) return fail("VALIDATION_ERROR", "Missing file", 422)
 
-    const isVideo = file.type.startsWith("video/")
-    const isAudio = file.type.startsWith("audio/")
+    if (file.size === 0) return fail("VALIDATION_ERROR", "File is empty", 422)
+    if (file.name.length > 255) return fail("VALIDATION_ERROR", "Filename too long", 422)
 
-    const maxAllowedSize = isVideo
-      ? MAX_FILE_SIZES.VIDEO
-      : isAudio
-      ? MAX_FILE_SIZES.AUDIO
-      : MAX_FILE_SIZES.PHOTO
+    if (isDangerousExtension(file.name)) return fail("VALIDATION_ERROR", "File type not allowed", 415)
 
+    const category = getMimeCategory(file.type)
+    if (!category) return fail("VALIDATION_ERROR", "Unsupported file type", 415)
+
+    const maxAllowedSize = MAX_FILE_SIZES[category]
     if (file.size > maxAllowedSize) return fail("VALIDATION_ERROR", "File too large", 413)
 
-    const isPhotoType = (ALLOWED_MIME_TYPES.PHOTO as readonly string[]).includes(file.type)
-    const isVideoType = (ALLOWED_MIME_TYPES.VIDEO as readonly string[]).includes(file.type)
-    const isAudioType = (ALLOWED_MIME_TYPES.AUDIO as readonly string[]).includes(file.type)
+    const fileBuffer = Buffer.from(await file.arrayBuffer())
 
-    if (!isPhotoType && !isVideoType && !isAudioType) {
-      return fail("VALIDATION_ERROR", "Unsupported file type", 415)
+    if (isSvgContent(new Uint8Array(fileBuffer))) {
+      return fail("VALIDATION_ERROR", "SVG files are not allowed", 415)
     }
+
+    const validation = validateFile(new Uint8Array(fileBuffer), file.name, file.type, file.size)
+    if (!validation.valid) return fail("VALIDATION_ERROR", validation.error!, 415)
 
     const { data: gallery } = await supabase
       .from("galleries")
@@ -53,21 +62,20 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
 
     if (!gallery) return ApiErrors.notFound("Gallery")
 
-    if (isVideoType) {
+    if (category === "VIDEO") {
       const videoGate = await checkEventFeatureAccess(gallery.event_id, "video_uploads")
       if (!videoGate.allowed) {
         return fail("FORBIDDEN", videoGate.reason || "Video uploads are disabled for this event. Upgrade plan to enable videos.", 403)
       }
     }
 
-    if (isAudioType) {
+    if (category === "AUDIO") {
       const audioGate = await checkEventFeatureAccess(gallery.event_id, "voice_notes")
       if (!audioGate.allowed) {
         return fail("FORBIDDEN", audioGate.reason || "Voice notes & audio are disabled for this event. Upgrade plan to enable audio greetings.", 403)
       }
     }
 
-    // Enforce limits
     const event = gallery.event as any
     const eventObj = Array.isArray(event) ? event[0] : event
     const hostId = eventObj?.host_id
@@ -78,14 +86,12 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       orgId = u?.organization_id
     }
 
-    // Fetch host user profile for settings/preferences
     const { data: hostProfile } = await supabase
       .from("users")
       .select("preferences")
       .eq("id", hostId)
       .maybeSingle()
 
-    // Fetch active subscription for the organization
     const { data: subscription } = orgId
       ? await supabase
           .from("subscriptions")
@@ -98,7 +104,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
 
     const orgPlan = subscription?.plan_id || "free"
     const hostPrefs = (hostProfile?.preferences as Record<string, any>) || {}
-    
+
     const guestBoost = hostPrefs.guest_boost || 0
     const shotsBoost = hostPrefs.shots_boost || 0
 
@@ -118,7 +124,6 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const maxShots = baseLimits.shots_limit + shotsBoost
     const maxStorageBytes = baseLimits.storage_limit_gb * 1024 * 1024 * 1024
 
-    // Check storage quota
     const { data: storageUsage } = orgId
       ? await supabase
           .from("storage_usage")
@@ -129,11 +134,13 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
 
     const currentStorageBytes = storageUsage?.total_bytes ? BigInt(storageUsage.total_bytes) : BigInt(0)
     const currentPhotoCount = storageUsage?.photo_count || 0
-    if (currentStorageBytes + BigInt(file.size) > BigInt(maxStorageBytes)) {
+    const effectiveOrgId = orgId || "anon"
+
+    if (currentStorageBytes + BigInt(fileBuffer.length) > BigInt(maxStorageBytes)) {
       return fail(
         "STORAGE_QUOTA_EXCEEDED",
         `Storage quota exceeded. You are using ${Math.round(Number(currentStorageBytes) / (1024 * 1024))}MB of ${baseLimits.storage_limit_gb}GB. Please upgrade your plan.`,
-        403
+        403,
       )
     }
 
@@ -145,7 +152,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const uniqueGuests = new Set(
       (currentUploads || [])
         .map((p) => p.uploader_email?.toLowerCase() || p.uploader_name?.toLowerCase())
-        .filter(Boolean)
+        .filter(Boolean),
     )
 
     const cleanEmail = uploaderEmail?.trim().toLowerCase()
@@ -158,16 +165,66 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     }
 
     const currentGuestShotsCount = (currentUploads || []).filter(
-      (p) => (p.uploader_email?.toLowerCase() === guestIdentifier || p.uploader_name?.toLowerCase() === guestIdentifier)
+      (p) => (p.uploader_email?.toLowerCase() === guestIdentifier || p.uploader_name?.toLowerCase() === guestIdentifier),
     ).length
 
     if (currentGuestShotsCount >= maxShots) {
       return fail("PLAN_LIMIT_REACHED", `You have reached your limit of ${maxShots} uploads for this event.`, 403)
     }
 
-    const ext = file.name.split(".").pop() ?? "jpg"
-    const path = `${orgId || "anon"}/${gallery.event_id}/${id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-    const up = await uploadFile({ bucket: "PHOTOS", path, file, contentType: file.type, cacheControl: "31536000" })
+    let uploadBuffer: Buffer = fileBuffer
+    let uploadMime = file.type
+    let imageWidth: number | null = null
+    let imageHeight: number | null = null
+    let thumbnailUploadPath: string | null = null
+    let thumbnailBuffer: Buffer | null = null
+
+    if (category === "PHOTO") {
+      try {
+        const dimCheck = await validateImageDimensions(fileBuffer)
+        if (!dimCheck.valid) return fail("VALIDATION_ERROR", dimCheck.error!, 422)
+
+        imageWidth = dimCheck.width
+        imageHeight = dimCheck.height
+
+        const result = await processImage(fileBuffer, file.type, effectiveOrgId, gallery.event_id, id)
+        uploadBuffer = result.processed.buffer as Buffer
+        uploadMime = result.processed.mimeType
+        imageWidth = result.processed.width
+        imageHeight = result.processed.height
+
+        if (result.thumbnail) {
+          thumbnailBuffer = result.thumbnail.buffer as Buffer
+          thumbnailUploadPath = result.thumbnailUploadPath
+        }
+      } catch {
+        return fail("PROCESSING_ERROR", "Failed to process image", 500)
+      }
+    }
+
+    const fileId = crypto.randomUUID()
+    const ext = uploadMime === "image/jpeg" ? "jpg" : uploadMime.split("/").pop() || "bin"
+    const storagePath = `${effectiveOrgId}/${gallery.event_id}/${id}/${fileId}.${ext}`
+
+    const uploadBlob = new Blob([new Uint8Array(uploadBuffer)], { type: uploadMime })
+    const uploadOpts = { bucket: "PHOTOS" as const, path: storagePath, file: uploadBlob, contentType: uploadMime, cacheControl: "31536000" }
+
+    const up = await uploadFile(uploadOpts)
+
+    if (thumbnailBuffer && thumbnailUploadPath) {
+      try {
+        await uploadFile({
+          bucket: "PHOTOS" as const,
+          path: thumbnailUploadPath,
+          file: new Blob([new Uint8Array(thumbnailBuffer)], { type: "image/jpeg" }),
+          contentType: "image/jpeg",
+          cacheControl: "31536000",
+        })
+      } catch {
+        thumbnailUploadPath = null
+      }
+    }
+
     const { data, error } = await supabase
       .from("photos")
       .insert({
@@ -177,34 +234,38 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
         uploader_name: uploaderName,
         uploader_email: uploaderEmail,
         storage_path: up.path,
+        thumbnail_path: thumbnailUploadPath,
         original_filename: file.name,
-        mime_type: file.type,
-        file_size: file.size,
+        mime_type: uploadMime,
+        file_size: uploadBuffer.length,
+        width: imageWidth,
+        height: imageHeight,
         is_approved: approvedFlag,
         processing_status: "ready",
       })
       .select()
       .single()
-    if (error) return fail("DB_ERROR", error.message, 500)
-    
-    // Update storage usage
+
+    if (error) {
+      try { await deleteFile("PHOTOS", up.path) } catch {}
+      if (thumbnailUploadPath) {
+        try { await deleteFile("PHOTOS", thumbnailUploadPath) } catch {}
+      }
+      return fail("DB_ERROR", "Failed to save photo record", 500)
+    }
+
     if (orgId) {
       try {
-        const { error: upsertError } = await supabase
-          .from("storage_usage")
-          .upsert({
+        await supabase.from("storage_usage").upsert(
+          {
             organization_id: orgId,
-            total_bytes: (currentStorageBytes + BigInt(file.size)).toString(),
+            total_bytes: (currentStorageBytes + BigInt(uploadBuffer.length)).toString(),
             photo_count: currentPhotoCount + 1,
-          })
-        if (upsertError) {
-          console.error("Failed to update storage usage:", upsertError.message)
-        }
-      } catch (err) {
-        console.error("Failed to update storage usage:", err)
-      }
+          },
+        )
+      } catch {}
     }
-    
+
     void trackEvent({ user_id: auth.user?.id ?? undefined, event_type: "photo.uploaded", event_data: { gallery_id: id }, request })
     return created(data)
   },

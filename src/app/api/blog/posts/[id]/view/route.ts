@@ -1,35 +1,23 @@
-import { NextRequest, NextResponse } from "next/server"
+import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const supabase = await createClient()
-  const { id } = await params
-
-  // Fetch current view count
-  const { data: post, error: fetchError } = await supabase
-    .from("blog_posts")
-    .select("view_count")
-    .eq("id", id)
-    .single()
-
-  if (fetchError || !post) {
-    return NextResponse.json({ error: "Post not found" }, { status: 404 })
-  }
-
-  // Safely increment view count
-  const { data, error: updateError } = await supabase
-    .from("blog_posts")
-    .update({ view_count: (post.view_count ?? 0) + 1 })
-    .eq("id", id)
-    .select("id, view_count")
-    .single()
-
-  if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 500 })
-  }
-
-  return NextResponse.json({ success: true, view_count: data?.view_count })
-}
+export const POST = defineRoute<unknown, unknown, { id: string }>({
+  method: "POST",
+  handler: async ({ params }) => {
+    const supabase = await createClient()
+    const { data: post, error: fetchError } = await supabase
+      .from("blog_posts")
+      .select("view_count")
+      .eq("id", params.id)
+      .single()
+    if (fetchError || !post) return fail("NOT_FOUND", "Post not found", 404)
+    const { data, error: updateError } = await supabase
+      .from("blog_posts")
+      .update({ view_count: (post.view_count ?? 0) + 1 })
+      .eq("id", params.id)
+      .select("id, view_count")
+      .single()
+    if (updateError || !data) return fail("DB_ERROR", "Failed to update view count", 500)
+    return ok({ success: true, view_count: data.view_count })
+  },
+}).POST

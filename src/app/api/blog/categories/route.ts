@@ -1,43 +1,40 @@
-import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
+import { defineRoute, ok, fail, created } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 
-export async function GET() {
-  const supabase = await createClient()
+const categorySchema = z.object({
+  name: z.string().min(1),
+  slug: z.string().min(1),
+  description: z.string().optional(),
+  emoji: z.string().optional(),
+  color: z.string().optional(),
+})
 
-  const { data, error } = await supabase
-    .from("blog_categories")
-    .select("id, name, slug, description, emoji, color, post_count")
-    .order("name")
+export const GET = defineRoute({
+  method: "GET",
+  handler: async () => {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from("blog_categories")
+      .select("id, name, slug, description, emoji, color, post_count")
+      .order("name")
+    if (error) return fail("DB_ERROR", "Failed to fetch categories", 500)
+    return ok({ categories: data ?? [] })
+  },
+}).GET
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
-  return NextResponse.json({ categories: data ?? [] })
-}
-
-export async function POST(req: NextRequest) {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-
-  const body = await req.json()
-  const { name, slug, description, emoji, color } = body
-
-  if (!name || !slug) {
-    return NextResponse.json({ error: "Name and slug are required" }, { status: 400 })
-  }
-
-  const { data, error } = await supabase
-    .from("blog_categories")
-    .insert({ name, slug, description, emoji, color })
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
-  return NextResponse.json({ category: data }, { status: 201 })
-}
+export const POST = defineRoute({
+  method: "POST",
+  body: categorySchema,
+  requireAuth: "admin",
+  handler: async ({ body }) => {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from("blog_categories")
+      .insert(body)
+      .select()
+      .single()
+    if (error) return fail("DB_ERROR", "Failed to create category", 500)
+    return created({ category: data })
+  },
+}).POST

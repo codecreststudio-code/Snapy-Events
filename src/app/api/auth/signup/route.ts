@@ -31,7 +31,10 @@ export const POST = defineRoute({
       email_confirm: true,
       user_metadata: { full_name: body.full_name },
     })
-    if (error || !data.user) return fail("AUTH_ERROR", error?.message ?? "Sign up failed", 400)
+    if (error || !data.user) {
+      const message = error?.status === 409 ? "An account with this email already exists" : "Registration failed"
+      return fail("AUTH_ERROR", message, 400)
+    }
 
     await svc
       .from("users")

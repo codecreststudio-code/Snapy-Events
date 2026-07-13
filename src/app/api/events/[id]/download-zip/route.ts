@@ -3,6 +3,7 @@ import { z } from "zod"
 import { createServiceClient } from "@/lib/supabase/server"
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
 import JSZip from "jszip"
+import { logger } from "@/lib/logger"
 
 const uuidSchema = z.string().uuid()
 
@@ -24,24 +25,28 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    // 1. Check feature access for print_ready_downloads
+    // 1. Fetch event metadata and verify ownership
+    const { data: event, error: eventErr } = await supabase
+      .from("events")
+      .select("title, slug, host_id")
+      .eq("id", eventId)
+      .single()
+
+    if (eventErr || !event) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 })
+    }
+
+    if (event.host_id !== user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+
+    // 2. Check feature access for print_ready_downloads
     const gate = await checkEventFeatureAccess(eventId, "print_ready_downloads")
     if (!gate.allowed) {
       return NextResponse.json(
         { error: gate.reason || "Print-ready high-res downloads are disabled for this plan. Please upgrade." },
         { status: 403 }
       )
-    }
-
-    // 2. Fetch event metadata
-    const { data: event, error: eventErr } = await supabase
-      .from("events")
-      .select("title, slug")
-      .eq("id", eventId)
-      .single()
-
-    if (eventErr || !event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 })
     }
 
     // 3. Fetch all approved photos in the event
@@ -54,9 +59,11 @@ export async function GET(
       return NextResponse.json({ error: "No photos available to download" }, { status: 400 })
     }
 
+    const MAX_ZIP_BYTES = 500 * 1024 * 1024
     const zip = new JSZip()
     const folderName = `${event.slug || "event"}-highres-photos`
     const folder = zip.folder(folderName)
+    let totalBytes = 0
 
     // Download each photo from storage and attach to zip archive
     for (let i = 0; i < photos.length; i++) {
@@ -68,12 +75,18 @@ export async function GET(
 
         if (fileData && !downloadErr) {
           const buffer = await fileData.arrayBuffer()
+          if (totalBytes + buffer.byteLength > MAX_ZIP_BYTES) break
           const filename = p.original_filename || `photo-${i + 1}.jpg`
           folder?.file(filename, buffer)
+          totalBytes += buffer.byteLength
         }
       } catch (err) {
-        console.error(`Failed to download photo ${p.id} into ZIP:`, err)
+        logger.error("Failed to download photo into ZIP", { photoId: p.id, error: String(err) })
       }
+    }
+
+    if (totalBytes === 0) {
+      return NextResponse.json({ error: "No photos could be downloaded" }, { status: 500 })
     }
 
     const zipArray = await zip.generateAsync({ type: "uint8array" })
@@ -88,7 +101,7 @@ export async function GET(
       },
     })
   } catch (error: any) {
-    console.error("[download-zip] Internal Server Error:", error)
+    logger.error("download-zip internal error", { error: String(error) })
     return NextResponse.json({ error: "Failed to generate ZIP archive" }, { status: 500 })
   }
 }

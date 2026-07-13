@@ -1,10 +1,12 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
-import { ok, fail } from "@/lib/api/handler"
 
-export async function POST(_request: NextRequest) {
-  const supabase = await createClient()
-  const { error } = await supabase.auth.signOut()
-  if (error) return fail("AUTH_ERROR", error.message, 500)
-  return ok({ loggedOut: true })
-}
+export const POST = defineRoute({
+  method: "POST",
+  handler: async () => {
+    const supabase = await createClient()
+    const { error } = await supabase.auth.signOut()
+    if (error) return fail("AUTH_ERROR", "Logout failed", 500)
+    return ok({ loggedOut: true })
+  },
+}).POST

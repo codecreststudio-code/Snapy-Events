@@ -39,7 +39,7 @@ export const POST = defineRoute({
         .update({ status: "refunded" })
         .eq("id", transactionId)
 
-      if (updateErr) return fail("DB_ERROR", updateErr.message, 500)
+      if (updateErr) return fail("DB_ERROR", "Failed to process refund", 500)
       return ok({ success: true, mode: "simulation", message: "Razorpay not configured — DB-only refund recorded." })
     }
 
@@ -66,7 +66,7 @@ export const POST = defineRoute({
         })
         .eq("id", transactionId)
 
-      if (updateErr) return fail("DB_ERROR", updateErr.message, 500)
+      if (updateErr) return fail("DB_ERROR", "Failed to update transaction status", 500)
 
       return ok({
         success: true,

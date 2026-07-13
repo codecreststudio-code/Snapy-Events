@@ -12,6 +12,13 @@ export const POST = defineRoute({
   audit: "qr.generated",
   handler: async ({ body, auth }) => {
     const supabase = await createClient()
+    const { data: event } = await supabase
+      .from("events")
+      .select("host_id")
+      .eq("id", body.event_id)
+      .single()
+    if (!event) return fail("NOT_FOUND", "Event not found", 404)
+    if (event.host_id !== auth.user!.id) return fail("FORBIDDEN", "You do not own this event", 403)
     const code = generateQrCode()
     const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://snapsy-events.vercel.app"
     const redirect = `${base}/event/scan/${code}`
@@ -20,7 +27,7 @@ export const POST = defineRoute({
       .insert({ event_id: body.event_id, code, name: body.name ?? null, redirect_url: redirect })
       .select()
       .single()
-    if (error) return fail("DB_ERROR", error.message, 400)
+    if (error) return fail("DB_ERROR", "Failed to create QR code", 400)
     return created(data)
   },
 }).POST

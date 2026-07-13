@@ -16,19 +16,20 @@ export const POST = defineRoute({
   requireAuth: true,
   audit: "whatsapp.alert.sent",
   handler: async ({ body, auth }) => {
-    const gate = await checkEventFeatureAccess(body.event_id, "whatsapp_alerts")
-    if (!gate.allowed) {
-      return fail("FORBIDDEN", gate.reason || "WhatsApp notification alerts require a plan upgrade.", 403)
-    }
-
     const supabase = await createServiceClient()
     const { data: event } = await supabase
       .from("events")
-      .select("title, slug")
+      .select("title, slug, host_id")
       .eq("id", body.event_id)
       .single()
 
     if (!event) return fail("NOT_FOUND", "Event not found", 404)
+    if (event.host_id !== auth.user!.id) return fail("FORBIDDEN", "You do not own this event", 403)
+
+    const gate = await checkEventFeatureAccess(body.event_id, "whatsapp_alerts")
+    if (!gate.allowed) {
+      return fail("FORBIDDEN", gate.reason || "WhatsApp notification alerts require a plan upgrade.", 403)
+    }
 
     const guestName = body.guest_name || "Guest"
     const galleryUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://snapsy-events.vercel.app"}/event/${event.slug}`
@@ -51,7 +52,7 @@ export const POST = defineRoute({
       scheduled_for: new Date().toISOString(),
     }).select().single()
 
-    if (error) return fail("DB_ERROR", error.message, 500)
+    if (error) return fail("DB_ERROR", "Failed to queue notification", 500)
     return ok({ success: true, notification_id: data.id, message: textMessage })
   },
 }).POST

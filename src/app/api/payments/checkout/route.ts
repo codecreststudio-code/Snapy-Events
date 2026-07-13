@@ -131,7 +131,7 @@ export const POST = defineRoute({
         order_id: order.id,
         amount: amountSubunits,
         currency: targetCurrency,
-        key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
+        key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         customer_id: customerId,
         total_price: price,
       })

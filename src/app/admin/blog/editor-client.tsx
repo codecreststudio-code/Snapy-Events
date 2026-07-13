@@ -97,27 +97,18 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
     setErrorMsg(null)
 
     try {
-      const { createClient } = await import("@/lib/supabase/client")
-      const supabase = createClient()
-
-      const fileExt = file.name.split(".").pop()
-      const filename = `blog-${Date.now()}.${fileExt}`
-      const filepath = `blog/${filename}`
-
-      const { data, error: uploadError } = await supabase.storage
-        .from("event-covers")
-        .upload(filepath, file, {
-          cacheControl: "3600",
-          upsert: true
-        })
-
-      if (uploadError) throw uploadError
-
-      const { data: pub } = supabase.storage
-        .from("event-covers")
-        .getPublicUrl(filepath)
-
-      setCoverImageUrl(pub.publicUrl)
+      const fd = new FormData()
+      fd.append("file", file)
+      const res = await fetch("/api/blog/upload", {
+        method: "POST",
+        body: fd,
+      })
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({ error: "Upload failed" }))
+        throw new Error(errBody.error || "Upload failed")
+      }
+      const json = await res.json()
+      setCoverImageUrl(json.data?.url || json.url)
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to upload image")
     } finally {

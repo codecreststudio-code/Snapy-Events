@@ -8,11 +8,22 @@ import { uploadFile } from "@/lib/integrations/storage"
 
 const params = z.object({ id: z.string().uuid() })
 
+async function checkEventOwnership(eventId: string, userId: string): Promise<boolean> {
+  const supabase = await createClient()
+  const { data: event } = await supabase
+    .from("events")
+    .select("host_id")
+    .eq("id", eventId)
+    .single()
+  return event?.host_id === userId
+}
+
 export const GET = defineRoute<unknown, unknown, { id: string }>({
   method: "GET",
   requireAuth: true,
   handler: async ({ params, auth }) => {
     const { id } = params
+    if (!(await checkEventOwnership(id, auth.user!.id))) return fail("FORBIDDEN", "Access denied", 403)
     const supabase = await createClient()
     const { data, error } = await supabase
       .from("qr_codes")
@@ -20,7 +31,7 @@ export const GET = defineRoute<unknown, unknown, { id: string }>({
       .eq("event_id", id)
       .eq("is_active", true)
       .order("created_at", { ascending: false })
-    if (error) return fail("DB_ERROR", error.message, 500)
+    if (error) return fail("DB_ERROR", "Failed to fetch QR codes", 500)
     return ok(data ?? [])
   },
 }).GET
@@ -32,6 +43,7 @@ export const POST = defineRoute<z.infer<typeof createQRCodeSchema>, unknown, { i
   audit: "qr.created",
   handler: async ({ params, body, auth }) => {
     const { id } = params
+    if (!(await checkEventOwnership(id, auth.user!.id))) return fail("FORBIDDEN", "You do not own this event", 403)
     const code = generateQrCode()
     const supabase = await createClient()
     const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://snapsy-events.vercel.app"
@@ -51,7 +63,7 @@ export const POST = defineRoute<z.infer<typeof createQRCodeSchema>, unknown, { i
       })
       .select()
       .single()
-    if (error) return fail("DB_ERROR", error.message, 400)
+    if (error) return fail("DB_ERROR", "Failed to create QR code", 400)
     return ok(data)
   },
 }).POST

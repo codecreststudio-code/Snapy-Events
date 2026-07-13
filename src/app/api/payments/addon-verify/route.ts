@@ -70,7 +70,7 @@ export const POST = defineRoute({
       .eq("id", auth.user!.id)
 
     if (userError) {
-      return fail("DB_ERROR", `Failed to update user: ${userError.message}`, 500)
+      return fail("DB_ERROR", "Failed to update user preferences", 500)
     }
 
     // 4. Create Invoice for the Add-on purchase

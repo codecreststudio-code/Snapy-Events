@@ -56,6 +56,7 @@ export const createEventSchema = z.object({
 export const updateEventSchema = createEventSchema.partial()
 
 export const createGallerySchema = z.object({
+  event_id: z.string().uuid(),
   name: z.string().min(2, "Gallery name must be at least 2 characters").max(200),
   description: z.string().max(1000).optional(),
   is_public: z.boolean().default(true),

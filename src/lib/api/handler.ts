@@ -72,7 +72,7 @@ export function defineRoute<TBody = unknown, TQuery = unknown, C = unknown>(opts
         // CSRF protection for state-changing requests
         if (["POST", "PUT", "PATCH", "DELETE"].includes(m)) {
           const csrfToken = request.headers.get("x-csrf-token")
-          const isValid = await verifyCsrf(csrfToken)
+          const isValid = await verifyCsrf(csrfToken, request)
           if (!isValid) {
             return fail("CSRF_INVALID", "Invalid or missing CSRF token", 403)
           }

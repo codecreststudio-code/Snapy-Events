@@ -17,7 +17,7 @@ export const POST = defineRoute({
   handler: async ({ body }) => {
     const supabase = await createClient()
     const { data, error } = await supabase.auth.signInWithPassword(body)
-    if (error || !data.user) return fail("AUTH_ERROR", error?.message ?? "Invalid credentials", 401)
+    if (error || !data.user) return fail("AUTH_ERROR", "Invalid email or password", 401)
     return NextResponse.json({ success: true, data: { user: { id: data.user.id, email: data.user.email } } })
   },
 }).POST
