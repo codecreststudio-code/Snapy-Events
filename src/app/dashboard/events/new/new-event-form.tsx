@@ -131,6 +131,30 @@ export function NewEventForm() {
   const [invitationWelcome, setInvitationWelcome] = useState("Scan to capture and share moments with us.")
   const [invitationCountdown, setInvitationCountdown] = useState(true)
 
+  // Dynamic active subscription plan lookup
+  const [activePlan, setActivePlan] = useState<string>("free")
+
+  useEffect(() => {
+    const fetchActiveSub = async () => {
+      if (!user) return
+      const supabase = createClient()
+      const { data } = await supabase
+        .from("subscriptions")
+        .select("plan_id")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle()
+      if (data?.plan_id) {
+        setActivePlan(data.plan_id)
+        if (data.plan_id === "premium" || data.plan_id === "standard" || data.plan_id === "starter") {
+          setGuestCountPlan(data.plan_id as any)
+        }
+      }
+    }
+    fetchActiveSub()
+  }, [user])
+
   // Dynamic plan prices to keep in sync with admin panel setting
   const [planPrices, setPlanPrices] = useState<Record<string, number>>({
     starter: 499,
@@ -328,8 +352,15 @@ export function NewEventForm() {
 
   const handleLaunch = () => {
     if (!createdEvent) return
-    // "take it to checkout" if Standard, Premium, or custom addons are selected
-    if (guestCountPlan === "standard" || guestCountPlan === "premium" || guestsBoost > 0 || shotsBoost > 0) {
+
+    const PLAN_RANK: Record<string, number> = { free: 0, starter: 1, standard: 2, premium: 3 }
+    const selectedRank = PLAN_RANK[guestCountPlan] ?? 0
+    const activeRank = PLAN_RANK[activePlan] ?? 0
+
+    // Only redirect to checkout if user selected a higher tier than their active subscription OR selected new custom boost add-ons
+    const requiresPayment = selectedRank > activeRank || guestsBoost > 0 || shotsBoost > 0
+
+    if (requiresPayment) {
       router.push(`/checkout?plan=${guestCountPlan}&guests=${guestsBoost}&shots=${shotsBoost}`)
     } else {
       router.push(`/dashboard/events/${createdEvent.slug}`)
