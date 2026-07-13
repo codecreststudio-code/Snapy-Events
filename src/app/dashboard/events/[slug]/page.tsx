@@ -249,7 +249,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     logoImg.src = "/Logo.png"
   }
 
-  // Server state queries
+  // Server state queries with 3-second live refetch polling for real-time dashboard updates
   const { data: event, isLoading: eventLoading } = useQuery({
     queryKey: ["event", slug, orgId],
     queryFn: () => getEvent(slug, orgId!),
@@ -260,25 +260,56 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     queryKey: ["event-photos", event?.id],
     queryFn: () => getEventPhotos(event!.id),
     enabled: !!event?.id,
+    refetchInterval: 3000,
   })
 
   const { data: faceClusters = [] } = useQuery({
     queryKey: ["face-clusters", event?.id],
     queryFn: () => getFaceClusters(event!.id),
     enabled: !!event?.id,
+    refetchInterval: 5000,
   })
 
   const { data: liveWallMessages = [] } = useQuery({
     queryKey: ["live-wall-messages", event?.id],
     queryFn: () => getLiveWallMessages(event!.id),
     enabled: !!event?.id,
+    refetchInterval: 3000,
   })
 
   const { data: photoAccess = [] } = useQuery({
     queryKey: ["photo-access", event?.id],
     queryFn: () => getPhotoAccess(event!.id),
     enabled: !!event?.id,
+    refetchInterval: 5000,
   })
+
+  // Supabase Realtime live stream listener for instant push updates
+  useEffect(() => {
+    if (!event?.id) return
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`live-dashboard-${event.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "photos", filter: `event_id=eq.${event.id}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["event-photos", event.id] })
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "live_wall_items", filter: `event_id=eq.${event.id}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["live-wall-messages", event.id] })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [event?.id, queryClient])
 
   // Mutate endpoints
   const updateMutation = useMutation({
