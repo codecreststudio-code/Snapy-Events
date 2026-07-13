@@ -209,8 +209,12 @@ function CheckoutForm() {
             })
 
             if (!verifyRes.ok) {
-              const verifyError = await verifyRes.json()
-              throw new Error(verifyError.error || "Payment verification failed")
+              const verifyData = await verifyRes.json()
+              const errDetail = verifyData?.error
+              const errMessage = typeof errDetail === "object"
+                ? (errDetail?.message || errDetail?.code || JSON.stringify(errDetail))
+                : (errDetail || "Payment verification failed")
+              throw new Error(errMessage)
             }
 
             toast({
@@ -221,7 +225,8 @@ function CheckoutForm() {
             // Redirect to dashboard with success query
             router.push("/dashboard?subscribed=success")
           } catch (err: any) {
-            setError(err.message || "Failed to verify signature")
+            const msg = typeof err === "object" && err?.message ? err.message : String(err)
+            setError(msg || "Failed to verify signature")
             setInitiating(false)
           }
         },
