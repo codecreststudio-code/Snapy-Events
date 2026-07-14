@@ -12,6 +12,7 @@ import { Input } from "@/lib/components/ui/input"
 import { Label } from "@/lib/components/ui/label"
 import { toast } from "@/lib/components/ui/toaster"
 
+import { VoiceNoteRecorder } from "@/lib/components/events/voice-note-recorder"
 import {
   ArrowLeft,
   Camera,
@@ -23,6 +24,8 @@ import {
   AlertTriangle,
   Camera as CameraIcon,
   Image as ImageIcon,
+  Mic as MicIcon,
+  Video as VideoIcon,
 } from "lucide-react"
 import type { Gallery } from "@/lib/types"
 
@@ -62,6 +65,14 @@ interface UploadFile {
 interface EventSettings {
   allow_guest_uploads: boolean
   auto_approve_photos: boolean
+  video_duration_limit?: number
+  voice_note_duration_limit?: number
+  content_types?: {
+    photos?: boolean
+    videos?: boolean
+    voice_notes?: boolean
+    messages?: boolean
+  }
 }
 
 export default function GuestUploadPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -75,6 +86,8 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
   const [guestEmail, setGuestEmail] = useState("")
   const [limitError, setLimitError] = useState<string | null>(null)
   const [showCamera, setShowCamera] = useState(false)
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false)
+
 
   const [quotaInfo, setQuotaInfo] = useState<{ uploaded: number; max: number } | null>(null)
 
@@ -572,12 +585,22 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         {showCamera && (
           <CameraCapture 
             allowedFilters={(event.settings as any)?.allowed_filters}
+            allowVideo={(event.settings as any)?.content_types?.videos !== false}
+            maxVideoDuration={(event.settings as any)?.video_duration_limit || 30}
             onCapture={handleCameraCapture}
             onClose={() => setShowCamera(false)}
           />
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {showVoiceRecorder && (
+          <VoiceNoteRecorder
+            maxDuration={(event.settings as any)?.voice_note_duration_limit || 30}
+            onCapture={handleCameraCapture}
+            onClose={() => setShowVoiceRecorder(false)}
+          />
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div
             className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#9333EA] hover:bg-[#9333EA]/5 transition-all cursor-pointer group"
             onClick={() => setShowCamera(true)}
@@ -586,10 +609,33 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
               <CameraIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#9333EA]" />
             </div>
             <div className="text-center">
-              <p className="font-medium text-[#1C1A17]">Take Photo</p>
-              <p className="text-xs text-[#9C958E] mt-1">Use camera with premium filters</p>
+              <p className="font-medium text-[#1C1A17]">
+                {(event.settings as any)?.content_types?.videos !== false ? "Take Photo / Video" : "Take Photo"}
+              </p>
+              <p className="text-xs text-[#9C958E] mt-1">
+                {(event.settings as any)?.content_types?.videos !== false
+                  ? `Live camera with filters & clips up to ${(event.settings as any)?.video_duration_limit || 30}s`
+                  : "Use camera with premium filters"}
+              </p>
             </div>
           </div>
+
+          {(event.settings as any)?.content_types?.voice_notes !== false && (
+            <div
+              className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all cursor-pointer group"
+              onClick={() => setShowVoiceRecorder(true)}
+            >
+              <div className="p-4 rounded-full bg-white group-hover:bg-[#D4AF37]/20 transition-colors border border-transparent group-hover:border-[#D4AF37]/30">
+                <MicIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#D4AF37]" />
+              </div>
+              <div className="text-center">
+                <p className="font-medium text-[#1C1A17]">Record Voice Note</p>
+                <p className="text-xs text-[#9C958E] mt-1">
+                  Leave vocal wishes & audio notes up to {(event.settings as any)?.voice_note_duration_limit || 30}s
+                </p>
+              </div>
+            </div>
+          )}
 
           <div
             className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#9333EA] hover:bg-[#9333EA]/5 transition-all cursor-pointer group"
@@ -607,6 +653,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
               handleFileSelect(e.dataTransfer.files)
             }}
           >
+
             {(() => {
               const contentTypes = (event?.settings as any)?.content_types || {}
               const acceptedList: string[] = []
