@@ -41,59 +41,60 @@ interface DashboardStats {
 async function getDashboardStats(orgId: string): Promise<DashboardStats> {
   const supabase = createClient()
 
-  // Get recent events for this organization with aggregated photo counts from galleries
-  const { data: events } = await supabase
-    .from("events")
-    .select(`
-      id, 
-      name, 
-      slug, 
-      event_date, 
-      status,
-      galleries(id, photo_count)
-    `)
-    .eq("host_id", orgId)
-    .order("created_at", { ascending: false })
-    .limit(5)
+  // Run all queries in parallel — eliminates the sequential waterfall
+  const [
+    eventsResult,
+    eventCountResult,
+  ] = await Promise.all([
+    // Recent events with gallery photo counts
+    supabase
+      .from("events")
+      .select(`id, name, slug, event_date, status, galleries(id, photo_count)`)
+      .eq("host_id", orgId)
+      .order("created_at", { ascending: false })
+      .limit(5),
 
-  // Get all event IDs for this organization
-  const { data: allEvents, count: totalEventCount } = await supabase
-    .from("events")
-    .select("id", { count: "exact", head: true })
-    .eq("host_id", orgId)
+    // Total event count
+    supabase
+      .from("events")
+      .select("id", { count: "exact", head: true })
+      .eq("host_id", orgId),
+  ])
 
-  const allEventIds = allEvents?.map((e) => e.id) || []
+  const events = eventsResult.data || []
+  const allEventIds = events.map((e: any) => e.id)
+  const totalEventCount = eventCountResult.count || 0
 
+  // Second parallel batch — only if there are events
   let photoCount = 0
   let galleryCount = 0
   let qrCount = 0
 
   if (allEventIds.length > 0) {
-    // Get photo count from storage_usage for the user (more efficient than counting)
-    const { data: storageData } = await supabase
-      .from("storage_usage")
-      .select("photo_count")
-      .eq("user_id", orgId)
-      .single()
-    photoCount = storageData?.photo_count || 0
+    const [storageResult, galleryCountResult, qrCountResult] = await Promise.all([
+      supabase
+        .from("storage_usage")
+        .select("photo_count")
+        .eq("user_id", orgId)
+        .single(),
 
-    // Get gallery count
-    const { count: gCount } = await supabase
-      .from("galleries")
-      .select("id", { count: "exact", head: true })
-      .in("event_id", allEventIds)
-    galleryCount = gCount || 0
+      supabase
+        .from("galleries")
+        .select("id", { count: "exact", head: true })
+        .in("event_id", allEventIds),
 
-    // Get QR code count
-    const { count: qCount } = await supabase
-      .from("qr_codes")
-      .select("id", { count: "exact", head: true })
-      .in("event_id", allEventIds)
-    qrCount = qCount || 0
+      supabase
+        .from("qr_codes")
+        .select("id", { count: "exact", head: true })
+        .in("event_id", allEventIds),
+    ])
+
+    photoCount = storageResult.data?.photo_count || 0
+    galleryCount = galleryCountResult.count || 0
+    qrCount = qrCountResult.count || 0
   }
 
-  // Aggregate photo counts from galleries (use photo_count rollup instead of querying photos table)
-  const recentEventsWithCounts = (events || []).map((event: any) => ({
+  const recentEventsWithCounts = events.map((event: any) => ({
     id: event.id,
     name: event.name,
     slug: event.slug,
@@ -103,13 +104,14 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
   }))
 
   return {
-    totalEvents: totalEventCount || 0,
+    totalEvents: totalEventCount,
     totalPhotos: photoCount,
     totalGalleries: galleryCount,
     totalQRCodes: qrCount,
     recentEvents: recentEventsWithCounts,
   }
 }
+
 
 export default function DashboardPage() {
   const { profile, isLoading: authLoading } = useAuth()

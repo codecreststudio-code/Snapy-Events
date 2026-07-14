@@ -6,6 +6,40 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname),
   },
   poweredByHeader: false,
+
+  // ─── Image Optimization ───────────────────────────────────────────────────
+  images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "rgueysvqeivxdnoeholx.supabase.co",
+        pathname: "/storage/v1/object/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/**",
+      },
+    ],
+  },
+
+  // ─── Compression ─────────────────────────────────────────────────────────
+  compress: true,
+
+  // ─── Experimental Optimizations ──────────────────────────────────────────
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-select",
+      "@radix-ui/react-tabs",
+    ],
+  },
+
   async headers() {
     const isDev = process.env.NODE_ENV !== "production";
     
@@ -57,8 +91,29 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // ─── Static assets — long cache ────────────────────────────────────────
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      // ─── Public images ────────────────────────────────────────────────────
+      {
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
     ]
   },
 }
 
 export default nextConfig;
+
