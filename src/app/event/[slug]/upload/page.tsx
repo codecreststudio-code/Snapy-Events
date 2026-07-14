@@ -30,6 +30,15 @@ import {
   Send,
 } from "lucide-react"
 
+export interface UploadFile {
+  id: string
+  file: File
+  preview: string
+  progress: number
+  status: "pending" | "uploading" | "done" | "error" | "idle"
+  error?: string
+}
+
 interface EventSettings {
   allow_guest_uploads: boolean
   auto_approve_photos: boolean
@@ -42,6 +51,7 @@ interface EventSettings {
     messages?: boolean
   }
 }
+
 
 export default function GuestUploadPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
