@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
 import { toast } from "@/lib/components/ui/toaster"
-import { Megaphone, Plus, Trash2, RefreshCw, Loader2, Sparkles, Gift, Percent, ShieldCheck } from "lucide-react"
+import { Megaphone, Plus, Trash2, RefreshCw, Loader2, Sparkles, Gift, Percent, ShieldCheck, Download, Users } from "lucide-react"
 
 type CouponItem = {
   id: string
@@ -184,7 +184,7 @@ export default function AdminMarketingPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button onClick={exportLeadsCSV} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
-            <DownloadIcon className="h-4 w-4 text-emerald-600" />
+            <Download className="h-4 w-4 text-emerald-600" />
             <span>Export CSV</span>
           </Button>
           <Button onClick={fetchMarketingData} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
