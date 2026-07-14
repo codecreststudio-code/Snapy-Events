@@ -41,12 +41,8 @@ interface DashboardStats {
 async function getDashboardStats(orgId: string): Promise<DashboardStats> {
   const supabase = createClient()
 
-  // Run all queries in parallel — eliminates the sequential waterfall
-  const [
-    eventsResult,
-    eventCountResult,
-  ] = await Promise.all([
-    // Recent events with gallery photo counts
+  // Fetch recent events and all event IDs for total host metric aggregation
+  const [eventsResult, allEventsResult] = await Promise.all([
     supabase
       .from("events")
       .select(`id, name, slug, event_date, status, galleries(id, photo_count)`)
@@ -54,23 +50,22 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
       .order("created_at", { ascending: false })
       .limit(5),
 
-    // Total event count
     supabase
       .from("events")
-      .select("id", { count: "exact", head: true })
-      .eq("host_id", orgId),
+      .select("id")
+      .eq("host_id", orgId)
   ])
 
   const events = eventsResult.data || []
-  const allEventIds = events.map((e: any) => e.id)
-  const totalEventCount = eventCountResult.count || 0
+  const allHostEvents = allEventsResult.data || []
+  const allHostEventIds = allHostEvents.map((e: any) => e.id)
+  const totalEventCount = allHostEvents.length
 
-  // Second parallel batch — only if there are events
   let photoCount = 0
   let galleryCount = 0
   let qrCount = 0
 
-  if (allEventIds.length > 0) {
+  if (allHostEventIds.length > 0) {
     const [storageResult, photoCountResult, galleryCountResult, qrCountResult] = await Promise.all([
       supabase
         .from("storage_usage")
@@ -81,17 +76,17 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
       supabase
         .from("photos")
         .select("id", { count: "exact", head: true })
-        .in("event_id", allEventIds),
+        .in("event_id", allHostEventIds),
 
       supabase
         .from("galleries")
         .select("id", { count: "exact", head: true })
-        .in("event_id", allEventIds),
+        .in("event_id", allHostEventIds),
 
       supabase
         .from("qr_codes")
         .select("id", { count: "exact", head: true })
-        .in("event_id", allEventIds),
+        .in("event_id", allHostEventIds),
     ])
 
     photoCount = storageResult.data?.photo_count || photoCountResult.count || 0
