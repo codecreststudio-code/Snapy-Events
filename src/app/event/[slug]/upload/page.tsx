@@ -88,8 +88,9 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
   const [selectedGallery, setSelectedGallery] = useState<string>("")
   const [isUploading, setIsUploading] = useState(false)
   const [guestName, setGuestName] = useState("")
-  const [guestEmail, setGuestEmail] = useState("")
   const [limitError, setLimitError] = useState<string | null>(null)
+  const [showCamera, setShowCamera] = useState(false)
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false)
   const [quotaInfo, setQuotaInfo] = useState<{ uploaded: number; max: number } | null>(null)
 
   const { data: event, isLoading: eventLoading } = useQuery({
