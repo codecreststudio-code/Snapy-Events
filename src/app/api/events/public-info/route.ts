@@ -51,10 +51,12 @@ export const GET = defineRoute({
     const baseGuestLimit = planLimits.guests_limit ?? planLimits.guest_limit ?? fallback.guests
     const baseShotLimit = planLimits.shots_limit ?? planLimits.shot_limit ?? fallback.shots
 
+    const maxGuests = baseGuestLimit + guestBoost
     const hostPhotoLimit = typeof (event.settings as any)?.photo_limit === "number" ? (event.settings as any).photo_limit : null
     const effectiveMaxShots = hostPhotoLimit && hostPhotoLimit > 0
       ? Math.min(baseShotLimit + shotsBoost, hostPhotoLimit)
       : (baseShotLimit + shotsBoost)
+
 
     // Project ONLY public-safe fields. The raw `event` row carries settings,
     // host_id, and host.preferences — never expose those to anonymous callers.
