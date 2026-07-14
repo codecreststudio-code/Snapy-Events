@@ -83,46 +83,44 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     queryFn: () => getEvent(slug),
   })
 
-  useEffect(() => {
-    async function fetchGuestQuota() {
-      if (!event?.id || !guestName.trim()) {
-        setQuotaInfo(null)
-        return
-      }
-      try {
-        // Get plan limits from the public-info endpoint
-        const params = new URLSearchParams({ slug })
-        const infoRes = await fetch(`/api/events/public-info?${params.toString()}`)
-        if (!infoRes.ok) return
-        const { data: infoData } = await infoRes.json()
-        const maxAllowed: number = infoData?.max_shots ?? 25
-
-        // Query this guest's actual upload count directly from Supabase
-        const supabase = createClient()
-        const identifier = guestEmail.trim().toLowerCase() || guestName.trim().toLowerCase()
-        const isEmail = guestEmail.trim().length > 0
-
-        const countQuery = isEmail
-          ? supabase
-              .from("photos")
-              .select("id", { count: "exact", head: true })
-              .eq("event_id", event.id)
-              .eq("uploader_email", identifier)
-          : supabase
-              .from("photos")
-              .select("id", { count: "exact", head: true })
-              .eq("event_id", event.id)
-              .eq("uploader_name", guestName.trim())
-
-        const { count } = await countQuery
-        setQuotaInfo({ uploaded: count ?? 0, max: maxAllowed })
-      } catch (err) {
-        console.error("Failed to calculate quota info", err)
-      }
+  const fetchGuestQuota = useCallback(async () => {
+    if (!event?.id || !guestName.trim()) {
+      setQuotaInfo(null)
+      return
     }
+    try {
+      const params = new URLSearchParams({ slug })
+      const infoRes = await fetch(`/api/events/public-info?${params.toString()}`)
+      if (!infoRes.ok) return
+      const { data: infoData } = await infoRes.json()
+      const maxAllowed: number = infoData?.max_shots ?? 25
 
-    fetchGuestQuota()
+      const supabase = createClient()
+      const identifier = guestEmail.trim().toLowerCase() || guestName.trim().toLowerCase()
+      const isEmail = guestEmail.trim().length > 0
+
+      const countQuery = isEmail
+        ? supabase
+            .from("photos")
+            .select("id", { count: "exact", head: true })
+            .eq("event_id", event.id)
+            .eq("uploader_email", identifier)
+        : supabase
+            .from("photos")
+            .select("id", { count: "exact", head: true })
+            .eq("event_id", event.id)
+            .eq("uploader_name", guestName.trim())
+
+      const { count } = await countQuery
+      setQuotaInfo({ uploaded: count ?? 0, max: maxAllowed })
+    } catch (err) {
+      console.error("Failed to calculate quota info", err)
+    }
   }, [event?.id, slug, guestName, guestEmail])
+
+  useEffect(() => {
+    fetchGuestQuota()
+  }, [fetchGuestQuota])
 
   const { data: galleries, isLoading: galleriesLoading } = useQuery({
     queryKey: ["galleries", event?.id],
@@ -152,19 +150,72 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     }
   }, [])
 
-  const handleFileSelect = useCallback((selectedFiles: FileList | null) => {
+  // Helper to load video/audio metadata duration
+  const getMediaDuration = (file: File): Promise<number> => {
+    return new Promise((resolve) => {
+      const url = URL.createObjectURL(file)
+      const isVideo = file.type.startsWith("video/")
+      const element = document.createElement(isVideo ? "video" : "audio")
+      element.preload = "metadata"
+      element.onloadedmetadata = () => {
+        URL.revokeObjectURL(url)
+        resolve(element.duration || 0)
+      }
+      element.onerror = () => {
+        URL.revokeObjectURL(url)
+        resolve(0)
+      }
+      element.src = url
+    })
+  }
+
+  const handleFileSelect = useCallback(async (selectedFiles: FileList | null) => {
     if (!selectedFiles) return
 
-    const newFiles: UploadFile[] = Array.from(selectedFiles).map((file) => ({
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      file,
-      preview: URL.createObjectURL(file),
-      progress: 0,
-      status: "pending" as const,
-    }))
+    const eventSettings = (event?.settings as any) || {}
+    const maxVideoSecs = eventSettings.video_duration_limit || 30
+    const maxVoiceSecs = eventSettings.voice_note_duration_limit || 30
 
-    setFiles((prev) => [...prev, ...newFiles])
-  }, [])
+    const validFiles: UploadFile[] = []
+
+    for (const file of Array.from(selectedFiles)) {
+      if (file.type.startsWith("video/")) {
+        const dur = await getMediaDuration(file)
+        if (dur > maxVideoSecs + 1) {
+          toast({
+            title: "Video Too Long",
+            description: `Host limit is ${maxVideoSecs}s for video clips. Selected video is ${Math.round(dur)}s.`,
+            variant: "destructive",
+          })
+          continue
+        }
+      }
+
+      if (file.type.startsWith("audio/")) {
+        const dur = await getMediaDuration(file)
+        if (dur > maxVoiceSecs + 1) {
+          toast({
+            title: "Voice Note Too Long",
+            description: `Host limit is ${maxVoiceSecs}s for voice notes. Selected audio is ${Math.round(dur)}s.`,
+            variant: "destructive",
+          })
+          continue
+        }
+      }
+
+      validFiles.push({
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        file,
+        preview: URL.createObjectURL(file),
+        progress: 0,
+        status: "pending" as const,
+      })
+    }
+
+    if (validFiles.length > 0) {
+      setFiles((prev) => [...prev, ...validFiles])
+    }
+  }, [event?.settings])
 
   const handleCameraCapture = useCallback((file: File) => {
     setFiles((prev) => {
@@ -179,6 +230,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     })
     setShowCamera(false)
   }, [])
+
 
   function removeFile(id: string) {
     setFiles((prev) => {
@@ -208,6 +260,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     }
 
     setIsUploading(true)
+    let newlyUploadedCount = 0
 
     try {
       // 1. Quota checks via secure service route
@@ -226,9 +279,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
         const currentGuests = infoData?.current_guests ?? 0
         const currentShots = infoData?.current_shots ?? 0
-        const identifier = (cleanEmail || cleanName.toLowerCase()).toLowerCase()
 
-        // Check if current guest is new (we build a virtual set server-side)
         const isNewGuest = currentShots === 0
 
         // A: Guest limit check
@@ -315,6 +366,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
             throw new Error(msg)
           }
 
+          newlyUploadedCount++
           setFiles((prev) =>
             prev.map((f) =>
               f.id === uploadFile.id
@@ -340,7 +392,14 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
       })
     } finally {
       setIsUploading(false)
+      if (newlyUploadedCount > 0) {
+        setQuotaInfo((prev) =>
+          prev ? { ...prev, uploaded: prev.uploaded + newlyUploadedCount } : prev
+        )
+        fetchGuestQuota()
+      }
     }
+
 
     const successCount = files.filter((f) => f.status === "done").length
     const errorCount = files.filter((f) => f.status === "error").length
