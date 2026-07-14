@@ -27,22 +27,30 @@ export function GuestCaptureModal({ eventId, eventName }: { eventId: string; eve
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!name.trim()) {
-      toast({ title: "Name required", variant: "destructive" })
+    const cleanName = name.trim()
+    const cleanEmail = email.trim()
+    const cleanMobile = mobile.trim()
+
+    if (!cleanName || !cleanEmail || !cleanMobile) {
+      toast({
+        title: "All Fields Required",
+        description: "Please fill in your Name, Mobile Number, and Email Address to enter the memory capsule.",
+        variant: "destructive",
+      })
       return
     }
 
     setLoading(true)
     
     // Save locally for persistence across uploads
-    localStorage.setItem(`snapsy_guest_${eventId}`, JSON.stringify({ name, email, mobile }))
+    localStorage.setItem(`snapsy_guest_${eventId}`, JSON.stringify({ name: cleanName, email: cleanEmail, mobile: cleanMobile }))
     
     // Also save globally for auto-filling upload forms
-    localStorage.setItem("snapsy_last_guest_name", name)
-    if (email) localStorage.setItem("snapsy_last_guest_email", email)
+    localStorage.setItem("snapsy_last_guest_name", cleanName)
+    localStorage.setItem("snapsy_last_guest_email", cleanEmail)
 
-    // Log the access in the database for the event timeline
-    const result = await logGuestAccess(eventId, { name, email, mobile })
+    // Log the access in the database for the event timeline and marketing retargeting leads
+    const result = await logGuestAccess(eventId, { name: cleanName, email: cleanEmail, mobile: cleanMobile })
     
     setLoading(false)
     if (result.success) {
@@ -66,7 +74,7 @@ export function GuestCaptureModal({ eventId, eventName }: { eventId: string; eve
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">Welcome to {eventName}</DialogTitle>
           <DialogDescription>
-            Please check in to view the memory capsule and share your photos.
+            Please check in with your details to view the memory capsule and share your photos.
           </DialogDescription>
         </DialogHeader>
 
@@ -83,28 +91,35 @@ export function GuestCaptureModal({ eventId, eventName }: { eventId: string; eve
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="guestMobile">Mobile Number</Label>
+            <Label htmlFor="guestMobile">Mobile Number <span className="text-red-500">*</span></Label>
             <Input
               id="guestMobile"
+              type="tel"
               placeholder="e.g. +1 234 567 890"
               value={mobile}
               onChange={(e) => setMobile(e.target.value)}
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="guestEmail">Email Address</Label>
+            <Label htmlFor="guestEmail">Email Address <span className="text-red-500">*</span></Label>
             <Input
               id="guestEmail"
               type="email"
               placeholder="e.g. john@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
 
           <div className="pt-4">
-            <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading || !name.trim()}>
+            <Button
+              type="submit"
+              className="w-full h-11 text-base font-semibold bg-[#9333EA] hover:bg-[#7E22CE] text-white"
+              disabled={loading || !name.trim() || !mobile.trim() || !email.trim()}
+            >
               {loading ? "Checking in..." : "Enter Capsule"}
             </Button>
           </div>

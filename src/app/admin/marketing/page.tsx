@@ -27,9 +27,24 @@ type ReferralItem = {
   referrer?: { full_name: string }
 }
 
+type LeadContact = {
+  id: string
+  name: string
+  email: string
+  mobile: string
+  type: "Host" | "Guest Lead"
+  plan: string
+  subStatus?: string
+  lastActive: string
+  eventCountOrName: string
+}
+
 export default function AdminMarketingPage() {
   const [coupons, setCoupons] = useState<CouponItem[]>([])
   const [referrals, setReferrals] = useState<ReferralItem[]>([])
+  const [leads, setLeads] = useState<LeadContact[]>([])
+  const [leadFilter, setLeadFilter] = useState<"all" | "hosts" | "guests">("all")
+  const [searchQuery, setSearchQuery] = useState("")
   const [loading, setLoading] = useState(true)
   const [actioning, setActioning] = useState(false)
 
@@ -43,19 +58,77 @@ export default function AdminMarketingPage() {
   const fetchMarketingData = async () => {
     setLoading(true)
     try {
-      const [couponsRes, referralsRes] = await Promise.all([
+      const [couponsRes, referralsRes, usersRes, accessRes] = await Promise.all([
         supabase.from("coupons").select("id, code, discount_type, discount_value, used_count, is_active, created_at").order("created_at", { ascending: false }),
-        supabase.from("referrals").select("id, status, reward_credited, created_at, referral_code, referrer:users!referrer_user_id(full_name)").order("created_at", { ascending: false }).limit(10)
+        supabase.from("referrals").select("id, status, reward_credited, created_at, referral_code, referrer:users!referrer_user_id(full_name)").order("created_at", { ascending: false }).limit(10),
+        supabase.from("users").select("id, full_name, email, phone_number, plan, role, created_at, subscriptions(plan_id, status)").order("created_at", { ascending: false }),
+        supabase.from("photo_access").select("id, guest_name, guest_email, permissions, accessed_at, event:events(name)").order("accessed_at", { ascending: false }).limit(300)
       ])
 
       if (couponsRes.error) throw couponsRes.error
       setCoupons((couponsRes.data as any) || [])
       setReferrals((referralsRes.data as any) || [])
+
+      const compiledLeads: LeadContact[] = []
+
+      // Add Host Users
+      if (usersRes.data) {
+        usersRes.data.forEach((u: any) => {
+          const activeSub = Array.isArray(u.subscriptions) ? u.subscriptions[0] : u.subscriptions
+          compiledLeads.push({
+            id: `usr-${u.id}`,
+            name: u.full_name || "Host User",
+            email: u.email || "—",
+            mobile: u.phone_number || "—",
+            type: "Host",
+            plan: activeSub?.plan_id || u.plan || "free",
+            subStatus: activeSub?.status || "active",
+            lastActive: new Date(u.created_at).toLocaleDateString(),
+            eventCountOrName: "Host Account",
+          })
+        })
+      }
+
+      // Add Guest Check-in Leads
+      if (accessRes.data) {
+        accessRes.data.forEach((a: any) => {
+          const mobile = a.permissions?.mobile || "—"
+          if (a.guest_email || mobile !== "—") {
+            compiledLeads.push({
+              id: `acc-${a.id}`,
+              name: a.guest_name || "Guest",
+              email: a.guest_email || "—",
+              mobile,
+              type: "Guest Lead",
+              plan: "Guest Lead",
+              subStatus: "Check-in Lead",
+              lastActive: new Date(a.accessed_at).toLocaleDateString(),
+              eventCountOrName: (a.event as any)?.name || "Joined Memory Capsule",
+            })
+          }
+        })
+      }
+
+      setLeads(compiledLeads)
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" })
     } finally {
       setLoading(false)
     }
+  }
+
+  const exportLeadsCSV = () => {
+    if (leads.length === 0) return
+    const headers = "Name,Email,Mobile,Type,Plan,Status,Last Active,Event Context\n"
+    const rows = leads.map(l => `"${l.name}","${l.email}","${l.mobile}","${l.type}","${l.plan}","${l.subStatus || ''}","${l.lastActive}","${l.eventCountOrName}"`).join("\n")
+    const blob = new Blob([headers + rows], { type: "text/csv" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `snapsy_customer_leads_${Date.now()}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: "Export Complete", description: `Exported ${leads.length} customer leads to CSV.` })
   }
 
   useEffect(() => {
@@ -106,14 +179,138 @@ export default function AdminMarketingPage() {
     <main className="px-6 py-8 space-y-6 bg-slate-50 min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Marketing & Promotion</h1>
-          <p className="text-sm text-slate-500 mt-1">Configure active promotional coupons, discounts, and track user referral points.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Marketing & Customer Retargeting</h1>
+          <p className="text-sm text-slate-500 mt-1">Manage promotional coupons, customer retargeting contacts, subscription statuses, and referral logs.</p>
         </div>
-        <Button onClick={fetchMarketingData} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
-          <RefreshCw className="h-4 w-4 text-slate-500" />
-          <span>Refresh</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={exportLeadsCSV} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
+            <DownloadIcon className="h-4 w-4 text-emerald-600" />
+            <span>Export CSV</span>
+          </Button>
+          <Button onClick={fetchMarketingData} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
+            <RefreshCw className="h-4 w-4 text-slate-500" />
+            <span>Refresh</span>
+          </Button>
+        </div>
       </div>
+
+      {/* Customer & Retargeting Lead Directory Card */}
+      <Card className="bg-white border-slate-200 overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
+          <div className="flex items-center gap-2">
+            <Users className="h-4.5 w-4.5 text-violet-600" />
+            <h3 className="font-bold text-slate-800 text-sm">Customer & Retargeting Contacts</h3>
+            <span className="bg-violet-100 text-violet-750 text-[10px] font-bold px-2 py-0.5 rounded-full border border-violet-200">
+              {leads.length} Total
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Input
+                placeholder="Search name, email, phone..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-8 text-xs w-48 sm:w-64 bg-white border-slate-200"
+              />
+            </div>
+            <select
+              value={leadFilter}
+              onChange={(e: any) => setLeadFilter(e.target.value)}
+              className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-violet-500 shadow-sm"
+            >
+              <option value="all">All Contacts</option>
+              <option value="hosts">Hosts Only</option>
+              <option value="guests">Guest Leads</option>
+            </select>
+          </div>
+        </div>
+
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="p-12 flex justify-center items-center">
+              <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+            </div>
+          ) : leads.length === 0 ? (
+            <div className="p-12 text-center text-slate-400 text-xs">No customer check-in leads captured yet.</div>
+          ) : (
+            <div className="overflow-x-auto max-h-[380px] overflow-y-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
+                  <tr className="text-slate-400 font-bold uppercase tracking-wider">
+                    <th className="p-3.5">Customer / Lead</th>
+                    <th className="p-3.5">Contact Email</th>
+                    <th className="p-3.5">Mobile Number</th>
+                    <th className="p-3.5">Subscription Plan</th>
+                    <th className="p-3.5">Context / Event</th>
+                    <th className="p-3.5 text-right">Retarget Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-650 font-medium">
+                  {leads
+                    .filter((l) => {
+                      if (leadFilter === "hosts" && l.type !== "Host") return false
+                      if (leadFilter === "guests" && l.type !== "Guest Lead") return false
+                      if (searchQuery.trim()) {
+                        const q = searchQuery.toLowerCase()
+                        return (
+                          l.name.toLowerCase().includes(q) ||
+                          l.email.toLowerCase().includes(q) ||
+                          l.mobile.toLowerCase().includes(q) ||
+                          l.plan.toLowerCase().includes(q)
+                        )
+                      }
+                      return true
+                    })
+                    .slice(0, 100)
+                    .map((lead) => (
+                      <tr key={lead.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-3.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-slate-900">{lead.name}</span>
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
+                              lead.type === "Host" ? "bg-violet-50 text-violet-750 border-violet-200" : "bg-blue-50 text-blue-750 border-blue-200"
+                            }`}>
+                              {lead.type}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-3.5 font-mono text-slate-700">{lead.email}</td>
+                        <td className="p-3.5 font-mono text-slate-700">{lead.mobile}</td>
+                        <td className="p-3.5">
+                          <span className="font-bold uppercase tracking-wider text-[10px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full">
+                            {lead.plan}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-slate-500">{lead.eventCountOrName}</td>
+                        <td className="p-3.5 text-right space-x-2">
+                          {lead.email !== "—" && (
+                            <a
+                              href={`mailto:${lead.email}?subject=Exclusive Offer from Snapsy`}
+                              className="inline-flex items-center gap-1 text-[11px] font-bold text-violet-600 hover:text-violet-800 underline"
+                            >
+                              Email
+                            </a>
+                          )}
+                          {lead.mobile !== "—" && (
+                            <a
+                              href={`https://wa.me/${lead.mobile.replace(/\D/g, "")}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-800 underline"
+                            >
+                              WhatsApp
+                            </a>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Coupons List */}
