@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Card } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Play, Volume2, X, Download } from "lucide-react"
@@ -9,6 +10,7 @@ type Photo = { id: string; storage_path: string; thumbnail_path: string | null; 
 
 function isVideo(p: Photo) { return p.mime_type?.startsWith("video/") }
 function isAudio(p: Photo) { return p.mime_type?.startsWith("audio/") }
+
 
 function MediaThumbnail({ p }: { p: Photo }) {
   if (isVideo(p)) {
@@ -30,9 +32,20 @@ function MediaThumbnail({ p }: { p: Photo }) {
       </div>
     )
   }
-  return p.url
-    ? <img src={p.url} alt={p.original_filename} className="h-auto w-full object-cover" loading="lazy" />
-    : <div className="aspect-square bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20" />
+  return p.url ? (
+    <div className="relative aspect-square w-full overflow-hidden">
+      <Image
+        src={p.url}
+        alt={p.original_filename}
+        fill
+        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        className="object-cover"
+        loading="lazy"
+      />
+    </div>
+  ) : (
+    <div className="aspect-square bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20" />
+  )
 }
 
 function MediaLightbox({ p, onClose }: { p: Photo; onClose: () => void }) {

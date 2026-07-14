@@ -1,30 +1,12 @@
-"use client"
-
+import { redirect } from "next/navigation"
+import { getAuthContext } from "@/lib/auth/session"
 import { DashboardSidebar } from "@/lib/components/layout"
-import { useAuth } from "@/lib/hooks"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth()
-  const router = useRouter()
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const ctx = await getAuthContext()
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/login")
-    }
-  }, [user, isLoading, router])
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    )
-  }
-
-  if (!user) {
-    return null
+  if (!ctx.user) {
+    redirect("/login")
   }
 
   return (

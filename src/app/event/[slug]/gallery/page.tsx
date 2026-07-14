@@ -184,13 +184,27 @@ function PhotoGrid({
             onClick={() => openLightbox(index)}
             className="relative aspect-square overflow-hidden rounded-lg bg-muted group"
           >
-            {photo.thumbnail_path || photo.storage_path ? (
+             {photo.thumbnail_path || photo.storage_path ? (
               <>
-                <img
-                  src={getMediaUrl(photo.thumbnail_path || photo.storage_path)}
-                  alt={photo.original_filename || "Photo"}
-                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                />
+                {isVideo(photo) || isAudio(photo) ? (
+                  // Video/audio: keep img for thumbnails (dynamic signed URLs may not work with next/image)
+                  <img
+                    src={getMediaUrl(photo.thumbnail_path || photo.storage_path)}
+                    alt={photo.original_filename || "Photo"}
+                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    loading="lazy"
+                  />
+                ) : (
+                  <Image
+                    src={getMediaUrl(photo.thumbnail_path || photo.storage_path)}
+                    alt={photo.original_filename || "Photo"}
+                    fill
+                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover transition-transform group-hover:scale-105"
+                    loading={index < 8 ? "eager" : "lazy"}
+                    priority={index < 4}
+                  />
+                )}
                 {isVideo(photo) && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
