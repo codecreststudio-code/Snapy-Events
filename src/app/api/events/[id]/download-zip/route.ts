@@ -52,25 +52,42 @@ export async function GET(
       )
     }
 
-    // 3. Fetch all approved photos in the event
+    // 3. Fetch approved photos only — unapproved drafts must never appear in downloads
     const { data: photos, error: photoErr } = await supabase
       .from("photos")
-      .select("id, storage_path, original_filename")
+      .select("id, storage_path, original_filename, file_size")
       .eq("event_id", eventId)
+      .eq("is_approved", true)
+      .order("created_at", { ascending: true })
 
     if (photoErr || !photos || photos.length === 0) {
-      return NextResponse.json({ error: "No photos available to download" }, { status: 400 })
+      return NextResponse.json({ error: "No approved photos available to download" }, { status: 400 })
     }
 
-    const MAX_ZIP_BYTES = 500 * 1024 * 1024
+    // Hard limits to prevent OOM — each file is buffered in-process.
+    // A streaming ZIP library (archiver) would remove this cap; for now
+    // we serve the first N files within the byte budget.
+    const MAX_ZIP_FILES = 50
+    const MAX_ZIP_BYTES = 200 * 1024 * 1024 // 200 MB cap (safe for Vercel 1 GB limit)
+
     const zip = new JSZip()
     const folderName = `${event.slug || "event"}-highres-photos`
     const folder = zip.folder(folderName)
     let totalBytes = 0
+    let filesAdded = 0
 
-    // Download each photo from storage and attach to zip archive
+    // Download each approved photo from storage and attach to zip archive.
+    // Pre-check the DB-stored file_size before downloading to avoid pulling
+    // a buffer we'd only have to discard.
     for (let i = 0; i < photos.length; i++) {
+      if (filesAdded >= MAX_ZIP_FILES) break
+
       const p = photos[i]
+      const knownSize = Number(p.file_size ?? 0)
+
+      // Skip files that alone would bust the byte budget
+      if (knownSize > 0 && totalBytes + knownSize > MAX_ZIP_BYTES) break
+
       try {
         const { data: fileData, error: downloadErr } = await supabase.storage
           .from("photos")
@@ -82,13 +99,14 @@ export async function GET(
           const filename = p.original_filename || `photo-${i + 1}.jpg`
           folder?.file(filename, buffer)
           totalBytes += buffer.byteLength
+          filesAdded++
         }
       } catch (err) {
         logger.error("Failed to download photo into ZIP", { photoId: p.id, error: String(err) })
       }
     }
 
-    if (totalBytes === 0) {
+    if (filesAdded === 0) {
       return NextResponse.json({ error: "No photos could be downloaded" }, { status: 500 })
     }
 

@@ -85,22 +85,37 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
   useEffect(() => {
     async function fetchGuestQuota() {
-      if (!event?.id || !guestName.trim()) return
+      if (!event?.id || !guestName.trim()) {
+        setQuotaInfo(null)
+        return
+      }
       try {
+        // Get plan limits from the public-info endpoint
         const params = new URLSearchParams({ slug })
-        const identifier = guestEmail.trim().toLowerCase() || guestName.trim().toLowerCase()
-        params.set("guest_email", identifier)
-
         const infoRes = await fetch(`/api/events/public-info?${params.toString()}`)
-        let maxAllowed = 25
-        let guestCount = 0
-        if (infoRes.ok) {
-          const { data: infoData } = await infoRes.json()
-          if (infoData?.max_shots) maxAllowed = infoData.max_shots
-          if (typeof infoData?.current_shots === "number") guestCount = infoData.current_shots
-        }
+        if (!infoRes.ok) return
+        const { data: infoData } = await infoRes.json()
+        const maxAllowed: number = infoData?.max_shots ?? 25
 
-        setQuotaInfo({ uploaded: guestCount, max: maxAllowed })
+        // Query this guest's actual upload count directly from Supabase
+        const supabase = createClient()
+        const identifier = guestEmail.trim().toLowerCase() || guestName.trim().toLowerCase()
+        const isEmail = guestEmail.trim().length > 0
+
+        const countQuery = isEmail
+          ? supabase
+              .from("photos")
+              .select("id", { count: "exact", head: true })
+              .eq("event_id", event.id)
+              .eq("uploader_email", identifier)
+          : supabase
+              .from("photos")
+              .select("id", { count: "exact", head: true })
+              .eq("event_id", event.id)
+              .eq("uploader_name", guestName.trim())
+
+        const { count } = await countQuery
+        setQuotaInfo({ uploaded: count ?? 0, max: maxAllowed })
       } catch (err) {
         console.error("Failed to calculate quota info", err)
       }

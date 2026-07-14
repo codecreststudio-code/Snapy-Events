@@ -257,28 +257,32 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     queryKey: ["event-photos", event?.id],
     queryFn: () => getEventPhotos(event!.id),
     enabled: !!event?.id,
-    refetchInterval: 3000,
+    // No refetchInterval — Supabase Realtime (below) invalidates this query
+    // instantly on every photo INSERT/UPDATE/DELETE. Polling would double DB load.
   })
 
   const { data: faceClusters = [] } = useQuery({
     queryKey: ["face-clusters", event?.id],
     queryFn: () => getFaceClusters(event!.id),
     enabled: !!event?.id,
-    refetchInterval: 5000,
+    // No realtime listener for face_clusters — keep a 10s safety-net poll.
+    refetchInterval: 10000,
   })
 
   const { data: liveWallMessages = [] } = useQuery({
     queryKey: ["live-wall-messages", event?.id],
     queryFn: () => getLiveWallMessages(event!.id),
     enabled: !!event?.id,
-    refetchInterval: 3000,
+    // No refetchInterval — Supabase Realtime invalidates this query on
+    // every live_wall_items change. Polling would double DB load.
   })
 
   const { data: photoAccess = [] } = useQuery({
     queryKey: ["photo-access", event?.id],
     queryFn: () => getPhotoAccess(event!.id),
     enabled: !!event?.id,
-    refetchInterval: 5000,
+    // No realtime listener for photo_access — keep a 10s safety-net poll.
+    refetchInterval: 10000,
   })
 
   // Supabase Realtime live stream listener for instant push updates

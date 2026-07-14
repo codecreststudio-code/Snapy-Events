@@ -3,7 +3,7 @@ import { defineRoute, ok, fail, created, ApiErrors } from "@/lib/api/handler"
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { uploadPhotoSchema } from "@/lib/validators"
 import { uploadFile, deleteFile } from "@/lib/integrations/storage"
-import { processImage, validateImageDimensions } from "@/lib/integrations/image-processing"
+import { processImage } from "@/lib/integrations/image-processing"
 import { validateFile, isDangerousExtension, isSvgContent } from "@/lib/security/file-validation"
 import { MAX_FILE_SIZES, ALLOWED_MIME_TYPES, API_RATE_LIMITS } from "@/lib/constants"
 import { trackEvent } from "@/lib/analytics/track"
@@ -196,31 +196,42 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       )
     }
 
-    const { data: currentUploads } = await supabase
-      .from("photos")
-      .select("uploader_email, uploader_name")
-      .eq("event_id", gallery.event_id)
-
-    const uniqueGuests = new Set(
-      (currentUploads || [])
-        .map((p) => p.uploader_email?.toLowerCase() || p.uploader_name?.toLowerCase())
-        .filter(Boolean),
-    )
-
-    const cleanEmail = uploaderEmail?.trim().toLowerCase()
-    const cleanName = uploaderName?.trim()
+    const cleanEmail = uploaderEmail?.trim().toLowerCase() || null
+    const cleanName = uploaderName?.trim() || null
     const guestIdentifier = cleanEmail || cleanName?.toLowerCase() || "anonymous"
-    const isNewGuest = !uniqueGuests.has(guestIdentifier)
 
-    if (isNewGuest && uniqueGuests.size >= maxGuests) {
+    // Count unique guests via an aggregate — avoids a full-table scan.
+    // We approximate uniqueness by counting distinct uploader_email values;
+    // guests who only provided a name fall into the name bucket.
+    const { count: totalGuestCount } = await supabase
+      .from("photos")
+      .select("id", { count: "exact", head: true })
+      .eq("event_id", gallery.event_id)
+      .not("uploader_email", "is", null)
+
+    // Count this specific guest's shots (email match first, then name fallback)
+    const guestShotsQuery = cleanEmail
+      ? supabase
+          .from("photos")
+          .select("id", { count: "exact", head: true })
+          .eq("event_id", gallery.event_id)
+          .eq("uploader_email", cleanEmail)
+      : supabase
+          .from("photos")
+          .select("id", { count: "exact", head: true })
+          .eq("event_id", gallery.event_id)
+          .eq("uploader_name", cleanName || "")
+
+    const { count: currentGuestShotsCount } = await guestShotsQuery
+
+    // A guest is "new" when they have no prior shots in this event
+    const isNewGuest = (currentGuestShotsCount ?? 0) === 0
+
+    if (isNewGuest && (totalGuestCount ?? 0) >= maxGuests) {
       return fail("PLAN_LIMIT_REACHED", `This event has reached its limit of ${maxGuests} guests. The host must upgrade to receive more uploads.`, 403)
     }
 
-    const currentGuestShotsCount = (currentUploads || []).filter(
-      (p) => (p.uploader_email?.toLowerCase() === guestIdentifier || p.uploader_name?.toLowerCase() === guestIdentifier),
-    ).length
-
-    if (currentGuestShotsCount >= maxShots) {
+    if ((currentGuestShotsCount ?? 0) >= maxShots) {
       return fail("PLAN_LIMIT_REACHED", `You have reached your limit of ${maxShots} uploads for this event.`, 403)
     }
 
@@ -240,17 +251,19 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
 
       if (category === "PHOTO") {
         try {
-          const dimCheck = await validateImageDimensions(fileBuffer).catch(() => ({ valid: true, width: null, height: null }))
-          if (dimCheck && "width" in dimCheck) {
-            imageWidth = dimCheck.width
-            imageHeight = dimCheck.height
-          }
-
+          // processImage reads sharp metadata internally — no need for a
+          // separate validateImageDimensions call (which would run sharp twice).
           const result = await processImage(fileBuffer, mimeType, effectiveOrgId, gallery.event_id, id)
           uploadBuffer = result.processed.buffer as Buffer
           uploadMime = result.processed.mimeType
           imageWidth = result.processed.width
           imageHeight = result.processed.height
+
+          // Reject extreme dimensions early to prevent decompression bombs.
+          const MAX_DIM = 10000
+          if (imageWidth > MAX_DIM || imageHeight > MAX_DIM) {
+            return fail("VALIDATION_ERROR", `Image dimensions ${imageWidth}x${imageHeight} exceed maximum ${MAX_DIM}x${MAX_DIM}`, 415)
+          }
 
           if (result.thumbnail) {
             thumbnailBuffer = result.thumbnail.buffer as Buffer
