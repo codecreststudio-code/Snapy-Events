@@ -90,37 +90,6 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
   const [guestName, setGuestName] = useState("")
   const [guestEmail, setGuestEmail] = useState("")
   const [limitError, setLimitError] = useState<string | null>(null)
-  const [showCamera, setShowCamera] = useState(false)
-  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false)
-  const [showTextMessageModal, setShowTextMessageModal] = useState(false)
-  const [textMessage, setTextMessage] = useState("")
-
-  const handleSendTextMessage = () => {
-    if (!textMessage.trim()) return
-    const blob = new Blob([textMessage.trim()], { type: "text/plain" })
-    const file = new File([blob], `message_${Date.now()}.txt`, { type: "text/plain" })
-    
-    setFiles((prev) => [
-      ...prev,
-      {
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        file,
-        preview: "",
-        progress: 0,
-        status: "pending" as const,
-      },
-    ])
-    
-    setTextMessage("")
-    setShowTextMessageModal(false)
-    toast({
-      title: "Message Added to Queue",
-      description: "Click 'Upload Media' button to send your wish to the host!",
-    })
-  }
-
-
-
   const [quotaInfo, setQuotaInfo] = useState<{ uploaded: number; max: number } | null>(null)
 
   const { data: event, isLoading: eventLoading } = useQuery({
@@ -136,7 +105,9 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     try {
       const params = new URLSearchParams({ slug })
       const infoRes = await fetch(`/api/events/public-info?${params.toString()}`)
-      if (!infoRes.ok) return
+      const contentType = infoRes.headers.get("content-type") || ""
+      if (!infoRes.ok || !contentType.includes("application/json")) return
+
       const { data: infoData } = await infoRes.json()
       const maxAllowed: number = infoData?.max_shots ?? 25
 
@@ -668,37 +639,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 />
               )}
 
-              {showTextMessageModal && (
-                <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-                  <div className="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-[#EAE5DF]">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <MessageSquare className="h-5 w-5 text-[#9333EA]" />
-                        <h3 className="font-semibold text-base text-[#1C1A17]">Write Guestbook Wish</h3>
-                      </div>
-                      <Button variant="ghost" size="icon" onClick={() => setShowTextMessageModal(false)} className="rounded-full">
-                        <X className="h-5 w-5 text-stone-400" />
-                      </Button>
-                    </div>
-                    <textarea
-                      placeholder="Write your congratulations, wishes, or notes for the host..."
-                      value={textMessage}
-                      onChange={(e) => setTextMessage(e.target.value)}
-                      rows={4}
-                      className="w-full rounded-xl border border-[#EAE5DF] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA] text-[#1C1A17]"
-                    />
-                    <div className="flex justify-end gap-3 pt-2">
-                      <Button variant="ghost" onClick={() => setShowTextMessageModal(false)}>Cancel</Button>
-                      <Button onClick={handleSendTextMessage} className="bg-[#9333EA] hover:bg-[#7E22CE] text-white rounded-xl gap-2 font-medium">
-                        <Send className="h-4 w-4" />
-                        Add Message
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Card 1: Take Photo / Video */}
                 <div
                   className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#9333EA] hover:bg-[#9333EA]/5 transition-all cursor-pointer group"
@@ -732,24 +673,6 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                       <p className="font-medium text-[#1C1A17]">Record Voice Note</p>
                       <p className="text-xs text-[#9C958E] mt-1">
                         Leave vocal wishes & audio notes up to {voiceLimit}s
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Card 3: Send Guest Message */}
-                {allowMessages && (
-                  <div
-                    className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-pink-500 hover:bg-pink-500/5 transition-all cursor-pointer group"
-                    onClick={() => setShowTextMessageModal(true)}
-                  >
-                    <div className="p-4 rounded-full bg-white group-hover:bg-pink-500/20 transition-colors border border-transparent group-hover:border-pink-500/30">
-                      <MessageSquare className="h-8 w-8 text-[#9C958E] group-hover:text-pink-500" />
-                    </div>
-                    <div className="text-center">
-                      <p className="font-medium text-[#1C1A17]">Send Guest Message</p>
-                      <p className="text-xs text-[#9C958E] mt-1">
-                        Write warm wishes for the host
                       </p>
                     </div>
                   </div>

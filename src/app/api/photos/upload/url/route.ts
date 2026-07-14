@@ -15,6 +15,9 @@ const bodySchema = z.object({
 })
 
 function getMimeCategory(mime: string): "PHOTO" | "VIDEO" | "AUDIO" | null {
+  if (!mime || mime.startsWith("image/") || mime === "application/octet-stream") return "PHOTO"
+  if (mime.startsWith("video/")) return "VIDEO"
+  if (mime.startsWith("audio/")) return "AUDIO"
   if ((ALLOWED_MIME_TYPES.PHOTO as readonly string[]).includes(mime)) return "PHOTO"
   if ((ALLOWED_MIME_TYPES.VIDEO as readonly string[]).includes(mime)) return "VIDEO"
   if ((ALLOWED_MIME_TYPES.AUDIO as readonly string[]).includes(mime)) return "AUDIO"
