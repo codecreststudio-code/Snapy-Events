@@ -295,7 +295,8 @@ export function NewEventForm() {
         name: name || "Celebration",
         slug,
         description: `Experience created with Snapsy.`,
-        event_type: eventType,
+        event_type: eventType === "custom" && customEventTypeName.trim() ? customEventTypeName.trim() : eventType,
+        custom_event_type_name: eventType === "custom" ? customEventTypeName.trim() : null,
         event_date: new Date().toISOString(),
         end_date: calculatedEndDate,
         venue: "Virtual Room",
@@ -1338,7 +1339,7 @@ export function NewEventForm() {
                     <div className={`flex flex-col gap-1 text-[9px] ${currentTheme.subtextColor}`}>
                       <div className="flex items-center gap-1.5">
                         <CalendarIcon className={`h-3 w-3 ${currentTheme.accentColor}`} />
-                        <span>Locks: {endDate || "Oct 12, 2026"} at {endTime}</span>
+                        <span>Locks: {endDate ? formatDate(endDate) : "Oct 12, 2026"} at {endTime}</span>
                       </div>
                       {capsuleEnabled && (
                         <div className={`flex items-center gap-1.5 font-semibold ${currentTheme.accentColor}`}>
