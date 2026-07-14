@@ -74,6 +74,9 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       if (!validation.valid) return fail("VALIDATION_ERROR", validation.error!, 415)
     }
 
+    // Guests may never self-approve; only an authenticated host action approves.
+    if (!auth?.user?.id) approvedFlag = false
+
     if (isDangerousExtension(originalFilename)) return fail("VALIDATION_ERROR", "File type not allowed", 415)
 
     const category = getMimeCategory(mimeType)
@@ -107,6 +110,24 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const event = gallery.event as any
     const eventObj = Array.isArray(event) ? event[0] : event
     const hostId = eventObj?.host_id
+
+    // Presigned-upload confirm (JSON branch): the client hands us a storage_path
+    // and file_size. Trusting the path lets a guest reference another tenant's
+    // objects (IDOR); trusting the size lets them dodge the storage quota. Pin
+    // the path to this gallery's prefix and read the real size from storage.
+    if (preUploadedPath) {
+      const prefix = `${hostId || "anon"}/${gallery.event_id}/${id}/`
+      if (!preUploadedPath.startsWith(prefix)) {
+        return fail("VALIDATION_ERROR", "storage_path is outside this gallery", 422)
+      }
+      const slash = preUploadedPath.lastIndexOf("/")
+      const dir = preUploadedPath.slice(0, slash)
+      const fname = preUploadedPath.slice(slash + 1)
+      const { data: objs } = await supabase.storage.from("photos").list(dir, { search: fname, limit: 1 })
+      const realSize = objs?.find((o) => o.name === fname)?.metadata?.size
+      if (realSize == null) return fail("VALIDATION_ERROR", "Uploaded object not found in storage", 422)
+      fileSize = Number(realSize)
+    }
 
     const { data: hostProfile } = await supabase
       .from("users")
@@ -244,18 +265,6 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       const fileId = crypto.randomUUID()
       const ext = uploadMime === "image/jpeg" ? "jpg" : uploadMime.split("/").pop() || "bin"
       const generatedPath = `${effectiveOrgId}/${gallery.event_id}/${id}/${fileId}.${ext}`
-
-      try {
-        await supabase.storage.updateBucket("photos", {
-          public: true,
-          allowedMimeTypes: [
-            "image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "image/gif",
-            "video/mp4", "video/quicktime", "video/webm", "video/x-msvideo", "video/3gpp",
-            "audio/mpeg", "audio/mp4", "audio/wav", "audio/webm", "audio/ogg", "audio/m4a", "audio/aac"
-          ],
-          fileSizeLimit: 52428800, // 50 MB limit
-        })
-      } catch {}
 
       const uploadBlob = new Blob([new Uint8Array(uploadBuffer)], { type: uploadMime })
       const uploadOpts = { bucket: "PHOTOS" as const, path: generatedPath, file: uploadBlob, contentType: uploadMime, cacheControl: "31536000" }

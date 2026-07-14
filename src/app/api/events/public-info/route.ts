@@ -54,44 +54,21 @@ export const GET = defineRoute({
     const maxGuests = baseGuestLimit + guestBoost
     const maxShots = baseShotLimit + shotsBoost
 
-    // Optional: return current guest-shot counts for quota checks
-    const guestEmail = url.searchParams.get("guest_email")
-    const guestName = url.searchParams.get("guest_name")
-    let currentInfo: { current_guests: number; current_shots: number } | undefined
-
-    if (guestEmail || guestName) {
-      const { data: allPhotos } = await supabase
-        .from("photos")
-        .select("uploader_email, uploader_name")
-        .eq("event_id", event.id)
-
-      if (allPhotos) {
-        const uniqueGuests = new Set(
-          allPhotos
-            .map((p) => (p.uploader_email ?? p.uploader_name ?? "").toLowerCase())
-            .filter(Boolean)
-        )
-
-        const identifier = (guestEmail ?? guestName ?? "").toLowerCase()
-        const currentShots = allPhotos.filter(
-          (p) =>
-            p.uploader_email?.toLowerCase() === identifier ||
-            p.uploader_name?.toLowerCase() === identifier
-        ).length
-
-        currentInfo = {
-          current_guests: uniqueGuests.size,
-          current_shots: currentShots,
-        }
-      }
-    }
-
+    // Project ONLY public-safe fields. The raw `event` row carries settings,
+    // host_id, and host.preferences — never expose those to anonymous callers.
+    // The former ?guest_email= lookup was a PII presence oracle and is removed;
+    // per-guest quota is enforced server-side at upload time.
     return ok({
-      event,
+      event: {
+        id: event.id,
+        name: event.name,
+        slug: event.slug,
+        end_date: event.end_date,
+        status: event.status,
+      },
       plan_id: planId,
       max_guests: maxGuests,
       max_shots: maxShots,
-      ...(currentInfo && currentInfo),
     })
   },
 }).GET

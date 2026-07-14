@@ -11,9 +11,12 @@ export const metadata = {
 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  // Verify administrator access on server side (also guarded by middleware)
+  // Verify administrator access on server side. A logged-in non-admin has no
+  // business in the admin tree — bounce them to the app (loop-safe: the login
+  // page is reached by unauthenticated visitors, who have no ctx.user here).
   const ctx = await getAuthContext()
-  
+  if (ctx.user && !ctx.isAdmin) redirect("/")
+
   let needsMfa = false
   let theme = "light"
   if (ctx.user) {

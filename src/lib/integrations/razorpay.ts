@@ -84,6 +84,10 @@ export async function fetchRazorpaySubscription(subscriptionId: string) {
   return client().subscriptions.fetch(subscriptionId)
 }
 
+export async function fetchRazorpayOrder(orderId: string) {
+  return client().orders.fetch(orderId)
+}
+
 export async function fetchRazorpayInvoice(invoiceId: string) {
   return client().invoices.fetch(invoiceId)
 }

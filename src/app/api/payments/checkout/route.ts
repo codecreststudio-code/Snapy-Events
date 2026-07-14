@@ -74,7 +74,12 @@ export async function calculatePrice(
   if (couponCode) {
     const sb = await adminDb()
     const { data: coupon } = await sb.from("coupons").select("*").eq("code", couponCode).eq("is_active", true).single()
-    if (coupon) {
+    const now = Date.now()
+    const notExpired = !coupon?.valid_until || new Date(coupon.valid_until).getTime() > now
+    const notStarted = !coupon?.valid_from || new Date(coupon.valid_from).getTime() <= now
+    const underMaxUses =
+      coupon?.max_uses == null || (coupon.used_count || 0) < coupon.max_uses
+    if (coupon && notExpired && notStarted && underMaxUses) {
       if (coupon.discount_type === "percentage") {
         price = price - (price * (coupon.discount_value / 100))
       } else {
@@ -147,6 +152,7 @@ export const POST = defineRoute({
           guest_boost: String(body.guest_boost),
           shots_boost: String(body.shots_boost),
           currency: targetCurrency,
+          ...(body.coupon_code ? { coupon_code: body.coupon_code } : {}),
         },
       })
 

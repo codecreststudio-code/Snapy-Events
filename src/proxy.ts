@@ -115,7 +115,7 @@ export async function proxy(request: NextRequest) {
         "default-src 'self'",
         "img-src 'self' data: blob: https:",
         "media-src 'self' blob:",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://*.razorpay.com",
+        "script-src 'self' 'unsafe-inline' https://*.supabase.co https://*.razorpay.com",
         "style-src 'self' 'unsafe-inline'",
         "font-src 'self' data: https://*.gstatic.com",
         "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://*.razorpay.com https://api.razorpay.com https://*.resend.com https://graph.facebook.com",
@@ -145,7 +145,7 @@ export async function proxy(request: NextRequest) {
         .eq("id", user.id)
         .single()
 
-      if (!profile?.is_admin && profile?.role !== "owner") {
+      if (!profile?.is_admin) {
         const url = request.nextUrl.clone()
         url.pathname = "/"
         return NextResponse.redirect(url)

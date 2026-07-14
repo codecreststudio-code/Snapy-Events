@@ -146,15 +146,18 @@ export default async function BlogPostPage({ params }: Props) {
     ],
   }
 
+  const safeJson = (obj: unknown) =>
+    JSON.stringify(obj).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026")
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJson(jsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJson(breadcrumbLd) }}
       />
       <BlogPostClient post={post} related={related} />
     </>

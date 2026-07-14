@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "src/app/api/events/[id]/download-zip/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/ai/faces/batch-process/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/photos/upload/route.ts": {
+      "maxDuration": 120
+    }
+  },
+  "$comment": "maxDuration:300 requires a Vercel Pro plan (Hobby caps at 60s). Pin `regions` to your Supabase region (e.g. \"bom1\", \"sin1\") to cut DB round-trip latency — omitted here because it depends on your project."
+}

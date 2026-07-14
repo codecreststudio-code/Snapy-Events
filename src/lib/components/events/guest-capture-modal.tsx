@@ -54,13 +54,14 @@ export function GuestCaptureModal({ eventId, eventName }: { eventId: string; eve
     }
   }
 
-  // Use preventScroll and interactOutside prevent to make it mandatory
+  // Check-in gating is enforced server-side; the dialog must still be closable
+  // by keyboard/AT users (WCAG 2.1.2 — no keyboard trap). We keep click-outside
+  // disabled to discourage accidental dismissal, but ESC and the close button work.
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent 
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent
         className="sm:max-w-[425px]"
         onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">Welcome to {eventName}</DialogTitle>

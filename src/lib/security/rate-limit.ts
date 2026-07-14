@@ -40,22 +40,21 @@ function localLimit(key: string, limit: number, windowSeconds: number): LimitRes
 }
 
 async function upstashLimit(key: string, limit: number, windowSeconds: number): Promise<LimitResult> {
-  const url = `${serverEnv.UPSTASH_REDIS_REST_URL}/incr/${encodeURIComponent(key)}`
-  const res = await fetch(url, {
+  // Pipeline: INCR + EXPIRE NX (set TTL only when the key is new) — single round-trip, atomic.
+  const res = await fetch(`${serverEnv.UPSTASH_REDIS_REST_URL}/pipeline`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${serverEnv.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${serverEnv.UPSTASH_REDIS_REST_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify([["INCR", key], ["EXPIRE", key, windowSeconds, "NX"]]),
   })
   if (!res.ok) {
-    // Fail open
+    // Fail open — Upstash unavailable should not block legitimate requests
     return { allowed: true, remaining: limit, resetIn: windowSeconds }
   }
-  const data: { result: number } = await res.json()
-  const count = data.result
-  // Expire the bucket
-  await fetch(
-    `${serverEnv.UPSTASH_REDIS_REST_URL}/expire/${encodeURIComponent(key)}/${windowSeconds}`,
-    { method: "POST", headers: { Authorization: `Bearer ${serverEnv.UPSTASH_REDIS_REST_TOKEN}` } },
-  ).catch(() => null)
+  const [incrResult]: [{ result: number }] = await res.json()
+  const count = incrResult.result
   const allowed = count <= limit
   return { allowed, remaining: Math.max(0, limit - count), resetIn: windowSeconds }
 }

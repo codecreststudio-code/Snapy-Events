@@ -2,7 +2,7 @@ import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createServiceClient } from "@/lib/supabase/server"
 import { isDangerousExtension } from "@/lib/security/file-validation"
-import { MAX_FILE_SIZES, ALLOWED_MIME_TYPES } from "@/lib/constants"
+import { MAX_FILE_SIZES, ALLOWED_MIME_TYPES, API_RATE_LIMITS } from "@/lib/constants"
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
 
 const bodySchema = z.object({
@@ -25,6 +25,7 @@ export const POST = defineRoute({
   method: "POST",
   body: bodySchema,
   requireAuth: false,
+  rateLimit: { key: "photos:upload-url", limit: API_RATE_LIMITS.UPLOAD_PHOTOS, windowSeconds: 60 },
   handler: async ({ body }) => {
     const supabase = await createServiceClient()
 
@@ -82,21 +83,6 @@ export const POST = defineRoute({
     const fileId = crypto.randomUUID()
     const ext = body.file_name.split(".").pop() || "bin"
     const storagePath = `${effectiveOrgId}/${gallery.event_id}/${body.gallery_id}/${fileId}.${ext}`
-
-    // Programmatically ensure photos bucket policy allows images, videos, and voice notes up to 100MB
-    try {
-      await supabase.storage.updateBucket("photos", {
-        public: true,
-        allowedMimeTypes: [
-          "image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "image/gif",
-          "video/mp4", "video/quicktime", "video/webm", "video/x-msvideo", "video/3gpp",
-          "audio/mpeg", "audio/mp4", "audio/wav", "audio/webm", "audio/ogg", "audio/m4a", "audio/aac"
-        ],
-        fileSizeLimit: 52428800, // 50 MB limit
-      })
-    } catch (e) {
-      console.warn("[updateBucket photos warning]", e)
-    }
 
     const { data: signedData, error: signedErr } = await supabase.storage
       .from("photos")

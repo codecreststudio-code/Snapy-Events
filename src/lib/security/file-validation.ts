@@ -118,10 +118,15 @@ export function validateMagicBytes(buf: Uint8Array, declaredMime: string): boole
     }
     if (declaredMime === "video/webm") return matchesAnyMagic(buf, MAGIC_BYTES["video/webm"])
     if (declaredMime === "video/x-msvideo") return matchesAnyMagic(buf, MAGIC_BYTES["video/x-msvideo"])
-    return true
+    // Other allowed video types (e.g. 3gpp) are ISO-BMFF: require an ftyp box.
+    return String.fromCharCode(...buf.slice(4, 8)) === "ftyp"
   }
   if (declaredMime.startsWith("audio/")) {
-    return true
+    // ISO-BMFF audio (m4a/aac/mp4) carry an ftyp box; others have byte signatures.
+    if (String.fromCharCode(...buf.slice(4, 8)) === "ftyp") return true
+    const sigs = MAGIC_BYTES[declaredMime]
+    if (sigs) return matchesAnyMagic(buf, sigs)
+    return matchesAnyMagic(buf, MAGIC_BYTES["audio/wav"]) || matchesAnyMagic(buf, MAGIC_BYTES["audio/ogg"])
   }
   return false
 }

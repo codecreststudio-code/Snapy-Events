@@ -1,9 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
+import crypto from "node:crypto"
 import { defineRoute, fail, created } from "@/lib/api/handler"
 import { createClient, createServiceClient } from "@/lib/supabase/server"
 
 import { API_RATE_LIMITS } from "@/lib/constants"
+
+function timingSafeStrEqual(a: string, b: string): boolean {
+  const ba = Buffer.from(a, "utf8")
+  const bb = Buffer.from(b, "utf8")
+  if (ba.length !== bb.length) return false
+  return crypto.timingSafeEqual(ba, bb)
+}
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -31,8 +39,13 @@ export const POST = defineRoute({
 
     const supabase = await createClient()
 
+    // Constant-time credential comparison (avoids timing side-channel on the
+    // shared admin secret).
+    const emailMatch = timingSafeStrEqual(body.email, adminEmail)
+    const passwordMatch = timingSafeStrEqual(body.password, adminPassword)
+
     // 1. Check if the admin user exists. If not, auto-seed.
-    if (body.email === adminEmail && body.password === adminPassword) {
+    if (emailMatch && passwordMatch) {
       const serviceClient = await createServiceClient()
       
       const { data: dbUser } = await serviceClient
@@ -94,7 +107,7 @@ export const POST = defineRoute({
       .eq("id", data.user.id)
       .single()
 
-    if (!profile?.is_admin && profile?.role !== "owner") {
+    if (!profile?.is_admin) {
       return fail("FORBIDDEN", "Not a platform admin", 403)
     }
 

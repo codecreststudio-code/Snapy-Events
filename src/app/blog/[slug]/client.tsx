@@ -26,8 +26,15 @@ const inter = Inter({ subsets: ["latin"], display: "swap" })
 // HELPERS
 // ─────────────────────────────────────────────────────────
 
+function stripDangerousHtml(raw: string): string {
+  return raw
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/\son\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi, "")
+    .replace(/javascript\s*:/gi, "javascript&#58;")
+}
+
 function formatContent(content: string) {
-  return content
+  return stripDangerousHtml(content)
     // h2
     .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold text-slate-900 mt-10 mb-4 tracking-tight">$1</h2>')
     // h3

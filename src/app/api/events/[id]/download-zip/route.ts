@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import { createServiceClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
 import JSZip from "jszip"
 import { logger } from "@/lib/logger"
@@ -21,8 +21,11 @@ export async function GET(
 
     const supabase = await createServiceClient()
 
-    // Require authenticated user (host must own the event download)
-    const { data: { user } } = await supabase.auth.getUser()
+    // Require authenticated user (host must own the event download). The service
+    // client has no session cookie, so auth must use the SSR client — otherwise
+    // getUser() is always null and this endpoint 401s for everyone.
+    const authClient = await createClient()
+    const { data: { user } } = await authClient.auth.getUser()
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     // 1. Fetch event metadata and verify ownership

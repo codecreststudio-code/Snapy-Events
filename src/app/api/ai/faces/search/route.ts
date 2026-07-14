@@ -29,7 +29,14 @@ export const POST = defineRoute({
       eventId = gallery?.event_id ?? null
     }
 
-    if (eventId) {
+    // Face search MUST be scoped to a single event. Without this guard an
+    // unauthenticated caller that omits gallery_id would dump every tenant's
+    // faces + photo storage paths (the query below only filters when eventId is set).
+    if (!eventId) {
+      return fail("VALIDATION_ERROR", "A valid gallery_id is required", 400)
+    }
+
+    {
       const gate = await checkEventFeatureAccess(eventId, "ai_face_search")
       if (!gate.allowed) {
         return fail("FORBIDDEN", gate.reason || "AI Face Search is disabled for this event.", 403)

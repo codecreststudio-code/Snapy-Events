@@ -47,7 +47,7 @@ export async function getAuthContext(): Promise<AuthContext> {
         full_name: fullName,
         avatar_url: avatarUrl,
         role: "owner",
-        permissions: ["*"],
+        permissions: [],
         is_admin: false,
       })
       .select()
@@ -84,7 +84,10 @@ export async function getAuthContext(): Promise<AuthContext> {
     },
     role,
     permissions,
-    isAdmin: role === "owner" || role === "admin" || profile.is_admin === true,
+    // Platform-admin is the `is_admin` flag ONLY. Account role "owner" means the
+    // user owns their own events/account (data scoped by RLS + explicit filters);
+    // it must NOT grant access to the platform /admin panel.
+    isAdmin: profile.is_admin === true,
   }
 }
 

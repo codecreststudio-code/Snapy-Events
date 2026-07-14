@@ -125,15 +125,20 @@ export function CameraCapture({ allowedFilters, onCapture, onClose }: CameraCapt
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col sm:p-4 md:p-8">
+    <div
+      className="fixed inset-0 z-50 bg-black flex flex-col sm:p-4 md:p-8"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Camera"
+    >
       {/* Top Header */}
       <div className="flex items-center justify-between p-4 z-10 bg-gradient-to-b from-black/60 to-transparent absolute top-0 left-0 right-0">
-        <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20 rounded-full">
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close camera" className="text-white hover:bg-white/20 rounded-full">
           <X className="h-6 w-6" />
         </Button>
         <div className="flex gap-4">
           {!capturedImage && (
-            <Button variant="ghost" size="icon" onClick={toggleCamera} className="text-white hover:bg-white/20 rounded-full">
+            <Button variant="ghost" size="icon" onClick={toggleCamera} aria-label="Flip camera" className="text-white hover:bg-white/20 rounded-full">
               <RefreshCw className="h-6 w-6" />
             </Button>
           )}
@@ -183,8 +188,9 @@ export function CameraCapture({ allowedFilters, onCapture, onClose }: CameraCapt
 
             {/* Shutter Button */}
             <div className="flex justify-center">
-              <button 
+              <button
                 onClick={takePhoto}
+                aria-label="Take photo"
                 className="w-16 h-16 rounded-full border-4 border-white/80 p-1 flex items-center justify-center hover:scale-95 transition-transform"
               >
                 <div className="w-full h-full bg-white rounded-full" />

@@ -22,6 +22,7 @@ const serverSchema = z.object({
   WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
   WHATSAPP_BUSINESS_ACCOUNT_ID: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
+  RESEND_WEBHOOK_SECRET: z.string().optional(),
   // AI
   FACE_API_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
@@ -67,8 +68,30 @@ function parseClient() {
       }
 }
 
+// Server env vars that MUST be present in production for the app to run safely.
+// A missing value here means silent runtime failure (unverified webhooks, broken
+// billing, RLS-bypass client that can't init) — so we fail the boot instead.
+const REQUIRED_IN_PROD = [
+  "SUPABASE_SERVICE_ROLE_KEY",
+  "RAZORPAY_KEY_SECRET",
+  "RAZORPAY_WEBHOOK_SECRET",
+  "CSRF_SECRET",
+] as const
+
 function parseServer() {
   const parsed = serverSchema.safeParse(process.env)
+  // Skip during `next build` (NEXT_PHASE) — secrets may only be injected at
+  // runtime; we don't want to fail the CI build, only refuse to serve traffic.
+  const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build"
+  if (process.env.NODE_ENV === "production" && !isBuildPhase) {
+    const missing = REQUIRED_IN_PROD.filter((k) => !process.env[k])
+    if (missing.length > 0) {
+      throw new Error(
+        `[env] Missing required production environment variables: ${missing.join(", ")}. ` +
+        `Refusing to boot with an insecure/incomplete configuration.`,
+      )
+    }
+  }
   if (!parsed.success) {
     if (process.env.NODE_ENV === "production") {
       console.warn("[env] server env validation failed", parsed.error.flatten().fieldErrors)

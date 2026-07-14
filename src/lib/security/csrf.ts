@@ -66,8 +66,17 @@ export async function verifyCsrf(
     const referer = request.headers.get("referer")
     const source = origin || referer
     if (source) {
+      // Compare by exact ORIGIN, not startsWith — otherwise
+      // "https://app.example.com.evil.com" passes the "https://app.example.com" prefix.
+      let srcOrigin: string | null = origin
+      if (!srcOrigin && referer) {
+        try { srcOrigin = new URL(referer).origin } catch { srcOrigin = null }
+      }
+      if (!srcOrigin) return false
       const allowed = getAllowedOrigins()
-      const isAllowed = allowed.some((a) => source.startsWith(a))
+      const isAllowed = allowed.some((a) => {
+        try { return new URL(a).origin === srcOrigin } catch { return a === srcOrigin }
+      })
       if (!isAllowed) return false
       // Same-origin request with SameSite=Lax cookie — safe.
       return true
