@@ -344,22 +344,36 @@ export function NewEventForm() {
         },
       }
 
-      const { data: event, error } = await supabase
-        .from("events")
-        .insert(eventData)
-        .select("id, slug")
-        .single()
-
-      if (error) throw new Error(error.message)
-
-      // Default gallery creation
-      const { error: galleryError } = await supabase.from("galleries").insert({
-        event_id: event.id,
-        name: "Capsule Gallery",
-        slug: "capsule-gallery",
+      const res = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(eventData),
       })
 
-      if (galleryError) throw new Error(galleryError.message)
+      if (!res.ok) {
+        const errData = await res.json()
+        const msg = typeof errData?.error === "object"
+          ? (errData.error.message || errData.error.code)
+          : (errData?.error || "Failed to create event")
+        throw new Error(msg)
+      }
+
+      const jsonRes = await res.json()
+      const event = jsonRes.data || jsonRes
+
+      // Default gallery creation if not auto-created by API
+      const { data: existingGalleries } = await supabase
+        .from("galleries")
+        .select("id")
+        .eq("event_id", event.id)
+
+      if (!existingGalleries || existingGalleries.length === 0) {
+        await supabase.from("galleries").insert({
+          event_id: event.id,
+          name: "Capsule Gallery",
+          slug: "capsule-gallery",
+        })
+      }
 
       return event
     },

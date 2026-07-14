@@ -42,12 +42,26 @@ export const POST = defineRoute({
   handler: async ({ body, auth, request }) => {
     const supabase = await createClient()
 
-    // Enforce Event Limit
-    const { data: userObj } = await supabase.from("users").select("plan").eq("id", auth.user!.id).single()
-    const plan = userObj?.plan || "free"
-    
-    let maxEvents = 1
-    const { data: planData } = await supabase.from("plans").select("limits").eq("id", plan).single()
+    // Enforce Active Subscription Event Limit
+    let planId = "free"
+    const { data: activeSub } = await supabase
+      .from("subscriptions")
+      .select("plan_id")
+      .eq("user_id", auth.user!.id)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (activeSub?.plan_id) {
+      planId = activeSub.plan_id
+    } else {
+      const { data: userObj } = await supabase.from("users").select("plan").eq("id", auth.user!.id).maybeSingle()
+      if (userObj?.plan) planId = userObj.plan
+    }
+
+    let maxEvents = planId === "premium" ? 5 : planId === "standard" ? 2 : 1
+    const { data: planData } = await supabase.from("plans").select("limits").eq("id", planId).maybeSingle()
     if (planData?.limits?.events_limit !== undefined) {
       maxEvents = planData.limits.events_limit
     }
@@ -57,10 +71,15 @@ export const POST = defineRoute({
         .from("events")
         .select("id", { count: "exact", head: true })
         .eq("host_id", auth.user!.id)
+        .neq("status", "archived")
 
       if (countError) return fail("DB_ERROR", countError.message, 500)
       if (count !== null && count >= maxEvents) {
-        return fail("PLAN_LIMIT_REACHED", `Event creation limit reached. You can create at most ${maxEvents} events on the ${plan} plan. Please upgrade to create more.`, 403)
+        return fail(
+          "PLAN_LIMIT_REACHED",
+          `Event creation limit reached (${count}/${maxEvents}). Your ${planId} package allows at most ${maxEvents} active event(s). Please purchase an additional event slot or upgrade your plan to create another event.`,
+          403
+        )
       }
     }
 
