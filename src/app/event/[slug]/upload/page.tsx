@@ -480,27 +480,14 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
           prev ? { ...prev, uploaded: prev.uploaded + newlyUploadedCount } : prev
         )
         fetchGuestQuota()
+        toast({
+          title: "Upload Complete",
+          description: `${newlyUploadedCount} file(s) uploaded successfully!`,
+        })
       }
     }
   }
 
-
-    const successCount = files.filter((f) => f.status === "done").length
-    const errorCount = files.filter((f) => f.status === "error").length
-
-    if (successCount > 0 && errorCount === 0) {
-      toast({
-        title: "Upload Complete",
-        description: `${successCount} photo(s) uploaded successfully!`,
-      })
-    } else if (errorCount > 0) {
-      toast({
-        title: "Upload Complete with errors",
-        description: `${successCount} uploaded, ${errorCount} failed`,
-        variant: "destructive",
-      })
-    }
-  }
 
   if (eventLoading || galleriesLoading) {
     return (
