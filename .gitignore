@@ -14,6 +14,7 @@
 /build/
 /dist/
 *.tsbuildinfo
+/.turbo
 
 # Environment files - NEVER commit secrets
 .env
@@ -23,16 +24,24 @@
 .env.production
 !.env.example
 
-# AI Agents & Local Metadata
+# AI Agents, Tools & Local Metadata
 .agents/
 .claude/
 .gemini/
 .antigravity/
+.gstack/
+.nanoclaw/
 skills-lock.json
 
 # Local Assets & Draft Roadmaps
 Brandkit/
 New RoadMap/
+
+# Temporary & Cache Files
+/tmp/
+/temp/
+.cache/
+*.tmp
 
 # OS / System Junk
 .DS_Store
@@ -54,12 +63,15 @@ Desktop.ini
 *.swp
 *.swo
 *~
+*.sublime-workspace
+*.sublime-project
 
 # Vercel & Deployment
 .vercel
 
 # Testing & Coverage
 /coverage
+/.nyc_output
 
 # Logs
 logs
@@ -72,24 +84,28 @@ yarn-error.log*
 # Database & Storage temp
 *.sqlite
 *.sqlite3
+*.db
 supabase/.branches
 supabase/.devlabs
 supabase/.temp
 supabase/functions/*/node_modules
 
-# Credentials and secrets
+# Credentials, Keys & Secrets
 *.credential
 *.key
 *.pem
 *.p12
 *.jks
-service-account.json
-google-credentials.json
+service-account*.json
+google-credentials*.json
 **/secrets/
 **/keys/
 **/credentials/
 
-# Documents
+# Documents & Binary Exports
 *.docx
 *.doc
 *.pdf
+*.xlsx
+*.pptx
+*.md

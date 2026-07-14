@@ -42,14 +42,18 @@ const playfair = Playfair_Display({
   weight: ["400", "500", "600", "700"]
 })
 
-const SUGGESTIONS = [
-  "Wedding Celebration",
-  "Birthday Party",
-  "Baby Shower",
-  "Engagement Night",
-  "Corporate Gathering",
-  "Anniversary Dinner",
-]
+const getSuggestions = (userName?: string) => {
+  const name = userName ? userName.trim().split(" ")[0] : "Alex"
+  const firstName = name.charAt(0).toUpperCase() + name.slice(1)
+  return [
+    `${firstName}'s Wedding Celebration`,
+    `${firstName}'s Birthday Party`,
+    `${firstName}'s Baby Shower`,
+    `${firstName}'s Engagement Night`,
+    `${firstName}'s Corporate Gathering`,
+    `${firstName}'s Anniversary Dinner`,
+  ]
+}
 
 const EVENT_TYPE_CARDS = [
   { id: "wedding", name: "Wedding", emoji: "💍", gradient: "from-[#FDFBF7] to-[#F5EBE6]", color: "#B89B85" },
@@ -409,7 +413,7 @@ export function NewEventForm() {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="e.g. Liam & Evelyn's Eternal Autumn"
+                      placeholder={`e.g. ${profile?.full_name?.split(" ")[0] || "Alex"}'s Wedding Celebration`}
                       className="w-full bg-transparent border-b-2 border-[#E3DDD5] focus:border-[#A58263] outline-none text-2xl md:text-3xl py-3 transition-colors placeholder:text-[#CDC5BB]"
                       autoFocus
                     />
@@ -419,7 +423,7 @@ export function NewEventForm() {
                   <div className="pt-2 space-y-3">
                     <p className="text-[11px] uppercase tracking-widest text-[#9C958E]">Suggestions</p>
                     <div className="flex flex-wrap gap-2">
-                      {SUGGESTIONS.map((s) => (
+                      {getSuggestions(profile?.full_name || user?.user_metadata?.full_name || user?.email).map((s) => (
                         <button
                           key={s}
                           onClick={() => setName(s)}

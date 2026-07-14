@@ -21,6 +21,33 @@
   --input: 214.3 31.8% 91.4%;
   --ring: 221.2 83.2% 53.3%;
   --radius: 0.5rem;
+
+  /* Claude Design Tokens (from DESIGN-claude.md) */
+  --claude-primary: #cc785c;
+  --claude-primary-active: #a9583e;
+  --claude-primary-disabled: #e6dfd8;
+  --claude-ink: #141413;
+  --claude-body: #3d3d3a;
+  --claude-body-strong: #252523;
+  --claude-muted: #6c6a64;
+  --claude-muted-soft: #8e8b82;
+  --claude-hairline: #e6dfd8;
+  --claude-hairline-soft: #ebe6df;
+  --claude-canvas: #faf9f5;
+  --claude-surface-soft: #f5f0e8;
+  --claude-surface-card: #efe9de;
+  --claude-surface-cream-strong: #e8e0d2;
+  --claude-surface-dark: #181715;
+  --claude-surface-dark-elevated: #252320;
+  --claude-surface-dark-soft: #1f1e1b;
+  --claude-on-primary: #ffffff;
+  --claude-on-dark: #faf9f5;
+  --claude-on-dark-soft: #a09d96;
+  --claude-accent-teal: #5db8a6;
+  --claude-accent-amber: #e8a55a;
+  --claude-success: #5db872;
+  --claude-warning: #d4a017;
+  --claude-error: #c64545;
 }
 
 .dark {
@@ -77,6 +104,29 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+
+  --color-claude-primary: var(--claude-primary);
+  --color-claude-primary-active: var(--claude-primary-active);
+  --color-claude-primary-disabled: var(--claude-primary-disabled);
+  --color-claude-ink: var(--claude-ink);
+  --color-claude-body: var(--claude-body);
+  --color-claude-body-strong: var(--claude-body-strong);
+  --color-claude-muted: var(--claude-muted);
+  --color-claude-muted-soft: var(--claude-muted-soft);
+  --color-claude-hairline: var(--claude-hairline);
+  --color-claude-hairline-soft: var(--claude-hairline-soft);
+  --color-claude-canvas: var(--claude-canvas);
+  --color-claude-surface-soft: var(--claude-surface-soft);
+  --color-claude-surface-card: var(--claude-surface-card);
+  --color-claude-surface-cream-strong: var(--claude-surface-cream-strong);
+  --color-claude-surface-dark: var(--claude-surface-dark);
+  --color-claude-surface-dark-elevated: var(--claude-surface-dark-elevated);
+  --color-claude-surface-dark-soft: var(--claude-surface-dark-soft);
+  --color-claude-on-primary: var(--claude-on-primary);
+  --color-claude-on-dark: var(--claude-on-dark);
+  --color-claude-on-dark-soft: var(--claude-on-dark-soft);
+  --color-claude-accent-teal: var(--claude-accent-teal);
+  --color-claude-accent-amber: var(--claude-accent-amber);
 }
 
 * {
