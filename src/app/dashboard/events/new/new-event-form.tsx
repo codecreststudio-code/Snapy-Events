@@ -80,7 +80,94 @@ const GRADIENT_COVERS = [
   { name: "Midnight Velvet", css: "linear-gradient(135deg, #84FAB0 0%, #8FD3F4 100%)" },
 ]
 
+const THEME_PRESETS: Record<string, {
+  containerBg: string
+  overlayBg: string
+  cardBg: string
+  titleColor: string
+  subtextColor: string
+  accentColor: string
+  navColor: string
+  navActive: string
+  boxBg: string
+  boxText: string
+}> = {
+  minimal: {
+    containerBg: "bg-[#FAF9F6]",
+    overlayBg: "from-black/20 via-black/10 to-[#FAF9F6]",
+    cardBg: "bg-white/90 border-[#F2EDE7] text-[#1C1A17]",
+    titleColor: "text-[#1C1A17]",
+    subtextColor: "text-[#7A756E]",
+    accentColor: "text-[#A58263]",
+    navColor: "text-stone-400",
+    navActive: "text-[#A58263]",
+    boxBg: "bg-white/80 border-[#F2EDE7]",
+    boxText: "text-[#69635C]",
+  },
+  luxury: {
+    containerBg: "bg-gradient-to-b from-[#1C1814] via-[#2A241F] to-[#121110]",
+    overlayBg: "from-black/40 via-black/20 to-[#121110]",
+    cardBg: "bg-[#27211B]/95 border-[#D4AF37]/40 shadow-[0_4px_20px_rgba(212,175,55,0.15)] text-[#F5E6C8]",
+    titleColor: "text-[#F5E6C8]",
+    subtextColor: "text-[#C5A059]",
+    accentColor: "text-[#D4AF37]",
+    navColor: "text-[#8C7654]",
+    navActive: "text-[#D4AF37]",
+    boxBg: "bg-[#1F1A15]/90 border-[#D4AF37]/30",
+    boxText: "text-[#D4C3A3]",
+  },
+  modern: {
+    containerBg: "bg-gradient-to-b from-[#0F172A] via-[#1E1B4B] to-[#0F172A]",
+    overlayBg: "from-black/50 via-purple-950/30 to-[#0F172A]",
+    cardBg: "bg-[#1E1B4B]/85 backdrop-blur-md border-purple-500/30 shadow-[0_4px_20px_rgba(168,85,247,0.2)] text-white",
+    titleColor: "text-white",
+    subtextColor: "text-indigo-200",
+    accentColor: "text-purple-400",
+    navColor: "text-indigo-300/60",
+    navActive: "text-purple-400",
+    boxBg: "bg-[#131138]/85 border-purple-500/30",
+    boxText: "text-indigo-200",
+  },
+  elegant: {
+    containerBg: "bg-gradient-to-b from-[#FAF5F0] via-[#F5EBE1] to-[#EFE2D3]",
+    overlayBg: "from-black/20 via-black/10 to-[#EFE2D3]",
+    cardBg: "bg-white/95 border-[#D8C7B5] shadow-md text-[#2C221E]",
+    titleColor: "text-[#2C221E]",
+    subtextColor: "text-[#8C7665]",
+    accentColor: "text-[#9E5A47]",
+    navColor: "text-[#A38D7C]",
+    navActive: "text-[#9E5A47]",
+    boxBg: "bg-white/90 border-[#D8C7B5]",
+    boxText: "text-[#5C4B40]",
+  },
+  glass: {
+    containerBg: "bg-gradient-to-br from-indigo-950 via-purple-900 to-slate-950",
+    overlayBg: "from-black/40 via-purple-950/20 to-slate-950",
+    cardBg: "bg-white/20 backdrop-blur-xl border-white/35 shadow-[0_8px_32px_rgba(31,38,135,0.37)] text-white",
+    titleColor: "text-white",
+    subtextColor: "text-white/80",
+    accentColor: "text-pink-300",
+    navColor: "text-white/50",
+    navActive: "text-pink-300",
+    boxBg: "bg-white/15 backdrop-blur-md border-white/25",
+    boxText: "text-white/95",
+  },
+  dark: {
+    containerBg: "bg-[#09090B]",
+    overlayBg: "from-black/60 via-black/40 to-[#09090B]",
+    cardBg: "bg-[#18181B]/95 border-zinc-800 shadow-[0_4px_20px_rgba(0,0,0,0.5)] text-zinc-100",
+    titleColor: "text-zinc-100",
+    subtextColor: "text-zinc-400",
+    accentColor: "text-amber-400",
+    navColor: "text-zinc-500",
+    navActive: "text-amber-400",
+    boxBg: "bg-[#18181B]/90 border-zinc-800",
+    boxText: "text-zinc-300",
+  },
+}
+
 export function NewEventForm() {
+
   const router = useRouter()
   const { profile, user } = useAuth()
   
@@ -1098,85 +1185,90 @@ export function NewEventForm() {
             </div>
 
             {/* Simulated App Content Wrapper */}
-            <div className="absolute inset-0 bg-[#FAF9F6] flex flex-col justify-between p-4 pt-10 overflow-hidden">
-              
-              {/* Event Cover Image Backdrop */}
-              <div className="absolute top-0 left-0 right-0 h-44 z-0 overflow-hidden">
-                <div
-                  className="w-full h-full bg-cover bg-center transition-all duration-500"
-                  style={{
-                    backgroundImage: coverImage.startsWith("http") ? `url(${coverImage})` : coverImage,
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-[#FAF9F6]" />
-              </div>
-
-              {/* Top Row: Brand & Mode */}
-              <div className="z-10 flex justify-between items-center text-white text-[10px] uppercase tracking-widest font-semibold">
-                <span>Snapsy Live</span>
-                <span className="bg-black/35 px-1.5 py-0.5 rounded-full text-[8px]">Mockup</span>
-              </div>
-
-              {/* Event Dynamic Details Card */}
-              <div className="z-10 mt-16 bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-[#F2EDE7] shadow-sm flex flex-col gap-2.5">
-                <span className="text-[8px] uppercase tracking-widest text-[#A58263] font-bold">
-                  {eventType.replace(/_/g, " ")} Capsule
-                </span>
-                
-                <h3 className={`${playfair.className} text-xl leading-tight font-medium text-[#1C1A17]`}>
-                  {name || "Your Event Name"}
-                </h3>
-
-                {/* Event timeline details preview */}
-                <div className="flex flex-col gap-1 text-[9px] text-[#7A756E]">
-                  <div className="flex items-center gap-1.5">
-                    <CalendarIcon className="h-3 w-3 text-[#A58263]" />
-                    <span>Locks: {endDate || "Oct 12, 2026"} at {endTime}</span>
+            {(() => {
+              const currentTheme = THEME_PRESETS[invitationTheme] || THEME_PRESETS.minimal
+              return (
+                <div className={`absolute inset-0 ${currentTheme.containerBg} transition-colors duration-500 flex flex-col justify-between p-4 pt-10 overflow-hidden`}>
+                  
+                  {/* Event Cover Image Backdrop */}
+                  <div className="absolute top-0 left-0 right-0 h-44 z-0 overflow-hidden">
+                    <div
+                      className="w-full h-full bg-cover bg-center transition-all duration-500"
+                      style={{
+                        backgroundImage: coverImage.startsWith("http") ? `url(${coverImage})` : coverImage,
+                      }}
+                    />
+                    <div className={`absolute inset-0 bg-gradient-to-b ${currentTheme.overlayBg}`} />
                   </div>
-                  {capsuleEnabled && (
-                    <div className="flex items-center gap-1.5 font-semibold text-[#A58263]">
-                      <ShieldCheck className="h-3 w-3" />
-                      <span>Capsule: Unlocks on {capsuleTrigger.replace(/_/g, " ")}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
 
-              {/* Interactive Contribution Grid Mockup inside Phone */}
-              <div className="z-10 flex-1 mt-3 flex flex-col justify-end">
-                <div className="bg-white/80 backdrop-blur-sm border border-[#F2EDE7] rounded-xl p-3 space-y-2">
-                  <p className="text-[8px] uppercase tracking-wider text-[#9C958E] font-bold">Allowed contributions</p>
-                  <div className="flex items-center justify-between text-[11px] text-[#69635C]">
-                    <div className="flex items-center gap-1">
-                      <span className={contentPhotos ? "opacity-100" : "opacity-30"}>📸</span>
-                      <span className={`text-[9px] ${contentPhotos ? "font-bold text-[#1C1A17]" : "line-through text-stone-300"}`}>Photos ({photoLimit === -1 ? "∞" : photoLimit})</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className={contentVideos ? "opacity-100" : "opacity-30"}>🎥</span>
-                      <span className={`text-[9px] ${contentVideos ? "font-bold text-[#1C1A17]" : "line-through text-stone-300"}`}>Videos</span>
+                  {/* Top Row: Brand & Mode */}
+                  <div className="z-10 flex justify-between items-center text-white text-[10px] uppercase tracking-widest font-semibold drop-shadow">
+                    <span>Snapsy Live</span>
+                    <span className="bg-black/35 px-1.5 py-0.5 rounded-full text-[8px] backdrop-blur-sm">Mockup</span>
+                  </div>
+
+                  {/* Event Dynamic Details Card */}
+                  <div className={`z-10 mt-16 ${currentTheme.cardBg} transition-all duration-500 rounded-2xl p-4 flex flex-col gap-2.5`}>
+                    <span className={`text-[8px] uppercase tracking-widest ${currentTheme.accentColor} font-bold`}>
+                      {eventType.replace(/_/g, " ")} Capsule
+                    </span>
+                    
+                    <h3 className={`${playfair.className} text-xl leading-tight font-medium ${currentTheme.titleColor}`}>
+                      {name || "Your Event Name"}
+                    </h3>
+
+                    {/* Event timeline details preview */}
+                    <div className={`flex flex-col gap-1 text-[9px] ${currentTheme.subtextColor}`}>
+                      <div className="flex items-center gap-1.5">
+                        <CalendarIcon className={`h-3 w-3 ${currentTheme.accentColor}`} />
+                        <span>Locks: {endDate || "Oct 12, 2026"} at {endTime}</span>
+                      </div>
+                      {capsuleEnabled && (
+                        <div className={`flex items-center gap-1.5 font-semibold ${currentTheme.accentColor}`}>
+                          <ShieldCheck className="h-3 w-3" />
+                          <span>Capsule: Unlocks on {capsuleTrigger.replace(/_/g, " ")}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-[#69635C]">
-                    <div className="flex items-center gap-1">
-                      <span className={contentVoiceNotes ? "opacity-100" : "opacity-30"}>🎤</span>
-                      <span className={`text-[9px] ${contentVoiceNotes ? "font-bold text-[#1C1A17]" : "line-through text-stone-300"}`}>Voice</span>
+
+                  {/* Interactive Contribution Grid Mockup inside Phone */}
+                  <div className="z-10 flex-1 mt-3 flex flex-col justify-end">
+                    <div className={`${currentTheme.boxBg} transition-all duration-500 rounded-xl p-3 space-y-2`}>
+                      <p className={`text-[8px] uppercase tracking-wider ${currentTheme.subtextColor} font-bold`}>Allowed contributions</p>
+                      <div className={`flex items-center justify-between text-[11px] ${currentTheme.boxText}`}>
+                        <div className="flex items-center gap-1">
+                          <span className={contentPhotos ? "opacity-100" : "opacity-30"}>📸</span>
+                          <span className={`text-[9px] ${contentPhotos ? "font-bold" : "line-through opacity-40"}`}>Photos ({photoLimit === -1 ? "∞" : photoLimit})</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className={contentVideos ? "opacity-100" : "opacity-30"}>🎥</span>
+                          <span className={`text-[9px] ${contentVideos ? "font-bold" : "line-through opacity-40"}`}>Videos</span>
+                        </div>
+                      </div>
+                      <div className={`flex items-center justify-between text-[11px] ${currentTheme.boxText}`}>
+                        <div className="flex items-center gap-1">
+                          <span className={contentVoiceNotes ? "opacity-100" : "opacity-30"}>🎤</span>
+                          <span className={`text-[9px] ${contentVoiceNotes ? "font-bold" : "line-through opacity-40"}`}>Voice</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className={contentMessages ? "opacity-100" : "opacity-30"}>💌</span>
+                          <span className={`text-[9px] ${contentMessages ? "font-bold" : "line-through opacity-40"}`}>Reactions</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span className={contentMessages ? "opacity-100" : "opacity-30"}>💌</span>
-                      <span className={`text-[9px] ${contentMessages ? "font-bold text-[#1C1A17]" : "line-through text-stone-300"}`}>Reactions</span>
+
+                    {/* Simulated Bottom Navigation */}
+                    <div className={`mt-4 border-t border-white/10 pt-2 flex justify-around ${currentTheme.navColor}`}>
+                      <span className={`text-[10px] font-bold ${currentTheme.navActive}`}>Invites</span>
+                      <span className="text-[10px]">Gallery</span>
+                      <span className="text-[10px]">Shots</span>
                     </div>
                   </div>
-                </div>
 
-                {/* Simulated Bottom Navigation */}
-                <div className="mt-4 border-t border-[#F2EDE7] pt-2 flex justify-around text-stone-400">
-                  <span className="text-[10px] font-bold text-[#A58263]">Invites</span>
-                  <span className="text-[10px]">Gallery</span>
-                  <span className="text-[10px]">Shots</span>
                 </div>
-              </div>
-
-            </div>
+              )
+            })()}
           </div>
         </div>
 
