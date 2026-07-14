@@ -587,15 +587,15 @@ export function NewEventForm() {
 
               {/* STEP 2: EVENT TYPE */}
               {step === 2 && (
-                <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-[#1C1A17]`}>
+                <div className="space-y-4">
+                  <h1 className={`${playfair.className} text-2xl md:text-3xl font-medium leading-tight tracking-tight text-[#1C1A17]`}>
                     What kind of event are you creating?
                   </h1>
-                  <p className="text-sm text-[#7A756E]">
+                  <p className="text-xs md:text-sm text-[#7A756E]">
                     Your choice tailors custom filters, layout designs, and countdown capsules.
                   </p>
                   
-                  <div className="grid grid-cols-2 gap-3 pt-2">
+                  <div className="grid grid-cols-2 gap-2.5 pt-1">
                     {EVENT_TYPE_CARDS.map((type) => {
                       const isSelected = eventType === type.id
                       return (
@@ -609,12 +609,12 @@ export function NewEventForm() {
                             else if (type.id === "corporate") setCoverImage("linear-gradient(135deg, #84FAB0 0%, #8FD3F4 100%)")
                             else setCoverImage("linear-gradient(135deg, #E2E2E2 0%, #C9C9C9 100%)")
                           }}
-                          className={`p-4 rounded-2xl text-left border-2 transition-all flex flex-col justify-between h-28 cursor-pointer bg-gradient-to-br ${type.gradient} ${
-                            isSelected ? "border-[#A58263] shadow-md scale-[1.02]" : "border-[#EAE5DF] hover:border-[#CDC5BB]"
+                          className={`p-3 rounded-xl text-left border transition-all flex items-center gap-3 h-14 cursor-pointer bg-gradient-to-br ${type.gradient} ${
+                            isSelected ? "border-[#A58263] shadow-sm ring-1 ring-[#A58263]" : "border-[#EAE5DF] hover:border-[#CDC5BB]"
                           }`}
                         >
-                          <span className="text-2xl">{type.emoji}</span>
-                          <span className="text-sm font-medium text-[#1C1A17]">{type.name}</span>
+                          <span className="text-xl shrink-0">{type.emoji}</span>
+                          <span className="text-xs font-semibold text-[#1C1A17] truncate">{type.name}</span>
                         </button>
                       )
                     })}

@@ -13,7 +13,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="min-h-screen bg-background">
       <DashboardSidebar />
       <main className="lg:pl-72">
-        <div className="py-8 px-4 sm:px-6 lg:px-8">{children}</div>
+        <div className="py-3 md:py-4 px-3 sm:px-6 lg:px-8">{children}</div>
       </main>
     </div>
   )
