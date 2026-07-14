@@ -180,11 +180,15 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     return gallerySettings?.allow_uploads !== false
   }) || []
 
+  // Ensure selectedGallery automatically defaults to the first available gallery
   useEffect(() => {
-    if (uploadGalleries.length > 0 && !selectedGallery) {
-      setSelectedGallery(uploadGalleries[0].id)
+    if (galleries && galleries.length > 0 && !selectedGallery) {
+      const defaultGal = uploadGalleries[0]?.id || galleries[0]?.id
+      if (defaultGal) {
+        setSelectedGallery(defaultGal)
+      }
     }
-  }, [uploadGalleries, selectedGallery])
+  }, [galleries, uploadGalleries, selectedGallery])
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -195,27 +199,38 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     }
   }, [])
 
-  // Helper to load video/audio metadata duration
+  // Helper to load video/audio metadata duration with 2s safety timeout for mobile Safari/Android browsers
   const getMediaDuration = (file: File): Promise<number> => {
     return new Promise((resolve) => {
       const url = URL.createObjectURL(file)
       const isVideo = file.type.startsWith("video/")
       const element = document.createElement(isVideo ? "video" : "audio")
+      
+      let isResolved = false
+      const cleanup = (dur: number) => {
+        if (isResolved) return
+        isResolved = true
+        try { URL.revokeObjectURL(url) } catch {}
+        resolve(dur)
+      }
+
+      const timer = setTimeout(() => cleanup(0), 2000)
+
       element.preload = "metadata"
       element.onloadedmetadata = () => {
-        URL.revokeObjectURL(url)
-        resolve(element.duration || 0)
+        clearTimeout(timer)
+        cleanup(element.duration || 0)
       }
       element.onerror = () => {
-        URL.revokeObjectURL(url)
-        resolve(0)
+        clearTimeout(timer)
+        cleanup(0)
       }
       element.src = url
     })
   }
 
   const handleFileSelect = useCallback(async (selectedFiles: FileList | null) => {
-    if (!selectedFiles) return
+    if (!selectedFiles || selectedFiles.length === 0) return
 
     const eventSettings = (event?.settings as any) || {}
     const maxVideoSecs = eventSettings.video_duration_limit || 30
@@ -224,7 +239,9 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     const validFiles: UploadFile[] = []
 
     for (const file of Array.from(selectedFiles)) {
-      if (file.type.startsWith("video/")) {
+      const effectiveType = file.type || "image/jpeg"
+
+      if (effectiveType.startsWith("video/")) {
         const dur = await getMediaDuration(file)
         if (dur > maxVideoSecs + 1) {
           toast({
@@ -236,7 +253,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         }
       }
 
-      if (file.type.startsWith("audio/")) {
+      if (effectiveType.startsWith("audio/")) {
         const dur = await getMediaDuration(file)
         if (dur > maxVoiceSecs + 1) {
           toast({
@@ -251,7 +268,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
       validFiles.push({
         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         file,
-        preview: URL.createObjectURL(file),
+        preview: effectiveType.startsWith("image/") ? URL.createObjectURL(file) : "",
         progress: 0,
         status: "pending" as const,
       })
@@ -264,10 +281,11 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
   const handleCameraCapture = useCallback((file: File) => {
     setFiles((prev) => {
+      const effectiveType = file.type || "image/jpeg"
       const newUpload: UploadFile = {
         id: Math.random().toString(36).substring(7),
         file,
-        preview: URL.createObjectURL(file),
+        preview: effectiveType.startsWith("image/") ? URL.createObjectURL(file) : "",
         progress: 0,
         status: "pending" as const,
       }
@@ -276,19 +294,38 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     setShowCamera(false)
   }, [])
 
-
   function removeFile(id: string) {
     setFiles((prev) => {
       const file = prev.find((f) => f.id === id)
-      if (file) {
-        URL.revokeObjectURL(file.preview)
+      if (file && file.preview) {
+        try { URL.revokeObjectURL(file.preview) } catch {}
       }
       return prev.filter((f) => f.id !== id)
     })
   }
 
   async function uploadFiles() {
-    if (files.length === 0 || !selectedGallery || !event) return
+    if (files.length === 0) {
+      toast({
+        title: "No Media Selected",
+        description: "Please select or record a photo/video before uploading.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const targetGallery = selectedGallery || uploadGalleries[0]?.id || galleries?.[0]?.id
+
+    if (!targetGallery) {
+      toast({
+        title: "Gallery Required",
+        description: "No gallery is available to accept uploads for this event.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!event) return
     setLimitError(null)
 
     // Validations: require a name to upload
@@ -298,7 +335,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     if (!cleanName) {
       toast({
         title: "Name Required",
-        description: "Please enter your name so the host knows who uploaded the photos.",
+        description: "Please enter your name so the host knows who uploaded the media.",
         variant: "destructive",
       })
       return
@@ -353,6 +390,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
             )
           )
 
+          const effectiveMimeType = uploadFile.file.type || "image/jpeg"
           let res: Response
 
           // Perform direct pre-signed URL upload to Supabase storage to bypass Vercel serverless limits & sharp processing crashes
@@ -360,48 +398,48 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              gallery_id: selectedGallery,
-              file_name: uploadFile.file.name,
-              file_type: uploadFile.file.type,
+              gallery_id: targetGallery,
+              file_name: uploadFile.file.name || `mobile_upload_${Date.now()}.jpg`,
+              file_type: effectiveMimeType,
               file_size: uploadFile.file.size,
               uploader_name: cleanName,
               uploader_email: cleanEmail,
             }),
           })
 
-            if (!urlRes.ok) {
-              const errData = await urlRes.json()
-              throw new Error(errData?.error || "Failed to obtain signed upload URL")
-            }
+          if (!urlRes.ok) {
+            const errData = await urlRes.json()
+            throw new Error(errData?.error || "Failed to obtain signed upload URL")
+          }
 
-            const { data: signedData } = await urlRes.json()
-            const { signedUrl, path } = signedData
+          const { data: signedData } = await urlRes.json()
+          const { signedUrl, path } = signedData
 
-            const directUploadRes = await fetch(signedUrl, {
-              method: "PUT",
-              headers: { "Content-Type": uploadFile.file.type },
-              body: uploadFile.file,
-            })
+          const directUploadRes = await fetch(signedUrl, {
+            method: "PUT",
+            headers: { "Content-Type": effectiveMimeType },
+            body: uploadFile.file,
+          })
 
-            if (!directUploadRes.ok) {
-              throw new Error("Direct storage upload failed")
-            }
+          if (!directUploadRes.ok) {
+            throw new Error("Direct storage upload failed")
+          }
 
-            // Register photo record in database with pre-uploaded storage path
-            res = await fetch(`/api/photos/upload?gallery_id=${selectedGallery}`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                storage_path: path,
-                file_name: uploadFile.file.name,
-                file_type: uploadFile.file.type,
-                mime_type: uploadFile.file.type,
-                file_size: uploadFile.file.size,
-                uploader_name: cleanName,
-                uploader_email: cleanEmail,
-                is_approved: settings.auto_approve_photos,
-              }),
-            })
+          // Register photo record in database with pre-uploaded storage path
+          res = await fetch(`/api/photos/upload?gallery_id=${targetGallery}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              storage_path: path,
+              file_name: uploadFile.file.name || `mobile_upload_${Date.now()}.jpg`,
+              file_type: effectiveMimeType,
+              mime_type: effectiveMimeType,
+              file_size: uploadFile.file.size,
+              uploader_name: cleanName,
+              uploader_email: cleanEmail,
+              is_approved: settings.auto_approve_photos,
+            }),
+          })
 
           if (!res.ok) {
             const errData = await res.json()
@@ -444,6 +482,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         fetchGuestQuota()
       }
     }
+  }
 
 
     const successCount = files.filter((f) => f.status === "done").length
@@ -842,9 +881,10 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
             <div className="flex justify-end gap-4">
               <Button
                 onClick={uploadFiles}
-                disabled={!selectedGallery || isUploading || files.length === 0}
+                disabled={isUploading || files.length === 0}
                 className="bg-[#9333EA] hover:bg-[#7E22CE] text-white font-bold px-6 py-5 rounded-xl shadow-[0_0_15px_rgba(147,51,234,0.25)]"
               >
+
                 {isUploading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
