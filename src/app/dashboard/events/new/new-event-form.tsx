@@ -472,6 +472,52 @@ export function NewEventForm() {
       router.push(`/dashboard/events/${createdEvent.slug}`)
     }
   }
+  const [uploadingCover, setUploadingCover] = useState(false)
+
+  const handleCustomCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid File", description: "Please upload an image file (JPG, PNG, WebP).", variant: "destructive" })
+      return
+    }
+
+    setUploadingCover(true)
+    try {
+      const supabase = createClient()
+      const fileExt = file.name.split(".").pop() || "jpg"
+      const fileName = `cover-${Date.now()}-${Math.random().toString(36).slice(-4)}.${fileExt}`
+      const filePath = `covers/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from("photos")
+        .upload(filePath, file, { cacheControl: "3600", upsert: true })
+
+      if (uploadError) {
+        // Fallback: Read as base64 Data URL if storage bucket fails or restricted
+        const reader = new FileReader()
+        reader.onload = (evt) => {
+          if (evt.target?.result) {
+            setCoverImage(evt.target.result as string)
+            toast({ title: "Custom Cover Applied!", description: "Your custom photo is set as the event cover." })
+          }
+        }
+        reader.readAsDataURL(file)
+        return
+      }
+
+      const { data: publicData } = supabase.storage.from("photos").getPublicUrl(filePath)
+      if (publicData?.publicUrl) {
+        setCoverImage(publicData.publicUrl)
+        toast({ title: "Custom Cover Uploaded!", description: "Applied your custom photo as the event cover." })
+      }
+    } catch (err: any) {
+      toast({ title: "Upload Failed", description: err.message || "Failed to process image", variant: "destructive" })
+    } finally {
+      setUploadingCover(false)
+    }
+  }
 
   return (
     <div className="w-full min-h-[calc(100vh-6rem)] bg-[#FAF9F6] text-[#1C1A17] flex flex-col font-sans rounded-3xl border border-[#EAE5DF] shadow-sm overflow-hidden selection:bg-[#EAE4D9]">
@@ -584,16 +630,21 @@ export function NewEventForm() {
                   </h1>
                   
                   {/* Selector tabs */}
-                  <div className="flex border-b border-[#EAE5DF]">
-                    {["gradient", "template"].map((tab) => (
+                  <div className="flex border-b border-[#EAE5DF] overflow-x-auto">
+                    {[
+                      { id: "gradient", label: "Gradients" },
+                      { id: "template", label: "Templates" },
+                      { id: "upload", label: "Custom Upload 📤" },
+                      { id: "ai", label: "AI Cover ✨" },
+                    ].map((tab) => (
                       <button
-                        key={tab}
-                        onClick={() => setCoverType(tab as any)}
-                        className={`pb-2 px-4 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
-                          coverType === tab ? "border-b-2 border-[#A58263] text-[#A58263]" : "text-[#9C958E]"
+                        key={tab.id}
+                        onClick={() => setCoverType(tab.id as any)}
+                        className={`pb-2 px-3.5 text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+                          coverType === tab.id ? "border-b-2 border-[#A58263] text-[#A58263]" : "text-[#9C958E]"
                         }`}
                       >
-                        {`${tab}s`}
+                        {tab.label}
                       </button>
                     ))}
                   </div>
@@ -637,6 +688,63 @@ export function NewEventForm() {
                           </button>
                         )
                       })}
+                    </div>
+                  )}
+
+                  {/* Custom Upload Section */}
+                  {coverType === "upload" && (
+                    <div className="pt-2 space-y-3">
+                      <label className="border-2 border-dashed border-[#EAE5DF] hover:border-[#A58263] bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:bg-[#FAF9F6]">
+                        <div className="w-12 h-12 rounded-full bg-[#FAF9F6] border border-[#EAE5DF] flex items-center justify-center text-[#A58263]">
+                          <Upload className="h-6 w-6" />
+                        </div>
+                        <div className="text-center space-y-1">
+                          <p className="text-sm font-semibold text-[#1C1A17]">
+                            {uploadingCover ? "Uploading custom cover..." : "Click to upload your custom cover photo"}
+                          </p>
+                          <p className="text-xs text-[#9C958E]">PNG, JPG, or WebP (max 10MB)</p>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleCustomCoverUpload}
+                          disabled={uploadingCover}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {coverImage.startsWith("http") && !TEMPLATE_COVERS.includes(coverImage) && (
+                        <div className="p-2 bg-white rounded-xl border border-[#EAE5DF] flex items-center gap-3">
+                          <img src={coverImage} alt="Custom cover preview" className="w-14 h-14 rounded-lg object-cover border border-[#EAE5DF]" />
+                          <div className="space-y-0.5">
+                            <span className="text-xs font-semibold text-emerald-600 block">✓ Custom Cover Active</span>
+                            <span className="text-[10px] text-[#9C958E]">Visible live on your event memory capsule</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* AI Generation Section */}
+                  {coverType === "ai" && (
+                    <div className="pt-2 space-y-3">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="e.g. Dreamy sunset over Italian vineyard with fairy lights"
+                          value={aiPrompt}
+                          onChange={(e) => setAiPrompt(e.target.value)}
+                          className="bg-white border-[#EAE5DF]"
+                        />
+                        <Button
+                          onClick={generateAiCover}
+                          disabled={generatingAi || !aiPrompt.trim()}
+                          className="bg-[#A58263] hover:bg-[#8E6E52] text-white shrink-0 font-semibold gap-1.5"
+                        >
+                          <Wand2 className="h-4 w-4" />
+                          <span>{generatingAi ? "Generating..." : "Generate"}</span>
+                        </Button>
+                      </div>
+                      <p className="text-xs text-[#9C958E]">Enter a descriptive visual prompt to generate unique AI cover art.</p>
                     </div>
                   )}
                 </div>
