@@ -635,7 +635,6 @@ export function NewEventForm() {
                       { id: "gradient", label: "Gradients" },
                       { id: "template", label: "Templates" },
                       { id: "upload", label: "Custom Upload 📤" },
-                      { id: "ai", label: "AI Cover ✨" },
                     ].map((tab) => (
                       <button
                         key={tab.id}
@@ -722,29 +721,6 @@ export function NewEventForm() {
                           </div>
                         </div>
                       )}
-                    </div>
-                  )}
-
-                  {/* AI Generation Section */}
-                  {coverType === "ai" && (
-                    <div className="pt-2 space-y-3">
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="e.g. Dreamy sunset over Italian vineyard with fairy lights"
-                          value={aiPrompt}
-                          onChange={(e) => setAiPrompt(e.target.value)}
-                          className="bg-white border-[#EAE5DF]"
-                        />
-                        <Button
-                          onClick={generateAiCover}
-                          disabled={generatingAi || !aiPrompt.trim()}
-                          className="bg-[#A58263] hover:bg-[#8E6E52] text-white shrink-0 font-semibold gap-1.5"
-                        >
-                          <Wand2 className="h-4 w-4" />
-                          <span>{generatingAi ? "Generating..." : "Generate"}</span>
-                        </Button>
-                      </div>
-                      <p className="text-xs text-[#9C958E]">Enter a descriptive visual prompt to generate unique AI cover art.</p>
                     </div>
                   )}
                 </div>
