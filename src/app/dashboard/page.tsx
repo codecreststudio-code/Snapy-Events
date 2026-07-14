@@ -71,12 +71,17 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
   let qrCount = 0
 
   if (allEventIds.length > 0) {
-    const [storageResult, galleryCountResult, qrCountResult] = await Promise.all([
+    const [storageResult, photoCountResult, galleryCountResult, qrCountResult] = await Promise.all([
       supabase
         .from("storage_usage")
         .select("photo_count")
         .eq("user_id", orgId)
-        .single(),
+        .maybeSingle(),
+
+      supabase
+        .from("photos")
+        .select("id", { count: "exact", head: true })
+        .in("event_id", allEventIds),
 
       supabase
         .from("galleries")
@@ -89,7 +94,7 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
         .in("event_id", allEventIds),
     ])
 
-    photoCount = storageResult.data?.photo_count || 0
+    photoCount = storageResult.data?.photo_count || photoCountResult.count || 0
     galleryCount = galleryCountResult.count || 0
     qrCount = qrCountResult.count || 0
   }

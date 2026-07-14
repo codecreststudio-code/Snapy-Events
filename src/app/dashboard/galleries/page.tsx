@@ -116,7 +116,7 @@ function GalleryCard({
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="gap-2 cursor-pointer">
-                    <Link href={`/event/${(gallery as any)?.event?.slug}/gallery`} target="_blank">
+                    <Link href={`/event/${(gallery as any)?.event?.slug}/g/${gallery.slug}`} target="_blank">
                       <Eye className="h-4 w-4 text-muted-foreground" />
                       View Public Gallery
                     </Link>
