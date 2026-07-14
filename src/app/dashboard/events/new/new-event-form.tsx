@@ -179,6 +179,7 @@ export function NewEventForm() {
   // Onboarding States
   const [name, setName] = useState("")
   const [eventType, setEventType] = useState("wedding")
+  const [customEventTypeName, setCustomEventTypeName] = useState("")
   const [coverType, setCoverType] = useState<"template" | "gradient" | "ai" | "upload">("gradient")
   const [coverImage, setCoverImage] = useState("linear-gradient(135deg, #FFDEB4 0%, #FFB4B4 100%)")
   const [aiPrompt, setAiPrompt] = useState("")
@@ -619,6 +620,23 @@ export function NewEventForm() {
                       )
                     })}
                   </div>
+
+                  {/* Custom Event Category Name Input */}
+                  {eventType === "custom" && (
+                    <div className="pt-2 space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <label className="text-xs font-semibold text-[#1C1A17] flex items-center gap-1">
+                        <span>Enter your custom event category name</span>
+                        <span className="text-[#A58263]">*</span>
+                      </label>
+                      <Input
+                        value={customEventTypeName}
+                        onChange={(e) => setCustomEventTypeName(e.target.value)}
+                        placeholder="e.g. Family Reunion, Tech Conference, Housewarming..."
+                        className="bg-white border-[#EAE5DF] focus:border-[#A58263] text-sm h-10 shadow-sm"
+                        autoFocus
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1309,7 +1327,7 @@ export function NewEventForm() {
                   {/* Event Dynamic Details Card */}
                   <div className={`z-10 mt-16 ${currentTheme.cardBg} transition-all duration-500 rounded-2xl p-4 flex flex-col gap-2.5`}>
                     <span className={`text-[8px] uppercase tracking-widest ${currentTheme.accentColor} font-bold`}>
-                      {eventType.replace(/_/g, " ")} Capsule
+                      {eventType === "custom" ? (customEventTypeName || "Custom Capsule") : `${eventType.replace(/_/g, " ")} Capsule`}
                     </span>
                     
                     <h3 className={`${playfair.className} text-xl leading-tight font-medium ${currentTheme.titleColor}`}>
