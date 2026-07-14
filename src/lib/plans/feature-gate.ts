@@ -34,6 +34,25 @@ export async function checkEventFeatureAccess(
       return { allowed: false, planId: "free", reason: "Feature disabled in event settings" }
     }
 
+    // Check nested content_types toggles
+    const contentTypes = (eventSettings.content_types as Record<string, boolean>) || {}
+    if (featureKey === "video_uploads" && contentTypes.videos === false) {
+      return { allowed: false, planId: "free", reason: "Video uploads are disabled for this event in event settings." }
+    }
+    if (featureKey === "voice_notes" && contentTypes.voice_notes === false) {
+      return { allowed: false, planId: "free", reason: "Voice notes are disabled for this event in event settings." }
+    }
+    if (featureKey === "photos" && contentTypes.photos === false) {
+      return { allowed: false, planId: "free", reason: "Photo uploads are disabled for this event in event settings." }
+    }
+
+    // Check nested ai_features toggles
+    const aiFeatures = (eventSettings.ai_features as Record<string, boolean>) || {}
+    if (featureKey === "ai_face_search" && aiFeatures.face_search === false) {
+      return { allowed: false, planId: "free", reason: "AI Face Search is disabled for this event in event settings." }
+    }
+
+
     // 2. Fetch Active Subscription Plan by Host User ID
     let planId = "free"
     const { data: sub } = await supabase

@@ -93,6 +93,18 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
 
     if (!gallery) return ApiErrors.notFound("Gallery")
 
+    const event = gallery.event as any
+    const eventObj = Array.isArray(event) ? event[0] : event
+    const hostId = eventObj?.host_id
+    const settings = (eventObj?.settings as Record<string, any>) || {}
+
+    if (category === "PHOTO") {
+      const contentTypes = settings.content_types || {}
+      if (contentTypes.photos === false) {
+        return fail("FORBIDDEN", "Photo uploads are disabled for this event in event settings.", 403)
+      }
+    }
+
     if (category === "VIDEO") {
       const videoGate = await checkEventFeatureAccess(gallery.event_id, "video_uploads")
       if (!videoGate.allowed) {
@@ -107,9 +119,6 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       }
     }
 
-    const event = gallery.event as any
-    const eventObj = Array.isArray(event) ? event[0] : event
-    const hostId = eventObj?.host_id
 
     // Presigned-upload confirm (JSON branch): the client hands us a storage_path
     // and file_size. Trusting the path lets a guest reference another tenant's
@@ -231,9 +240,15 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       return fail("PLAN_LIMIT_REACHED", `This event has reached its limit of ${maxGuests} guests. The host must upgrade to receive more uploads.`, 403)
     }
 
-    if ((currentGuestShotsCount ?? 0) >= maxShots) {
-      return fail("PLAN_LIMIT_REACHED", `You have reached your limit of ${maxShots} uploads for this event.`, 403)
+    const hostConfiguredPhotoLimit = typeof settings.photo_limit === "number" ? settings.photo_limit : null
+    const effectiveMaxShots = hostConfiguredPhotoLimit && hostConfiguredPhotoLimit > 0
+      ? Math.min(maxShots, hostConfiguredPhotoLimit)
+      : maxShots
+
+    if ((currentGuestShotsCount ?? 0) >= effectiveMaxShots) {
+      return fail("PLAN_LIMIT_REACHED", `You have reached the limit of ${effectiveMaxShots} uploads per guest for this event.`, 403)
     }
+
 
     let finalStoragePath = preUploadedPath
     let uploadMime = mimeType
