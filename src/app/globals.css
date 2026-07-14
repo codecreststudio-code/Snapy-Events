@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* ─── Font utilities ──────────────────────────────────────────────────────── */
+/* Playfair Display is loaded in the root layout (server component) as
+   --font-playfair CSS variable. Use this class anywhere instead of
+   next/font's .className to avoid client-side font re-fetching. */
+.font-playfair {
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;

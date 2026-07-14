@@ -1,13 +1,22 @@
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Inter, Playfair_Display } from "next/font/google"
 import "./globals.css"
 import { QueryProvider } from "@/lib/hooks/query-provider"
 import { AuthProvider } from "@/lib/hooks/use-auth"
 import { TooltipProvider } from "@/lib/components/ui/tooltip"
-
 import { CurrencyProvider } from "@/lib/context/currency-context"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+})
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-playfair",
+})
 
 export const metadata: Metadata = {
   title: "Snapsy - Event Photography Platform",
@@ -44,7 +53,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+      <head>
+        {/* Preconnect to Google Fonts origins to eliminate DNS/TCP overhead */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
+      <body className={`${inter.variable} ${playfair.variable} ${inter.className}`} suppressHydrationWarning>
         <QueryProvider>
           <AuthProvider>
             <CurrencyProvider>

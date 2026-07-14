@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { Playfair_Display, Inter } from "next/font/google"
 import {
   Camera,
   QrCode,
@@ -32,15 +31,10 @@ import { Button } from "@/lib/components/ui/button"
 import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
 import { motion, AnimatePresence, useInView } from "framer-motion"
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  display: "swap",
-})
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-})
+// Fonts are declared in root layout (server component) as CSS variables
+// --font-playfair and --font-inter — use them via className or style
+const playfairClass = "font-[family-name:var(--font-playfair)]"
+const interClass = "font-[family-name:var(--font-inter)]"
 
 // --- Custom Numeric Count-Up Component for Social Proof ---
 function CountUp({ value, suffix = "" }: { value: number; suffix?: string }) {
@@ -597,7 +591,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className={`relative overflow-hidden text-5xl font-normal tracking-tight md:text-8xl text-slate-900 leading-[1.05] ${playfair.className}`}
+              className={`relative overflow-hidden text-5xl font-normal tracking-tight md:text-8xl text-slate-900 leading-[1.05] $\{playfairClass\}`}
             >
               Capture Every Moment. <br />
               <span className="italic font-normal bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">Reveal Together.</span>
@@ -697,7 +691,7 @@ export default function HomePage() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className={`mt-3 text-center text-[10px] text-slate-400 ${playfair.className} italic`}>
+                  <div className={`mt-3 text-center text-[10px] text-slate-400 $\{playfairClass\} italic`}>
                     {card.label}
                   </div>
                 </motion.div>
@@ -764,7 +758,7 @@ export default function HomePage() {
           <div className="container px-6 mx-auto max-w-7xl flex flex-col items-center">
             <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
               <span className="text-xs font-semibold text-violet-600 tracking-wider uppercase block">SIGNATURE EXPERIENCE</span>
-              <h2 className={`text-4xl font-normal tracking-tight md:text-5xl text-slate-900 ${playfair.className}`}>
+              <h2 className={`text-4xl font-normal tracking-tight md:text-5xl text-slate-900 $\{playfairClass\}`}>
                 Interactive Memory Orbit
               </h2>
               <p className="text-slate-500 font-light max-w-md mx-auto text-sm leading-relaxed">
@@ -838,7 +832,7 @@ export default function HomePage() {
           <div className="container px-6 mx-auto max-w-7xl">
             <div className="text-center max-w-2xl mx-auto space-y-4 mb-20">
               <span className="text-xs font-semibold text-violet-600 tracking-wider uppercase block">POWERFUL CAPABILITIES</span>
-              <h2 className={`text-4xl font-normal tracking-tight md:text-5xl text-slate-900 ${playfair.className}`}>
+              <h2 className={`text-4xl font-normal tracking-tight md:text-5xl text-slate-900 $\{playfairClass\}`}>
                 Everything you need for perfect events
               </h2>
               <p className="text-slate-500 font-light max-w-lg mx-auto text-sm leading-relaxed">
@@ -964,7 +958,7 @@ export default function HomePage() {
           <div className="container px-6 mx-auto max-w-7xl">
             <div className="text-center max-w-2xl mx-auto space-y-4 mb-20">
               <span className="text-xs font-semibold text-violet-600 tracking-wider uppercase block">SIMPLE PROCESS</span>
-              <h2 className={`text-4xl font-normal tracking-tight md:text-5xl text-slate-900 ${playfair.className}`}>
+              <h2 className={`text-4xl font-normal tracking-tight md:text-5xl text-slate-900 $\{playfairClass\}`}>
                 How Snapsy Works
               </h2>
               <p className="text-slate-500 font-light max-w-md mx-auto text-sm leading-relaxed">
@@ -1056,7 +1050,7 @@ export default function HomePage() {
                     >
                       <div className="border-2 border-dashed border-slate-200 p-4 rounded-xl space-y-4">
                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">TABLE TENT CARD</span>
-                        <h4 className={`text-xl font-normal leading-tight ${playfair.className}`}>
+                        <h4 className={`text-xl font-normal leading-tight $\{playfairClass\}`}>
                           Help us capture <br />
                           the <span className="italic font-normal text-violet-600">magic</span>
                         </h4>
@@ -1147,7 +1141,7 @@ export default function HomePage() {
           <div className="container px-6 mx-auto max-w-7xl">
             <div className="text-center max-w-2xl mx-auto space-y-4 mb-20">
               <span className="text-xs font-semibold text-violet-600 tracking-wider uppercase block">EVENT GALLERY</span>
-              <h2 className={`text-4xl font-normal tracking-tight md:text-5xl text-slate-900 ${playfair.className}`}>
+              <h2 className={`text-4xl font-normal tracking-tight md:text-5xl text-slate-900 $\{playfairClass\}`}>
                 Memories that last forever
               </h2>
               <p className="text-slate-500 font-light max-w-lg mx-auto text-sm leading-relaxed">
@@ -1188,7 +1182,7 @@ export default function HomePage() {
           <div className="container px-6 mx-auto max-w-7xl">
             <div className="text-center max-w-2xl mx-auto space-y-4 mb-20">
               <span className="text-xs font-semibold text-violet-600 tracking-wider uppercase block">SIMPLE & TRANSPARENT</span>
-              <h2 className={`text-4xl font-normal tracking-tight md:text-5xl text-slate-900 ${playfair.className}`}>
+              <h2 className={`text-4xl font-normal tracking-tight md:text-5xl text-slate-900 $\{playfairClass\}`}>
                 Choose the perfect plan
               </h2>
               <p className="text-slate-500 font-light max-w-md mx-auto text-sm leading-relaxed">
@@ -1218,7 +1212,7 @@ export default function HomePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.8 }}
-                  className={`text-4xl md:text-6xl font-normal tracking-tight leading-[1.1] ${playfair.className}`}
+                  className={`text-4xl md:text-6xl font-normal tracking-tight leading-[1.1] $\{playfairClass\}`}
                 >
                   Ready to create <br />
                   unforgettable <span className="italic font-normal bg-gradient-to-r from-violet-400 to-pink-300 bg-clip-text text-transparent">memories</span>?
