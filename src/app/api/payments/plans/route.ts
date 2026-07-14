@@ -3,6 +3,23 @@ import { createClient } from "@/lib/supabase/server"
 
 const DEFAULT_PLANS = [
   {
+    id: "free",
+    name: "Free Trial",
+    description: "Perfect for testing Snapsy with small groups",
+    price_inr: 0,
+    price_usd: 0,
+    billing_interval: "event",
+    is_active: true,
+    sort_order: 0,
+    features: [
+      "5 guests limit",
+      "5 shots per guest",
+      "Standard photo reveal",
+      "Basic web gallery",
+    ],
+    limits: { events_limit: 1, storage_limit_gb: 1, photo_limit: 100, guests_limit: 5, shots_limit: 5 },
+  },
+  {
     id: "starter",
     name: "Starter",
     description: "For small events and personal use",

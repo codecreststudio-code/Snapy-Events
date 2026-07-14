@@ -187,7 +187,7 @@ export function NewEventForm() {
   const [endDate, setEndDate] = useState("")
   const [endTime, setEndTime] = useState("22:00")
   const [revealExperience, setRevealExperience] = useState("immediately")
-  const [guestCountPlan, setGuestCountPlan] = useState<"starter" | "standard" | "premium">("starter")
+  const [guestCountPlan, setGuestCountPlan] = useState<"free" | "starter" | "standard" | "premium">("starter")
   
   // Addons
   const [guestsBoost, setGuestsBoost] = useState(0)
@@ -411,7 +411,11 @@ export function NewEventForm() {
 
   // Auto-adjust photo limits based on plans
   useEffect(() => {
-    if (guestCountPlan === "starter") {
+    if (guestCountPlan === "free") {
+      setPhotoLimit(5)
+      setContentVideos(false)
+      setContentVoiceNotes(false)
+    } else if (guestCountPlan === "starter") {
       setPhotoLimit(20)
       setContentVideos(false)
       setContentVoiceNotes(false)
@@ -857,9 +861,10 @@ export function NewEventForm() {
                   
                   <div className="space-y-3 pt-2">
                     {[
-                      { id: "starter", name: "Starter Plan", price: `₹${planPrices.starter}`, limit: "Up to 10 guests", desc: "20 shots/guest · Standard reveal · Basic web gallery · 3 filters · All media download" },
-                      { id: "standard", name: "Standard Plan", price: `₹${planPrices.standard}`, limit: "Up to 25 guests", desc: "45 shots/guest · Custom reveal · 7 filters · Download option · 10s Video uploads" },
-                      { id: "premium", name: "Premium Plan", price: `₹${planPrices.premium}`, limit: "Up to 100 guests", desc: "85 shots/guest · AI Face matching · 15 filters · 30s Video · 30s Voice notes · Reactions" },
+                      { id: "free", name: "Free Trial", price: "Free (₹0)", limit: "Up to 5 guests", desc: "5 shots/guest · Standard photo reveal · Basic web gallery · All media view" },
+                      { id: "starter", name: "Starter Plan", price: `₹${planPrices.starter || 499}`, limit: "Up to 10 guests", desc: "20 shots/guest · Standard reveal · Basic web gallery · 3 filters · All media download" },
+                      { id: "standard", name: "Standard Plan", price: `₹${planPrices.standard || 1499}`, limit: "Up to 25 guests", desc: "45 shots/guest · Custom reveal · 7 filters · Download option · 10s Video uploads" },
+                      { id: "premium", name: "Premium Plan", price: `₹${planPrices.premium || 3999}`, limit: "Up to 100 guests", desc: "85 shots/guest · AI Face matching · 15 filters · 30s Video · 30s Voice notes · Reactions" },
                     ].map((plan) => {
                       const isSelected = guestCountPlan === plan.id
                       return (
