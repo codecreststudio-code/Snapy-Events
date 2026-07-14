@@ -323,6 +323,8 @@ export function NewEventForm() {
           video_duration_limit: videoDuration,
           voice_note_duration_limit: voiceDuration,
           cover_gradient: coverImage.startsWith("linear") ? coverImage : null,
+          photo_reveal_mode: (revealExperience === "immediately" || revealExperience === "during_event") ? "instant" : "delayed",
+          reveal_type: (revealExperience === "immediately" || revealExperience === "during_event") ? "instant" : "delayed",
           reveal_experience: revealExperience,
           ai_features: {
             face_search: aiFaceSearch,
