@@ -474,24 +474,24 @@ export function NewEventForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] text-[#1C1A17] flex flex-col font-sans overflow-x-hidden selection:bg-[#EAE4D9]">
+    <div className="w-full min-h-[calc(100vh-6rem)] bg-[#FAF9F6] text-[#1C1A17] flex flex-col font-sans rounded-3xl border border-[#EAE5DF] shadow-sm overflow-hidden selection:bg-[#EAE4D9]">
       
       {/* Top Header */}
-      <header className="px-6 py-4 flex items-center justify-between border-b border-[#EAE5DF] max-w-7xl w-full mx-auto">
+      <header className="px-4 md:px-6 py-2.5 flex items-center justify-between border-b border-[#EAE5DF] w-full shrink-0 bg-white/60 backdrop-blur-sm">
         <div className="flex items-center gap-2">
-          <span className={`${playfair.className} text-xl font-bold tracking-wider text-[#A58263]`}>SNAPSY</span>
+          <span className={`${playfair.className} text-lg md:text-xl font-bold tracking-wider text-[#A58263]`}>SNAPSY</span>
           <span className="text-[10px] uppercase tracking-widest text-[#9C958E] px-2 py-0.5 border border-[#EAE5DF] rounded-full">Capsule Maker</span>
         </div>
-        <div className="text-xs text-[#9C958E] tracking-widest">
+        <div className="text-[11px] font-semibold text-[#9C958E] tracking-widest">
           {step <= 10 ? `STEP ${step} OF 10` : "READY"}
         </div>
       </header>
 
       {/* Main Experience Layout */}
-      <main className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-6 items-center justify-center md:gap-12 lg:gap-24 py-12 md:py-24">
+      <main className="flex-1 flex flex-col lg:flex-row max-w-7xl w-full mx-auto p-4 md:p-6 items-center justify-between gap-6 lg:gap-12 overflow-y-auto lg:overflow-hidden">
         
         {/* Left Side: Step Card Container */}
-        <div className="w-full md:w-3/5 max-w-xl flex flex-col justify-center min-h-[450px]">
+        <div className="w-full lg:w-3/5 max-w-xl flex flex-col justify-center min-h-[360px] md:min-h-[400px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
@@ -1191,8 +1191,8 @@ export function NewEventForm() {
         </div>
 
         {/* Right Side: Phone Mockup Live Preview (Fidelity WOW factor) */}
-        <div className="w-full md:w-2/5 flex justify-center items-center">
-          <div className="w-[280px] h-[560px] rounded-[40px] border-[10px] border-[#1C1A17] bg-[#FAF8F5] shadow-2xl overflow-hidden relative flex flex-col justify-between p-4 shrink-0 select-none">
+        <div className="w-full lg:w-2/5 flex justify-center items-center py-2 shrink-0">
+          <div className="w-[250px] sm:w-[270px] md:w-[280px] h-[450px] sm:h-[480px] md:h-[510px] rounded-[36px] md:rounded-[40px] border-[8px] md:border-[10px] border-[#1C1A17] bg-[#FAF8F5] shadow-xl overflow-hidden relative flex flex-col justify-between p-3.5 shrink-0 select-none scale-90 sm:scale-95 md:scale-100 origin-center transition-all">
             
             {/* Phone Camera Notch notch */}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-5 bg-[#1C1A17] rounded-full z-20 flex items-center justify-center">

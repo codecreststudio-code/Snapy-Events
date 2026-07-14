@@ -8,7 +8,7 @@ export default async function NewEventPage() {
   const ctx = await getAuthContext()
   if (!ctx.user) redirect("/login")
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full min-h-[calc(100vh-6rem)] flex flex-col justify-center overflow-hidden">
       <NewEventForm />
     </div>
   )
