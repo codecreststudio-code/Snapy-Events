@@ -8,11 +8,11 @@ export const metadata = { title: "Gallery" }
 export default async function GalleryPage({ params }: PageProps<"/event/[slug]/g/[gallerySlug]">) {
   const { slug, gallerySlug } = await params
   const supabase = await createClient()
-  const { data: ev } = await supabase.from("events").select("id, name").eq("slug", slug).eq("status", "published").single()
+  const { data: ev } = await supabase.from("events").select("id, name").eq("slug", slug).neq("status", "archived").single()
   if (!ev) return <div className="p-8 text-center text-sm text-muted-foreground">Event not found.</div>
   const { data: gallery } = await supabase.from("galleries").select("*").eq("event_id", ev.id).eq("slug", gallerySlug).single()
   if (!gallery) return <div className="p-8 text-center text-sm text-muted-foreground">Gallery not found.</div>
-  const { data: photos } = await supabase.from("photos").select("id, storage_path, thumbnail_path, original_filename, uploader_name, mime_type, created_at").eq("gallery_id", gallery.id).eq("is_approved", true).order("created_at", { ascending: false }).limit(200)
+  const { data: photos } = await supabase.from("photos").select("id, storage_path, thumbnail_path, original_filename, uploader_name, mime_type, created_at").eq("gallery_id", gallery.id).neq("is_approved", false).order("created_at", { ascending: false }).limit(200)
   const urls = (photos ?? []).map((p) => ({ ...p, url: publicUrl("PHOTOS", p.storage_path) }))
   return (
     <>

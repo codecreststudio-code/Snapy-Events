@@ -87,10 +87,13 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
     user: hostData
   } as unknown as EventData
 
-  const isRevealed = !settings.enable_countdown ||
+  const isRevealed = (settings as any).photo_reveal_mode === "instant" ||
+    (settings as any).reveal_type === "instant" ||
+    !settings.enable_countdown ||
     (settings.countdown_date && new Date(settings.countdown_date) <= new Date())
 
   const visibleGalleries = event.galleries?.filter((g) => {
+    if ((settings as any).photo_reveal_mode === "instant" || (settings as any).reveal_type === "instant") return true
     if (!g.reveal_enabled) return true
     return g.reveal_at && new Date(g.reveal_at) <= new Date()
   }) || []
