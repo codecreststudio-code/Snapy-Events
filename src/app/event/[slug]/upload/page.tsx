@@ -30,6 +30,32 @@ import {
   Send,
 } from "lucide-react"
 
+import type { Gallery } from "@/lib/types"
+
+async function getEvent(slug: string) {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from("events")
+    .select("id, name, slug, settings, host_id, end_date, status, host:users(preferences)")
+    .eq("slug", slug)
+    .neq("status", "archived")
+    .single()
+  if (error) throw error
+  return data
+}
+
+async function getGalleries(eventId: string): Promise<Gallery[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from("galleries")
+    .select("*")
+    .eq("event_id", eventId)
+    .order("created_at", { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
 export interface UploadFile {
   id: string
   file: File
@@ -51,6 +77,7 @@ interface EventSettings {
     messages?: boolean
   }
 }
+
 
 
 export default function GuestUploadPage({ params }: { params: Promise<{ slug: string }> }) {
