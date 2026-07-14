@@ -635,7 +635,8 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Card 1: Take Photo / Video */}
                 <div
                   className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#9333EA] hover:bg-[#9333EA]/5 transition-all cursor-pointer group"
                   onClick={() => setShowCamera(true)}
@@ -655,6 +656,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                   </div>
                 </div>
 
+                {/* Card 2: Record Voice Note */}
                 {allowVoice && (
                   <div
                     className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all cursor-pointer group"
@@ -672,6 +674,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                   </div>
                 )}
 
+                {/* Card 3: Send Guest Message */}
                 {allowMessages && (
                   <div
                     className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-pink-500 hover:bg-pink-500/5 transition-all cursor-pointer group"
@@ -688,57 +691,56 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                     </div>
                   </div>
                 )}
+
+                {/* Card 4: Upload Media */}
+                <div
+                  className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#9333EA] hover:bg-[#9333EA]/5 transition-all cursor-pointer group"
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    e.currentTarget.classList.add("border-[#9333EA]", "bg-[#9333EA]/5")
+                  }}
+                  onDragLeave={(e) => {
+                    e.currentTarget.classList.remove("border-[#9333EA]", "bg-[#9333EA]/5")
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    e.currentTarget.classList.remove("border-[#9333EA]", "bg-[#9333EA]/5")
+                    handleFileSelect(e.dataTransfer.files)
+                  }}
+                >
+                  {(() => {
+                    const acceptedList: string[] = []
+                    if (contentTypes?.photos !== false) acceptedList.push("image/*")
+                    if (allowVideo) acceptedList.push("video/*")
+                    if (allowVoice) acceptedList.push("audio/*")
+                    const allowedAcceptString = acceptedList.join(",") || "image/*"
+                    return (
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept={allowedAcceptString}
+                        multiple
+                        className="hidden"
+                        onChange={(e) => handleFileSelect(e.target.files)}
+                      />
+                    )
+                  })()}
+
+                  <div className="p-4 rounded-full bg-white group-hover:bg-[#9333EA]/20 transition-colors border border-transparent group-hover:border-[#9333EA]/30">
+                    <ImageIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#9333EA]" />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-medium text-[#1C1A17]">Upload Media</p>
+                    <p className="text-xs text-[#9C958E] mt-1">Select PNG, JPG, MP4, MOV up to 100MB</p>
+                  </div>
+                </div>
+              </div>
             </>
           )
         })()}
 
 
-
-          <div
-            className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#9333EA] hover:bg-[#9333EA]/5 transition-all cursor-pointer group"
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={(e) => {
-              e.preventDefault()
-              e.currentTarget.classList.add("border-[#9333EA]", "bg-[#9333EA]/5")
-            }}
-            onDragLeave={(e) => {
-              e.currentTarget.classList.remove("border-[#9333EA]", "bg-[#9333EA]/5")
-            }}
-            onDrop={(e) => {
-              e.preventDefault()
-              e.currentTarget.classList.remove("border-[#9333EA]", "bg-[#9333EA]/5")
-              handleFileSelect(e.dataTransfer.files)
-            }}
-          >
-
-            {(() => {
-              const contentTypes = (event?.settings as any)?.content_types || {}
-              const acceptedList: string[] = []
-              if (contentTypes.photos !== false) acceptedList.push("image/*")
-              if (contentTypes.videos === true) acceptedList.push("video/*")
-              if (contentTypes.voice_notes === true) acceptedList.push("audio/*")
-              const allowedAcceptString = acceptedList.join(",") || "image/*"
-              return (
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept={allowedAcceptString}
-                  multiple
-                  className="hidden"
-                  onChange={(e) => handleFileSelect(e.target.files)}
-                />
-              )
-            })()}
-
-            <div className="p-4 rounded-full bg-white group-hover:bg-[#9333EA]/20 transition-colors border border-transparent group-hover:border-[#9333EA]/30">
-              <ImageIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#9333EA]" />
-            </div>
-            <div className="text-center">
-              <p className="font-medium text-[#1C1A17]">Upload Media</p>
-              <p className="text-xs text-[#9C958E] mt-1">Select PNG, JPG, MP4, MOV up to 100MB</p>
-            </div>
-          </div>
-        </div>
 
         {files.length > 0 && (
           <div className="space-y-4">
