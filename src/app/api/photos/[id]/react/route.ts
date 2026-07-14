@@ -8,11 +8,12 @@ const bodySchema = z.object({
   author_name: z.string().trim().max(100).optional(),
 })
 
-export const POST = defineRoute({
+export const POST = defineRoute<z.infer<typeof bodySchema>, unknown, { id: string }>({
   method: "POST",
   body: bodySchema,
   requireAuth: false,
   handler: async ({ params, body }) => {
+
 
     const { id } = params
     const supabase = await createServiceClient()
