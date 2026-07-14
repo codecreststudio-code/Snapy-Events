@@ -194,9 +194,10 @@ export function NewEventForm() {
 
   // Content type configurations
   const [contentPhotos, setContentPhotos] = useState(true)
-  const [contentVideos, setContentVideos] = useState(false)
-  const [contentVoiceNotes, setContentVoiceNotes] = useState(false)
+  const [contentVideos, setContentVideos] = useState(true)
+  const [contentVoiceNotes, setContentVoiceNotes] = useState(true)
   const [contentMessages, setContentMessages] = useState(true)
+
 
   // Specific content limits
   const [photoLimit, setPhotoLimit] = useState(20)

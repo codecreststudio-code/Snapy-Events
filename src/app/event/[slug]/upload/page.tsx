@@ -582,60 +582,73 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
           </CardContent>
         </Card>
 
-        {showCamera && (
-          <CameraCapture 
-            allowedFilters={(event.settings as any)?.allowed_filters}
-            allowVideo={(event.settings as any)?.content_types?.videos !== false}
-            maxVideoDuration={(event.settings as any)?.video_duration_limit || 30}
-            onCapture={handleCameraCapture}
-            onClose={() => setShowCamera(false)}
-          />
-        )}
+        {(() => {
+          const contentTypes = (event?.settings as any)?.content_types
+          const allowVideo = contentTypes ? contentTypes.videos !== false : true
+          const allowVoice = contentTypes ? contentTypes.voice_notes !== false : true
+          const videoLimit = (event?.settings as any)?.video_duration_limit || 30
+          const voiceLimit = (event?.settings as any)?.voice_note_duration_limit || 30
 
-        {showVoiceRecorder && (
-          <VoiceNoteRecorder
-            maxDuration={(event.settings as any)?.voice_note_duration_limit || 30}
-            onCapture={handleCameraCapture}
-            onClose={() => setShowVoiceRecorder(false)}
-          />
-        )}
+          return (
+            <>
+              {showCamera && (
+                <CameraCapture 
+                  allowedFilters={(event.settings as any)?.allowed_filters}
+                  allowVideo={allowVideo}
+                  maxVideoDuration={videoLimit}
+                  onCapture={handleCameraCapture}
+                  onClose={() => setShowCamera(false)}
+                />
+              )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <div
-            className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#9333EA] hover:bg-[#9333EA]/5 transition-all cursor-pointer group"
-            onClick={() => setShowCamera(true)}
-          >
-            <div className="p-4 rounded-full bg-white group-hover:bg-[#9333EA]/20 transition-colors border border-transparent group-hover:border-[#9333EA]/30">
-              <CameraIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#9333EA]" />
-            </div>
-            <div className="text-center">
-              <p className="font-medium text-[#1C1A17]">
-                {(event.settings as any)?.content_types?.videos !== false ? "Take Photo / Video" : "Take Photo"}
-              </p>
-              <p className="text-xs text-[#9C958E] mt-1">
-                {(event.settings as any)?.content_types?.videos !== false
-                  ? `Live camera with filters & clips up to ${(event.settings as any)?.video_duration_limit || 30}s`
-                  : "Use camera with premium filters"}
-              </p>
-            </div>
-          </div>
+              {showVoiceRecorder && (
+                <VoiceNoteRecorder
+                  maxDuration={voiceLimit}
+                  onCapture={handleCameraCapture}
+                  onClose={() => setShowVoiceRecorder(false)}
+                />
+              )}
 
-          {(event.settings as any)?.content_types?.voice_notes !== false && (
-            <div
-              className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all cursor-pointer group"
-              onClick={() => setShowVoiceRecorder(true)}
-            >
-              <div className="p-4 rounded-full bg-white group-hover:bg-[#D4AF37]/20 transition-colors border border-transparent group-hover:border-[#D4AF37]/30">
-                <MicIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#D4AF37]" />
-              </div>
-              <div className="text-center">
-                <p className="font-medium text-[#1C1A17]">Record Voice Note</p>
-                <p className="text-xs text-[#9C958E] mt-1">
-                  Leave vocal wishes & audio notes up to {(event.settings as any)?.voice_note_duration_limit || 30}s
-                </p>
-              </div>
-            </div>
-          )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div
+                  className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#9333EA] hover:bg-[#9333EA]/5 transition-all cursor-pointer group"
+                  onClick={() => setShowCamera(true)}
+                >
+                  <div className="p-4 rounded-full bg-white group-hover:bg-[#9333EA]/20 transition-colors border border-transparent group-hover:border-[#9333EA]/30">
+                    <CameraIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#9333EA]" />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-medium text-[#1C1A17]">
+                      {allowVideo ? "Take Photo / Video" : "Take Photo"}
+                    </p>
+                    <p className="text-xs text-[#9C958E] mt-1">
+                      {allowVideo
+                        ? `Live camera with filters & clips up to ${videoLimit}s`
+                        : "Use camera with premium filters"}
+                    </p>
+                  </div>
+                </div>
+
+                {allowVoice && (
+                  <div
+                    className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all cursor-pointer group"
+                    onClick={() => setShowVoiceRecorder(true)}
+                  >
+                    <div className="p-4 rounded-full bg-white group-hover:bg-[#D4AF37]/20 transition-colors border border-transparent group-hover:border-[#D4AF37]/30">
+                      <MicIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#D4AF37]" />
+                    </div>
+                    <div className="text-center">
+                      <p className="font-medium text-[#1C1A17]">Record Voice Note</p>
+                      <p className="text-xs text-[#9C958E] mt-1">
+                        Leave vocal wishes & audio notes up to {voiceLimit}s
+                      </p>
+                    </div>
+                  </div>
+                )}
+            </>
+          )
+        })()}
+
 
           <div
             className="border-2 border-dashed border-[#EAE5DF] bg-stone-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#9333EA] hover:bg-[#9333EA]/5 transition-all cursor-pointer group"
