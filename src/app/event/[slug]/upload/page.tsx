@@ -548,14 +548,25 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
               handleFileSelect(e.dataTransfer.files)
             }}
           >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*,video/*,audio/*"
-              multiple
-              className="hidden"
-              onChange={(e) => handleFileSelect(e.target.files)}
-            />
+            {(() => {
+              const contentTypes = (event?.settings as any)?.content_types || {}
+              const acceptedList: string[] = []
+              if (contentTypes.photos !== false) acceptedList.push("image/*")
+              if (contentTypes.videos === true) acceptedList.push("video/*")
+              if (contentTypes.voice_notes === true) acceptedList.push("audio/*")
+              const allowedAcceptString = acceptedList.join(",") || "image/*"
+              return (
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={allowedAcceptString}
+                  multiple
+                  className="hidden"
+                  onChange={(e) => handleFileSelect(e.target.files)}
+                />
+              )
+            })()}
+
             <div className="p-4 rounded-full bg-white group-hover:bg-[#9333EA]/20 transition-colors border border-transparent group-hover:border-[#9333EA]/30">
               <ImageIcon className="h-8 w-8 text-[#9C958E] group-hover:text-[#9333EA]" />
             </div>

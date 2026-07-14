@@ -51,13 +51,13 @@ export const GET = defineRoute({
     const baseGuestLimit = planLimits.guests_limit ?? planLimits.guest_limit ?? fallback.guests
     const baseShotLimit = planLimits.shots_limit ?? planLimits.shot_limit ?? fallback.shots
 
-    const maxGuests = baseGuestLimit + guestBoost
-    const maxShots = baseShotLimit + shotsBoost
+    const hostPhotoLimit = typeof (event.settings as any)?.photo_limit === "number" ? (event.settings as any).photo_limit : null
+    const effectiveMaxShots = hostPhotoLimit && hostPhotoLimit > 0
+      ? Math.min(baseShotLimit + shotsBoost, hostPhotoLimit)
+      : (baseShotLimit + shotsBoost)
 
     // Project ONLY public-safe fields. The raw `event` row carries settings,
     // host_id, and host.preferences — never expose those to anonymous callers.
-    // The former ?guest_email= lookup was a PII presence oracle and is removed;
-    // per-guest quota is enforced server-side at upload time.
     return ok({
       event: {
         id: event.id,
@@ -65,10 +65,13 @@ export const GET = defineRoute({
         slug: event.slug,
         end_date: event.end_date,
         status: event.status,
+        content_types: (event.settings as any)?.content_types || { photos: true, videos: true, voice_notes: true, messages: true },
+        ai_features: (event.settings as any)?.ai_features || {},
       },
       plan_id: planId,
       max_guests: maxGuests,
-      max_shots: maxShots,
+      max_shots: effectiveMaxShots,
     })
+
   },
 }).GET
