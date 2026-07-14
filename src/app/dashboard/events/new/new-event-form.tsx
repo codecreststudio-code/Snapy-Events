@@ -224,36 +224,25 @@ export function NewEventForm() {
   const [invitationWelcome, setInvitationWelcome] = useState("Scan to capture and share moments with us.")
   const [invitationCountdown, setInvitationCountdown] = useState(true)
 
-  // Dynamic active subscription plan lookup
-  const [activePlan, setActivePlan] = useState<string>("free")
-
-  useEffect(() => {
-    const fetchActiveSub = async () => {
-      if (!user) return
-      const supabase = createClient()
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("plan_id")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .limit(1)
-        .maybeSingle()
-      if (data?.plan_id) {
-        setActivePlan(data.plan_id)
-        if (data.plan_id === "premium" || data.plan_id === "standard" || data.plan_id === "starter") {
-          setGuestCountPlan(data.plan_id as any)
-        }
-      }
-    }
-    fetchActiveSub()
-  }, [user])
-
-  // Dynamic plan prices to keep in sync with admin panel setting
+  // Dynamic plan prices (per-event pricing, synced with admin)
   const [planPrices, setPlanPrices] = useState<Record<string, number>>({
+    free: 0,
     starter: 499,
     standard: 1499,
     premium: 3999,
   })
+
+  // Add-on prices (fetched from /api/payments/addons)
+  const [addonPrices, setAddonPrices] = useState<{
+    guestBoosts: Array<{ value: number; label: string; price: number }>
+    shotBoosts: Array<{ value: number; label: string; price: number }>
+  }>({ guestBoosts: [], shotBoosts: [] })
+
+  // Computed per-event total
+  const planBasePrice = planPrices[guestCountPlan] ?? 0
+  const guestAddonPrice = addonPrices.guestBoosts.find(b => b.value === guestsBoost)?.price ?? (guestsBoost > 0 ? Math.round(guestsBoost * 19.9) : 0)
+  const shotAddonPrice = addonPrices.shotBoosts.find(b => b.value === shotsBoost)?.price ?? (shotsBoost > 0 ? Math.round(shotsBoost * 19.9) : 0)
+  const totalEventPrice = planBasePrice + guestAddonPrice + shotAddonPrice
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -263,9 +252,7 @@ export function NewEventForm() {
           const result = await res.json()
           if (result.success && Array.isArray(result.data)) {
             const mapped: Record<string, number> = {}
-            result.data.forEach((p: any) => {
-              mapped[p.id] = p.price_inr
-            })
+            result.data.forEach((p: any) => { mapped[p.id] = p.price_inr })
             setPlanPrices(prev => ({ ...prev, ...mapped }))
           }
         }
@@ -273,7 +260,24 @@ export function NewEventForm() {
         console.error("Failed to fetch plan prices", e)
       }
     }
+    const fetchAddons = async () => {
+      try {
+        const res = await fetch("/api/payments/addons")
+        if (res.ok) {
+          const result = await res.json()
+          if (result.success && result.data) {
+            setAddonPrices({
+              guestBoosts: result.data.guest_boosts?.filter((b: any) => b.value > 0) || [],
+              shotBoosts: result.data.shot_boosts?.filter((b: any) => b.value > 0) || [],
+            })
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch addon prices", e)
+      }
+    }
     fetchPlans()
+    fetchAddons()
   }, [])
 
   // Form Mutation
@@ -467,18 +471,20 @@ export function NewEventForm() {
   const handleLaunch = () => {
     if (!createdEvent) return
 
-    const PLAN_RANK: Record<string, number> = { free: 0, starter: 1, standard: 2, premium: 3 }
-    const selectedRank = PLAN_RANK[guestCountPlan] ?? 0
-    const activeRank = PLAN_RANK[activePlan] ?? 0
-
-    // Only redirect to checkout if user selected a higher tier than their active subscription OR selected new custom boost add-ons
-    const requiresPayment = selectedRank > activeRank || guestsBoost > 0 || shotsBoost > 0
-
-    if (requiresPayment) {
-      router.push(`/checkout?plan=${guestCountPlan}&guests=${guestsBoost}&shots=${shotsBoost}`)
-    } else {
+    // Per-event model: free plan skips payment, all paid plans go to checkout for this specific event
+    if (guestCountPlan === "free" && guestsBoost === 0 && shotsBoost === 0) {
       router.push(`/dashboard/events/${createdEvent.slug}`)
+      return
     }
+
+    // Build checkout URL with event context so payment is tied to this event
+    const params = new URLSearchParams({
+      plan: guestCountPlan,
+      event: createdEvent.slug,
+      guests: String(guestsBoost),
+      shots: String(shotsBoost),
+    })
+    router.push(`/checkout?${params.toString()}`)
   }
   const [uploadingCover, setUploadingCover] = useState(false)
 
@@ -536,8 +542,27 @@ export function NewEventForm() {
           <span className={`${playfair.className} text-lg md:text-xl font-bold tracking-wider text-[#A58263]`}>SNAPSY</span>
           <span className="text-[10px] uppercase tracking-widest text-[#9C958E] px-2 py-0.5 border border-[#EAE5DF] rounded-full">Capsule Maker</span>
         </div>
-        <div className="text-[11px] font-semibold text-[#9C958E] tracking-widest">
-          {step <= 10 ? `STEP ${step} OF 10` : "READY"}
+        <div className="flex items-center gap-3">
+          {/* Live price summary — visible from Step 6 onwards */}
+          {step >= 6 && step <= 10 && (
+            <div className="flex items-center gap-2 bg-[#FAF2EB] border border-[#E8D9C8] rounded-full px-3 py-1">
+              <span className="text-[10px] font-semibold text-[#A58263] capitalize">
+                {guestCountPlan === "free" ? "Free Trial" : `${guestCountPlan.charAt(0).toUpperCase() + guestCountPlan.slice(1)} Plan`}
+              </span>
+              {(guestsBoost > 0 || shotsBoost > 0) && (
+                <span className="text-[9px] text-[#9C958E]">
+                  +{guestsBoost > 0 ? `${guestsBoost}G` : ""}{guestsBoost > 0 && shotsBoost > 0 ? " " : ""}{shotsBoost > 0 ? `${shotsBoost}S` : ""}
+                </span>
+              )}
+              <span className="h-3 w-px bg-[#D8C9B8]" />
+              <span className="text-[11px] font-bold text-[#1C1A17]">
+                {totalEventPrice === 0 ? "Free" : `₹${totalEventPrice.toLocaleString("en-IN")}`}
+              </span>
+            </div>
+          )}
+          <div className="text-[11px] font-semibold text-[#9C958E] tracking-widest">
+            {step <= 10 ? `STEP ${step} OF 10` : "READY"}
+          </div>
         </div>
       </header>
 
@@ -898,32 +923,74 @@ export function NewEventForm() {
                   <div className="border border-[#EAE5DF] rounded-2xl p-4 bg-white space-y-4">
                     <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#A58263]">
                       <Users className="h-4 w-4" />
-                      <span>Custom Quota Boost Addons</span>
+                      <span>Custom Quota Boost Add-ons</span>
                     </div>
 
-                    <div className="flex justify-between items-center text-xs">
+                    {/* Guest Boost Tier Picker */}
+                    <div className="space-y-2">
                       <div>
-                        <p className="font-semibold text-[#1C1A17]">Boost Guest Capacity</p>
-                        <p className="text-[10px] text-[#7A756E]">Add extra guests above the tier limit</p>
+                        <p className="font-semibold text-xs text-[#1C1A17]">Boost Guest Capacity</p>
+                        <p className="text-[10px] text-[#7A756E]">Add extra guests above your plan limit</p>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <button onClick={() => setGuestsBoost(Math.max(0, guestsBoost - 10))} className="w-7 h-7 rounded-full border border-[#EAE5DF] flex items-center justify-center font-bold text-lg cursor-pointer hover:border-[#A58263] bg-stone-50">-</button>
-                        <span className="font-bold text-sm min-w-16 text-center">+{guestsBoost} Guests</span>
-                        <button onClick={() => setGuestsBoost(guestsBoost + 10)} className="w-7 h-7 rounded-full border border-[#EAE5DF] flex items-center justify-center font-bold text-lg cursor-pointer hover:border-[#A58263] bg-stone-50">+</button>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => setGuestsBoost(0)}
+                          className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${guestsBoost === 0 ? "bg-[#A58263] text-white border-[#A58263]" : "bg-stone-50 border-[#EAE5DF] text-[#7A756E] hover:border-[#A58263]"}`}
+                        >
+                          None
+                        </button>
+                        {(addonPrices.guestBoosts.length > 0
+                          ? addonPrices.guestBoosts
+                          : [{ value: 10, label: "+10 guests", price: 199 }, { value: 25, label: "+25 guests", price: 399 }, { value: 50, label: "+50 guests", price: 699 }, { value: 100, label: "+100 guests", price: 1199 }]
+                        ).map((boost) => (
+                          <button
+                            key={boost.value}
+                            onClick={() => setGuestsBoost(boost.value)}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer flex items-center gap-1 ${guestsBoost === boost.value ? "bg-[#A58263] text-white border-[#A58263]" : "bg-stone-50 border-[#EAE5DF] text-[#7A756E] hover:border-[#A58263]"}`}
+                          >
+                            +{boost.value} guests
+                            <span className={`font-bold ${guestsBoost === boost.value ? "text-white/80" : "text-[#A58263]"}`}>₹{boost.price}</span>
+                          </button>
+                        ))}
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center text-xs">
+                    {/* Shot Boost Tier Picker */}
+                    <div className="space-y-2">
                       <div>
-                        <p className="font-semibold text-[#1C1A17]">Boost Shot Quota</p>
-                        <p className="text-[10px] text-[#7A756E]">Add extra photos uploads allowed per guest</p>
+                        <p className="font-semibold text-xs text-[#1C1A17]">Boost Shot Quota</p>
+                        <p className="text-[10px] text-[#7A756E]">Add extra photo uploads allowed per guest</p>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <button onClick={() => setShotsBoost(Math.max(0, shotsBoost - 5))} className="w-7 h-7 rounded-full border border-[#EAE5DF] flex items-center justify-center font-bold text-lg cursor-pointer hover:border-[#A58263] bg-stone-50">-</button>
-                        <span className="font-bold text-sm min-w-16 text-center">+{shotsBoost} Shots</span>
-                        <button onClick={() => setShotsBoost(shotsBoost + 5)} className="w-7 h-7 rounded-full border border-[#EAE5DF] flex items-center justify-center font-bold text-lg cursor-pointer hover:border-[#A58263] bg-stone-50">+</button>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => setShotsBoost(0)}
+                          className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${shotsBoost === 0 ? "bg-[#A58263] text-white border-[#A58263]" : "bg-stone-50 border-[#EAE5DF] text-[#7A756E] hover:border-[#A58263]"}`}
+                        >
+                          None
+                        </button>
+                        {(addonPrices.shotBoosts.length > 0
+                          ? addonPrices.shotBoosts
+                          : [{ value: 5, label: "+5 shots", price: 99 }, { value: 10, label: "+10 shots", price: 179 }, { value: 25, label: "+25 shots", price: 249 }]
+                        ).map((boost) => (
+                          <button
+                            key={boost.value}
+                            onClick={() => setShotsBoost(boost.value)}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer flex items-center gap-1 ${shotsBoost === boost.value ? "bg-[#A58263] text-white border-[#A58263]" : "bg-stone-50 border-[#EAE5DF] text-[#7A756E] hover:border-[#A58263]"}`}
+                          >
+                            +{boost.value} shots/guest
+                            <span className={`font-bold ${shotsBoost === boost.value ? "text-white/80" : "text-[#A58263]"}`}>₹{boost.price}</span>
+                          </button>
+                        ))}
                       </div>
                     </div>
+
+                    {/* Live total for this event */}
+                    {(guestsBoost > 0 || shotsBoost > 0) && (
+                      <div className="pt-2 border-t border-[#F0EAE2] flex items-center justify-between">
+                        <p className="text-[10px] text-[#7A756E]">Add-on subtotal for this event</p>
+                        <p className="text-sm font-bold text-[#1C1A17]">₹{(guestAddonPrice + shotAddonPrice).toLocaleString("en-IN")}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
