@@ -2,8 +2,7 @@ import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder } from "@/lib/integrations/razorpay"
-import { adminDb } from "@/lib/supabase/admin"
-import { DEFAULT_GUEST_BOOSTS, DEFAULT_SHOT_BOOSTS } from "@/lib/constants"
+import { getLiveBoostAddons } from "@/lib/payments/addons"
 
 const addonCheckoutSchema = z.object({
   boost_type: z.enum(["guest", "shots"]),
@@ -21,29 +20,18 @@ export const POST = defineRoute({
 
     const supabase = await createClient()
 
-    // 1. Fetch Addon Prices
+    // 1. Fetch Addon Prices — live from the Admin > Add-ons catalog (same
+    // source used by the Billing page and the event-wizard checkout).
     let price = 0
-    let guestBoosts = DEFAULT_GUEST_BOOSTS
-    let shotBoosts = DEFAULT_SHOT_BOOSTS
-    try {
-      const sb = await adminDb()
-      const [guestRes, shotRes] = await Promise.all([
-        sb.from("platform_settings").select("value").eq("key", "guest_boosts").maybeSingle(),
-        sb.from("platform_settings").select("value").eq("key", "shot_boosts").maybeSingle(),
-      ])
-      if (guestRes.data?.value) guestBoosts = guestRes.data.value
-      if (shotRes.data?.value) shotBoosts = shotRes.data.value
-    } catch (err) {
-      console.error("Failed to query platform settings for addon pricing:", err)
-    }
+    const { guestBoosts, shotBoosts } = await getLiveBoostAddons()
 
     // Calculate specific addon price
     if (body.boost_type === "guest") {
-      const item = guestBoosts.find((b: any) => b.value === body.boost_value)
+      const item = guestBoosts.find((b) => b.value === body.boost_value)
       if (!item) return fail("INVALID_ADDON", "Invalid guest boost selected", 400)
       price = item.price
     } else {
-      const item = shotBoosts.find((b: any) => b.value === body.boost_value)
+      const item = shotBoosts.find((b) => b.value === body.boost_value)
       if (!item) return fail("INVALID_ADDON", "Invalid shots boost selected", 400)
       price = item.price
     }

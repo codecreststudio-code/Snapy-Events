@@ -135,11 +135,14 @@ export const ALLOWED_MIME_TYPES = {
   COVER: ["image/jpeg", "image/png", "image/webp"],
 } as const
 
+// Fallback values used when the `addons` table has no matching rows (or the
+// query fails) — kept in sync with whatever is actually configured in
+// Admin > Subscriptions > Add-ons today. If you change prices/tiers there,
+// update these too, or the "not in sync" bug from before comes right back
+// for anyone hitting the fallback path.
 export const DEFAULT_GUEST_BOOSTS = [
-  { value: 10, label: "+10 guests", price: 199 },
+  { value: 5, label: "+5 guests", price: 199 },
   { value: 25, label: "+25 guests", price: 399 },
-  { value: 50, label: "+50 guests", price: 699 },
-  { value: 100, label: "+100 guests", price: 1199 },
 ]
 
 export const DEFAULT_SHOT_BOOSTS = [

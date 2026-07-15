@@ -3,9 +3,8 @@ import { defineRoute, ok, fail, created } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder } from "@/lib/integrations/razorpay"
 import { adminDb } from "@/lib/supabase/admin"
+import { getLiveBoostAddons } from "@/lib/payments/addons"
 import {
-  DEFAULT_GUEST_BOOSTS,
-  DEFAULT_SHOT_BOOSTS,
   PLAN_BASE_PHOTO_LIMITS,
   PHOTO_LIMIT_ADDON_PRICES,
   VIDEO_UNLOCK_ADDON_PRICE,
@@ -103,9 +102,12 @@ export async function calculatePrice(
     }
   }
 
-  // Calculate guest and shot add-ons
-  const guestItem = DEFAULT_GUEST_BOOSTS.find(b => b.value === guestBoost)
-  const shotItem = DEFAULT_SHOT_BOOSTS.find(b => b.value === shotsBoost)
+  // Calculate guest and shot add-ons — priced from the live Admin > Add-ons
+  // catalog so a price change there takes effect here immediately, not just
+  // on the Billing page's display list.
+  const { guestBoosts, shotBoosts } = await getLiveBoostAddons()
+  const guestItem = guestBoosts.find(b => b.value === guestBoost)
+  const shotItem = shotBoosts.find(b => b.value === shotsBoost)
 
   const guestAddonPriceInr = guestItem?.price || (guestBoost > 0 ? Math.round(guestBoost * 19.9) : 0)
   const shotAddonPriceInr = shotItem?.price || (shotsBoost > 0 ? Math.round(shotsBoost * 19.9) : 0)

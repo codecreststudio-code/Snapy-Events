@@ -1,6 +1,6 @@
 import { defineRoute, ok } from "@/lib/api/handler"
 import { adminDb } from "@/lib/supabase/admin"
-import { DEFAULT_GUEST_BOOSTS, DEFAULT_SHOT_BOOSTS } from "@/lib/constants"
+import { getLiveBoostAddons } from "@/lib/payments/addons"
 
 // Helper to partition dates by dynamic intervals (hour, day, week, month)
 function generateTrendBuckets(startDate: Date, endDate: Date) {
@@ -337,30 +337,33 @@ export const GET = defineRoute({
     }))
     const sortedTopEvents = topEventsMedia.sort((a, b) => b.count - a.count).slice(0, 5)
 
-    // Attributing top revenue sources
+    // Attributing top revenue sources. Uses the *current* live Add-ons
+    // catalog to re-derive what portion of each transaction was addon vs
+    // plan cost — same as everywhere else this pricing is needed. Note this
+    // is necessarily an approximation for older transactions if prices have
+    // changed since they were made (the transaction only stores the boost
+    // value, not the price paid at the time), but that's strictly better
+    // than the old hardcoded 10/25/50/100-guest, 5/10/15-shot price table,
+    // which no longer matched the real catalog at all (current tiers are
+    // 5/25 guests, 5/10/25 shots).
+    const { guestBoosts: liveGuestBoosts, shotBoosts: liveShotBoosts } = await getLiveBoostAddons()
     const { data: successTxsList } = await sb.from("transactions").select("amount, notes").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
     let planRevenue = 0;
     let addonRevenue = 0;
-    
+
     (successTxsList || []).forEach((t: any) => {
       const amt = (t.amount || 0) / 100
       const notes = (t.notes as Record<string, any>) || {}
       const hasAddons = notes.guest_boost || notes.shots_boost
-      
+
       if (hasAddons) {
         let addonCost = 0
         const gb = parseInt(notes.guest_boost || "0")
         const sb = parseInt(notes.shots_boost || "0")
-        
-        if (gb === 10) addonCost += 199
-        else if (gb === 25) addonCost += 399
-        else if (gb === 50) addonCost += 699
-        else if (gb === 100) addonCost += 1199
-        
-        if (sb === 5) addonCost += 99
-        else if (sb === 10) addonCost += 179
-        else if (sb === 15) addonCost += 249
-        
+
+        addonCost += liveGuestBoosts.find((b) => b.value === gb)?.price || 0
+        addonCost += liveShotBoosts.find((b) => b.value === sb)?.price || 0
+
         const attributedAddon = Math.min(amt, addonCost)
         addonRevenue += attributedAddon
         planRevenue += (amt - attributedAddon)

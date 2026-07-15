@@ -119,19 +119,21 @@ const PLAN_INFO: PlanInfo[] = [
   },
 ]
 
+// Initial/fallback state only — overwritten by the live /api/payments/addons
+// fetch below as soon as it resolves. Kept in sync with the current
+// Admin > Subscriptions > Add-ons catalog so there's no flash of stale
+// tiers/prices before that fetch completes (or if it fails).
 const GUEST_BOOSTS = [
   { label: "No extra", value: 0, price: 0 },
-  { label: "+10 guests", value: 10, price: 199 },
+  { label: "+5 guests", value: 5, price: 199 },
   { label: "+25 guests", value: 25, price: 399 },
-  { label: "+50 guests", value: 50, price: 699 },
-  { label: "+100 guests", value: 100, price: 1199 },
 ]
 
 const SHOT_BOOSTS = [
   { label: "No extra", value: 0, price: 0 },
   { label: "+5 shots/guest", value: 5, price: 99 },
   { label: "+10 shots/guest", value: 10, price: 179 },
-  { label: "+15 shots/guest", value: 15, price: 249 },
+  { label: "+25 shots/guest", value: 25, price: 249 },
 ]
 
 async function getSubscription(): Promise<Subscription | null> {
