@@ -31,6 +31,10 @@
 .antigravity/
 .gstack/
 .nanoclaw/
+.impeccable/
+.graphify*
+graphify-out/
+ruvector.db*
 skills-lock.json
 
 # Local Assets & Draft Roadmaps
