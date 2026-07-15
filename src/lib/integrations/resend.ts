@@ -63,10 +63,13 @@ const DEFAULT_SETTINGS: EmailSettings = {
   support_email: "snapsyevent@gmail.com",
   contact_email: "snapsyevent@gmail.com",
   // Must be a publicly reachable image URL (email clients can't resolve
-  // relative paths or GitHub blob/page links, only raw file URLs) — this is
-  // the same logo served at /logo_png.png on the live site (see
-  // src/lib/components/layout/logo.tsx).
-  logo_url: "https://snapsy-events.vercel.app/logo_png.png",
+  // relative paths or GitHub blob/page links, only raw file URLs). This is
+  // a cropped/downsized copy of the site logo (/logo_png.png is 1536x1024
+  // and 2.1MB — far too heavy to inline in an email; some clients render a
+  // broken-image placeholder rather than wait on a multi-MB fetch). This
+  // logo-email.png is the same artwork cropped to its content bounds and
+  // resized to 233x160 (~9KB), meant for a ~40px-tall display in the header.
+  logo_url: "https://snapsy-events.vercel.app/logo-email.png",
   footer_text: "© Snapsy. All rights reserved.",
   social_links: {}
 }
@@ -154,7 +157,12 @@ export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null;
 
   // Inject logo and settings-configured signature/footer if HTML contains placeholders or does not contain layout
   if (html && !html.includes("snapsy-wrapper")) {
-    const logoHtml = settings.logo_url ? `<img src="${settings.logo_url}" alt="${settings.sender_name}" style="max-height: 40px; margin-bottom: 24px; display: block;" />` : ""
+    // Explicit width/height (not just CSS) matter here: Outlook desktop and
+    // some other clients render <img> at native pixel size and ignore
+    // max-height in CSS, so without these attributes a correctly-hosted but
+    // large-dimension image can still blow out the layout or fail to load
+    // in time. 58x40 mirrors the intended ~40px-tall header display size.
+    const logoHtml = settings.logo_url ? `<img src="${settings.logo_url}" alt="${settings.sender_name}" width="58" height="40" style="max-height: 40px; width: auto; margin-bottom: 24px; display: block;" />` : ""
     const footerHtml = `<div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ede9fe; font-size: 11px; color: #9c958e; text-align: center;">
       ${settings.company_address ? `<p>${settings.company_address}</p>` : ""}
       <p>${settings.footer_text}</p>

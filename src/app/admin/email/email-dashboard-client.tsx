@@ -166,6 +166,12 @@ export default function EmailDashboardClient({ initialTemplates, initialLogs, in
     if (!testTemplateId || !testRecipient) return showToast("Please select a template and enter a recipient", "err")
     setBusy(true)
     const result = await apiPost({ action: "test", template_id: testTemplateId, recipient: testRecipient })
+    // Every send writes a new email_logs row, so refetch logs regardless of
+    // outcome — otherwise the Sent/Failed header counts and the Logs tab
+    // stay stale until the user manually clicks Refresh or reloads the page.
+    const r = await fetch("/api/admin/emails?resource=logs")
+    const j = await r.json()
+    setLogs(j.data ?? [])
     setBusy(false)
     if (result.error) return showToast("Test failed: " + result.error, "err")
     showToast(`Test email sent to ${testRecipient}`)

@@ -23,7 +23,7 @@ export default async function AdminEmailPage() {
     reply_to: "snapsyevent@gmail.com",
     support_email: "snapsyevent@gmail.com",
     contact_email: "snapsyevent@gmail.com",
-    logo_url: "https://snapsy-events.vercel.app/logo_png.png",
+    logo_url: "https://snapsy-events.vercel.app/logo-email.png",
     footer_text: "© Snapsy. All rights reserved.",
     signature: "",
     company_address: "",
