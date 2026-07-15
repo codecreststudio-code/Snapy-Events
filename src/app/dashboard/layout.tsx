@@ -13,7 +13,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="min-h-screen bg-background">
       <DashboardSidebar />
       <main className="lg:pl-72">
-        <div className="py-3 md:py-4 px-3 sm:px-6 lg:px-8">{children}</div>
+        {/* pb-24 clears the fixed phone/tablet bottom tab bar (MobileBottomNav)
+            plus its safe-area inset; not needed once the lg: sidebar takes over. */}
+        <div className="py-3 pb-24 md:py-4 px-3 sm:px-6 lg:px-8 lg:pb-8">{children}</div>
       </main>
     </div>
   )

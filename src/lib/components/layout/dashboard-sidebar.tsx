@@ -11,10 +11,7 @@ import {
   CreditCard,
   Download,
   LogOut,
-  Menu,
-  X,
   ChevronDown,
-  User
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/lib/components/ui/button"
@@ -27,8 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/lib/components/ui/dropdown-menu"
-import { createClient } from "@/lib/supabase/client"
-import { useState } from "react"
+import { MobileBottomNav } from "./mobile-bottom-nav"
 
 import { useAuth } from "@/lib/hooks"
 
@@ -47,7 +43,6 @@ const secondaryNavigation = [
 
 export function DashboardSidebar() {
   const pathname = usePathname()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { user, profile, signOut } = useAuth()
 
   const handleSignOut = async () => {
@@ -57,32 +52,9 @@ export function DashboardSidebar() {
 
   return (
     <>
-      {/* Mobile menu button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
-      </div>
-
-      {/* Mobile menu overlay */}
-      {mobileMenuOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div
-        className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r bg-sidebar transition-transform duration-300 lg:translate-x-0",
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
+      {/* Desktop sidebar (lg+). Phone/tablet get MobileBottomNav instead —
+          see below — rather than a hamburger + slide-in copy of this panel. */}
+      <div className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r bg-sidebar lg:flex">
         <div className="flex h-16 items-center gap-2 border-b px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
@@ -100,7 +72,6 @@ export function DashboardSidebar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     isActive
@@ -126,7 +97,6 @@ export function DashboardSidebar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     isActive
@@ -193,6 +163,9 @@ export function DashboardSidebar() {
           </DropdownMenu>
         </div>
       </div>
+
+      {/* Phone/tablet bottom tab bar (< lg) */}
+      <MobileBottomNav />
     </>
   )
 }
