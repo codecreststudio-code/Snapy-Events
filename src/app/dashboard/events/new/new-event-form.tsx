@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation"
 import { useMutation } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase/client"
 import { slugify, formatDate } from "@/lib/utils"
+import {
+  PLAN_BASE_PHOTO_LIMITS,
+  PHOTO_LIMIT_ADDON_PRICES,
+  VIDEO_UNLOCK_ADDON_PRICE,
+  VOICE_UNLOCK_ADDON_PRICE,
+} from "@/lib/constants"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
 import { Switch } from "@/lib/components/ui/switch"
@@ -242,7 +248,21 @@ export function NewEventForm() {
   const planBasePrice = planPrices[guestCountPlan] ?? 0
   const guestAddonPrice = addonPrices.guestBoosts.find(b => b.value === guestsBoost)?.price ?? (guestsBoost > 0 ? Math.round(guestsBoost * 19.9) : 0)
   const shotAddonPrice = addonPrices.shotBoosts.find(b => b.value === shotsBoost)?.price ?? (shotsBoost > 0 ? Math.round(shotsBoost * 19.9) : 0)
-  const totalEventPrice = planBasePrice + guestAddonPrice + shotAddonPrice
+
+  // Step 7 selections that go beyond what the plan itself includes — these
+  // used to be either silently blocked (Videos/Voice on lower plans) or
+  // silently free (Unlimited photos on any plan). Now priced the same way
+  // guest/shot boosts are, and re-validated server-side at checkout so this
+  // display can't be the only thing enforcing it.
+  const planBasePhotoLimit = PLAN_BASE_PHOTO_LIMITS[guestCountPlan] ?? 0
+  const photoAddonPrice = photoLimit !== planBasePhotoLimit && (photoLimit === -1 || photoLimit > planBasePhotoLimit)
+    ? (PHOTO_LIMIT_ADDON_PRICES[photoLimit] ?? 0)
+    : 0
+  const videoAddonPrice = contentVideos && guestCountPlan !== "standard" && guestCountPlan !== "premium" ? VIDEO_UNLOCK_ADDON_PRICE : 0
+  const voiceAddonPrice = contentVoiceNotes && guestCountPlan !== "premium" ? VOICE_UNLOCK_ADDON_PRICE : 0
+  const featureAddonPrice = photoAddonPrice + videoAddonPrice + voiceAddonPrice
+
+  const totalEventPrice = planBasePrice + guestAddonPrice + shotAddonPrice + featureAddonPrice
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -471,8 +491,10 @@ export function NewEventForm() {
   const handleLaunch = () => {
     if (!createdEvent) return
 
-    // Per-event model: free plan skips payment, all paid plans go to checkout for this specific event
-    if (guestCountPlan === "free" && guestsBoost === 0 && shotsBoost === 0) {
+    // Per-event model: free plan skips payment, all paid plans (and any paid
+    // add-on — guest/shot boosts, or a photo cap / video / voice upsell) go
+    // to checkout for this specific event.
+    if (guestCountPlan === "free" && guestsBoost === 0 && shotsBoost === 0 && featureAddonPrice === 0) {
       router.push(`/dashboard/events/${createdEvent.slug}`)
       return
     }
@@ -483,6 +505,9 @@ export function NewEventForm() {
       event: createdEvent.slug,
       guests: String(guestsBoost),
       shots: String(shotsBoost),
+      photo_limit: String(photoLimit),
+      videos: contentVideos ? "1" : "0",
+      voice_notes: contentVoiceNotes ? "1" : "0",
     })
     router.push(`/checkout?${params.toString()}`)
   }
@@ -1019,17 +1044,28 @@ export function NewEventForm() {
                         <div className="pt-2 border-t border-zinc-800 flex flex-wrap gap-2 items-center justify-between text-xs">
                           <span className="text-zinc-400">Maximum photos per guest:</span>
                           <div className="flex gap-2">
-                            {[5, 10, 25, 50, -1].map((val) => (
-                              <button
-                                key={val}
-                                onClick={() => setPhotoLimit(val)}
-                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${
-                                  photoLimit === val ? "bg-amber-500 text-white border-amber-400" : "bg-zinc-800 border-zinc-800 text-zinc-400"
-                                }`}
-                              >
-                                {val === -1 ? "Unlimited" : val}
-                              </button>
-                            ))}
+                            {[5, 10, 25, 50, -1].map((val) => {
+                              const addonPrice = val !== planBasePhotoLimit && (val === -1 || val > planBasePhotoLimit)
+                                ? (PHOTO_LIMIT_ADDON_PRICES[val] ?? 0)
+                                : 0
+                              return (
+                                <button
+                                  key={val}
+                                  onClick={() => {
+                                    if (addonPrice > 0) {
+                                      toast({ title: "Photo cap upgrade", description: `Above your plan's included limit — adds ₹${addonPrice} to this event.` })
+                                    }
+                                    setPhotoLimit(val)
+                                  }}
+                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${
+                                    photoLimit === val ? "bg-amber-500 text-white border-amber-400" : "bg-zinc-800 border-zinc-800 text-zinc-400"
+                                  }`}
+                                >
+                                  {val === -1 ? "Unlimited" : val}
+                                  {addonPrice > 0 && <span className="opacity-70"> +₹{addonPrice}</span>}
+                                </button>
+                              )
+                            })}
                           </div>
                         </div>
                       )}
@@ -1043,8 +1079,8 @@ export function NewEventForm() {
                           <div>
                             <div className="flex items-center gap-1.5">
                               <p className="text-sm font-bold text-white">Videos</p>
-                              {guestCountPlan === "starter" && (
-                                <span className="bg-zinc-800 text-amber-400 text-[9px] font-bold px-1 py-0.2 rounded-full uppercase scale-95">Standard+</span>
+                              {videoAddonPrice > 0 && (
+                                <span className="bg-zinc-800 text-amber-400 text-[9px] font-bold px-1 py-0.2 rounded-full uppercase scale-95">+₹{videoAddonPrice} add-on</span>
                               )}
                             </div>
                             <p className="text-[10px] text-zinc-400">Capture motion events and video highlights</p>
@@ -1052,11 +1088,9 @@ export function NewEventForm() {
                         </div>
                         <Switch
                           checked={contentVideos}
-                          disabled={guestCountPlan === "starter"}
                           onCheckedChange={(c) => {
-                            if (guestCountPlan === "starter") {
-                              toast({ title: "Plan upgrade required", description: "Videos require the Standard or Premium plan." })
-                              return
+                            if (c && guestCountPlan !== "standard" && guestCountPlan !== "premium") {
+                              toast({ title: "Videos add-on", description: `Not included in your plan — adds ₹${VIDEO_UNLOCK_ADDON_PRICE} to this event.` })
                             }
                             setContentVideos(c)
                           }}
@@ -1090,8 +1124,8 @@ export function NewEventForm() {
                           <div>
                             <div className="flex items-center gap-1.5">
                               <p className="text-sm font-bold text-white">Voice Notes</p>
-                              {guestCountPlan !== "premium" && (
-                                <span className="bg-zinc-800 text-amber-400 text-[9px] font-bold px-1.5 py-0.2 rounded-full uppercase scale-95">Premium</span>
+                              {voiceAddonPrice > 0 && (
+                                <span className="bg-zinc-800 text-amber-400 text-[9px] font-bold px-1.5 py-0.2 rounded-full uppercase scale-95">+₹{voiceAddonPrice} add-on</span>
                               )}
                             </div>
                             <p className="text-[10px] text-zinc-400">Collect voice messages and wedding wishes</p>
@@ -1099,11 +1133,9 @@ export function NewEventForm() {
                         </div>
                         <Switch
                           checked={contentVoiceNotes}
-                          disabled={guestCountPlan !== "premium"}
                           onCheckedChange={(c) => {
-                            if (guestCountPlan !== "premium") {
-                              toast({ title: "Premium feature", description: "Voice notes are exclusive to the Premium tier." })
-                              return
+                            if (c && guestCountPlan !== "premium") {
+                              toast({ title: "Voice Notes add-on", description: `Premium-tier feature — adds ₹${VOICE_UNLOCK_ADDON_PRICE} to this event.` })
                             }
                             setContentVoiceNotes(c)
                           }}

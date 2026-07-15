@@ -147,3 +147,33 @@ export const DEFAULT_SHOT_BOOSTS = [
   { value: 10, label: "+10 shots", price: 179 },
   { value: 25, label: "+25 shots", price: 249 },
 ]
+
+// How many photos-per-guest each plan includes for free. Selecting a photo
+// limit above the current plan's own value in the event wizard is an
+// upsell, priced via PHOTO_LIMIT_ADDON_PRICES below — it used to be
+// selectable for free regardless of plan, which meant e.g. a Starter host
+// (20/guest included) could pick "Unlimited" at no extra charge.
+export const PLAN_BASE_PHOTO_LIMITS: Record<string, number> = {
+  free: 5,
+  starter: 20,
+  standard: 45,
+  premium: 85,
+}
+
+// Flat one-time charge for raising an event's per-guest photo cap to this
+// tier, only applied when the tier exceeds the selected plan's own included
+// limit (see PLAN_BASE_PHOTO_LIMITS). -1 represents "Unlimited".
+export const PHOTO_LIMIT_ADDON_PRICES: Record<number, number> = {
+  5: 0,
+  10: 99,
+  25: 179,
+  50: 249,
+  [-1]: 599,
+}
+
+// Flat one-time charge to unlock Videos / Voice Notes for an event on a plan
+// that doesn't already include them (Videos: Standard+, Voice Notes: Premium
+// only) — previously these were just hard-blocked with no way to pay for
+// them, or in one case (Free plan, Videos) not blocked at all and free.
+export const VIDEO_UNLOCK_ADDON_PRICE = 599
+export const VOICE_UNLOCK_ADDON_PRICE = 399

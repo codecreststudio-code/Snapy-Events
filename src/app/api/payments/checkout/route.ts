@@ -3,7 +3,14 @@ import { defineRoute, ok, fail, created } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder } from "@/lib/integrations/razorpay"
 import { adminDb } from "@/lib/supabase/admin"
-import { DEFAULT_GUEST_BOOSTS, DEFAULT_SHOT_BOOSTS } from "@/lib/constants"
+import {
+  DEFAULT_GUEST_BOOSTS,
+  DEFAULT_SHOT_BOOSTS,
+  PLAN_BASE_PHOTO_LIMITS,
+  PHOTO_LIMIT_ADDON_PRICES,
+  VIDEO_UNLOCK_ADDON_PRICE,
+  VOICE_UNLOCK_ADDON_PRICE,
+} from "@/lib/constants"
 
 const checkoutBodySchema = z.object({
   plan_id: z.string().min(1),
@@ -11,7 +18,42 @@ const checkoutBodySchema = z.object({
   guest_boost: z.number().default(0),
   shots_boost: z.number().default(0),
   currency: z.enum(["INR", "USD"]).default("INR"),
+  // Selections made in the event wizard that exceed the chosen plan's own
+  // included limits — e.g. picking "Unlimited" photos on Starter, or
+  // enabling Videos/Voice Notes on a plan that doesn't include them. These
+  // used to be free (the wizard let you pick them with no price change and
+  // the checkout API never even looked at them); calculatePrice() below now
+  // charges for the difference the same way it already does for guest/shot
+  // boosts.
+  photo_limit: z.number().optional(),
+  videos: z.boolean().default(false),
+  voice_notes: z.boolean().default(false),
 })
+
+// Server-side add-on pricing for wizard selections that exceed the chosen
+// plan's included limits. This is intentionally re-derived here (not
+// trusted from the client) so the Razorpay order amount always reflects
+// what the host actually owes, regardless of what the wizard UI displayed.
+export function calculateFeatureAddonPrice(planId: string, photoLimit?: number, videos?: boolean, voiceNotes?: boolean) {
+  let addon = 0
+  const planBaseLimit = PLAN_BASE_PHOTO_LIMITS[planId] ?? 0
+
+  if (typeof photoLimit === "number" && photoLimit !== planBaseLimit && (photoLimit === -1 || photoLimit > planBaseLimit)) {
+    addon += PHOTO_LIMIT_ADDON_PRICES[photoLimit] ?? 0
+  }
+
+  const planIncludesVideo = planId === "standard" || planId === "premium"
+  if (videos && !planIncludesVideo) {
+    addon += VIDEO_UNLOCK_ADDON_PRICE
+  }
+
+  const planIncludesVoice = planId === "premium"
+  if (voiceNotes && !planIncludesVoice) {
+    addon += VOICE_UNLOCK_ADDON_PRICE
+  }
+
+  return addon
+}
 
 export async function calculatePrice(
   supabase: any,
@@ -20,7 +62,10 @@ export async function calculatePrice(
   shotsBoost: number,
   couponCode?: string,
   currency: "INR" | "USD" = "INR",
-  userId?: string
+  userId?: string,
+  photoLimit?: number,
+  videos?: boolean,
+  voiceNotes?: boolean
 ) {
   let price = 0
 
@@ -68,7 +113,10 @@ export async function calculatePrice(
   const guestAddonPrice = currency === "USD" ? (Math.round(guestAddonPriceInr / 80) || (guestBoost > 0 ? 3 : 0)) : guestAddonPriceInr
   const shotAddonPrice = currency === "USD" ? (Math.round(shotAddonPriceInr / 80) || (shotsBoost > 0 ? 2 : 0)) : shotAddonPriceInr
 
-  price = price + guestAddonPrice + shotAddonPrice
+  const featureAddonPriceInr = calculateFeatureAddonPrice(planId, photoLimit, videos, voiceNotes)
+  const featureAddonPrice = currency === "USD" ? (Math.round(featureAddonPriceInr / 80) || (featureAddonPriceInr > 0 ? 1 : 0)) : featureAddonPriceInr
+
+  price = price + guestAddonPrice + shotAddonPrice + featureAddonPrice
 
   // Apply Coupon if exists
   if (couponCode) {
@@ -108,7 +156,18 @@ export const POST = defineRoute({
 
     let price = 0
     try {
-      price = await calculatePrice(supabase, body.plan_id, body.guest_boost, body.shots_boost, body.coupon_code, targetCurrency, auth.user!.id)
+      price = await calculatePrice(
+        supabase,
+        body.plan_id,
+        body.guest_boost,
+        body.shots_boost,
+        body.coupon_code,
+        targetCurrency,
+        auth.user!.id,
+        body.photo_limit,
+        body.videos,
+        body.voice_notes
+      )
     } catch (err: any) {
       return fail("BAD_REQUEST", err.message, 400)
     }
@@ -152,6 +211,9 @@ export const POST = defineRoute({
           guest_boost: String(body.guest_boost),
           shots_boost: String(body.shots_boost),
           currency: targetCurrency,
+          ...(typeof body.photo_limit === "number" ? { photo_limit: String(body.photo_limit) } : {}),
+          videos: String(body.videos),
+          voice_notes: String(body.voice_notes),
           ...(body.coupon_code ? { coupon_code: body.coupon_code } : {}),
         },
       })

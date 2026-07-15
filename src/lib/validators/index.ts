@@ -37,11 +37,23 @@ export const createEventSchema = z.object({
   name: z.string().min(2, "Event name must be at least 2 characters").max(200),
   description: z.string().max(2000).optional(),
   event_type: z.string().optional(),
+  custom_event_type_name: z.string().max(200).optional().nullable(),
   event_date: z.string().datetime().optional(),
   end_date: z.string().datetime().optional(),
   venue: z.string().max(500).optional(),
   timezone: z.string().default("UTC"),
   status: z.enum(["draft", "published", "completed", "archived"]).optional(),
+  cover_image_url: z.string().optional().nullable(),
+  // `.passthrough()` matters here: this used to be a plain z.object(), which
+  // Zod silently strips unknown keys from on parse. The event wizard
+  // (new-event-form.tsx) sends several settings keys — guest_count_plan,
+  // guests_boost, shots_boost, content_types, photo_limit, ai_features,
+  // capsule, invitation, etc. — that were never listed below, so they were
+  // dropped before ever reaching the database. That broke both the paid
+  // plan's actual entitlements (feature-gate.ts always saw an empty
+  // content_types) and the event_created email's variables. The explicit
+  // keys below still get real validation/defaults; passthrough just stops
+  // future wizard fields from silently vanishing the same way.
   settings: z.object({
     is_public: z.boolean().default(true),
     password_protected: z.boolean().default(false),
@@ -50,7 +62,11 @@ export const createEventSchema = z.object({
     auto_approve_photos: z.boolean().default(false),
     enable_countdown: z.boolean().default(false),
     countdown_date: z.string().datetime().optional(),
-  }).optional(),
+    guest_count_plan: z.enum(["free", "starter", "standard", "premium"]).optional(),
+    guests_boost: z.number().default(0),
+    shots_boost: z.number().default(0),
+    photo_limit: z.number().default(20),
+  }).passthrough().optional(),
 })
 
 export const updateEventSchema = createEventSchema.partial()

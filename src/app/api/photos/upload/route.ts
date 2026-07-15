@@ -243,12 +243,20 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       return fail("PLAN_LIMIT_REACHED", `This event has reached its limit of ${maxGuests} guests. The host must upgrade to receive more uploads.`, 403)
     }
 
+    // settings.photo_limit is the host's chosen per-guest cap from the event
+    // wizard. Selecting a value above the plan's own included limit (or
+    // "Unlimited", stored as -1) is now a paid add-on charged at checkout
+    // (see PLAN_BASE_PHOTO_LIMITS / PHOTO_LIMIT_ADDON_PRICES in
+    // src/lib/constants) — so once configured, it IS the real cap for this
+    // event, not just an extra ceiling on top of the plan default. Using
+    // Math.min against the plan's own maxShots here would silently discard
+    // the add-on the host paid for.
     const hostConfiguredPhotoLimit = typeof settings.photo_limit === "number" ? settings.photo_limit : null
-    const effectiveMaxShots = hostConfiguredPhotoLimit && hostConfiguredPhotoLimit > 0
-      ? Math.min(maxShots, hostConfiguredPhotoLimit)
-      : maxShots
+    const effectiveMaxShots = hostConfiguredPhotoLimit === -1
+      ? Infinity
+      : (hostConfiguredPhotoLimit && hostConfiguredPhotoLimit > 0 ? hostConfiguredPhotoLimit : maxShots)
 
-    if ((currentGuestShotsCount ?? 0) >= effectiveMaxShots) {
+    if (Number.isFinite(effectiveMaxShots) && (currentGuestShotsCount ?? 0) >= effectiveMaxShots) {
       return fail("PLAN_LIMIT_REACHED", `You have reached the limit of ${effectiveMaxShots} uploads per guest for this event.`, 403)
     }
 

@@ -14,6 +14,15 @@ import { toast } from "@/lib/components/ui/toaster"
 import { useCurrency } from "@/lib/context/currency-context"
 import { CurrencyToggle } from "@/lib/components/ui/currency-toggle"
 
+// Kept in sync with PLAN_BASE_PHOTO_LIMITS / PHOTO_LIMIT_ADDON_PRICES /
+// VIDEO_UNLOCK_ADDON_PRICE / VOICE_UNLOCK_ADDON_PRICE in src/lib/constants —
+// this is only used to render the price breakdown; the actual charge is
+// always recomputed server-side in /api/payments/checkout.
+const PLAN_BASE_PHOTO_LIMITS: Record<string, number> = { free: 5, starter: 20, standard: 45, premium: 85 }
+const PHOTO_LIMIT_ADDON_PRICES: Record<number, number> = { 5: 0, 10: 99, 25: 179, 50: 249, [-1]: 599 }
+const VIDEO_UNLOCK_ADDON_PRICE = 599
+const VOICE_UNLOCK_ADDON_PRICE = 399
+
 const GUEST_PRICES: Record<number, number> = {
   0: 0,
   10: 199,
@@ -56,6 +65,10 @@ function CheckoutForm() {
   const plan = searchParams?.get("plan") || "starter"
   const guests = parseInt(searchParams?.get("guests") || "0")
   const shots = parseInt(searchParams?.get("shots") || "0")
+  const photoLimitParam = searchParams?.get("photo_limit")
+  const photoLimit = photoLimitParam !== null ? parseInt(photoLimitParam) : undefined
+  const videos = searchParams?.get("videos") === "1"
+  const voiceNotes = searchParams?.get("voice_notes") === "1"
 
   const [initiating, setInitiating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -104,11 +117,26 @@ function CheckoutForm() {
   const rawShotInr = shotPrices[shots] || (shots > 0 ? Math.round(shots * 19.9) : 0)
   const rawShotUsd = Math.round(rawShotInr / 80) || (shots > 0 ? 2 : 0)
 
+  // Wizard selections beyond what the plan itself includes — Unlimited (or
+  // any tier above the plan's own) photo cap, Videos/Voice Notes unlocked on
+  // a plan that doesn't include them. Priced here only for display; the
+  // authoritative charge is recomputed server-side in /api/payments/checkout
+  // so this can't be spoofed by editing the URL.
+  const planBasePhotoLimit = PLAN_BASE_PHOTO_LIMITS[plan] ?? 0
+  const photoAddonInr = typeof photoLimit === "number" && photoLimit !== planBasePhotoLimit && (photoLimit === -1 || photoLimit > planBasePhotoLimit)
+    ? (PHOTO_LIMIT_ADDON_PRICES[photoLimit] ?? 0)
+    : 0
+  const videoAddonInr = videos && plan !== "standard" && plan !== "premium" ? VIDEO_UNLOCK_ADDON_PRICE : 0
+  const voiceAddonInr = voiceNotes && plan !== "premium" ? VOICE_UNLOCK_ADDON_PRICE : 0
+  const featureAddonInr = photoAddonInr + videoAddonInr + voiceAddonInr
+  const featureAddonUsd = Math.round(featureAddonInr / 80) || (featureAddonInr > 0 ? 1 : 0)
+
   const basePrice = getPrice(rawBaseInr, rawBaseUsd)
   const guestAddonPrice = getPrice(rawGuestInr, rawGuestUsd)
   const shotAddonPrice = getPrice(rawShotInr, rawShotUsd)
-  
-  let totalPrice = basePrice + guestAddonPrice + shotAddonPrice
+  const featureAddonPrice = getPrice(featureAddonInr, featureAddonUsd)
+
+  let totalPrice = basePrice + guestAddonPrice + shotAddonPrice + featureAddonPrice
   let discountAmount = 0
   
   if (appliedCoupon) {
@@ -215,6 +243,9 @@ function CheckoutForm() {
           shots_boost: shots,
           coupon_code: appliedCoupon?.code,
           currency: currency,
+          photo_limit: photoLimit,
+          videos,
+          voice_notes: voiceNotes,
         }),
       })
 
@@ -362,6 +393,39 @@ function CheckoutForm() {
                       <p className="text-xs text-slate-400">+{shots} shots limit per guest</p>
                     </div>
                     <span className="font-bold text-slate-800">{symbol}{shotAddonPrice}</span>
+                  </div>
+                )}
+
+                {/* Photo limit above plan (incl. Unlimited) */}
+                {photoAddonInr > 0 && (
+                  <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                    <div className="space-y-0.5">
+                      <span className="font-semibold text-slate-800">Photo Cap Upgrade</span>
+                      <p className="text-xs text-slate-400">{photoLimit === -1 ? "Unlimited" : photoLimit} photos per guest</p>
+                    </div>
+                    <span className="font-bold text-slate-800">{symbol}{getPrice(photoAddonInr, Math.round(photoAddonInr / 80) || 1)}</span>
+                  </div>
+                )}
+
+                {/* Videos unlock */}
+                {videoAddonInr > 0 && (
+                  <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                    <div className="space-y-0.5">
+                      <span className="font-semibold text-slate-800">Videos Add-on</span>
+                      <p className="text-xs text-slate-400">Not included in {PLAN_NAMES[plan] || plan}</p>
+                    </div>
+                    <span className="font-bold text-slate-800">{symbol}{getPrice(videoAddonInr, Math.round(videoAddonInr / 80) || 1)}</span>
+                  </div>
+                )}
+
+                {/* Voice Notes unlock */}
+                {voiceAddonInr > 0 && (
+                  <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                    <div className="space-y-0.5">
+                      <span className="font-semibold text-slate-800">Voice Notes Add-on</span>
+                      <p className="text-xs text-slate-400">Premium-only feature</p>
+                    </div>
+                    <span className="font-bold text-slate-800">{symbol}{getPrice(voiceAddonInr, Math.round(voiceAddonInr / 80) || 1)}</span>
                   </div>
                 )}
               </div>
