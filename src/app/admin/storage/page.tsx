@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 
 type StorageRow = {
   id: string
-  user_id: string
+  user_id: string | null
   total_bytes: any // stored as bigint string
   photo_count: number
   video_count: number | null
@@ -197,7 +197,9 @@ export default function AdminStoragePage() {
                       )}>
                         <td className="p-4">
                           <div className="font-bold text-slate-800">{row.user?.full_name ?? "—"}</div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">{row.user?.email || row.user_id.slice(0, 8) + "…"}</div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">
+                            {row.user?.email || (row.user_id ? row.user_id.slice(0, 8) + "…" : "Unassigned")}
+                          </div>
                         </td>
                         <td className="p-4">
                           <span className={cn("px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase",

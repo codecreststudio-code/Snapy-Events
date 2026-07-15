@@ -144,7 +144,7 @@ export default function AdminAnalyticsPage() {
                 <span>Device Types Distribution</span>
               </h3>
               <div className="space-y-4">
-                {data?.deviceDistribution?.map((item: any, i: number) => (
+                {data?.deviceDistribution?.length ? data.deviceDistribution.map((item: any, i: number) => (
                   <div key={i} className="flex justify-between items-center text-xs font-semibold">
                     <span className="text-slate-700">{item.type}</span>
                     <div className="flex items-center gap-3">
@@ -152,7 +152,9 @@ export default function AdminAnalyticsPage() {
                       <span className="text-violet-600 font-bold w-12 text-right">{item.percent}</span>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-xs text-slate-400 font-medium">No device data captured yet.</p>
+                )}
               </div>
             </Card>
 
@@ -163,7 +165,7 @@ export default function AdminAnalyticsPage() {
                 <span>Acquisition Referrers</span>
               </h3>
               <div className="space-y-4">
-                {data?.referrers?.map((item: any, i: number) => (
+                {data?.referrers?.length ? data.referrers.map((item: any, i: number) => (
                   <div key={i} className="flex justify-between items-center text-xs font-semibold">
                     <span className="text-slate-700">{item.source}</span>
                     <div className="flex items-center gap-3">
@@ -171,7 +173,9 @@ export default function AdminAnalyticsPage() {
                       <span className="text-violet-600 font-bold w-12 text-right">{item.percent}</span>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-xs text-slate-400 font-medium">No traffic source data yet — only QR scans are tracked as a source.</p>
+                )}
               </div>
             </Card>
 

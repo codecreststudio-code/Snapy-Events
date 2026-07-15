@@ -51,9 +51,10 @@ export const GET = defineRoute({
     const qrScans = (qrScansRes.data || []).reduce((sum, q) => sum + (q.scan_count || 0), 0)
     const photoUploads = photosRes.count || 0
     const aiSearches = aiSearchesRes.count || 0
-    // If we have actual page visits in analytics, use it, else approximate
-    let totalVisits = pageVisitsRes.count || 0
-    if (totalVisits < qrScans) totalVisits = qrScans + 150 // Fallback logic
+    // Real tracked page visits from analytics_events. Every QR scan is also a
+    // visit, so the true visit count can't be lower than qrScans — but we no
+    // longer pad it with an arbitrary made-up number when analytics is thin.
+    const totalVisits = Math.max(pageVisitsRes.count || 0, qrScans)
 
     const funnel = [
       { step: "Visitor Landings", val: totalVisits, percent: "100%", size: "w-full bg-violet-100 text-violet-750" },
@@ -82,29 +83,20 @@ export const GET = defineRoute({
       else devices.Other++
     })
     
-    // Fallback if no analytics data
-    if (deviceTotal === 0) {
-      devices.iOS = 54; devices.Android = 31; devices.Mac = 12; devices.Other = 3;
-      deviceTotal = 100;
-    }
-
-    const deviceDistribution = [
+    // No fabricated fallback — if no user_agent data has been captured yet,
+    // report an honest empty state instead of made-up percentages.
+    const deviceDistribution = deviceTotal === 0 ? [] : [
       { type: "iOS Safari/Chrome", percent: Math.round((devices.iOS / deviceTotal) * 100) + "%", count: devices.iOS },
       { type: "Android Chrome", percent: Math.round((devices.Android / deviceTotal) * 100) + "%", count: devices.Android },
       { type: "Desktop Mac/PC", percent: Math.round(((devices.Windows + devices.Mac) / deviceTotal) * 100) + "%", count: devices.Windows + devices.Mac },
       { type: "Others", percent: Math.round((devices.Other / deviceTotal) * 100) + "%", count: devices.Other },
     ]
 
-    // 4. Acquisition Referrers (approximated for now based on QR Scans + Direct traffic)
-    const directScans = qrScans
-    const organic = Math.floor(directScans * 0.15)
-    const social = Math.floor(directScans * 0.05)
-    const totalRef = directScans + organic + social || 1
-
-    const referrers = [
-      { source: "Direct (QR Code Scans)", percent: Math.round((directScans / totalRef) * 100) + "%", visits: directScans },
-      { source: "Organic Link Share", percent: Math.round((organic / totalRef) * 100) + "%", visits: organic },
-      { source: "Social Media / WhatsApp", percent: Math.round((social / totalRef) * 100) + "%", visits: social },
+    // 4. Acquisition Referrers — we only actually track QR-code scans as a
+    // traffic source right now (no UTM/referrer capture exists yet), so
+    // "Organic"/"Social" splits are not reported rather than guessed.
+    const referrers = qrScans === 0 ? [] : [
+      { source: "Direct (QR Code Scans)", percent: "100%", visits: qrScans },
     ]
 
     // 5. Top Features Utilized
