@@ -56,14 +56,14 @@ const getSuggestions = (userName?: string) => {
 }
 
 const EVENT_TYPE_CARDS = [
-  { id: "wedding", name: "Wedding", emoji: "💍", gradient: "from-[#FDFBF7] to-[#F5EBE6]", color: "#B89B85" },
-  { id: "birthday", name: "Birthday", emoji: "🎂", gradient: "from-[#FDFBF7] to-[#F7ECE1]", color: "#D29F6C" },
-  { id: "engagement", name: "Engagement", emoji: "🍾", gradient: "from-[#FDFBF7] to-[#F5E6EC]", color: "#C68CA3" },
-  { id: "corporate", name: "Corporate", emoji: "🏢", gradient: "from-[#FDFBF7] to-[#E3ECF5]", color: "#5F87A8" },
-  { id: "baby_shower", name: "Baby Shower", emoji: "👶", gradient: "from-[#FDFBF7] to-[#E3F2F5]", color: "#5FB6A8" },
-  { id: "graduation", name: "Graduation", emoji: "🎓", gradient: "from-[#FDFBF7] to-[#E6F5EB]", color: "#6EB887" },
-  { id: "festival", name: "Festival", emoji: "🎪", gradient: "from-[#FDFBF7] to-[#F5EBE3]", color: "#B28659" },
-  { id: "custom", name: "Custom", emoji: "✨", gradient: "from-[#FDFBF7] to-[#F4F4F6]", color: "#8E8E93" },
+  { id: "wedding", name: "Wedding", emoji: "💍", gradient: "from-zinc-900 to-zinc-800", color: "#B89B85" },
+  { id: "birthday", name: "Birthday", emoji: "🎂", gradient: "from-zinc-900 to-zinc-800", color: "#D29F6C" },
+  { id: "engagement", name: "Engagement", emoji: "🍾", gradient: "from-zinc-900 to-zinc-800", color: "#C68CA3" },
+  { id: "corporate", name: "Corporate", emoji: "🏢", gradient: "from-zinc-900 to-zinc-800", color: "#5F87A8" },
+  { id: "baby_shower", name: "Baby Shower", emoji: "👶", gradient: "from-zinc-900 to-zinc-800", color: "#5FB6A8" },
+  { id: "graduation", name: "Graduation", emoji: "🎓", gradient: "from-zinc-900 to-zinc-800", color: "#6EB887" },
+  { id: "festival", name: "Festival", emoji: "🎪", gradient: "from-zinc-900 to-zinc-800", color: "#B28659" },
+  { id: "custom", name: "Custom", emoji: "✨", gradient: "from-zinc-900 to-zinc-800", color: "#8E8E93" },
 ]
 
 const TEMPLATE_COVERS = [
@@ -534,33 +534,33 @@ export function NewEventForm() {
   }
 
   return (
-    <div className="w-full min-h-[calc(100vh-6rem)] bg-[#FAF9F6] text-[#1C1A17] flex flex-col font-sans rounded-3xl border border-[#EAE5DF] shadow-sm overflow-hidden selection:bg-[#EAE4D9]">
+    <div className="w-full min-h-[calc(100vh-6rem)] bg-black text-white flex flex-col font-sans rounded-3xl border border-zinc-800 shadow-sm overflow-hidden selection:bg-zinc-700">
       
       {/* Top Header */}
-      <header className="px-4 md:px-6 py-2.5 flex items-center justify-between border-b border-[#EAE5DF] w-full shrink-0 bg-white/60 backdrop-blur-sm">
+      <header className="px-4 md:px-6 py-2.5 flex items-center justify-between border-b border-zinc-800 w-full shrink-0 bg-zinc-950/60 backdrop-blur-sm">
         <div className="flex items-center gap-2">
-          <span className={`${playfair.className} text-lg md:text-xl font-bold tracking-wider text-[#A58263]`}>SNAPSY</span>
-          <span className="text-[10px] uppercase tracking-widest text-[#9C958E] px-2 py-0.5 border border-[#EAE5DF] rounded-full">Capsule Maker</span>
+          <span className={`${playfair.className} text-lg md:text-xl font-bold tracking-wider text-amber-400`}>SNAPSY</span>
+          <span className="text-[10px] uppercase tracking-widest text-zinc-500 px-2 py-0.5 border border-zinc-800 rounded-full">Capsule Maker</span>
         </div>
         <div className="flex items-center gap-3">
           {/* Live price summary — visible from Step 6 onwards */}
           {step >= 6 && step <= 10 && (
-            <div className="flex items-center gap-2 bg-[#FAF2EB] border border-[#E8D9C8] rounded-full px-3 py-1">
-              <span className="text-[10px] font-semibold text-[#A58263] capitalize">
+            <div className="flex items-center gap-2 bg-zinc-800 border border-zinc-700 rounded-full px-3 py-1">
+              <span className="text-[10px] font-semibold text-amber-400 capitalize">
                 {guestCountPlan === "free" ? "Free Trial" : `${guestCountPlan.charAt(0).toUpperCase() + guestCountPlan.slice(1)} Plan`}
               </span>
               {(guestsBoost > 0 || shotsBoost > 0) && (
-                <span className="text-[9px] text-[#9C958E]">
+                <span className="text-[9px] text-zinc-500">
                   +{guestsBoost > 0 ? `${guestsBoost}G` : ""}{guestsBoost > 0 && shotsBoost > 0 ? " " : ""}{shotsBoost > 0 ? `${shotsBoost}S` : ""}
                 </span>
               )}
-              <span className="h-3 w-px bg-[#D8C9B8]" />
-              <span className="text-[11px] font-bold text-[#1C1A17]">
+              <span className="h-3 w-px bg-zinc-700" />
+              <span className="text-[11px] font-bold text-white">
                 {totalEventPrice === 0 ? "Free" : `₹${totalEventPrice.toLocaleString("en-IN")}`}
               </span>
             </div>
           )}
-          <div className="text-[11px] font-semibold text-[#9C958E] tracking-widest">
+          <div className="text-[11px] font-semibold text-zinc-500 tracking-widest">
             {step <= 10 ? `STEP ${step} OF 10` : "READY"}
           </div>
         </div>
@@ -583,10 +583,10 @@ export function NewEventForm() {
               {/* STEP 1: EVENT NAME */}
               {step === 1 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-[#1C1A17]`}>
+                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     What should we call your event?
                   </h1>
-                  <p className="text-sm text-[#7A756E] max-w-md">
+                  <p className="text-sm text-zinc-400 max-w-md">
                     Give your memory capsule a name. Something personal, emotional, or celebratory.
                   </p>
                   <div className="relative">
@@ -595,20 +595,20 @@ export function NewEventForm() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder={`e.g. ${profile?.full_name?.split(" ")[0] || "Alex"}'s Wedding Celebration`}
-                      className="w-full bg-transparent border-b-2 border-[#E3DDD5] focus:border-[#A58263] outline-none text-2xl md:text-3xl py-3 transition-colors placeholder:text-[#CDC5BB]"
+                      className="w-full bg-transparent border-b-2 border-zinc-700 focus:border-amber-400 outline-none text-2xl md:text-3xl py-3 transition-colors placeholder:text-zinc-600"
                       autoFocus
                     />
                   </div>
                   
                   {/* Suggestions */}
                   <div className="pt-2 space-y-3">
-                    <p className="text-[11px] uppercase tracking-widest text-[#9C958E]">Suggestions</p>
+                    <p className="text-[11px] uppercase tracking-widest text-zinc-500">Suggestions</p>
                     <div className="flex flex-wrap gap-2">
                       {getSuggestions(profile?.full_name || user?.user_metadata?.full_name || user?.email).map((s) => (
                         <button
                           key={s}
                           onClick={() => setName(s)}
-                          className="px-4 py-2 text-xs rounded-full border border-[#EAE5DF] bg-white hover:border-[#A58263] hover:bg-[#FAF9F6] text-[#69635C] transition-all cursor-pointer"
+                          className="px-4 py-2 text-xs rounded-full border border-zinc-800 bg-zinc-900 hover:border-amber-400 hover:bg-zinc-800 text-zinc-400 transition-all cursor-pointer"
                         >
                           {s}
                         </button>
@@ -621,10 +621,10 @@ export function NewEventForm() {
               {/* STEP 2: EVENT TYPE */}
               {step === 2 && (
                 <div className="space-y-4">
-                  <h1 className={`${playfair.className} text-2xl md:text-3xl font-medium leading-tight tracking-tight text-[#1C1A17]`}>
+                  <h1 className={`${playfair.className} text-2xl md:text-3xl font-medium leading-tight tracking-tight text-white`}>
                     What kind of event are you creating?
                   </h1>
-                  <p className="text-xs md:text-sm text-[#7A756E]">
+                  <p className="text-xs md:text-sm text-zinc-400">
                     Your choice tailors custom filters, layout designs, and countdown capsules.
                   </p>
                   
@@ -643,11 +643,11 @@ export function NewEventForm() {
                             else setCoverImage("linear-gradient(135deg, #E2E2E2 0%, #C9C9C9 100%)")
                           }}
                           className={`p-3 rounded-xl text-left border transition-all flex items-center gap-3 h-14 cursor-pointer bg-gradient-to-br ${type.gradient} ${
-                            isSelected ? "border-[#A58263] shadow-sm ring-1 ring-[#A58263]" : "border-[#EAE5DF] hover:border-[#CDC5BB]"
+                            isSelected ? "border-amber-400 shadow-sm ring-1 ring-amber-400" : "border-zinc-800 hover:border-zinc-600"
                           }`}
                         >
                           <span className="text-xl shrink-0">{type.emoji}</span>
-                          <span className="text-xs font-semibold text-[#1C1A17] truncate">{type.name}</span>
+                          <span className="text-xs font-semibold text-white truncate">{type.name}</span>
                         </button>
                       )
                     })}
@@ -656,15 +656,15 @@ export function NewEventForm() {
                   {/* Custom Event Category Name Input */}
                   {eventType === "custom" && (
                     <div className="pt-2 space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <label className="text-xs font-semibold text-[#1C1A17] flex items-center gap-1">
+                      <label className="text-xs font-semibold text-white flex items-center gap-1">
                         <span>Enter your custom event category name</span>
-                        <span className="text-[#A58263]">*</span>
+                        <span className="text-amber-400">*</span>
                       </label>
                       <Input
                         value={customEventTypeName}
                         onChange={(e) => setCustomEventTypeName(e.target.value)}
                         placeholder="e.g. Family Reunion, Tech Conference, Housewarming..."
-                        className="bg-white border-[#EAE5DF] focus:border-[#A58263] text-sm h-10 shadow-sm"
+                        className="bg-zinc-900 border-zinc-800 focus:border-amber-400 text-sm h-10 shadow-sm"
                         autoFocus
                       />
                     </div>
@@ -675,12 +675,12 @@ export function NewEventForm() {
               {/* STEP 3: EVENT COVER */}
               {step === 3 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-[#1C1A17]`}>
+                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     Choose a cover for your memories.
                   </h1>
                   
                   {/* Selector tabs */}
-                  <div className="flex border-b border-[#EAE5DF] overflow-x-auto">
+                  <div className="flex border-b border-zinc-800 overflow-x-auto">
                     {[
                       { id: "gradient", label: "Gradients" },
                       { id: "template", label: "Templates" },
@@ -690,7 +690,7 @@ export function NewEventForm() {
                         key={tab.id}
                         onClick={() => setCoverType(tab.id as any)}
                         className={`pb-2 px-3.5 text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
-                          coverType === tab.id ? "border-b-2 border-[#A58263] text-[#A58263]" : "text-[#9C958E]"
+                          coverType === tab.id ? "border-b-2 border-amber-400 text-amber-400" : "text-zinc-500"
                         }`}
                       >
                         {tab.label}
@@ -707,12 +707,12 @@ export function NewEventForm() {
                           <button
                             key={grad.name}
                             onClick={() => setCoverImage(grad.css)}
-                            className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all cursor-pointer bg-white ${
-                              isSelected ? "border-[#A58263] shadow-sm" : "border-[#EAE5DF] hover:border-[#CDC5BB]"
+                            className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all cursor-pointer bg-zinc-900 ${
+                              isSelected ? "border-amber-400 shadow-sm" : "border-zinc-800 hover:border-zinc-600"
                             }`}
                           >
                             <div className="w-10 h-10 rounded-lg shrink-0" style={{ background: grad.css }} />
-                            <span className="text-xs font-medium text-[#69635C]">{grad.name}</span>
+                            <span className="text-xs font-medium text-zinc-400">{grad.name}</span>
                           </button>
                         )
                       })}
@@ -729,7 +729,7 @@ export function NewEventForm() {
                             key={idx}
                             onClick={() => setCoverImage(url)}
                             className={`h-24 rounded-xl border overflow-hidden relative transition-all cursor-pointer ${
-                              isSelected ? "border-[#A58263] shadow-md scale-[1.02]" : "border-[#EAE5DF]"
+                              isSelected ? "border-amber-400 shadow-md scale-[1.02]" : "border-zinc-800"
                             }`}
                           >
                             <img src={url} alt={`Template ${idx}`} className="w-full h-full object-cover" />
@@ -743,15 +743,15 @@ export function NewEventForm() {
                   {/* Custom Upload Section */}
                   {coverType === "upload" && (
                     <div className="pt-2 space-y-3">
-                      <label className="border-2 border-dashed border-[#EAE5DF] hover:border-[#A58263] bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:bg-[#FAF9F6]">
-                        <div className="w-12 h-12 rounded-full bg-[#FAF9F6] border border-[#EAE5DF] flex items-center justify-center text-[#A58263]">
+                      <label className="border-2 border-dashed border-zinc-800 hover:border-amber-400 bg-zinc-900 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:bg-zinc-800">
+                        <div className="w-12 h-12 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-amber-400">
                           <Upload className="h-6 w-6" />
                         </div>
                         <div className="text-center space-y-1">
-                          <p className="text-sm font-semibold text-[#1C1A17]">
+                          <p className="text-sm font-semibold text-white">
                             {uploadingCover ? "Uploading custom cover..." : "Click to upload your custom cover photo"}
                           </p>
-                          <p className="text-xs text-[#9C958E]">PNG, JPG, or WebP (max 10MB)</p>
+                          <p className="text-xs text-zinc-500">PNG, JPG, or WebP (max 10MB)</p>
                         </div>
                         <input
                           type="file"
@@ -763,11 +763,11 @@ export function NewEventForm() {
                       </label>
 
                       {coverImage.startsWith("http") && !TEMPLATE_COVERS.includes(coverImage) && (
-                        <div className="p-2 bg-white rounded-xl border border-[#EAE5DF] flex items-center gap-3">
-                          <img src={coverImage} alt="Custom cover preview" className="w-14 h-14 rounded-lg object-cover border border-[#EAE5DF]" />
+                        <div className="p-2 bg-zinc-900 rounded-xl border border-zinc-800 flex items-center gap-3">
+                          <img src={coverImage} alt="Custom cover preview" className="w-14 h-14 rounded-lg object-cover border border-zinc-800" />
                           <div className="space-y-0.5">
                             <span className="text-xs font-semibold text-emerald-600 block">✓ Custom Cover Active</span>
-                            <span className="text-[10px] text-[#9C958E]">Visible live on your event memory capsule</span>
+                            <span className="text-[10px] text-zinc-500">Visible live on your event memory capsule</span>
                           </div>
                         </div>
                       )}
@@ -779,44 +779,44 @@ export function NewEventForm() {
               {/* STEP 4: EVENT END DATE */}
               {step === 4 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-[#1C1A17]`}>
+                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     When does your event end?
                   </h1>
-                  <p className="text-sm text-[#7A756E]">
+                  <p className="text-sm text-zinc-400">
                     Once ended, guest upload portals lock, and final preparation for the memory reveal starts.
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                     <div className="space-y-2">
-                      <label className="text-[11px] uppercase tracking-widest text-[#9C958E] font-bold">End Date</label>
-                      <div className="relative bg-white border border-[#EAE5DF] rounded-xl p-3 flex items-center gap-3">
-                        <CalendarIcon className="h-4 w-4 text-[#A58263]" />
+                      <label className="text-[11px] uppercase tracking-widest text-zinc-500 font-bold">End Date</label>
+                      <div className="relative bg-zinc-900 border border-zinc-800 rounded-xl p-3 flex items-center gap-3">
+                        <CalendarIcon className="h-4 w-4 text-amber-400" />
                         <input
                           type="date"
                           value={endDate}
                           onChange={(e) => setEndDate(e.target.value)}
-                          className="bg-transparent outline-none text-sm text-[#1C1A17] flex-1 cursor-pointer"
+                          className="bg-transparent outline-none text-sm text-white flex-1 cursor-pointer"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[11px] uppercase tracking-widest text-[#9C958E] font-bold">Locks at Time</label>
-                      <div className="relative bg-white border border-[#EAE5DF] rounded-xl p-3 flex items-center gap-3">
-                        <Clock className="h-4 w-4 text-[#A58263]" />
+                      <label className="text-[11px] uppercase tracking-widest text-zinc-500 font-bold">Locks at Time</label>
+                      <div className="relative bg-zinc-900 border border-zinc-800 rounded-xl p-3 flex items-center gap-3">
+                        <Clock className="h-4 w-4 text-amber-400" />
                         <input
                           type="time"
                           value={endTime}
                           onChange={(e) => setEndTime(e.target.value)}
-                          className="bg-transparent outline-none text-sm text-[#1C1A17] flex-1 cursor-pointer"
+                          className="bg-transparent outline-none text-sm text-white flex-1 cursor-pointer"
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-[#F6F2EB] rounded-2xl p-4 flex items-center gap-3">
+                  <div className="bg-zinc-900 rounded-2xl p-4 flex items-center gap-3">
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-xs text-[#69635C] font-medium">
+                    <span className="text-xs text-zinc-400 font-medium">
                       Event active live. Countdown clock starts running immediately upon launch.
                     </span>
                   </div>
@@ -826,7 +826,7 @@ export function NewEventForm() {
               {/* STEP 5: REVEAL EXPERIENCE */}
               {step === 5 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-[#1C1A17]`}>
+                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     When should guests see the memories?
                   </h1>
                   
@@ -844,29 +844,29 @@ export function NewEventForm() {
                         <button
                           key={opt.id}
                           onClick={() => setRevealExperience(opt.id)}
-                          className={`p-4 rounded-xl text-left border flex flex-col justify-between transition-all bg-white cursor-pointer ${
-                            isSelected ? "border-[#A58263] shadow-sm" : "border-[#EAE5DF] hover:border-[#CDC5BB]"
+                          className={`p-4 rounded-xl text-left border flex flex-col justify-between transition-all bg-zinc-900 cursor-pointer ${
+                            isSelected ? "border-amber-400 shadow-sm" : "border-zinc-800 hover:border-zinc-600"
                           }`}
                         >
-                          <span className="text-xs font-bold text-[#1C1A17]">{opt.label}</span>
-                          <span className="text-[10px] text-[#7A756E] mt-1">{opt.desc}</span>
+                          <span className="text-xs font-bold text-white">{opt.label}</span>
+                          <span className="text-[10px] text-zinc-400 mt-1">{opt.desc}</span>
                         </button>
                       )
                     })}
                   </div>
 
                   {/* Thumbnail Reveal Blur Demo */}
-                  <div className="border border-[#EAE5DF] rounded-xl p-4 bg-white space-y-3">
-                    <p className="text-[10px] uppercase tracking-widest text-[#9C958E] font-semibold text-center">Interactive Reveal Preview</p>
+                  <div className="border border-zinc-800 rounded-xl p-4 bg-zinc-900 space-y-3">
+                    <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold text-center">Interactive Reveal Preview</p>
                     <div className="flex justify-center gap-3">
                       {[1, 2, 3].map((i) => (
                         <div key={i} className="w-16 h-16 rounded-lg bg-cover bg-center relative overflow-hidden shadow-inner" style={{ backgroundImage: `url(${TEMPLATE_COVERS[i % TEMPLATE_COVERS.length]})` }}>
                           <motion.div
                             animate={{ opacity: revealExperience === "immediately" ? 0 : 0.8 }}
                             transition={{ duration: 0.8 }}
-                            className="absolute inset-0 bg-[#FCFBFA]/90 backdrop-blur-md flex items-center justify-center"
+                            className="absolute inset-0 bg-zinc-900/90 backdrop-blur-md flex items-center justify-center"
                           >
-                            <svg className="h-4 w-4 text-[#A58263]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                           </motion.div>
@@ -880,7 +880,7 @@ export function NewEventForm() {
               {/* STEP 6: GUEST COUNT & PLANS */}
               {step === 6 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-[#1C1A17]`}>
+                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     How many guests are joining?
                   </h1>
                   
@@ -896,23 +896,23 @@ export function NewEventForm() {
                         <div
                           key={plan.id}
                           onClick={() => setGuestCountPlan(plan.id as any)}
-                          className={`p-4 rounded-2xl border-2 transition-all bg-white cursor-pointer flex justify-between items-start gap-4 ${
-                            isSelected ? "border-[#A58263] shadow-sm" : "border-[#EAE5DF] hover:border-[#CDC5BB]"
+                          className={`p-4 rounded-2xl border-2 transition-all bg-zinc-900 cursor-pointer flex justify-between items-start gap-4 ${
+                            isSelected ? "border-amber-400 shadow-sm" : "border-zinc-800 hover:border-zinc-600"
                           }`}
                         >
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-bold text-[#1C1A17]">{plan.name}</span>
+                              <span className="text-sm font-bold text-white">{plan.name}</span>
                               {plan.id === "premium" && (
-                                <span className="bg-[#FAF2EB] text-[#A58263] text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">Luxe</span>
+                                <span className="bg-zinc-800 text-amber-400 text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">Luxe</span>
                               )}
                             </div>
-                            <p className="text-xs text-[#A58263] font-medium">{plan.limit}</p>
-                            <p className="text-[10px] text-[#7A756E] leading-relaxed max-w-sm">{plan.desc}</p>
+                            <p className="text-xs text-amber-400 font-medium">{plan.limit}</p>
+                            <p className="text-[10px] text-zinc-400 leading-relaxed max-w-sm">{plan.desc}</p>
                           </div>
                           <div className="text-right shrink-0">
-                            <span className="text-lg font-bold text-[#1C1A17]">{plan.price}</span>
-                            <span className="text-[9px] text-[#9C958E] block">One-time event</span>
+                            <span className="text-lg font-bold text-white">{plan.price}</span>
+                            <span className="text-[9px] text-zinc-500 block">One-time event</span>
                           </div>
                         </div>
                       )
@@ -920,8 +920,8 @@ export function NewEventForm() {
                   </div>
 
                   {/* Addon boosters section */}
-                  <div className="border border-[#EAE5DF] rounded-2xl p-4 bg-white space-y-4">
-                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#A58263]">
+                  <div className="border border-zinc-800 rounded-2xl p-4 bg-zinc-900 space-y-4">
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400">
                       <Users className="h-4 w-4" />
                       <span>Custom Quota Boost Add-ons</span>
                     </div>
@@ -929,13 +929,13 @@ export function NewEventForm() {
                     {/* Guest Boost Tier Picker */}
                     <div className="space-y-2">
                       <div>
-                        <p className="font-semibold text-xs text-[#1C1A17]">Boost Guest Capacity</p>
-                        <p className="text-[10px] text-[#7A756E]">Add extra guests above your plan limit</p>
+                        <p className="font-semibold text-xs text-white">Boost Guest Capacity</p>
+                        <p className="text-[10px] text-zinc-400">Add extra guests above your plan limit</p>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => setGuestsBoost(0)}
-                          className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${guestsBoost === 0 ? "bg-[#A58263] text-white border-[#A58263]" : "bg-stone-50 border-[#EAE5DF] text-[#7A756E] hover:border-[#A58263]"}`}
+                          className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${guestsBoost === 0 ? "bg-amber-500 text-white border-amber-400" : "bg-zinc-800 border-zinc-800 text-zinc-400 hover:border-amber-400"}`}
                         >
                           None
                         </button>
@@ -946,10 +946,10 @@ export function NewEventForm() {
                           <button
                             key={boost.value}
                             onClick={() => setGuestsBoost(boost.value)}
-                            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer flex items-center gap-1 ${guestsBoost === boost.value ? "bg-[#A58263] text-white border-[#A58263]" : "bg-stone-50 border-[#EAE5DF] text-[#7A756E] hover:border-[#A58263]"}`}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer flex items-center gap-1 ${guestsBoost === boost.value ? "bg-amber-500 text-white border-amber-400" : "bg-zinc-800 border-zinc-800 text-zinc-400 hover:border-amber-400"}`}
                           >
                             +{boost.value} guests
-                            <span className={`font-bold ${guestsBoost === boost.value ? "text-white/80" : "text-[#A58263]"}`}>₹{boost.price}</span>
+                            <span className={`font-bold ${guestsBoost === boost.value ? "text-white/80" : "text-amber-400"}`}>₹{boost.price}</span>
                           </button>
                         ))}
                       </div>
@@ -958,13 +958,13 @@ export function NewEventForm() {
                     {/* Shot Boost Tier Picker */}
                     <div className="space-y-2">
                       <div>
-                        <p className="font-semibold text-xs text-[#1C1A17]">Boost Shot Quota</p>
-                        <p className="text-[10px] text-[#7A756E]">Add extra photo uploads allowed per guest</p>
+                        <p className="font-semibold text-xs text-white">Boost Shot Quota</p>
+                        <p className="text-[10px] text-zinc-400">Add extra photo uploads allowed per guest</p>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => setShotsBoost(0)}
-                          className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${shotsBoost === 0 ? "bg-[#A58263] text-white border-[#A58263]" : "bg-stone-50 border-[#EAE5DF] text-[#7A756E] hover:border-[#A58263]"}`}
+                          className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${shotsBoost === 0 ? "bg-amber-500 text-white border-amber-400" : "bg-zinc-800 border-zinc-800 text-zinc-400 hover:border-amber-400"}`}
                         >
                           None
                         </button>
@@ -975,10 +975,10 @@ export function NewEventForm() {
                           <button
                             key={boost.value}
                             onClick={() => setShotsBoost(boost.value)}
-                            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer flex items-center gap-1 ${shotsBoost === boost.value ? "bg-[#A58263] text-white border-[#A58263]" : "bg-stone-50 border-[#EAE5DF] text-[#7A756E] hover:border-[#A58263]"}`}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer flex items-center gap-1 ${shotsBoost === boost.value ? "bg-amber-500 text-white border-amber-400" : "bg-zinc-800 border-zinc-800 text-zinc-400 hover:border-amber-400"}`}
                           >
                             +{boost.value} shots/guest
-                            <span className={`font-bold ${shotsBoost === boost.value ? "text-white/80" : "text-[#A58263]"}`}>₹{boost.price}</span>
+                            <span className={`font-bold ${shotsBoost === boost.value ? "text-white/80" : "text-amber-400"}`}>₹{boost.price}</span>
                           </button>
                         ))}
                       </div>
@@ -986,9 +986,9 @@ export function NewEventForm() {
 
                     {/* Live total for this event */}
                     {(guestsBoost > 0 || shotsBoost > 0) && (
-                      <div className="pt-2 border-t border-[#F0EAE2] flex items-center justify-between">
-                        <p className="text-[10px] text-[#7A756E]">Add-on subtotal for this event</p>
-                        <p className="text-sm font-bold text-[#1C1A17]">₹{(guestAddonPrice + shotAddonPrice).toLocaleString("en-IN")}</p>
+                      <div className="pt-2 border-t border-zinc-800 flex items-center justify-between">
+                        <p className="text-[10px] text-zinc-400">Add-on subtotal for this event</p>
+                        <p className="text-sm font-bold text-white">₹{(guestAddonPrice + shotAddonPrice).toLocaleString("en-IN")}</p>
                       </div>
                     )}
                   </div>
@@ -998,33 +998,33 @@ export function NewEventForm() {
               {/* STEP 7: CONTENT TYPES & SETTINGS */}
               {step === 7 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-[#1C1A17]`}>
+                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     What can your guests contribute?
                   </h1>
                   
                   <div className="space-y-4">
                     {/* Photos switch */}
-                    <div className="p-4 rounded-xl border border-[#EAE5DF] bg-white space-y-3">
+                    <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-900 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <span className="text-xl">📸</span>
                           <div>
-                            <p className="text-sm font-bold text-[#1C1A17]">Photos</p>
-                            <p className="text-[10px] text-[#7A756E]">Still photographs of moments</p>
+                            <p className="text-sm font-bold text-white">Photos</p>
+                            <p className="text-[10px] text-zinc-400">Still photographs of moments</p>
                           </div>
                         </div>
                         <Switch checked={contentPhotos} onCheckedChange={setContentPhotos} />
                       </div>
                       {contentPhotos && (
-                        <div className="pt-2 border-t border-[#F2EDE7] flex flex-wrap gap-2 items-center justify-between text-xs">
-                          <span className="text-[#69635C]">Maximum photos per guest:</span>
+                        <div className="pt-2 border-t border-zinc-800 flex flex-wrap gap-2 items-center justify-between text-xs">
+                          <span className="text-zinc-400">Maximum photos per guest:</span>
                           <div className="flex gap-2">
                             {[5, 10, 25, 50, -1].map((val) => (
                               <button
                                 key={val}
                                 onClick={() => setPhotoLimit(val)}
                                 className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${
-                                  photoLimit === val ? "bg-[#A58263] text-white border-[#A58263]" : "bg-stone-50 border-[#EAE5DF] text-[#7A756E]"
+                                  photoLimit === val ? "bg-amber-500 text-white border-amber-400" : "bg-zinc-800 border-zinc-800 text-zinc-400"
                                 }`}
                               >
                                 {val === -1 ? "Unlimited" : val}
@@ -1036,18 +1036,18 @@ export function NewEventForm() {
                     </div>
 
                     {/* Videos switch */}
-                    <div className="p-4 rounded-xl border border-[#EAE5DF] bg-white space-y-3">
+                    <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-900 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <span className="text-xl">🎥</span>
                           <div>
                             <div className="flex items-center gap-1.5">
-                              <p className="text-sm font-bold text-[#1C1A17]">Videos</p>
+                              <p className="text-sm font-bold text-white">Videos</p>
                               {guestCountPlan === "starter" && (
-                                <span className="bg-[#FAF2EB] text-[#A58263] text-[9px] font-bold px-1 py-0.2 rounded-full uppercase scale-95">Standard+</span>
+                                <span className="bg-zinc-800 text-amber-400 text-[9px] font-bold px-1 py-0.2 rounded-full uppercase scale-95">Standard+</span>
                               )}
                             </div>
-                            <p className="text-[10px] text-[#7A756E]">Capture motion events and video highlights</p>
+                            <p className="text-[10px] text-zinc-400">Capture motion events and video highlights</p>
                           </div>
                         </div>
                         <Switch
@@ -1063,15 +1063,15 @@ export function NewEventForm() {
                         />
                       </div>
                       {contentVideos && (
-                        <div className="pt-2 border-t border-[#F2EDE7] flex items-center justify-between text-xs">
-                          <span className="text-[#69635C]">Duration limit per clip:</span>
+                        <div className="pt-2 border-t border-zinc-800 flex items-center justify-between text-xs">
+                          <span className="text-zinc-400">Duration limit per clip:</span>
                           <div className="flex gap-2">
                             {[10, 20, 30].map((sec) => (
                               <button
                                 key={sec}
                                 onClick={() => setVideoDuration(sec)}
                                 className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${
-                                  videoDuration === sec ? "bg-[#A58263] text-white border-[#A58263]" : "bg-stone-50 border-[#EAE5DF] text-[#7A756E]"
+                                  videoDuration === sec ? "bg-amber-500 text-white border-amber-400" : "bg-zinc-800 border-zinc-800 text-zinc-400"
                                 }`}
                               >
                                 {sec}s
@@ -1083,18 +1083,18 @@ export function NewEventForm() {
                     </div>
 
                     {/* Voice Notes switch */}
-                    <div className="p-4 rounded-xl border border-[#EAE5DF] bg-white space-y-3">
+                    <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-900 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <span className="text-xl">🎤</span>
                           <div>
                             <div className="flex items-center gap-1.5">
-                              <p className="text-sm font-bold text-[#1C1A17]">Voice Notes</p>
+                              <p className="text-sm font-bold text-white">Voice Notes</p>
                               {guestCountPlan !== "premium" && (
-                                <span className="bg-[#FAF2EB] text-[#A58263] text-[9px] font-bold px-1.5 py-0.2 rounded-full uppercase scale-95">Premium</span>
+                                <span className="bg-zinc-800 text-amber-400 text-[9px] font-bold px-1.5 py-0.2 rounded-full uppercase scale-95">Premium</span>
                               )}
                             </div>
-                            <p className="text-[10px] text-[#7A756E]">Collect voice messages and wedding wishes</p>
+                            <p className="text-[10px] text-zinc-400">Collect voice messages and wedding wishes</p>
                           </div>
                         </div>
                         <Switch
@@ -1110,16 +1110,16 @@ export function NewEventForm() {
                         />
                       </div>
                       {contentVoiceNotes && (
-                        <div className="pt-2 border-t border-[#F2EDE7] space-y-2">
+                        <div className="pt-2 border-t border-zinc-800 space-y-2">
                           <div className="flex justify-between items-center text-xs">
-                            <span className="text-[#69635C]">Duration limit per note:</span>
+                            <span className="text-zinc-400">Duration limit per note:</span>
                             <div className="flex gap-2">
                               {[10, 20, 30].map((sec) => (
                                 <button
                                   key={sec}
                                   onClick={() => setVoiceDuration(sec)}
                                   className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${
-                                    voiceDuration === sec ? "bg-[#A58263] text-white border-[#A58263]" : "bg-stone-50 border-[#EAE5DF] text-[#7A756E]"
+                                    voiceDuration === sec ? "bg-amber-500 text-white border-amber-400" : "bg-zinc-800 border-zinc-800 text-zinc-400"
                                   }`}
                                 >
                                   {sec}s
@@ -1128,29 +1128,29 @@ export function NewEventForm() {
                             </div>
                           </div>
                           {/* Voice player design mock */}
-                          <div className="bg-[#FBFBFA] border border-[#F2EDE7] rounded-xl p-2 flex items-center gap-3 mt-1">
-                            <div className="w-8 h-8 rounded-full bg-[#A58263] flex items-center justify-center text-white shrink-0">
+                          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-2 flex items-center gap-3 mt-1">
+                            <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-white shrink-0">
                               <Mic className="h-3.5 w-3.5" />
                             </div>
                             <div className="flex-1 space-y-1">
                               <div className="h-1 bg-stone-200 rounded-full w-full overflow-hidden">
-                                <div className="h-full bg-[#A58263] w-1/3" />
+                                <div className="h-full bg-amber-500 w-1/3" />
                               </div>
-                              <p className="text-[8px] text-[#9C958E]">Preview: "Wedding Wishes" audio note</p>
+                              <p className="text-[8px] text-zinc-500">Preview: "Wedding Wishes" audio note</p>
                             </div>
-                            <span className="text-[10px] text-[#69635C] font-mono shrink-0">0:04 / 0:15</span>
+                            <span className="text-[10px] text-zinc-400 font-mono shrink-0">0:04 / 0:15</span>
                           </div>
                         </div>
                       )}
                     </div>
 
                     {/* Messages switch */}
-                    <div className="p-4 rounded-xl border border-[#EAE5DF] bg-white flex items-center justify-between">
+                    <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-900 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <span className="text-xl">💌</span>
                         <div>
-                          <p className="text-sm font-bold text-[#1C1A17]">Reaction Messages</p>
-                          <p className="text-[10px] text-[#7A756E]">Guest notes, emoji reaction tags, and advice cards</p>
+                          <p className="text-sm font-bold text-white">Reaction Messages</p>
+                          <p className="text-[10px] text-zinc-400">Guest notes, emoji reaction tags, and advice cards</p>
                         </div>
                       </div>
                       <Switch checked={contentMessages} onCheckedChange={setContentMessages} />
@@ -1162,10 +1162,10 @@ export function NewEventForm() {
               {/* STEP 8: AI FEATURES */}
               {step === 8 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-[#1C1A17]`}>
+                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     Let AI organize your memories.
                   </h1>
-                  <p className="text-sm text-[#7A756E]">
+                  <p className="text-sm text-zinc-400">
                     Activate powerful server-side AI agents to catalog and index guest uploads.
                   </p>
 
@@ -1179,15 +1179,15 @@ export function NewEventForm() {
                       { id: "categorize", label: "Auto Categorization", desc: "Tags items (candles, dances, cakes, sunset) automatically", state: aiAutoCategorize, setter: setAiAutoCategorize, premium: true },
                       { id: "customLayout", label: "Custom Layout Planner", desc: "Dynamically constructs custom print-ready grid spacing", state: aiCustomLayout, setter: setAiCustomLayout, premium: true },
                     ].map((feature, idx) => (
-                      <div key={idx} className="p-3.5 rounded-xl border border-[#EAE5DF] bg-white flex items-center justify-between gap-4">
+                      <div key={idx} className="p-3.5 rounded-xl border border-zinc-800 bg-zinc-900 flex items-center justify-between gap-4">
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-[#1C1A17]">{feature.label}</span>
+                            <span className="text-xs font-bold text-white">{feature.label}</span>
                             {feature.premium && (
-                              <span className="bg-[#FAF2EB] text-[#A58263] text-[8px] font-bold px-1.5 py-0.2 rounded-full uppercase scale-90">Premium</span>
+                              <span className="bg-zinc-800 text-amber-400 text-[8px] font-bold px-1.5 py-0.2 rounded-full uppercase scale-90">Premium</span>
                             )}
                           </div>
-                          <p className="text-[10px] text-[#7A756E] leading-relaxed max-w-sm">{feature.desc}</p>
+                          <p className="text-[10px] text-zinc-400 leading-relaxed max-w-sm">{feature.desc}</p>
                         </div>
                         <Switch
                           checked={feature.state}
@@ -1208,17 +1208,17 @@ export function NewEventForm() {
               {/* STEP 9: MEMORY CAPSULE */}
               {step === 9 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-[#1C1A17]`}>
+                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     Create a memory capsule?
                   </h1>
-                  <p className="text-sm text-[#7A756E]">
+                  <p className="text-sm text-zinc-400">
                     Lock files in a secure virtual capsule until a future special date. Build anticipation.
                   </p>
 
-                  <div className="p-4 rounded-xl border border-[#EAE5DF] bg-white flex items-center justify-between">
+                  <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-900 flex items-center justify-between">
                     <div className="space-y-1">
-                      <p className="text-sm font-bold text-[#1C1A17]">Enable Memory Capsule</p>
-                      <p className="text-[10px] text-[#7A756E]">Hide contribution stream until reveal date is reached</p>
+                      <p className="text-sm font-bold text-white">Enable Memory Capsule</p>
+                      <p className="text-[10px] text-zinc-400">Hide contribution stream until reveal date is reached</p>
                     </div>
                     <Switch checked={capsuleEnabled} onCheckedChange={setCapsuleEnabled} />
                   </div>
@@ -1241,7 +1241,7 @@ export function NewEventForm() {
                             type="button"
                             onClick={() => setCapsuleTrigger(t.id)}
                             className={`p-3 rounded-lg border text-[11px] font-bold text-left transition-all ${
-                              capsuleTrigger === t.id ? "bg-[#A58263] text-white border-[#A58263]" : "bg-white border-[#EAE5DF] text-[#69635C]"
+                              capsuleTrigger === t.id ? "bg-amber-500 text-white border-amber-400" : "bg-zinc-900 border-zinc-800 text-zinc-400"
                             }`}
                           >
                             {t.label}
@@ -1250,8 +1250,8 @@ export function NewEventForm() {
                       </div>
 
                       {/* Locked capsule safe box animation mock */}
-                      <div className="p-6 rounded-2xl bg-gradient-to-b from-[#FDFBF7] to-[#FAF2EB] border border-[#EAE5DF] flex flex-col items-center justify-center text-center space-y-3">
-                        <div className="w-16 h-16 rounded-full bg-[#FAF9F6] border border-[#EAE5DF] flex items-center justify-center text-[#A58263] shadow-sm relative">
+                      <div className="p-6 rounded-2xl bg-gradient-to-b from-zinc-900 to-zinc-800 border border-zinc-800 flex flex-col items-center justify-center text-center space-y-3">
+                        <div className="w-16 h-16 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-amber-400 shadow-sm relative">
                           <motion.div
                             animate={{ scale: [1, 1.05, 1] }}
                             transition={{ repeat: Infinity, duration: 3 }}
@@ -1263,8 +1263,8 @@ export function NewEventForm() {
                           <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-ping" />
                         </div>
                         <div className="space-y-1">
-                          <p className={`${playfair.className} text-lg font-medium text-[#1C1A17]`}>Memory Safe Activated</p>
-                          <p className="text-[10px] text-[#7A756E] max-w-xs mx-auto">
+                          <p className={`${playfair.className} text-lg font-medium text-white`}>Memory Safe Activated</p>
+                          <p className="text-[10px] text-zinc-400 max-w-xs mx-auto">
                             All media, audio, and messages will remain blurred and unreadable. Unlocking on Anniversary day.
                           </p>
                         </div>
@@ -1277,13 +1277,13 @@ export function NewEventForm() {
               {/* STEP 10: INVITATION CARD DESIGN */}
               {step === 10 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-[#1C1A17]`}>
+                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     Design your invitation experience.
                   </h1>
                   
                   <div className="space-y-4 pt-2">
                     <div>
-                      <label className="text-[11px] uppercase tracking-widest text-[#9C958E] font-bold block mb-2">Select Theme Template</label>
+                      <label className="text-[11px] uppercase tracking-widest text-zinc-500 font-bold block mb-2">Select Theme Template</label>
                       <div className="flex flex-wrap gap-2">
                         {["minimal", "luxury", "modern", "elegant", "glass", "dark"].map((theme) => (
                           <button
@@ -1291,7 +1291,7 @@ export function NewEventForm() {
                             type="button"
                             onClick={() => setInvitationTheme(theme)}
                             className={`px-3 py-1.5 rounded-full text-xs font-semibold capitalize border transition-all cursor-pointer ${
-                              invitationTheme === theme ? "bg-[#A58263] text-white border-[#A58263]" : "bg-white border-[#EAE5DF] text-[#69635C]"
+                              invitationTheme === theme ? "bg-amber-500 text-white border-amber-400" : "bg-zinc-900 border-zinc-800 text-zinc-400"
                             }`}
                           >
                             {theme}
@@ -1301,20 +1301,20 @@ export function NewEventForm() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[11px] uppercase tracking-widest text-[#9C958E] font-bold block">Welcome Message</label>
+                      <label className="text-[11px] uppercase tracking-widest text-zinc-500 font-bold block">Welcome Message</label>
                       <textarea
                         value={invitationWelcome}
                         onChange={(e) => setInvitationWelcome(e.target.value)}
                         rows={2}
-                        className="w-full bg-white border border-[#EAE5DF] rounded-xl p-3 text-xs outline-none focus:border-[#A58263]"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs outline-none focus:border-amber-400"
                         placeholder="Write a greeting for guests scanning the QR card..."
                       />
                     </div>
 
-                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-[#EAE5DF] bg-white">
+                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-800 bg-zinc-900">
                       <div className="space-y-0.5">
-                        <p className="text-xs font-bold text-[#1C1A17]">Display Countdown Clock</p>
-                        <p className="text-[9px] text-[#7A756E]">Shows ticks countdown till reveal unlocks</p>
+                        <p className="text-xs font-bold text-white">Display Countdown Clock</p>
+                        <p className="text-[9px] text-zinc-400">Shows ticks countdown till reveal unlocks</p>
                       </div>
                       <Switch checked={invitationCountdown} onCheckedChange={setInvitationCountdown} />
                     </div>
@@ -1323,11 +1323,11 @@ export function NewEventForm() {
               )}
 
               {/* Navigation Controls */}
-              <div className="pt-8 flex items-center justify-between border-t border-[#EAE5DF]">
+              <div className="pt-8 flex items-center justify-between border-t border-zinc-800">
                 {step > 1 ? (
                   <button
                     onClick={handleBack}
-                    className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#7A756E] hover:text-[#1C1A17] transition-colors cursor-pointer"
+                    className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-colors cursor-pointer"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     <span>Back</span>
@@ -1339,7 +1339,7 @@ export function NewEventForm() {
                 <Button
                   onClick={handleNext}
                   disabled={mutation.isPending}
-                  className="bg-[#A58263] text-white hover:bg-[#8D6B50] font-bold px-6 py-5 rounded-full flex items-center gap-2 border-none shadow-[0_4px_14px_rgba(165,130,99,0.2)] cursor-pointer"
+                  className="bg-amber-500 text-white hover:bg-amber-600 font-bold px-6 py-5 rounded-full flex items-center gap-2 border-none shadow-[0_4px_14px_rgba(165,130,99,0.2)] cursor-pointer"
                 >
                   {mutation.isPending ? (
                     <span>Saving Capsule...</span>
@@ -1358,7 +1358,7 @@ export function NewEventForm() {
                   <div
                     key={i}
                     className={`h-1.5 rounded-full transition-all ${
-                      i + 1 === step ? "w-6 bg-[#A58263]" : "w-1.5 bg-[#E3DDD5]"
+                      i + 1 === step ? "w-6 bg-amber-400" : "w-1.5 bg-zinc-700"
                     }`}
                   />
                 ))}
@@ -1473,12 +1473,12 @@ export function NewEventForm() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-[#1C1A17]/30 backdrop-blur-md flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4"
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
-              className="bg-[#FCFBFA] border border-[#EAE5DF] rounded-3xl p-8 max-w-lg w-full shadow-2xl relative space-y-6"
+              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 max-w-lg w-full shadow-2xl relative space-y-6"
             >
               
               {/* Confetti Visual Mock */}
@@ -1487,18 +1487,18 @@ export function NewEventForm() {
               </div>
 
               <div className="text-center pt-8 space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#A58263]">Setup Complete</span>
-                <h2 className={`${playfair.className} text-3xl font-medium text-[#1C1A17]`}>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">Setup Complete</span>
+                <h2 className={`${playfair.className} text-3xl font-medium text-white`}>
                   Your memory capsule is ready.
                 </h2>
-                <p className="text-xs text-[#7A756E] max-w-sm mx-auto">
+                <p className="text-xs text-zinc-400 max-w-sm mx-auto">
                   The portal has been created. Invite guests to share photos, video clips, and vocal greetings.
                 </p>
               </div>
 
               {/* Real Custom Snapsy Logo QR Card Output */}
-              <div className="border border-[#EAE5DF] rounded-2xl p-4 bg-white flex flex-col sm:flex-row items-center gap-4 shadow-sm">
-                <div className="p-2 bg-white rounded-xl border border-[#EAE5DF] relative overflow-hidden flex items-center justify-center shrink-0">
+              <div className="border border-zinc-800 rounded-2xl p-4 bg-zinc-900 flex flex-col sm:flex-row items-center gap-4 shadow-sm">
+                <div className="p-2 bg-white rounded-xl border border-zinc-800 relative overflow-hidden flex items-center justify-center shrink-0">
                   <img
                     src="/Favicon.png"
                     alt="Snapsy Logo Background"
@@ -1525,15 +1525,15 @@ export function NewEventForm() {
 
                 <div className="flex-1 space-y-3 w-full text-center sm:text-left">
                   <div className="space-y-0.5">
-                    <p className="text-xs font-bold text-[#1C1A17]">{name}</p>
-                    <p className="text-[10px] text-[#A58263]">Plan: {guestCountPlan.toUpperCase()}</p>
+                    <p className="text-xs font-bold text-white">{name}</p>
+                    <p className="text-[10px] text-amber-400">Plan: {guestCountPlan.toUpperCase()}</p>
                   </div>
                   
                   {/* Share/Actions */}
                   <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                     <button
                       onClick={copyInviteLink}
-                      className="px-3 py-1.5 rounded-lg border border-[#EAE5DF] bg-stone-50 hover:bg-[#FAF9F6] text-[10px] font-semibold text-[#69635C] transition-all flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-800 hover:bg-zinc-800 text-[10px] font-semibold text-zinc-400 transition-all flex items-center gap-1.5 cursor-pointer"
                     >
                       <Copy className="h-3.5 w-3.5" />
                       <span>Copy link</span>
@@ -1542,7 +1542,7 @@ export function NewEventForm() {
                       <a
                         href={qrCodeUrl}
                         download={`${slugify(name)}-qr-code.png`}
-                        className="px-3 py-1.5 rounded-lg border border-[#EAE5DF] bg-stone-50 hover:bg-[#FAF9F6] text-[10px] font-semibold text-[#69635C] transition-all flex items-center gap-1.5"
+                        className="px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-800 hover:bg-zinc-800 text-[10px] font-semibold text-zinc-400 transition-all flex items-center gap-1.5"
                       >
                         <DownloadIcon className="h-3.5 w-3.5" />
                         <span>Download QR</span>
@@ -1557,13 +1557,13 @@ export function NewEventForm() {
                 <Button
                   variant="outline"
                   onClick={() => router.push("/dashboard/events")}
-                  className="flex-1 border-[#EAE5DF] text-[#69635C] hover:bg-stone-50 rounded-xl py-5"
+                  className="flex-1 border-zinc-800 text-zinc-400 hover:bg-zinc-800 rounded-xl py-5"
                 >
                   Go to Dashboard
                 </Button>
                 <Button
                   onClick={handleLaunch}
-                  className="flex-1 bg-[#A58263] text-white hover:bg-[#8D6B50] font-bold rounded-xl py-5 border-none shadow-[0_4px_14px_rgba(165,130,99,0.2)]"
+                  className="flex-1 bg-amber-500 text-white hover:bg-amber-600 font-bold rounded-xl py-5 border-none shadow-[0_4px_14px_rgba(165,130,99,0.2)]"
                 >
                   Launch Event
                 </Button>
