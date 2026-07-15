@@ -234,6 +234,7 @@ export default function GalleriesPage() {
     mutationFn: deleteGallery,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["galleries"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
       toast({ title: "Gallery deleted successfully" })
     },
     onError: (error: Error) => {

@@ -314,6 +314,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     mutationFn: (data: any) => updateEvent(slug, data, event?.settings || {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event", slug] })
+      // The Events list / Dashboard Overview cards (name, status, cover)
+      // read from their own separate cached queries — without this they'd
+      // keep showing the pre-edit values until a hard refresh.
+      queryClient.invalidateQueries({ queryKey: ["events"] })
+      queryClient.invalidateQueries({ queryKey: ["events-list"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
       toast({ title: "Memory settings saved" })
       setIsDrawerOpen(false)
     },
@@ -325,6 +331,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const deleteMutation = useMutation({
     mutationFn: deleteEvent,
     onSuccess: () => {
+      // Invalidate before navigating, otherwise the Events list can still
+      // render the just-deleted event from its stale cache after redirect.
+      queryClient.invalidateQueries({ queryKey: ["events"] })
+      queryClient.invalidateQueries({ queryKey: ["events-list"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
+      queryClient.invalidateQueries({ queryKey: ["galleries"] })
+      queryClient.invalidateQueries({ queryKey: ["all-qrcodes"] })
       toast({ title: "Capsule deleted successfully" })
       router.push("/dashboard/events")
     },

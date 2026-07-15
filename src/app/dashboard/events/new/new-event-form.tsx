@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase/client"
 import { slugify, formatDate } from "@/lib/utils"
 import {
@@ -176,6 +176,7 @@ export function NewEventForm() {
 
   const router = useRouter()
   const { profile, user } = useAuth()
+  const queryClient = useQueryClient()
   
   // Current onboarding step: 1 to 10, then 11 (Final)
   const [step, setStep] = useState(1)
@@ -413,7 +414,14 @@ export function NewEventForm() {
       QRCode.toDataURL(url)
         .then((code) => setQrCodeUrl(code))
         .catch(console.error)
-      
+
+      // Without this, the new event only shows up on the Events list /
+      // Dashboard Overview / galleries+QR dropdowns after a hard refresh or
+      // once the cache's staleTime naturally expires.
+      queryClient.invalidateQueries({ queryKey: ["events"] })
+      queryClient.invalidateQueries({ queryKey: ["events-list"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
+
       // Move to Step 11
       setStep(11)
     },

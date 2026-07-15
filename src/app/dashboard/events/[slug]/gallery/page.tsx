@@ -610,6 +610,8 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
     mutationFn: deleteGallery,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event-galleries", event?.id] })
+      queryClient.invalidateQueries({ queryKey: ["galleries"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
       toast({ title: "Gallery deleted successfully" })
     },
     onError: (error: Error) => {
@@ -666,7 +668,11 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
         </div>
         <CreateGalleryDialog
           eventId={event.id}
-          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["event-galleries", event.id] })}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ["event-galleries", event.id] })
+            queryClient.invalidateQueries({ queryKey: ["galleries"] })
+            queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
+          }}
         />
       </div>
 
@@ -678,7 +684,10 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
               gallery={gallery}
               eventSlug={event.slug}
               onDelete={(id) => deleteMutation.mutate(id)}
-              onUpdate={() => queryClient.invalidateQueries({ queryKey: ["event-galleries", event.id] })}
+              onUpdate={() => {
+                queryClient.invalidateQueries({ queryKey: ["event-galleries", event.id] })
+                queryClient.invalidateQueries({ queryKey: ["galleries"] })
+              }}
             />
           ))}
         </div>

@@ -412,6 +412,7 @@ export default function ConsolidatedQRPage() {
     mutationFn: deleteQRCode,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["all-qrcodes"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
       toast({ title: "QR code deleted" })
     },
     onError: (error: Error) => {
@@ -469,7 +470,10 @@ export default function ConsolidatedQRPage() {
         </div>
         <CreateQRDialog
           events={events || []}
-          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["all-qrcodes"] })}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ["all-qrcodes"] })
+            queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
+          }}
         />
       </div>
 

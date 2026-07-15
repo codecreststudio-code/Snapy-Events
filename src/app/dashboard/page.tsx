@@ -121,6 +121,10 @@ export default function DashboardPage() {
     queryKey: ["dashboard-stats", orgId],
     queryFn: () => getDashboardStats(orgId!),
     enabled: !!orgId,
+    // Safety-net poll (same pattern as the event detail page) so guest-driven
+    // changes — a new upload, a QR scan — show up here even if the host
+    // never triggers a mutation or refocuses the tab.
+    refetchInterval: 20000,
   })
 
   const isLoading = authLoading || (!!orgId && statsLoading)

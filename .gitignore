@@ -120,3 +120,4 @@ google-credentials*.json
 BASH_WRITE_TEST.txt
 /models/
 /zzz-*.md
+/snapsy-feature-prompts - AI face etc.md
