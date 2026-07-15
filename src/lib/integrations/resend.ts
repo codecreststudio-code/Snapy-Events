@@ -62,6 +62,11 @@ const DEFAULT_SETTINGS: EmailSettings = {
   reply_to: "snapsyevent@gmail.com",
   support_email: "snapsyevent@gmail.com",
   contact_email: "snapsyevent@gmail.com",
+  // Must be a publicly reachable image URL (email clients can't resolve
+  // relative paths or GitHub blob/page links, only raw file URLs) — this is
+  // the same logo served at /logo_png.png on the live site (see
+  // src/lib/components/layout/logo.tsx).
+  logo_url: "https://snapsy-events.vercel.app/logo_png.png",
   footer_text: "© Snapsy. All rights reserved.",
   social_links: {}
 }
@@ -149,18 +154,25 @@ export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null;
 
   // Inject logo and settings-configured signature/footer if HTML contains placeholders or does not contain layout
   if (html && !html.includes("snapsy-wrapper")) {
-    const logoHtml = settings.logo_url ? `<img src="${settings.logo_url}" alt="${settings.sender_name}" style="max-height: 48px; margin-bottom: 20px; display: block;" />` : ""
-    const footerHtml = `<div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eae5df; font-size: 11px; color: #9c958e; text-align: center;">
+    const logoHtml = settings.logo_url ? `<img src="${settings.logo_url}" alt="${settings.sender_name}" style="max-height: 40px; margin-bottom: 24px; display: block;" />` : ""
+    const footerHtml = `<div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ede9fe; font-size: 11px; color: #9c958e; text-align: center;">
       ${settings.company_address ? `<p>${settings.company_address}</p>` : ""}
       <p>${settings.footer_text}</p>
     </div>`
-    
-    html = `<div class="snapsy-wrapper" style="font-family: sans-serif; color: #1c1a17; background-color: #faf9f6; padding: 30px 15px;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border: 1px solid #eae5df; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-        ${logoHtml}
-        ${html}
-        ${settings.signature ? `<p style="margin-top: 25px; font-style: italic; color: #7a756e;">${settings.signature}</p>` : ""}
-        ${footerHtml}
+
+    // Brand: violet-600 -> fuchsia-500 gradient, matching the marketing site
+    // (src/app/page.tsx uses the same "from-violet-600 to-fuchsia-500" accent
+    // throughout) — not the tan/brown palette used only inside the event
+    // creation wizard's own UI, which isn't the site's actual brand identity.
+    html = `<div class="snapsy-wrapper" style="font-family: sans-serif; color: #1c1a17; background-color: #f7f5fb; padding: 30px 15px;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(124,58,237,0.08); border: 1px solid #ede9fe;">
+        <div style="height: 6px; background: linear-gradient(to right, #7c3aed, #d946ef);"></div>
+        <div style="padding: 32px 30px;">
+          ${logoHtml}
+          ${html}
+          ${settings.signature ? `<p style="margin-top: 25px; font-style: italic; color: #7a756e;">${settings.signature}</p>` : ""}
+          ${footerHtml}
+        </div>
       </div>
     </div>`
   }
