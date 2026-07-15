@@ -5,6 +5,7 @@ import { PageHeader } from "@/lib/components/layout/page-header"
 import { Card, CardContent } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Sparkles, RefreshCw, Cpu, Image, Search, Loader2 } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 
 type AIStat = {
   totalSearches: number
@@ -22,23 +23,42 @@ export default function AdminAiUsagePage() {
   const [stats, setStats] = useState<AIStat | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const supabase = createClient()
+
   const fetchAiStats = async () => {
     setLoading(true)
-    // Seed mock stats representing AI models usage
-    setTimeout(() => {
+    try {
+      const [logsRes, facesRes] = await Promise.all([
+        supabase
+          .from("face_search_logs")
+          .select("id, created_at, search_duration_ms, results")
+          .order("created_at", { ascending: false })
+          .limit(20),
+        supabase.from("faces").select("id", { count: "exact", head: true }),
+      ])
+
+      const logs = logsRes.data || []
+
+      // Real counts from face_search_logs / faces. Face detection itself is a
+      // stub (src/lib/integrations/face.ts) until a real provider is wired up,
+      // so these are honestly 0 until then rather than placeholder numbers.
       setStats({
-        totalSearches: 1845,
-        activeEmbeddings: 24900,
+        totalSearches: logs.length,
+        activeEmbeddings: facesRes.count || 0,
         queueStatus: "Idle (0 pending)",
-        recentSearches: [
-          { id: "log_1", timestamp: new Date(Date.now() - 50000).toISOString(), durationMs: 420, resultCount: 8 },
-          { id: "log_2", timestamp: new Date(Date.now() - 150000).toISOString(), durationMs: 510, resultCount: 3 },
-          { id: "log_3", timestamp: new Date(Date.now() - 400000).toISOString(), durationMs: 380, resultCount: 15 },
-          { id: "log_4", timestamp: new Date(Date.now() - 600000).toISOString(), durationMs: 450, resultCount: 1 }
-        ]
+        recentSearches: logs.map((l) => ({
+          id: l.id,
+          timestamp: l.created_at,
+          durationMs: l.search_duration_ms || 0,
+          resultCount: Array.isArray(l.results) ? l.results.length : 0,
+        })),
       })
+    } catch (err) {
+      console.error("[ai-usage] failed to load stats", err)
+      setStats({ totalSearches: 0, activeEmbeddings: 0, queueStatus: "Unknown", recentSearches: [] })
+    } finally {
       setLoading(false)
-    }, 400)
+    }
   }
 
   useEffect(() => {

@@ -48,7 +48,7 @@ export const POST = defineRoute({
 
     let facesQuery = supabase
       .from("faces")
-      .select("id, photo_id, embedding_path, photo:photos(id, gallery_id, event_id, storage_path, is_approved)")
+      .select("id, photo_id, embedding, photo:photos(id, gallery_id, event_id, storage_path, is_approved)")
 
     if (eventId) {
       facesQuery = facesQuery.eq("event_id", eventId)
@@ -56,8 +56,13 @@ export const POST = defineRoute({
 
     const { data: faces, error } = await facesQuery
     if (error) return fail("DB_ERROR", "Failed to search faces", 500)
-    // For the stub, compare against hash embeddings of photo IDs
-    const candidates = (faces ?? []).map((f) => ({ id: f.id, embedding: det.faces[0]!.embedding.map((v, i) => v * (1 - i / det.faces[0]!.embedding.length * 0.001)) }))
+    // Compare against the real stored descriptor for each detected face.
+    // Rows detected before the `embedding` column existed (or where face
+    // detection failed to produce a descriptor) have no embedding — skip
+    // them rather than matching against nothing.
+    const candidates = (faces ?? [])
+      .filter((f) => Array.isArray(f.embedding) && f.embedding.length > 0)
+      .map((f) => ({ id: f.id, embedding: f.embedding as number[] }))
     const hits = searchByEmbedding({ embedding: det.faces[0]!.embedding, candidates, topK: body.max_results ?? 20 })
     const duration = Date.now() - t0
     await supabase.from("face_search_logs").insert({

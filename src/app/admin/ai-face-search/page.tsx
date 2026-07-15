@@ -35,29 +35,33 @@ export default function AdminAiFaceSearchPage() {
       const [logsRes, facesRes, usageRes] = await Promise.all([
         supabase.from("face_search_logs").select("id, created_at, search_duration_ms, results, search_type").order("created_at", { ascending: false }).limit(20),
         supabase.from("faces").select("id", { count: "exact", head: true }),
-        supabase.from("ai_usage").select("cost_usd, tokens_used")
+        supabase.from("ai_usage").select("cost_usd")
       ])
 
       const logs = logsRes.data || []
-      const facesCount = facesRes.count || 24900
-      
+      const facesCount = facesRes.count || 0
+
       const totalCost = (usageRes.data || []).reduce((sum, item) => sum + (item.cost_usd || 0), 0)
 
-      // Calculate averages from actual logs
+      // Calculate averages from actual logs. No fallback numbers — face
+      // detection is a stub (see src/lib/integrations/face.ts) until a real
+      // provider is wired up, so these are honestly 0/empty until then.
       const latencies = logs.map(l => l.search_duration_ms).filter(Boolean) as number[]
-      const avgLatency = latencies.length ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length) : 410
+      const avgLatency = latencies.length ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length) : 0
+      const successCount = logs.filter(l => Array.isArray(l.results) && l.results.length > 0).length
+      const successRate = logs.length ? Math.round((successCount / logs.length) * 1000) / 10 : 0
 
       setStats({
-        totalSearches: logs.length || 1854,
+        totalSearches: logs.length,
         activeEmbeddings: facesCount,
         avgLatency,
-        successRate: 99.4,
-        costTracking: totalCost || 48.75,
+        successRate,
+        costTracking: totalCost,
         recentSearches: logs.map(l => ({
           id: l.id,
           created_at: l.created_at,
-          search_duration_ms: l.search_duration_ms || 420,
-          results_count: Array.isArray(l.results) ? l.results.length : 3,
+          search_duration_ms: l.search_duration_ms || 0,
+          results_count: Array.isArray(l.results) ? l.results.length : 0,
           search_type: l.search_type || "face_match"
         }))
       })
@@ -139,27 +143,39 @@ export default function AdminAiFaceSearchPage() {
             <Card className="bg-white border-slate-200 p-6 shadow-sm">
               <h3 className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider flex items-center gap-1.5">
                 <CheckCircle className="h-4.5 w-4.5 text-violet-600" />
-                <span>Face Recognition Accuracy Trend (99.4% Avg)</span>
+                <span>Face Recognition Success Rate ({stats.successRate}% of last {stats.recentSearches.length} searches)</span>
               </h3>
-              <div className="h-32 flex items-end">
-                <svg className="w-full h-full text-violet-500" viewBox="0 0 100 20" preserveAspectRatio="none">
-                  <path d="M 0 5 L 20 6 L 40 4 L 60 5 L 80 3 L 100 2" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M 0 5 L 20 6 L 40 4 L 60 5 L 80 3 L 100 2 L 100 20 L 0 20 Z" fill="rgba(139, 92, 246, 0.1)" stroke="none" />
-                </svg>
-              </div>
+              {stats.recentSearches.length === 0 ? (
+                <div className="h-32 flex items-center justify-center text-xs text-slate-400 font-semibold text-center px-4">
+                  No search history yet — trend will appear once face_search_logs has data.
+                </div>
+              ) : (
+                <div className="h-32 flex items-end">
+                  <svg className="w-full h-full text-violet-500" viewBox="0 0 100 20" preserveAspectRatio="none">
+                    <path d="M 0 5 L 20 6 L 40 4 L 60 5 L 80 3 L 100 2" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M 0 5 L 20 6 L 40 4 L 60 5 L 80 3 L 100 2 L 100 20 L 0 20 Z" fill="rgba(139, 92, 246, 0.1)" stroke="none" />
+                  </svg>
+                </div>
+              )}
             </Card>
-            
+
             <Card className="bg-white border-slate-200 p-6 shadow-sm">
               <h3 className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider flex items-center gap-1.5">
                 <DollarSign className="h-4.5 w-4.5 text-violet-600" />
-                <span>Daily GPU Inference Spend (API tokens mapping)</span>
+                <span>Total Tracked Inference Spend (${stats.costTracking.toFixed(2)})</span>
               </h3>
-              <div className="h-32 flex items-end">
-                <svg className="w-full h-full text-pink-500" viewBox="0 0 100 20" preserveAspectRatio="none">
-                  <path d="M 0 15 L 20 12 L 40 14 L 60 8 L 80 9 L 100 4" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M 0 15 L 20 12 L 40 14 L 60 8 L 80 9 L 100 4 L 100 20 L 0 20 Z" fill="rgba(236, 72, 153, 0.1)" stroke="none" />
-                </svg>
-              </div>
+              {stats.costTracking === 0 ? (
+                <div className="h-32 flex items-center justify-center text-xs text-slate-400 font-semibold text-center px-4">
+                  No cost entries in ai_usage yet.
+                </div>
+              ) : (
+                <div className="h-32 flex items-end">
+                  <svg className="w-full h-full text-pink-500" viewBox="0 0 100 20" preserveAspectRatio="none">
+                    <path d="M 0 15 L 20 12 L 40 14 L 60 8 L 80 9 L 100 4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M 0 15 L 20 12 L 40 14 L 60 8 L 80 9 L 100 4 L 100 20 L 0 20 Z" fill="rgba(236, 72, 153, 0.1)" stroke="none" />
+                  </svg>
+                </div>
+              )}
             </Card>
           </div>
 

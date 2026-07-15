@@ -107,9 +107,16 @@ google-credentials*.json
 **/credentials/
 
 # Documents & Binary Exports
+# (Note: *.md intentionally NOT ignored — AGENTS.md, README.md, CLAUDE.md,
+# AUDIT-SUMMARY.md etc. are real tracked project docs.)
 *.docx
 *.doc
 *.pdf
 *.xlsx
 *.pptx
-*.md
+
+# Debug/scratch artifacts (not part of the app — face-api models load
+# from node_modules/@vladmandic/face-api/model, not a local models/ dir)
+BASH_WRITE_TEST.txt
+/models/
+/zzz-*.md

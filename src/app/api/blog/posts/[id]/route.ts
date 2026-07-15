@@ -46,8 +46,12 @@ export const PATCH = defineRoute<z.infer<typeof updatePostSchema>, unknown, { id
   method: "PATCH",
   body: updatePostSchema,
   requireAuth: true,
-  handler: async ({ body, params }) => {
+  handler: async ({ body, params, auth }) => {
     const supabase = await createClient()
+    const { data: profile } = await supabase.from("users").select("is_admin, role").eq("id", auth.user!.id).single()
+    if (!profile?.is_admin && profile?.role !== "owner") {
+      return fail("FORBIDDEN", "Admin access required to edit blog posts", 403)
+    }
     const updates: Record<string, unknown> = {
       ...body,
       updated_at: new Date().toISOString(),
@@ -80,8 +84,12 @@ export const PATCH = defineRoute<z.infer<typeof updatePostSchema>, unknown, { id
 export const DELETE = defineRoute<unknown, unknown, { id: string }>({
   method: "DELETE",
   requireAuth: true,
-  handler: async ({ params }) => {
+  handler: async ({ params, auth }) => {
     const supabase = await createClient()
+    const { data: profile } = await supabase.from("users").select("is_admin, role").eq("id", auth.user!.id).single()
+    if (!profile?.is_admin && profile?.role !== "owner") {
+      return fail("FORBIDDEN", "Admin access required to delete blog posts", 403)
+    }
     const { error } = await supabase.from("blog_posts").delete().eq("id", params.id)
     if (error) return fail("DB_ERROR", "Failed to delete post", 500)
     return ok({ success: true })

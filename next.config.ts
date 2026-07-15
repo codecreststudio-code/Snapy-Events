@@ -7,6 +7,16 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
 
+  // ─── Face detection model weights ────────────────────────────────────────
+  // @vladmandic/face-api ships its model weights inside its own npm package
+  // (node_modules/@vladmandic/face-api/model). Those files are loaded via
+  // fs at runtime, not import/require, so Next's automatic file tracer won't
+  // discover them — list them explicitly so Vercel bundles them into the
+  // face-detection route functions.
+  outputFileTracingIncludes: {
+    "/api/ai/faces/*": ["./node_modules/@vladmandic/face-api/model/**/*"],
+  },
+
   // ─── Image Optimization ───────────────────────────────────────────────────
   images: {
     formats: ["image/avif", "image/webp"],

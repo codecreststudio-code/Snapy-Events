@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
@@ -26,19 +25,13 @@ export default function AdminNotificationsPage() {
   // Broadcast state
   const [bannerText, setBannerText] = useState("")
 
-  const supabase = createClient()
-
   const fetchQueue = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from("notification_queue")
-        .select("id, type, recipient, status, retry_count, scheduled_for, created_at")
-        .order("created_at", { ascending: false })
-        .limit(20)
-
-      if (error) throw error
-      setQueue((data as any) || [])
+      const res = await fetch("/api/admin/notifications?pageSize=20")
+      const json = await res.json()
+      if (!res.ok || json.success === false) throw new Error(json.error?.message || "Failed to load notification queue")
+      setQueue(json.data || [])
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" })
     } finally {
@@ -55,17 +48,18 @@ export default function AdminNotificationsPage() {
     if (!bannerText) return
     setBroadcasting(true)
     try {
-      // Simulate global announcement queue injection
-      const { error } = await supabase
-        .from("notification_queue")
-        .insert({
-          type: "broadcast",
+      const res = await fetch("/api/admin/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "push",
           recipient: "all_users",
-          payload: { text: bannerText },
-          status: "pending"
-        })
-
-      if (error) throw error
+          subject: "Global Announcement",
+          message: bannerText,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok || json.success === false) throw new Error(json.error?.message || "Failed to schedule broadcast")
       toast({ title: "Success", description: "Global banner announcement scheduled successfully." })
       setBannerText("")
       fetchQueue()

@@ -140,16 +140,18 @@ export default function AdminMarketingPage() {
     if (!newCode) return
     setActioning(true)
     try {
-      const { error } = await supabase
-        .from("coupons")
-        .insert({
+      const res = await fetch("/api/admin/subscriptions/coupons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           code: newCode.toUpperCase(),
           discount_type: discountType,
           discount_value: discountValue,
-          is_active: true
-        })
-
-      if (error) throw error
+          is_active: true,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok || json.success === false) throw new Error(json.error?.message || json.error || "Failed to create coupon")
       toast({ title: "Coupon Created", description: `Promo code ${newCode.toUpperCase()} is now active.` })
       setNewCode("")
       fetchMarketingData()
@@ -164,8 +166,9 @@ export default function AdminMarketingPage() {
     if (!confirm("Are you sure you want to delete this coupon code?")) return
     setActioning(true)
     try {
-      const { error } = await supabase.from("coupons").delete().eq("id", couponId)
-      if (error) throw error
+      const res = await fetch(`/api/admin/subscriptions/coupons/${couponId}`, { method: "DELETE" })
+      const json = await res.json()
+      if (!res.ok || json.success === false) throw new Error(json.error?.message || json.error || "Failed to delete coupon")
       toast({ title: "Coupon Deleted", description: "Promo code has been removed." })
       fetchMarketingData()
     } catch (err: any) {

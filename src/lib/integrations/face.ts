@@ -1,21 +1,24 @@
 // src/lib/integrations/face.ts
-// Face detection + embedding + search abstraction.
+// Face detection + embedding + search — powered by face-api.js running
+// entirely inside this Node process (TensorFlow.js WASM backend).
 //
-// ⚠️  STUB IMPLEMENTATION - NOT FOR PRODUCTION
+// This is a genuinely free, self-hosted implementation: no external API,
+// no per-image billing, no API key. Model weights ship inside the
+// @vladmandic/face-api npm package itself (node_modules/@vladmandic/face-api/model)
+// so `npm install` is the only "download" step — nothing extra to bundle.
+// See next.config.ts outputFileTracingIncludes for why that path needs to
+// be listed explicitly for Vercel. Loaded once per server instance.
+// Images are decoded with @canvas/image
+// (pure WASM/JS decoders — no native `canvas`/cairo dependency), which
+// keeps this compatible with Vercel serverless functions.
 //
-// This is a deterministic stub that hashes photo URLs to fake embeddings.
-// For production deployment, implement one of:
-// - AWS Rekognition API
-// - Azure Computer Vision
-// - Google Cloud Vision API
-// - Self-hosted FaceNet/ArcFace model
-// - CloudFlare Workers with ONNX runtime
-//
-// The FACE_API_KEY env var is currently unused. Set it to enable
-// real face detection when you've implemented a proper backend.
+// Detection uses the "tiny" face detector (fast, small model — good fit
+// for guest-selfie matching at event scale). If you need higher accuracy
+// on group photos with small/partial faces, swap in `ssdMobilenetv1`
+// (its weights are already present in the same model/ directory).
 
 import "server-only"
-import { serverEnv } from "@/lib/env"
+import path from "node:path"
 import { logger } from "@/lib/logger"
 
 export interface DetectedFace {
@@ -31,19 +34,142 @@ export interface DetectionResult {
   height?: number
 }
 
-const EMBEDDING_DIM = 128
-const IS_PRODUCTION = process.env.NODE_ENV === "production"
+const MODEL_DIR = path.join(process.cwd(), "node_modules", "@vladmandic", "face-api", "model")
+const MODEL_ID = "face-api-tiny-wasm-v1"
 
-function hashEmbedding(input: string): number[] {
-  // ⚠️  STUB: Deterministic 128-dim pseudo-embedding, NOT real ML
-  const out: number[] = new Array(EMBEDDING_DIM)
-  let seed = 0
-  for (let i = 0; i < input.length; i++) seed = (seed * 31 + input.charCodeAt(i)) >>> 0
-  for (let i = 0; i < EMBEDDING_DIM; i++) {
-    seed = (seed * 1664525 + 1013904223) >>> 0
-    out[i] = ((seed % 2000) - 1000) / 1000
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let faceapiPromise: Promise<any> | null = null
+let modelsLoadedPromise: Promise<void> | null = null
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function getFaceApi(): Promise<any> {
+  if (!faceapiPromise) {
+    faceapiPromise = (async () => {
+      const tf = await import("@tensorflow/tfjs")
+      await import("@tensorflow/tfjs-backend-wasm")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const faceapi: any = await import("@vladmandic/face-api/dist/face-api.node-wasm.js")
+      await tf.setBackend("wasm")
+      await tf.ready()
+      return faceapi
+    })()
   }
-  return out
+  return faceapiPromise
+}
+
+async function ensureModelsLoaded(): Promise<void> {
+  if (!modelsLoadedPromise) {
+    modelsLoadedPromise = (async () => {
+      const faceapi = await getFaceApi()
+      await faceapi.nets.tinyFaceDetector.loadFromDisk(MODEL_DIR)
+      await faceapi.nets.faceLandmark68Net.loadFromDisk(MODEL_DIR)
+      await faceapi.nets.faceRecognitionNet.loadFromDisk(MODEL_DIR)
+      logger.info("[face] models loaded", { dir: MODEL_DIR })
+    })()
+  }
+  return modelsLoadedPromise
+}
+
+export interface DetectInput {
+  imageUrl?: string
+  imageBase64?: string
+  maxFaces?: number
+}
+
+async function loadImageBuffer(input: DetectInput): Promise<Buffer> {
+  if (input.imageUrl) {
+    const res = await fetch(input.imageUrl)
+    if (!res.ok) throw new Error(`Failed to fetch image (${res.status})`)
+    return Buffer.from(await res.arrayBuffer())
+  }
+  if (input.imageBase64) {
+    // Accept either a raw base64 string or a full "data:image/...;base64,xxx" URL.
+    const raw = input.imageBase64.includes(",") ? input.imageBase64.split(",").pop()! : input.imageBase64
+    return Buffer.from(raw, "base64")
+  }
+  throw new Error("detectFaces requires imageUrl or imageBase64")
+}
+
+export async function detectFaces(input: DetectInput): Promise<DetectionResult> {
+  let faceapi: Awaited<ReturnType<typeof getFaceApi>>
+  let tf: typeof import("@tensorflow/tfjs")
+  try {
+    faceapi = await getFaceApi()
+    await ensureModelsLoaded()
+    tf = await import("@tensorflow/tfjs")
+  } catch (err) {
+    logger.error("[face] failed to initialize model runtime", { error: String(err) })
+    return { model: MODEL_ID, faces: [] }
+  }
+
+  let buffer: Buffer
+  try {
+    buffer = await loadImageBuffer(input)
+  } catch (err) {
+    logger.error("[face] failed to load image", { error: String(err) })
+    return { model: MODEL_ID, faces: [] }
+  }
+
+  const canvasImage = await import("@canvas/image")
+  let width = 0
+  let height = 0
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let tensor: any
+  try {
+    const canvas = await canvasImage.imageFromBuffer(buffer)
+    const imageData = canvasImage.getImageData(canvas)
+    if (!imageData) throw new Error("Failed to read pixel data from decoded image")
+    width = canvas.width
+    height = canvas.height
+    tensor = tf.tidy(() => {
+      const data = tf.tensor(Array.from(imageData.data), [canvas.height, canvas.width, 4], "int32")
+      const channels = tf.split(data, 4, 2)
+      const rgb = tf.stack([channels[0], channels[1], channels[2]], 2)
+      return tf.reshape(rgb, [1, canvas.height, canvas.width, 3])
+    })
+  } catch (err) {
+    logger.error("[face] failed to decode image", { error: String(err) })
+    return { model: MODEL_ID, faces: [] }
+  }
+
+  try {
+    const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
+    const detections = await faceapi.detectAllFaces(tensor, options).withFaceLandmarks().withFaceDescriptors()
+
+    const maxFaces = input.maxFaces ?? 50
+    const faces: DetectedFace[] = detections
+      .slice(0, maxFaces)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((r: any) => ({
+        boundingBox: {
+          x: Math.round(r.detection.box.x),
+          y: Math.round(r.detection.box.y),
+          width: Math.round(r.detection.box.width),
+          height: Math.round(r.detection.box.height),
+        },
+        confidence: r.detection.score,
+        embedding: Array.from(r.descriptor as Float32Array) as number[],
+      }))
+
+    return { model: MODEL_ID, faces, width, height }
+  } catch (err) {
+    logger.error("[face] detection failed", { error: String(err) })
+    return { model: MODEL_ID, faces: [], width, height }
+  } finally {
+    tensor.dispose()
+  }
+}
+
+export interface SearchInput {
+  embedding: number[]
+  candidates: { id: string; embedding: number[] }[]
+  topK?: number
+  threshold?: number
+}
+
+export interface SearchHit {
+  id: string
+  similarity: number
 }
 
 function cosSim(a: number[], b: number[]): number {
@@ -59,66 +185,16 @@ function cosSim(a: number[], b: number[]): number {
   return dot / denom
 }
 
-export interface DetectInput {
-  imageUrl?: string
-  imageBase64?: string
-  maxFaces?: number
-}
-
-export async function detectFaces(input: DetectInput): Promise<DetectionResult> {
-  // ⚠️  PRODUCTION GUARD
-  if (IS_PRODUCTION && !serverEnv.FACE_API_KEY) {
-    logger.error(
-      "Face detection disabled: FACE_API_KEY not configured in production. " +
-      "Set FACE_API_KEY environment variable to enable face detection."
-    )
-    return { model: "disabled", faces: [] }
-  }
-
-  const seed = input.imageUrl ?? input.imageBase64 ?? ""
-  
-  // Use stub if no real API configured
-  if (!serverEnv.FACE_API_KEY) {
-    logger.debug("Face detection using stub (development mode)")
-    return {
-      model: "stub",
-      faces: [
-        {
-          boundingBox: { x: 100, y: 80, width: 120, height: 140 },
-          confidence: 0.97,
-          embedding: hashEmbedding(`face:${seed}`),
-        },
-      ],
-    }
-  }
-
-  // TODO: Implement real face detection API call here
-  // For now, log a warning that production API is not implemented
-  logger.warn(
-    "Face API integration incomplete. " +
-    "TODO: Implement real face detection API call to " + serverEnv.FACE_API_KEY
-  )
-  
-  return { model: "not-implemented", faces: [] }
-}
-
-export interface SearchInput {
-  embedding: number[]
-  candidates: { id: string; embedding: number[] }[]
-  topK?: number
-  threshold?: number
-}
-
-export interface SearchHit {
-  id: string
-  similarity: number
-}
-
 export function searchByEmbedding(input: SearchInput): SearchHit[] {
-  // ⚠️  STUB: Only works if both embeddings are from same stub function
   const k = input.topK ?? 20
-  const threshold = input.threshold ?? 0.6
+  // face-api.js descriptors are usually compared via Euclidean distance
+  // (~0.6 = same person), but cosine similarity on the same 128-d vectors
+  // still separates matches from non-matches well. Start at 0.75 and tune
+  // against real search results — lower it if true matches are being missed,
+  // raise it if too many false positives show up.
+  const threshold = input.threshold ?? 0.75
   return input.candidates
+    .filter((c) => Array.isArray(c.embedding) && c.embedding.length === input.embedding.length)
     .map((c) => ({ id: c.id, similarity: cosSim(input.embedding, c.embedding) }))
     .filter((h) => h.similarity >= threshold)
     .sort((a, b) => b.similarity - a.similarity)
@@ -140,13 +216,6 @@ export interface BatchProcessResult {
 
 export async function batchProcessFaces(input: BatchProcessInput): Promise<BatchProcessResult> {
   const out: BatchProcessResult = { processed: 0, facesDetected: 0, errors: [] }
-  
-  if (IS_PRODUCTION && !serverEnv.FACE_API_KEY) {
-    const error = "Face detection disabled in production"
-    logger.warn(error)
-    return out
-  }
-  
   for (let i = 0; i < input.photoIds.length; i++) {
     try {
       const r = await detectFaces({ imageUrl: input.imageUrls[i] })

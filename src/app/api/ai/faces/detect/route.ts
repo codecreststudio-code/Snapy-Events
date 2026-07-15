@@ -28,6 +28,7 @@ export const POST = defineRoute({
         event_id: body.event_id,
         bounding_box: f.boundingBox,
         confidence: f.confidence,
+        embedding: f.embedding,
         embedding_path: `${body.photo_id}/${det.faces.indexOf(f)}.bin`,
         embedding_model: det.model,
       })

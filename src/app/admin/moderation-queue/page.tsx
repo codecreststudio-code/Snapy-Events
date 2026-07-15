@@ -56,13 +56,37 @@ export default function AdminModerationQueuePage() {
     fetchModerationItems()
   }, [])
 
-  const handleResolve = (itemId: string, action: "approve" | "delete") => {
+  const handleResolve = async (itemId: string, action: "approve" | "delete") => {
+    const item = items.find((i) => i.id === itemId)
+    if (!item) return
     setActioningId(itemId)
-    setTimeout(() => {
-      toast({ title: "Resolved", description: `Report resolved by admin: ${action} content.` })
-      setItems(items.filter(i => i.id !== itemId))
+    try {
+      if (item.resource_type === "photo" && item.resource_id) {
+        if (action === "approve") {
+          const res = await fetch("/api/admin/photos", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ photoIds: [item.resource_id], action: "approve" }),
+          })
+          const json = await res.json()
+          if (!res.ok || json.success === false) throw new Error(json.error?.message || "Failed to approve photo")
+        } else {
+          const res = await fetch(`/api/admin/photos?photoIds=${item.resource_id}`, { method: "DELETE" })
+          const json = await res.json()
+          if (!res.ok || json.success === false) throw new Error(json.error?.message || "Failed to delete photo")
+        }
+        toast({ title: "Resolved", description: `Report resolved: ${action === "approve" ? "content kept" : "content deleted"}.` })
+      } else {
+        // No moderation action route exists yet for this resource type — just
+        // clear it from the queue view rather than pretending to act on it.
+        toast({ title: "Dismissed", description: `No automated action available for "${item.resource_type}" reports yet — removed from queue view only.` })
+      }
+      setItems(items.filter((i) => i.id !== itemId))
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" })
+    } finally {
       setActioningId(null)
-    }, 400)
+    }
   }
 
   return (
