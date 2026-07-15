@@ -265,6 +265,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
       return [...prev, newUpload]
     })
     setShowCamera(false)
+    setShowVoiceRecorder(false)
   }, [])
 
   function removeFile(id: string) {
@@ -620,8 +621,8 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
           const allowVideo = contentTypes ? contentTypes.videos !== false : true
           const allowVoice = contentTypes ? contentTypes.voice_notes !== false : true
           const allowMessages = contentTypes ? contentTypes.messages !== false : true
-          const videoLimit = (event?.settings as any)?.video_duration_limit || 30
-          const voiceLimit = (event?.settings as any)?.voice_note_duration_limit || 30
+          const videoLimit = Number((event?.settings as any)?.video_duration_limit) || 10
+          const voiceLimit = Number((event?.settings as any)?.voice_note_duration_limit) || 10
 
           return (
             <>

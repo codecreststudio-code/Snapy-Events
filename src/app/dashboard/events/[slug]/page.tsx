@@ -257,24 +257,21 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     queryKey: ["event-photos", event?.id],
     queryFn: () => getEventPhotos(event!.id),
     enabled: !!event?.id,
-    // No refetchInterval — Supabase Realtime (below) invalidates this query
-    // instantly on every photo INSERT/UPDATE/DELETE. Polling would double DB load.
+    refetchInterval: 3000, // 3-second polling ensures live counts and uploads sync automatically
   })
 
   const { data: faceClusters = [] } = useQuery({
     queryKey: ["face-clusters", event?.id],
     queryFn: () => getFaceClusters(event!.id),
     enabled: !!event?.id,
-    // No realtime listener for face_clusters — keep a 10s safety-net poll.
-    refetchInterval: 10000,
+    refetchInterval: 5000,
   })
 
   const { data: liveWallMessages = [] } = useQuery({
     queryKey: ["live-wall-messages", event?.id],
     queryFn: () => getLiveWallMessages(event!.id),
     enabled: !!event?.id,
-    // No refetchInterval — Supabase Realtime invalidates this query on
-    // every live_wall_items change. Polling would double DB load.
+    refetchInterval: 3000, // 3-second live polling
   })
 
   const { data: photoAccess = [] } = useQuery({
@@ -341,6 +338,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [editStatus, setEditStatus] = useState<EventStatus>("published")
   const [editEndDate, setEditEndDate] = useState("")
   const [editAllowedFilters, setEditAllowedFilters] = useState<string[]>([])
+  const [editVideoDuration, setEditVideoDuration] = useState<number>(10)
+  const [editVoiceDuration, setEditVoiceDuration] = useState<number>(10)
 
   useEffect(() => {
     if (event) {
@@ -348,6 +347,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       setEditStatus(event.status as EventStatus)
       setEditEndDate(event.end_date ? new Date(event.end_date).toISOString().slice(0, 16) : "")
       setEditAllowedFilters((event.settings as ExtEventSettings)?.allowed_filters || ["normal", "golden_hour", "vintage", "bw", "cinematic", "vivid", "cyberpunk", "dreamy"])
+      setEditVideoDuration((event.settings as ExtEventSettings)?.video_duration_limit || 10)
+      setEditVoiceDuration((event.settings as ExtEventSettings)?.voice_note_duration_limit || 10)
     }
   }, [event, isDrawerOpen])
 
@@ -440,7 +441,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(p.uploader_name || "A")}&background=random`,
         time: new Date(p.created_at).toLocaleString("en-IN", { month: "short", day: "numeric", hour: '2-digit', minute: '2-digit' }),
         timestamp: new Date(p.created_at).getTime(),
-        thumbnail: getImageUrl(p.thumbnail_path || p.storage_path, "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&auto=format&fit=crop"),
+        videoUrl: getImageUrl(p.storage_path, ""),
+        thumbnail: p.thumbnail_path ? getImageUrl(p.thumbnail_path, "") : undefined,
         title: p.original_filename || "Video clip",
         duration: "0:15"
       })
@@ -542,7 +544,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       end_date: editEndDate,
       settings: {
         ...event?.settings,
-        allowed_filters: editAllowedFilters
+        allowed_filters: editAllowedFilters,
+        video_duration_limit: Number(editVideoDuration),
+        voice_note_duration_limit: Number(editVoiceDuration),
       }
     })
   }
@@ -719,7 +723,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       <div className="space-y-2">
                         <div className="aspect-video bg-stone-900 rounded-xl overflow-hidden relative flex items-center justify-center group shadow-inner">
                           <video
-                            src={getImageUrl(item.thumbnail)}
+                            src={item.videoUrl}
+                            poster={item.thumbnail}
                             controls
                             playsInline
                             preload="metadata"
@@ -998,21 +1003,43 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
                   {/* Settings toggle display list */}
                   <div className="border border-stone-100 rounded-xl p-4 bg-stone-50/50 space-y-4">
-                    <p className="text-[10px] uppercase tracking-wider text-[#A58263] font-bold">Capsule Locks</p>
+                    <p className="text-[10px] uppercase tracking-wider text-[#A58263] font-bold">Capsule Locks & Limits</p>
                     
                     <div className="flex items-center justify-between text-xs">
                       <span>Auto face cluster indexing</span>
                       <span className="font-semibold text-stone-600">{settings.ai_features?.face_search ? "Active" : "Inactive"}</span>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs">
-                      <span>Video durations allowed</span>
-                      <span className="font-semibold text-stone-600">{settings.video_duration_limit || 10} seconds</span>
+                    <div className="flex items-center justify-between text-xs gap-4">
+                      <span className="shrink-0">Video durations allowed</span>
+                      <select
+                        value={editVideoDuration}
+                        onChange={(e) => setEditVideoDuration(Number(e.target.value))}
+                        className="rounded-lg border border-[#EAE5DF] bg-white px-2.5 py-1 text-xs font-semibold text-[#1C1A17] focus:outline-none focus:ring-1 focus:ring-[#A58263]"
+                      >
+                        <option value={5}>5 seconds</option>
+                        <option value={10}>10 seconds</option>
+                        <option value={15}>15 seconds</option>
+                        <option value={20}>20 seconds</option>
+                        <option value={30}>30 seconds</option>
+                        <option value={60}>60 seconds</option>
+                      </select>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs">
-                      <span>Vocal note greetings allowed</span>
-                      <span className="font-semibold text-stone-600">{settings.voice_note_duration_limit || 10} seconds</span>
+                    <div className="flex items-center justify-between text-xs gap-4">
+                      <span className="shrink-0">Vocal note greetings allowed</span>
+                      <select
+                        value={editVoiceDuration}
+                        onChange={(e) => setEditVoiceDuration(Number(e.target.value))}
+                        className="rounded-lg border border-[#EAE5DF] bg-white px-2.5 py-1 text-xs font-semibold text-[#1C1A17] focus:outline-none focus:ring-1 focus:ring-[#A58263]"
+                      >
+                        <option value={5}>5 seconds</option>
+                        <option value={10}>10 seconds</option>
+                        <option value={15}>15 seconds</option>
+                        <option value={20}>20 seconds</option>
+                        <option value={30}>30 seconds</option>
+                        <option value={60}>60 seconds</option>
+                      </select>
                     </div>
                   </div>
 

@@ -121,12 +121,18 @@ export function validateMagicBytes(buf: Uint8Array, declaredMime: string): boole
     // Other allowed video types (e.g. 3gpp) are ISO-BMFF: require an ftyp box.
     return String.fromCharCode(...buf.slice(4, 8)) === "ftyp"
   }
-  if (declaredMime.startsWith("audio/")) {
+  const baseMime = declaredMime.split(";")[0].trim().toLowerCase()
+  if (baseMime.startsWith("audio/")) {
     // ISO-BMFF audio (m4a/aac/mp4) carry an ftyp box; others have byte signatures.
     if (String.fromCharCode(...buf.slice(4, 8)) === "ftyp") return true
-    const sigs = MAGIC_BYTES[declaredMime]
-    if (sigs) return matchesAnyMagic(buf, sigs)
-    return matchesAnyMagic(buf, MAGIC_BYTES["audio/wav"]) || matchesAnyMagic(buf, MAGIC_BYTES["audio/ogg"])
+    const sigs = MAGIC_BYTES[baseMime]
+    if (sigs && matchesAnyMagic(buf, sigs)) return true
+    return (
+      matchesAnyMagic(buf, MAGIC_BYTES["audio/webm"]) ||
+      matchesAnyMagic(buf, MAGIC_BYTES["audio/mpeg"]) ||
+      matchesAnyMagic(buf, MAGIC_BYTES["audio/wav"]) ||
+      matchesAnyMagic(buf, MAGIC_BYTES["audio/ogg"])
+    )
   }
   return false
 }
@@ -137,13 +143,14 @@ export function isSvgContent(buf: Uint8Array): boolean {
 }
 
 export function isAllowedMimeType(mime: string): boolean {
+  const cleanMime = mime.split(";")[0].trim().toLowerCase()
   const allAllowed: readonly string[] = [
     ...ALLOWED_MIME_TYPES.PHOTO,
     ...ALLOWED_MIME_TYPES.VIDEO,
     ...ALLOWED_MIME_TYPES.AUDIO,
     ...ALLOWED_MIME_TYPES.COVER,
   ]
-  return allAllowed.includes(mime)
+  return allAllowed.includes(cleanMime)
 }
 
 export interface ValidationResult {
