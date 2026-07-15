@@ -74,6 +74,18 @@ const DEFAULT_SETTINGS: EmailSettings = {
   social_links: {}
 }
 
+// Short subtitle shown under the wordmark in the email hero banner, keyed
+// by template id — see sendEmail()'s wrapper below.
+const HERO_SUBTITLES: Record<string, string> = {
+  welcome: "Welcome Aboard",
+  verification: "Confirm Your Email",
+  password_reset: "Secure Password Recovery",
+  payment_receipt: "Payment Confirmed",
+  event_created: "Your Event is Live",
+  guest_invitation: "You're Invited",
+  support_ticket: "Support Update",
+}
+
 // 1. Fetch Dynamic Settings from platform_settings
 export async function getEmailSettings(): Promise<EmailSettings> {
   try {
@@ -155,17 +167,22 @@ export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null;
     }
   }
 
-  // Inject logo and settings-configured signature/footer if HTML contains placeholders or does not contain layout
+  // Inject the hero banner + footer if HTML contains placeholders or does not contain layout
   if (html && !html.includes("snapsy-wrapper")) {
-    // Explicit width/height (not just CSS) matter here: Outlook desktop and
-    // some other clients render <img> at native pixel size and ignore
-    // max-height in CSS, so without these attributes a correctly-hosted but
-    // large-dimension image can still blow out the layout or fail to load
-    // in time. 58x40 mirrors the intended ~40px-tall header display size.
-    const logoHtml = settings.logo_url ? `<img src="${settings.logo_url}" alt="${settings.sender_name}" width="58" height="40" style="max-height: 40px; width: auto; margin-bottom: 24px; display: block;" />` : ""
-    const footerHtml = `<div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ede9fe; font-size: 11px; color: #9c958e; text-align: center;">
-      ${settings.company_address ? `<p>${settings.company_address}</p>` : ""}
-      <p>${settings.footer_text}</p>
+    // Per-template subtitle shown under the wordmark in the hero — mirrors
+    // the format the user liked from Supabase's own password-reset email
+    // (gradient banner, bold wordmark, short subtitle underneath). Falls
+    // back to a generic tagline for any custom/unknown template.
+    const heroSubtitle = HERO_SUBTITLES[msg.templateId ?? ""] ?? "Event Photography Platform"
+
+    // Deliberately a text wordmark, not the logo <img>: this session's own
+    // debugging showed remote images are the least reliable part of an
+    // email (blocked in spam, stripped by some clients, slow to fetch) —
+    // a bold text mark on the gradient always renders, everywhere, instantly.
+    const footerHtml = `<div style="padding: 20px 30px 28px; border-top: 1px solid #ede9fe; text-align: center;">
+      <p style="font-size: 12px; font-weight: 700; color: #7c3aed; margin: 0 0 8px;">Every Guest. Every Moment. One Shared Memory.</p>
+      ${settings.company_address ? `<p style="font-size: 11px; color: #9c958e; margin: 0 0 4px;">${settings.company_address}</p>` : ""}
+      <p style="font-size: 11px; color: #9c958e; margin: 0;">${settings.footer_text}</p>
     </div>`
 
     // Brand: violet-600 -> fuchsia-500 gradient, matching the marketing site
@@ -173,14 +190,16 @@ export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null;
     // throughout) — not the tan/brown palette used only inside the event
     // creation wizard's own UI, which isn't the site's actual brand identity.
     html = `<div class="snapsy-wrapper" style="font-family: sans-serif; color: #1c1a17; background-color: #f7f5fb; padding: 30px 15px;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(124,58,237,0.08); border: 1px solid #ede9fe;">
-        <div style="height: 6px; background: linear-gradient(to right, #7c3aed, #d946ef);"></div>
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(124,58,237,0.12);">
+        <div style="background: linear-gradient(135deg, #7c3aed, #d946ef); padding: 40px 30px; text-align: center;">
+          <div style="font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">${settings.sender_name}</div>
+          <div style="font-size: 13px; color: rgba(255,255,255,0.85); margin-top: 6px;">${heroSubtitle}</div>
+        </div>
         <div style="padding: 32px 30px;">
-          ${logoHtml}
           ${html}
           ${settings.signature ? `<p style="margin-top: 25px; font-style: italic; color: #7a756e;">${settings.signature}</p>` : ""}
-          ${footerHtml}
         </div>
+        ${footerHtml}
       </div>
     </div>`
   }
