@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
@@ -29,19 +28,13 @@ export default function AdminPhotosPage() {
   const [actioningId, setActioningId] = useState<string | null>(null)
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoItem | null>(null)
 
-  const supabase = createClient()
-
   const fetchPhotos = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from("photos")
-        .select("id, storage_path, original_filename, mime_type, file_size, is_approved, created_at, event:events(name)")
-        .order("created_at", { ascending: false })
-        .limit(20)
-
-      if (error) throw error
-      setPhotos((data as any) || [])
+      const res = await fetch("/api/admin/photos?pageSize=50")
+      if (!res.ok) throw new Error("Failed to load photos")
+      const result = await res.json()
+      setPhotos(result.data || [])
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" })
     } finally {
@@ -56,12 +49,12 @@ export default function AdminPhotosPage() {
   const handleApprove = async (photoId: string) => {
     setActioningId(photoId)
     try {
-      const { error } = await supabase
-        .from("photos")
-        .update({ is_approved: true })
-        .eq("id", photoId)
-
-      if (error) throw error
+      const res = await fetch("/api/admin/photos", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photoIds: [photoId], action: "approve" }),
+      })
+      if (!res.ok) throw new Error("Failed to approve photo")
       toast({ title: "Approved", description: "Photo approved successfully." })
       setPhotos(photos.map(p => p.id === photoId ? { ...p, is_approved: true } : p))
       if (selectedPhoto?.id === photoId) {
@@ -78,12 +71,10 @@ export default function AdminPhotosPage() {
     if (!confirm("Are you sure you want to permanently delete this photo? This cannot be undone.")) return
     setActioningId(photoId)
     try {
-      const { error } = await supabase
-        .from("photos")
-        .delete()
-        .eq("id", photoId)
-
-      if (error) throw error
+      const res = await fetch(`/api/admin/photos?photoIds=${photoId}`, {
+        method: "DELETE",
+      })
+      if (!res.ok) throw new Error("Failed to delete photo")
       toast({ title: "Deleted", description: "Photo deleted from server storage." })
       setPhotos(photos.filter(p => p.id !== photoId))
       if (selectedPhoto?.id === photoId) setSelectedPhoto(null)
