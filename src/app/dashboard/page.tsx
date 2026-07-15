@@ -66,13 +66,7 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
   let qrCount = 0
 
   if (allHostEventIds.length > 0) {
-    const [storageResult, photoCountResult, galleryCountResult, qrCountResult] = await Promise.all([
-      supabase
-        .from("storage_usage")
-        .select("photo_count")
-        .eq("user_id", orgId)
-        .maybeSingle(),
-
+    const [photoCountResult, galleryCountResult, qrCountResult] = await Promise.all([
       supabase
         .from("photos")
         .select("id", { count: "exact", head: true })
@@ -89,7 +83,14 @@ async function getDashboardStats(orgId: string): Promise<DashboardStats> {
         .in("event_id", allHostEventIds),
     ])
 
-    photoCount = storageResult.data?.photo_count || photoCountResult.count || 0
+    // Count directly from the photos table — it's the source of truth for
+    // "how many photos exist right now". storage_usage.photo_count used to be
+    // read here instead, but that column is a running upload counter that
+    // never decrements on delete, so it drifts from reality (a host who
+    // uploaded and then removed photos, or whose count came from an older
+    // event, would see a stale "Total Photos" that doesn't match any actual
+    // gallery — exactly the "shows 5 but every gallery says 0" report).
+    photoCount = photoCountResult.count || 0
     galleryCount = galleryCountResult.count || 0
     qrCount = qrCountResult.count || 0
   }

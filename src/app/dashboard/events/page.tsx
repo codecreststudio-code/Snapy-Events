@@ -84,18 +84,31 @@ export default function EventsPage() {
       {/* Main Grid List */}
       {events && events.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {events.map((event) => (
+          {events.map((event) => {
+            // The event wizard offers 3 cover types: an uploaded photo or
+            // stock photo (both saved to cover_image_url), or one of the
+            // built-in gradient swatches (saved to settings.cover_gradient
+            // instead, since it's CSS, not an image URL). This card used to
+            // only ever check cover_image_url, so any event created with a
+            // gradient cover — the wizard's default — fell through to the
+            // generic placeholder icon instead of showing the gradient the
+            // host actually picked.
+            const coverGradient = (event.settings as any)?.cover_gradient as string | undefined
+            return (
             <Card key={event.id} className="overflow-hidden border border-border/40 bg-card/60 backdrop-blur-md hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group flex flex-col justify-between">
               <div>
                 {/* Event Cover Image */}
-                <div className="aspect-video bg-muted relative overflow-hidden">
+                <div
+                  className="aspect-video bg-muted relative overflow-hidden"
+                  style={!event.cover_image_url && coverGradient ? { backgroundImage: coverGradient } : undefined}
+                >
                   {event.cover_image_url ? (
                     <img
                       src={event.cover_image_url}
                       alt={event.name}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                  ) : (
+                  ) : coverGradient ? null : (
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-indigo-500/5 flex items-center justify-center">
                       <Camera className="h-10 w-10 text-muted-foreground/40 group-hover:text-primary/45 transition-colors" />
                     </div>
@@ -185,7 +198,8 @@ export default function EventsPage() {
                 </div>
               </div>
             </Card>
-          ))}
+            )
+          })}
         </div>
       ) : (
         <Card className="border border-dashed border-border/60 bg-card/20 py-20">

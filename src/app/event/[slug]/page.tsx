@@ -76,6 +76,20 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
 
   if (!ev) notFound()
 
+  // events.view_count was read on the dashboard but nothing ever incremented
+  // it, so every event permanently showed "0 views" regardless of real guest
+  // traffic. Bump it on each page load — best-effort, never allowed to break
+  // the page if it fails (matches the same non-atomic read-then-write the
+  // existing blog post view counter uses).
+  try {
+    await supabase
+      .from("events")
+      .update({ view_count: (ev.view_count ?? 0) + 1 })
+      .eq("id", ev.id)
+  } catch {
+    // View counting is best-effort; a failure here must never break the page.
+  }
+
   const hostData = ev.host ? {
     name: ev.host.full_name,
     branding: (ev.host.preferences?.branding as any) || {}
