@@ -14,9 +14,12 @@ export default async function AdminEmailPage() {
     sb.from("platform_settings").select("value").eq("key", "email_settings").single(),
   ])
 
+  // sender_email defaults to Resend's zero-setup sandbox address, not a
+  // gmail.com address — Resend can only send "from" a domain verified at
+  // resend.com/domains, which is impossible for a webmail domain like gmail.com.
   const emailSettings = settingsRow?.value ?? {
     sender_name: "Snapsy Event",
-    sender_email: "snapsyevent@gmail.com",
+    sender_email: "onboarding@resend.dev",
     reply_to: "snapsyevent@gmail.com",
     support_email: "snapsyevent@gmail.com",
     contact_email: "snapsyevent@gmail.com",

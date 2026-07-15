@@ -4,7 +4,7 @@ import { useState, useCallback } from "react"
 import {
   Mail, FileText, Settings, Search, Send, Plus, Trash2, Edit3, Copy,
   CheckCircle, XCircle, Clock, Eye, MousePointer, RefreshCw, Save,
-  ChevronDown, ExternalLink, AlertCircle, Loader2, BarChart2
+  ChevronDown, ExternalLink, AlertCircle, AlertTriangle, Loader2, BarChart2
 } from "lucide-react"
 
 // ────── Types ──────────────────────────────────────────────────────────
@@ -509,10 +509,23 @@ export default function EmailDashboardClient({ initialTemplates, initialLogs, in
           <div className="space-y-6 max-w-3xl">
             <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-5">
               <h2 className="font-bold text-slate-900 text-lg flex items-center gap-2"><Mail className="h-5 w-5 text-violet-600" />Sender Configuration</h2>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 text-xs text-amber-800 flex items-start gap-2">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Sender Email</strong> must be on a domain you've verified in Resend — a webmail address
+                  (gmail.com, yahoo.com, etc.) will always be rejected, since only the domain's owner can verify it.
+                  Use <code className="bg-amber-100 px-1 rounded">onboarding@resend.dev</code> for testing, or add and
+                  verify your own domain at{" "}
+                  <a href="https://resend.com/domains" target="_blank" rel="noreferrer" className="underline font-semibold">
+                    resend.com/domains
+                  </a>{" "}
+                  first. Reply-To, Support, and Contact emails have no such restriction.
+                </span>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {([
                   { key: "sender_name", label: "Sender Name", placeholder: "Snapsy Event" },
-                  { key: "sender_email", label: "Sender Email", placeholder: "snapsyevent@gmail.com" },
+                  { key: "sender_email", label: "Sender Email", placeholder: "onboarding@resend.dev" },
                   { key: "reply_to", label: "Reply-To Email", placeholder: "snapsyevent@gmail.com" },
                   { key: "support_email", label: "Support Email", placeholder: "snapsyevent@gmail.com" },
                   { key: "contact_email", label: "Contact Email", placeholder: "snapsyevent@gmail.com" },

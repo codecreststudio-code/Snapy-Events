@@ -47,9 +47,18 @@ export interface EmailSettings {
   social_links?: Record<string, string>
 }
 
+// NOTE on sender_email: Resend (and every transactional email provider) only
+// lets you send "from" a domain you've added and verified via DNS at
+// https://resend.com/domains. A webmail domain like gmail.com/yahoo.com can
+// never be verified by anyone but its owner, so sending "from" one always
+// fails with "domain is not verified" regardless of the API key or template.
+// `onboarding@resend.dev` is Resend's own sandbox sender — it works with zero
+// setup, which is why it's the default here instead of a gmail.com address.
+// Once a real domain is verified, change sender_email in Admin → Email
+// Management → Settings to an address on that domain (e.g. noreply@yourdomain.com).
 const DEFAULT_SETTINGS: EmailSettings = {
   sender_name: "Snapsy Event",
-  sender_email: "snapsyevent@gmail.com",
+  sender_email: "onboarding@resend.dev",
   reply_to: "snapsyevent@gmail.com",
   support_email: "snapsyevent@gmail.com",
   contact_email: "snapsyevent@gmail.com",
