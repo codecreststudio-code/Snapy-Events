@@ -14,10 +14,11 @@ import { toast } from "@/lib/components/ui/toaster"
 import { useCurrency } from "@/lib/context/currency-context"
 import { CurrencyToggle } from "@/lib/components/ui/currency-toggle"
 
-// Kept in sync with PLAN_BASE_PHOTO_LIMITS / PHOTO_LIMIT_ADDON_PRICES /
-// VIDEO_UNLOCK_ADDON_PRICE / VOICE_UNLOCK_ADDON_PRICE in src/lib/constants —
-// this is only used to render the price breakdown; the actual charge is
-// always recomputed server-side in /api/payments/checkout.
+// Fallback-only values, used only until the live catalog loads (or if that
+// fetch fails). The actual display AND the actual charge are both driven by
+// the live Admin > Add-ons catalog: this page fetches it via
+// /api/payments/addons (see fetchAddons below) and /api/payments/checkout
+// re-fetches it server-side so the Razorpay order amount can't be spoofed.
 const PLAN_BASE_PHOTO_LIMITS: Record<string, number> = { free: 5, starter: 20, standard: 45, premium: 85 }
 const PHOTO_LIMIT_ADDON_PRICES: Record<number, number> = { 5: 0, 10: 99, 25: 179, 50: 249, [-1]: 599 }
 const VIDEO_UNLOCK_ADDON_PRICE = 599
@@ -25,10 +26,8 @@ const VOICE_UNLOCK_ADDON_PRICE = 399
 
 const GUEST_PRICES: Record<number, number> = {
   0: 0,
-  10: 199,
+  5: 199,
   25: 399,
-  50: 699,
-  100: 1199,
 }
 
 const SHOT_PRICES: Record<number, number> = {
@@ -76,6 +75,9 @@ function CheckoutForm() {
   const [planUsdPrices, setPlanUsdPrices] = useState<Record<string, number>>(PLAN_DEFAULT_USD)
   const [guestPrices, setGuestPrices] = useState<Record<number, number>>(GUEST_PRICES)
   const [shotPrices, setShotPrices] = useState<Record<number, number>>(SHOT_PRICES)
+  const [photoLimitPrices, setPhotoLimitPrices] = useState<Record<number, number>>(PHOTO_LIMIT_ADDON_PRICES)
+  const [videoAddonPrice, setVideoAddonPrice] = useState<number>(VIDEO_UNLOCK_ADDON_PRICE)
+  const [voiceAddonPrice, setVoiceAddonPrice] = useState<number>(VOICE_UNLOCK_ADDON_PRICE)
 
   const [couponCode, setCouponCode] = useState("")
   const [appliedCoupon, setAppliedCoupon] = useState<{ discount_type: string, discount_value: number, code: string } | null>(null)
@@ -124,10 +126,10 @@ function CheckoutForm() {
   // so this can't be spoofed by editing the URL.
   const planBasePhotoLimit = PLAN_BASE_PHOTO_LIMITS[plan] ?? 0
   const photoAddonInr = typeof photoLimit === "number" && photoLimit !== planBasePhotoLimit && (photoLimit === -1 || photoLimit > planBasePhotoLimit)
-    ? (PHOTO_LIMIT_ADDON_PRICES[photoLimit] ?? 0)
+    ? (photoLimitPrices[photoLimit] ?? 0)
     : 0
-  const videoAddonInr = videos && plan !== "standard" && plan !== "premium" ? VIDEO_UNLOCK_ADDON_PRICE : 0
-  const voiceAddonInr = voiceNotes && plan !== "premium" ? VOICE_UNLOCK_ADDON_PRICE : 0
+  const videoAddonInr = videos && plan !== "standard" && plan !== "premium" ? videoAddonPrice : 0
+  const voiceAddonInr = voiceNotes && plan !== "premium" ? voiceAddonPrice : 0
   const featureAddonInr = photoAddonInr + videoAddonInr + voiceAddonInr
   const featureAddonUsd = Math.round(featureAddonInr / 80) || (featureAddonInr > 0 ? 1 : 0)
 
@@ -210,6 +212,19 @@ function CheckoutForm() {
               shotMap[b.value] = b.price
             })
             setShotPrices(shotMap)
+          }
+          if (result.photo_limit_boosts) {
+            const photoMap: Record<number, number> = {}
+            result.photo_limit_boosts.forEach((b: any) => {
+              photoMap[b.value] = b.price
+            })
+            setPhotoLimitPrices(photoMap)
+          }
+          if (typeof result.video_addon_price === "number") {
+            setVideoAddonPrice(result.video_addon_price)
+          }
+          if (typeof result.voice_addon_price === "number") {
+            setVoiceAddonPrice(result.voice_addon_price)
           }
         }
       } catch (e) {

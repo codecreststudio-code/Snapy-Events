@@ -2,7 +2,7 @@ import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder } from "@/lib/integrations/razorpay"
-import { getLiveBoostAddons } from "@/lib/payments/addons"
+import { getLiveAddonCatalog } from "@/lib/payments/addons"
 
 const addonCheckoutSchema = z.object({
   boost_type: z.enum(["guest", "shots"]),
@@ -23,7 +23,7 @@ export const POST = defineRoute({
     // 1. Fetch Addon Prices — live from the Admin > Add-ons catalog (same
     // source used by the Billing page and the event-wizard checkout).
     let price = 0
-    const { guestBoosts, shotBoosts } = await getLiveBoostAddons()
+    const { guestBoosts, shotBoosts } = await getLiveAddonCatalog()
 
     // Calculate specific addon price
     if (body.boost_type === "guest") {

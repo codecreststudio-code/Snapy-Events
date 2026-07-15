@@ -10,6 +10,8 @@ const updateAddonSchema = z.object({
   billing_type: z.enum(["one_time", "monthly", "yearly", "lifetime"]).optional(),
   compatible_plans: z.array(z.string()).optional(),
   is_active: z.boolean().optional(),
+  category: z.enum(["guest_boost", "shot_boost", "photo_limit_boost", "video_addon", "voice_addon"]).nullable().optional(),
+  value: z.number().nullable().optional(),
 })
 
 export const PATCH = defineRoute({

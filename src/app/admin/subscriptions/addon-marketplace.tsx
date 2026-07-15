@@ -8,7 +8,15 @@ import { Label } from "@/lib/components/ui/label"
 import { toast } from "@/lib/components/ui/toaster"
 import { Plus, Edit2, Trash2, Loader2, Save, X, Package } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Addon } from "@/lib/types"
+import { Addon, AddonCategory } from "@/lib/types"
+
+const CATEGORY_LABELS: Record<AddonCategory, string> = {
+  guest_boost: "Guest Boost",
+  shot_boost: "Shot Boost",
+  photo_limit_boost: "Photo Limit Boost",
+  video_addon: "Video Add-on",
+  voice_addon: "Voice Add-on",
+}
 
 export function AddonMarketplace() {
   const [addons, setAddons] = useState<Addon[]>([])
@@ -25,6 +33,11 @@ export function AddonMarketplace() {
   const [formPriceUsd, setFormPriceUsd] = useState(0)
   const [formBilling, setFormBilling] = useState<"one_time" | "monthly" | "yearly" | "lifetime">("one_time")
   const [formActive, setFormActive] = useState(true)
+  const [formCategory, setFormCategory] = useState<AddonCategory | "">("")
+  // Photo Limit Boost uses -1 to mean "Unlimited" — tracked separately so the
+  // number input can be disabled and the underlying value forced to -1.
+  const [formUnlimited, setFormUnlimited] = useState(false)
+  const [formValue, setFormValue] = useState<number | "">("")
 
   const fetchAddons = useCallback(async () => {
     setLoading(true)
@@ -51,6 +64,9 @@ export function AddonMarketplace() {
     setFormPriceUsd(0)
     setFormBilling("one_time")
     setFormActive(true)
+    setFormCategory("")
+    setFormUnlimited(false)
+    setFormValue("")
   }
 
   const startEdit = (a: Addon) => {
@@ -62,15 +78,23 @@ export function AddonMarketplace() {
     setFormPriceUsd(a.price_usd)
     setFormBilling(a.billing_type)
     setFormActive(a.is_active)
+    setFormCategory(a.category || "")
+    setFormUnlimited(a.value === -1)
+    setFormValue(a.value !== null && a.value !== undefined && a.value !== -1 ? a.value : "")
   }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setActioning(true)
 
+    const resolvedValue = formCategory === "photo_limit_boost" && formUnlimited
+      ? -1
+      : formValue === "" ? null : Number(formValue)
+
     const payload = {
       name: formName, description: formDesc, price_inr: formPriceInr,
-      price_usd: formPriceUsd, billing_type: formBilling, is_active: formActive
+      price_usd: formPriceUsd, billing_type: formBilling, is_active: formActive,
+      category: formCategory || null, value: resolvedValue,
     }
 
     try {
@@ -143,10 +167,20 @@ export function AddonMarketplace() {
                     <span className="text-2xl font-black text-slate-900">₹{a.price_inr}</span>
                     <span className="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider bg-slate-100 px-1.5 py-0.5 rounded-md">{a.billing_type.replace("_", " ")}</span>
                   </div>
-                  <div className="mt-3 pt-2 border-t border-slate-100">
+                  <div className="mt-3 pt-2 border-t border-slate-100 flex flex-wrap gap-1.5 items-center">
                     <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", a.is_active ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-100 text-slate-500 border-slate-200")}>
                       {a.is_active ? "Active" : "Inactive"}
                     </span>
+                    {a.category && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-violet-50 text-violet-700 border-violet-100">
+                        {CATEGORY_LABELS[a.category]}
+                      </span>
+                    )}
+                    {a.category && a.value !== null && a.value !== undefined && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-slate-50 text-slate-600 border-slate-200">
+                        {a.value === -1 ? "Unlimited" : `value: ${a.value}`}
+                      </span>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -195,6 +229,49 @@ export function AddonMarketplace() {
                     <option value="lifetime">Lifetime</option>
                   </select>
                 </div>
+                <div className="space-y-1 pt-2 border-t border-slate-100">
+                  <Label className="text-xs font-bold text-slate-500">Category</Label>
+                  <select
+                    value={formCategory}
+                    onChange={e => {
+                      const next = e.target.value as AddonCategory | ""
+                      setFormCategory(next)
+                      if (next !== "photo_limit_boost") setFormUnlimited(false)
+                    }}
+                    className="w-full h-8 px-2 rounded-md border border-slate-200 text-xs font-medium"
+                  >
+                    <option value="">None (legacy / uncategorized)</option>
+                    <option value="guest_boost">Guest Boost</option>
+                    <option value="shot_boost">Shot Boost</option>
+                    <option value="photo_limit_boost">Photo Limit Boost</option>
+                    <option value="video_addon">Video Add-on</option>
+                    <option value="voice_addon">Voice Add-on</option>
+                  </select>
+                  <p className="text-[10px] text-slate-400 font-medium pt-0.5">
+                    Drives where this add-on shows up in the event wizard and Billing page (guest limit, shot limit, photo limit tier, video unlock, voice unlock).
+                  </p>
+                </div>
+                {formCategory && formCategory !== "video_addon" && formCategory !== "voice_addon" && (
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-slate-500">
+                      {formCategory === "photo_limit_boost" ? "Photo Limit Tier" : "Tier Value"}
+                    </Label>
+                    {formCategory === "photo_limit_boost" && (
+                      <div className="flex items-center gap-2 pb-1">
+                        <input type="checkbox" checked={formUnlimited} onChange={e => setFormUnlimited(e.target.checked)} className="rounded text-violet-600 h-3.5 w-3.5" />
+                        <span className="text-xs font-medium text-slate-600">Unlimited (value = -1)</span>
+                      </div>
+                    )}
+                    <Input
+                      type="number"
+                      value={formValue}
+                      disabled={formCategory === "photo_limit_boost" && formUnlimited}
+                      onChange={e => setFormValue(e.target.value === "" ? "" : Number(e.target.value))}
+                      placeholder={formCategory === "guest_boost" ? "e.g. 25 (guests)" : formCategory === "shot_boost" ? "e.g. 10 (shots/guest)" : "e.g. 50 (photos/guest)"}
+                      className="h-8 text-xs font-medium"
+                    />
+                  </div>
+                )}
                 <div className="flex items-center gap-2 py-2 border-t border-b border-slate-100">
                   <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-violet-600 h-3.5 w-3.5" />
                   <span className="text-xs font-bold text-slate-700">Add-on Active</span>

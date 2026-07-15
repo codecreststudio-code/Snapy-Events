@@ -1,6 +1,6 @@
 import { defineRoute, ok } from "@/lib/api/handler"
 import { adminDb } from "@/lib/supabase/admin"
-import { getLiveBoostAddons } from "@/lib/payments/addons"
+import { getLiveAddonCatalog } from "@/lib/payments/addons"
 
 // Helper to partition dates by dynamic intervals (hour, day, week, month)
 function generateTrendBuckets(startDate: Date, endDate: Date) {
@@ -346,7 +346,7 @@ export const GET = defineRoute({
     // than the old hardcoded 10/25/50/100-guest, 5/10/15-shot price table,
     // which no longer matched the real catalog at all (current tiers are
     // 5/25 guests, 5/10/25 shots).
-    const { guestBoosts: liveGuestBoosts, shotBoosts: liveShotBoosts } = await getLiveBoostAddons()
+    const { guestBoosts: liveGuestBoosts, shotBoosts: liveShotBoosts } = await getLiveAddonCatalog()
     const { data: successTxsList } = await sb.from("transactions").select("amount, notes").eq("status", "success").gte("created_at", startDate.toISOString()).lte("created_at", endDate.toISOString())
     let planRevenue = 0;
     let addonRevenue = 0;

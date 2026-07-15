@@ -172,6 +172,13 @@ export interface PlanFeature {
   created_at: string
 }
 
+export type AddonCategory =
+  | "guest_boost"
+  | "shot_boost"
+  | "photo_limit_boost"
+  | "video_addon"
+  | "voice_addon"
+
 export interface Addon {
   id: string
   name: string
@@ -181,6 +188,11 @@ export interface Addon {
   billing_type: "one_time" | "monthly" | "yearly" | "lifetime"
   compatible_plans: string[]
   is_active: boolean
+  // Explicit classification + numeric tier (guests/shots/photo-limit value,
+  // or 1 for flat unlocks like video/voice). Nullable for legacy rows that
+  // predate this column; admin UI treats a null category as "Custom".
+  category: AddonCategory | null
+  value: number | null
   created_at: string
   updated_at: string
 }

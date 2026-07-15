@@ -3,13 +3,8 @@ import { defineRoute, ok, fail, created } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder } from "@/lib/integrations/razorpay"
 import { adminDb } from "@/lib/supabase/admin"
-import { getLiveBoostAddons } from "@/lib/payments/addons"
-import {
-  PLAN_BASE_PHOTO_LIMITS,
-  PHOTO_LIMIT_ADDON_PRICES,
-  VIDEO_UNLOCK_ADDON_PRICE,
-  VOICE_UNLOCK_ADDON_PRICE,
-} from "@/lib/constants"
+import { getLiveAddonCatalog, type LiveAddonCatalog } from "@/lib/payments/addons"
+import { PLAN_BASE_PHOTO_LIMITS } from "@/lib/constants"
 
 const checkoutBodySchema = z.object({
   plan_id: z.string().min(1),
@@ -33,22 +28,30 @@ const checkoutBodySchema = z.object({
 // plan's included limits. This is intentionally re-derived here (not
 // trusted from the client) so the Razorpay order amount always reflects
 // what the host actually owes, regardless of what the wizard UI displayed.
-export function calculateFeatureAddonPrice(planId: string, photoLimit?: number, videos?: boolean, voiceNotes?: boolean) {
+// Priced from the live Admin > Add-ons catalog (catalog is fetched once by
+// the caller and passed in, so calculatePrice() only hits the DB once).
+export function calculateFeatureAddonPrice(
+  planId: string,
+  catalog: Pick<LiveAddonCatalog, "photoLimitBoosts" | "videoAddonPrice" | "voiceAddonPrice">,
+  photoLimit?: number,
+  videos?: boolean,
+  voiceNotes?: boolean
+) {
   let addon = 0
   const planBaseLimit = PLAN_BASE_PHOTO_LIMITS[planId] ?? 0
 
   if (typeof photoLimit === "number" && photoLimit !== planBaseLimit && (photoLimit === -1 || photoLimit > planBaseLimit)) {
-    addon += PHOTO_LIMIT_ADDON_PRICES[photoLimit] ?? 0
+    addon += catalog.photoLimitBoosts.find((b) => b.value === photoLimit)?.price ?? 0
   }
 
   const planIncludesVideo = planId === "standard" || planId === "premium"
   if (videos && !planIncludesVideo) {
-    addon += VIDEO_UNLOCK_ADDON_PRICE
+    addon += catalog.videoAddonPrice
   }
 
   const planIncludesVoice = planId === "premium"
   if (voiceNotes && !planIncludesVoice) {
-    addon += VOICE_UNLOCK_ADDON_PRICE
+    addon += catalog.voiceAddonPrice
   }
 
   return addon
@@ -102,12 +105,12 @@ export async function calculatePrice(
     }
   }
 
-  // Calculate guest and shot add-ons — priced from the live Admin > Add-ons
-  // catalog so a price change there takes effect here immediately, not just
-  // on the Billing page's display list.
-  const { guestBoosts, shotBoosts } = await getLiveBoostAddons()
-  const guestItem = guestBoosts.find(b => b.value === guestBoost)
-  const shotItem = shotBoosts.find(b => b.value === shotsBoost)
+  // Priced from the live Admin > Add-ons catalog (one fetch covers guest,
+  // shot, photo-limit, video, and voice add-ons) so a price change there
+  // takes effect here immediately, not just on the Billing page's display.
+  const catalog = await getLiveAddonCatalog()
+  const guestItem = catalog.guestBoosts.find(b => b.value === guestBoost)
+  const shotItem = catalog.shotBoosts.find(b => b.value === shotsBoost)
 
   const guestAddonPriceInr = guestItem?.price || (guestBoost > 0 ? Math.round(guestBoost * 19.9) : 0)
   const shotAddonPriceInr = shotItem?.price || (shotsBoost > 0 ? Math.round(shotsBoost * 19.9) : 0)
@@ -115,7 +118,7 @@ export async function calculatePrice(
   const guestAddonPrice = currency === "USD" ? (Math.round(guestAddonPriceInr / 80) || (guestBoost > 0 ? 3 : 0)) : guestAddonPriceInr
   const shotAddonPrice = currency === "USD" ? (Math.round(shotAddonPriceInr / 80) || (shotsBoost > 0 ? 2 : 0)) : shotAddonPriceInr
 
-  const featureAddonPriceInr = calculateFeatureAddonPrice(planId, photoLimit, videos, voiceNotes)
+  const featureAddonPriceInr = calculateFeatureAddonPrice(planId, catalog, photoLimit, videos, voiceNotes)
   const featureAddonPrice = currency === "USD" ? (Math.round(featureAddonPriceInr / 80) || (featureAddonPriceInr > 0 ? 1 : 0)) : featureAddonPriceInr
 
   price = price + guestAddonPrice + shotAddonPrice + featureAddonPrice
