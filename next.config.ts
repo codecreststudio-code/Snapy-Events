@@ -97,7 +97,10 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Permissions-Policy",
-            value: "camera=(self), microphone=(), geolocation=(), interest-cohort=()",
+            // microphone must allow self — guest video recording (with audio)
+            // and voice-note recording both call getUserMedia({ audio: true }),
+            // which a blanket microphone=() silently blocks in production.
+            value: "camera=(self), microphone=(self), geolocation=(), interest-cohort=()",
           },
         ],
       },

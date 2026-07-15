@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "@/lib/components/ui/button"
-import { Camera, RefreshCw, X, Check, Video, Square, Play, Pause } from "lucide-react"
+import { Camera, RefreshCw, X, Check, Video, Square, Play, Pause, Zap, ZapOff, Grid3x3, ZoomIn } from "lucide-react"
 
 export interface FilterPreset {
   id: string
@@ -44,6 +44,14 @@ export function CameraCapture({
   const [activeFilterId, setActiveFilterId] = useState<string>("normal")
   const [captureMode, setCaptureMode] = useState<"photo" | "video">("photo")
 
+  // Enhanced camera controls
+  const [torchSupported, setTorchSupported] = useState(false)
+  const [torchOn, setTorchOn] = useState(false)
+  const [zoomSupported, setZoomSupported] = useState(false)
+  const [zoomRange, setZoomRange] = useState<{ min: number; max: number; step: number }>({ min: 1, max: 1, step: 0.1 })
+  const [zoomLevel, setZoomLevel] = useState(1)
+  const [showGrid, setShowGrid] = useState(false)
+
   // Photo state
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
 
@@ -79,12 +87,60 @@ export function CameraCapture({
       setStream(newStream)
       if (videoRef.current) {
         videoRef.current.srcObject = newStream
+        // Critical: the live viewfinder must never be audible. When allowVideo
+        // is true the stream also carries a live mic track — an unmuted
+        // <video> would play that mic audio back out of the speakers in real
+        // time, which the (still-recording) mic then picks up again, causing
+        // the echo/feedback loop guests reported while recording video.
+        videoRef.current.muted = true
+      }
+
+      // Reset/detect enhanced controls (torch + zoom) for the new track
+      const [videoTrack] = newStream.getVideoTracks()
+      const capabilities = (videoTrack?.getCapabilities?.() as (MediaTrackCapabilities & { torch?: boolean; zoom?: { min: number; max: number; step: number } }) | undefined)
+      setTorchOn(false)
+      if (capabilities?.torch) {
+        setTorchSupported(true)
+      } else {
+        setTorchSupported(false)
+      }
+      if (capabilities?.zoom) {
+        setZoomSupported(true)
+        setZoomRange({ min: capabilities.zoom.min, max: capabilities.zoom.max, step: capabilities.zoom.step || 0.1 })
+        setZoomLevel(capabilities.zoom.min)
+      } else {
+        setZoomSupported(false)
       }
     } catch (err) {
       console.error("Error accessing camera:", err)
       alert("Could not access camera. Please check permissions.")
     }
   }, [facingMode, allowVideo])
+
+  const toggleTorch = async () => {
+    if (!stream) return
+    const [videoTrack] = stream.getVideoTracks()
+    if (!videoTrack) return
+    try {
+      const next = !torchOn
+      await videoTrack.applyConstraints({ advanced: [{ torch: next } as MediaTrackConstraintSet] })
+      setTorchOn(next)
+    } catch (err) {
+      console.error("Failed to toggle flashlight:", err)
+    }
+  }
+
+  const handleZoomChange = async (value: number) => {
+    setZoomLevel(value)
+    if (!stream) return
+    const [videoTrack] = stream.getVideoTracks()
+    if (!videoTrack) return
+    try {
+      await videoTrack.applyConstraints({ advanced: [{ zoom: value } as MediaTrackConstraintSet] })
+    } catch (err) {
+      console.error("Failed to apply zoom:", err)
+    }
+  }
 
   useEffect(() => {
     startCamera()
@@ -267,7 +323,27 @@ export function CameraCapture({
           </div>
         )}
 
-        <div className="flex gap-4">
+        <div className="flex gap-2">
+          {!hasPreview && (
+            <button
+              onClick={() => setShowGrid((g) => !g)}
+              aria-label="Toggle grid"
+              aria-pressed={showGrid}
+              className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors ${showGrid ? "bg-white/30 text-white" : "text-white hover:bg-white/20"}`}
+            >
+              <Grid3x3 className="h-5 w-5" />
+            </button>
+          )}
+          {!hasPreview && torchSupported && (
+            <button
+              onClick={toggleTorch}
+              aria-label="Toggle flashlight"
+              aria-pressed={torchOn}
+              className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors ${torchOn ? "bg-yellow-400/90 text-black" : "text-white hover:bg-white/20"}`}
+            >
+              {torchOn ? <Zap className="h-5 w-5" /> : <ZapOff className="h-5 w-5" />}
+            </button>
+          )}
           {!hasPreview && !isRecordingVideo && (
             <Button variant="ghost" size="icon" onClick={toggleCamera} aria-label="Flip camera" className="text-white hover:bg-white/20 rounded-full">
               <RefreshCw className="h-6 w-6" />
@@ -278,6 +354,13 @@ export function CameraCapture({
 
       {/* Main Viewfinder */}
       <div className="flex-1 relative overflow-hidden flex items-center justify-center bg-black sm:rounded-2xl sm:border border-white/10">
+        {!hasPreview && showGrid && (
+          <div className="pointer-events-none absolute inset-0 z-[5] grid grid-cols-3 grid-rows-3">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className="border border-white/25" />
+            ))}
+          </div>
+        )}
         {capturedImage ? (
           <img src={capturedImage} alt="Captured" className="w-full h-full object-cover" />
         ) : recordedVideoUrl ? (
@@ -299,13 +382,30 @@ export function CameraCapture({
             </button>
           </div>
         ) : (
-          <video 
+          <video
             ref={videoRef}
-            autoPlay 
-            playsInline 
+            autoPlay
+            playsInline
+            muted
             className={`w-full h-full object-cover transition-all duration-300 ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
             style={{ filter: activeFilter.cssFilter }}
           />
+        )}
+        {!hasPreview && zoomSupported && zoomRange.max > zoomRange.min && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-black/50 backdrop-blur-md rounded-full px-4 py-2 w-56 max-w-[80%]">
+            <ZoomIn className="h-4 w-4 text-white shrink-0" />
+            <input
+              type="range"
+              min={zoomRange.min}
+              max={zoomRange.max}
+              step={zoomRange.step}
+              value={zoomLevel}
+              onChange={(e) => handleZoomChange(Number(e.target.value))}
+              aria-label="Camera zoom"
+              className="w-full accent-orange-500"
+            />
+            <span className="text-[10px] font-mono text-white/80 w-8 text-right shrink-0">{zoomLevel.toFixed(1)}x</span>
+          </div>
         )}
         <canvas ref={canvasRef} className="hidden" />
       </div>

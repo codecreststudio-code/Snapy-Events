@@ -341,6 +341,45 @@ function CheckoutForm() {
     }
   }
 
+  // When the plan is already active and there are no paid add-ons, totalPrice
+  // is legitimately 0 — but Razorpay rejects orders below its minimum charge,
+  // so routing this through handlePayment would just surface a payment
+  // error. Activate directly instead, no payment gateway involved.
+  const handleFreeActivation = async () => {
+    setInitiating(true)
+    setError(null)
+    try {
+      const res = await fetch("/api/payments/checkout-free", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan_id: plan,
+          guest_boost: guests,
+          shots_boost: shots,
+          coupon_code: appliedCoupon?.code,
+          currency: currency,
+          photo_limit: photoLimit,
+          videos,
+          voice_notes: voiceNotes,
+        }),
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error((typeof errorData.error === "object" ? errorData.error?.message : errorData.error) || "Failed to activate plan")
+      }
+
+      toast({
+        title: "Plan Activated",
+        description: `You're all set on ${PLAN_NAMES[plan] || plan}!`,
+      })
+      router.push("/dashboard?subscribed=success")
+    } catch (err: any) {
+      setError(err.message || "Something went wrong. Please try again.")
+      setInitiating(false)
+    }
+  }
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center">
@@ -493,19 +532,24 @@ function CheckoutForm() {
               )}
 
               <Button
-                onClick={handlePayment}
+                onClick={totalPrice > 0 ? handlePayment : handleFreeActivation}
                 disabled={initiating}
                 className="w-full bg-orange-500 text-white hover:bg-orange-600 font-bold py-6 rounded-xl shadow-[0_0_20px_rgba(249,115,22,0.2)] flex items-center justify-center gap-2 border-none"
               >
                 {initiating ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span>Processing Payment...</span>
+                    <span>{totalPrice > 0 ? "Processing Payment..." : "Activating..."}</span>
                   </>
-                ) : (
+                ) : totalPrice > 0 ? (
                   <>
                     <CreditCard className="h-5 w-5" />
                     <span>Pay with Razorpay</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-5 w-5" />
+                    <span>Continue — No Payment Required</span>
                   </>
                 )}
               </Button>

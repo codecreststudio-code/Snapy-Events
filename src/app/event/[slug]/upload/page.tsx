@@ -28,6 +28,9 @@ import {
   Video as VideoIcon,
   MessageSquare,
   Send,
+  Play,
+  Volume2,
+  ZoomIn,
 } from "lucide-react"
 
 import type { Gallery } from "@/lib/types"
@@ -93,6 +96,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
   const [showCamera, setShowCamera] = useState(false)
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false)
   const [quotaInfo, setQuotaInfo] = useState<{ uploaded: number; max: number } | null>(null)
+  const [previewFile, setPreviewFile] = useState<UploadFile | null>(null)
 
   const { data: event, isLoading: eventLoading } = useQuery({
     queryKey: ["event", slug],
@@ -241,7 +245,9 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
       validFiles.push({
         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         file,
-        preview: effectiveType.startsWith("image/") ? URL.createObjectURL(file) : "",
+        // A blob preview URL is useful for video/audio too (video thumbnail
+        // frame + full-view playback before upload), not just images.
+        preview: URL.createObjectURL(file),
         progress: 0,
         status: "pending" as const,
       })
@@ -254,11 +260,10 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
   const handleCameraCapture = useCallback((file: File) => {
     setFiles((prev) => {
-      const effectiveType = file.type || "image/jpeg"
       const newUpload: UploadFile = {
         id: Math.random().toString(36).substring(7),
         file,
-        preview: effectiveType.startsWith("image/") ? URL.createObjectURL(file) : "",
+        preview: URL.createObjectURL(file),
         progress: 0,
         status: "pending" as const,
       }
@@ -269,6 +274,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
   }, [])
 
   function removeFile(id: string) {
+    setPreviewFile((prev) => (prev?.id === id ? null : prev))
     setFiles((prev) => {
       const file = prev.find((f) => f.id === id)
       if (file && file.preview) {
@@ -746,6 +752,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 onClick={() => {
                   files.forEach((f) => URL.revokeObjectURL(f.preview))
                   setFiles([])
+                  setPreviewFile(null)
                 }}
               >
                 Clear All
@@ -753,16 +760,46 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
             </div>
 
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
-              {files.map((file) => (
+              {files.map((file) => {
+                const kind = file.file.type.startsWith("video/")
+                  ? "video"
+                  : file.file.type.startsWith("audio/")
+                  ? "audio"
+                  : "image"
+                return (
                 <div
                   key={file.id}
-                  className="relative aspect-square rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800"
+                  onClick={() => setPreviewFile(file)}
+                  className="relative aspect-square rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 cursor-pointer"
                 >
-                  <img
-                    src={file.preview}
-                    alt={file.file.name}
-                    className="w-full h-full object-cover"
-                  />
+                  {kind === "image" && (
+                    <img
+                      src={file.preview}
+                      alt={file.file.name}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  {kind === "video" && (
+                    <>
+                      <video src={file.preview} muted playsInline preload="metadata" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/10">
+                        <div className="w-10 h-10 rounded-full bg-black/60 flex items-center justify-center">
+                          <Play className="h-5 w-5 text-white fill-white ml-0.5" />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {kind === "audio" && (
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#D4AF37]/20 to-purple-900/20 p-2">
+                      <Volume2 className="h-8 w-8 text-[#D4AF37]" />
+                      <span className="text-[10px] text-zinc-300 text-center line-clamp-2 px-1">{file.file.name}</span>
+                    </div>
+                  )}
+                  {(kind === "video" || kind === "image") && (
+                    <div className="absolute bottom-1.5 right-1.5 p-1 rounded-full bg-black/50 text-white pointer-events-none">
+                      <ZoomIn className="h-3.5 w-3.5" />
+                    </div>
+                  )}
                   {file.status === "uploading" && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                       <Loader2 className="h-6 w-6 animate-spin text-white" />
@@ -793,7 +830,8 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                     </button>
                   )}
                 </div>
-              ))}
+                )
+              })}
             </div>
 
             <div className="flex justify-end gap-4">
@@ -811,13 +849,54 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 ) : (
                   <>
                     <Cloud className="h-4 w-4" />
-                    Upload {files.length} Photo(s)
+                    Upload {files.length} File{files.length === 1 ? "" : "s"}
                   </>
                 )}
               </Button>
             </div>
           </div>
         )}
+
+        {previewFile && (() => {
+          const kind = previewFile.file.type.startsWith("video/")
+            ? "video"
+            : previewFile.file.type.startsWith("audio/")
+            ? "audio"
+            : "image"
+          return (
+            <div
+              className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+              onClick={() => setPreviewFile(null)}
+            >
+              <button
+                onClick={() => setPreviewFile(null)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                aria-label="Close preview"
+              >
+                <X className="h-6 w-6" />
+              </button>
+              <div className="max-w-3xl max-h-[85vh] w-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                {kind === "video" && (
+                  <video src={previewFile.preview} controls autoPlay playsInline className="max-w-full max-h-[85vh] rounded-lg">
+                    Your browser does not support video playback.
+                  </video>
+                )}
+                {kind === "audio" && (
+                  <div className="flex flex-col items-center gap-4 p-8">
+                    <Volume2 className="h-16 w-16 text-[#D4AF37]" />
+                    <p className="text-white/80 text-sm">{previewFile.file.name}</p>
+                    <audio src={previewFile.preview} controls autoPlay className="w-80 max-w-full">
+                      Your browser does not support audio playback.
+                    </audio>
+                  </div>
+                )}
+                {kind === "image" && (
+                  <img src={previewFile.preview} alt={previewFile.file.name} className="max-w-full max-h-[85vh] object-contain rounded-lg" />
+                )}
+              </div>
+            </div>
+          )
+        })()}
 
         <Card className="bg-zinc-900 border-zinc-800 p-6 shadow-sm">
           <h3 className="font-semibold text-white mb-2">Upload Guidelines</h3>
