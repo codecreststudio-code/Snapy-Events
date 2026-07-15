@@ -395,7 +395,9 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
           })
 
           if (!directUploadRes.ok) {
-            throw new Error("Direct storage upload failed")
+            let errBody = ""
+            try { errBody = await directUploadRes.text() } catch {}
+            throw new Error(`Storage upload failed (${directUploadRes.status})${errBody ? ": " + errBody.slice(0, 120) : ""}`)
           }
 
           // Register photo record in database with pre-uploaded storage path
@@ -771,8 +773,11 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                     </div>
                   )}
                   {file.status === "error" && (
-                    <div className="absolute inset-0 bg-red-500/50 flex items-center justify-center">
-                      <X className="h-8 w-8 text-white" />
+                    <div className="absolute inset-0 bg-red-500/80 flex flex-col items-center justify-center p-2 gap-1">
+                      <X className="h-6 w-6 text-white shrink-0" />
+                      {file.error && (
+                        <p className="text-white text-[8px] text-center leading-tight line-clamp-3">{file.error}</p>
+                      )}
                     </div>
                   )}
                   {file.status !== "done" && (

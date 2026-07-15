@@ -8,8 +8,8 @@ import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
 const bodySchema = z.object({
   gallery_id: z.string().uuid(),
   file_name: z.string().min(1),
-  file_type: z.string().min(1),
-  file_size: z.number().positive(),
+  file_type: z.string().min(1).default("image/jpeg"),
+  file_size: z.number().default(0), // allow 0 — camera/iOS captured blobs may report 0 before storage write
   uploader_name: z.string().optional().nullable(),
   uploader_email: z.string().optional().nullable(),
 })
@@ -42,7 +42,8 @@ export const POST = defineRoute({
     }
 
     const maxAllowedSize = MAX_FILE_SIZES[category]
-    if (body.file_size > maxAllowedSize) {
+    // Only enforce pre-declared size limit when size is known (camera/iOS blobs may report 0)
+    if (body.file_size > 0 && body.file_size > maxAllowedSize) {
       return fail("VALIDATION_ERROR", `File size exceeds max allowed limit of ${Math.round(maxAllowedSize / (1024 * 1024))}MB`, 413)
     }
 

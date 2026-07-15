@@ -87,7 +87,9 @@ export async function checkEventFeatureAccess(
     }
 
     // Default Fallback Rules based on Plan Tier
-    if (["ai_face_search", "live_photo_wall", "video_uploads", "voice_notes", "print_ready_downloads", "whatsapp_alerts", "priority_support"].includes(featureKey)) {
+    // NOTE: video_uploads and voice_notes are controlled by event content_types settings (checked above).
+    // Only block premium AI features when host has no paid plan.
+    if (["ai_face_search", "live_photo_wall", "print_ready_downloads", "whatsapp_alerts", "priority_support"].includes(featureKey)) {
       const isPaid = planId !== "free"
       return {
         allowed: isPaid,
@@ -96,6 +98,7 @@ export async function checkEventFeatureAccess(
       }
     }
 
+    // video_uploads and voice_notes: allowed if event settings permit (already checked above)
     return { allowed: true, planId }
   } catch (err: any) {
     console.error(`[feature-gate] Error checking '${featureKey}' for event ${eventId}:`, err)
