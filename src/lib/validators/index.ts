@@ -37,7 +37,19 @@ export const createEventSchema = z.object({
   name: z.string().min(2, "Event name must be at least 2 characters").max(200),
   description: z.string().max(2000).optional(),
   event_type: z.string().optional(),
-  custom_event_type_name: z.string().max(200).optional().nullable(),
+  // NOTE: intentionally NOT accepting a top-level `custom_event_type_name` key.
+  // The wizard already folds the custom name into `event_type` itself
+  // (new-event-form.tsx sets event_type to the trimmed custom name when
+  // eventType === "custom"), and the `events` table has no
+  // custom_event_type_name column. Previously this key was silently
+  // stripped by Zod's default (non-passthrough) parsing before it ever
+  // reached the insert. When `.passthrough()` was added to `settings` below
+  // (to fix the plan-settings-stripping bug) this top-level field was also
+  // accidentally given an explicit schema entry, which let it survive
+  // parsing and get spread into the Postgres insert — causing EVERY event
+  // creation to fail with "column custom_event_type_name does not exist"
+  // (the Launch Capsule button "doing nothing" bug). Do not re-add this
+  // field here without also adding a matching migration + column.
   event_date: z.string().datetime().optional(),
   end_date: z.string().datetime().optional(),
   venue: z.string().max(500).optional(),
