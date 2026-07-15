@@ -7,6 +7,7 @@ import { trackEvent } from "@/lib/analytics/track"
 import { API_RATE_LIMITS } from "@/lib/constants"
 
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
+import { getFeatureFlags } from "@/lib/platform-settings"
 
 export const POST = defineRoute({
   method: "POST",
@@ -34,6 +35,15 @@ export const POST = defineRoute({
     // faces + photo storage paths (the query below only filters when eventId is set).
     if (!eventId) {
       return fail("VALIDATION_ERROR", "A valid gallery_id is required", 400)
+    }
+
+    // Admin > Feature Flags kill switch for AI Face Search platform-wide.
+    // Separate from the per-event/per-plan gate below — this is the global
+    // toggle an admin would flip during an incident (e.g. the face-detection
+    // provider is down or over quota).
+    const flags = await getFeatureFlags()
+    if (!flags.ai_search_enabled) {
+      return fail("FORBIDDEN", "AI Face Search is temporarily disabled by the platform.", 403)
     }
 
     {

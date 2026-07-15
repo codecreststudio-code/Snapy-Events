@@ -11,14 +11,21 @@ import {
   Save,
   Shield,
   Key,
-  Eye,
   Mail,
   Activity,
-  Settings
+  Settings,
+  CheckCircle2,
+  XCircle
 } from "lucide-react"
 import { updatePlatformSettings } from "@/app/actions/admin-settings"
 
-export function SettingsClient({ initialSettings }: { initialSettings: any }) {
+export function SettingsClient({
+  initialSettings,
+  integrationStatus,
+}: {
+  initialSettings: any
+  integrationStatus: { razorpay_configured: boolean; resend_configured: boolean }
+}) {
   // Feature Flags state
   const flags = initialSettings?.feature_flags || {}
   const [paymentsEnabled, setPaymentsEnabled] = useState(flags.payments_enabled ?? true)
@@ -26,12 +33,6 @@ export function SettingsClient({ initialSettings }: { initialSettings: any }) {
   const [liveWallEnabled, setLiveWallEnabled] = useState(flags.live_wall_enabled ?? true)
   const [watermarkEnabled, setWatermarkEnabled] = useState(flags.watermark_enabled ?? false)
   const [whiteLabelEnabled, setWhiteLabelEnabled] = useState(flags.white_label_enabled ?? false)
-
-  // API Configs
-  const keys = initialSettings?.integration_keys || {}
-  const [razorpayKey, setRazorpayKey] = useState(keys.razorpay_key || "")
-  const [resendKey, setResendKey] = useState(keys.resend_key || "")
-  const [showKeys, setShowKeys] = useState(false)
 
   // Mail template preview
   const templates = initialSettings?.email_templates || {}
@@ -53,12 +54,6 @@ export function SettingsClient({ initialSettings }: { initialSettings: any }) {
       white_label_enabled: whiteLabelEnabled
     })
 
-    // Save integration keys
-    await updatePlatformSettings("integration_keys", {
-      razorpay_key: razorpayKey,
-      resend_key: resendKey
-    })
-
     // Save email templates
     await updatePlatformSettings("email_templates", {
       welcome_subject: welcomeSubject,
@@ -66,7 +61,7 @@ export function SettingsClient({ initialSettings }: { initialSettings: any }) {
     })
 
     setSaving(false)
-    toast({ title: "Settings Saved", description: "Global platform controls and configuration keys have been synced to the database." })
+    toast({ title: "Settings Saved", description: "Feature flags and email templates have been synced to the database." })
   }
 
   return (
@@ -136,49 +131,49 @@ export function SettingsClient({ initialSettings }: { initialSettings: any }) {
         {/* API Credentials */}
         <Card className="bg-white border-slate-200 shadow-sm">
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle className="text-slate-800 flex items-center gap-2 text-base font-bold">
-                  <Key className="h-5 w-5 text-violet-650" />
-                  <span>Integration Keys</span>
-                </CardTitle>
-                <CardDescription className="text-slate-400 text-xs font-semibold leading-relaxed">
-                  Credentials for Resend email and Razorpay payment gateway APIs.
-                </CardDescription>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowKeys(!showKeys)}
-                className="text-slate-500 hover:bg-slate-100 rounded-lg text-xs font-bold"
-              >
-                <Eye className="h-4 w-4 mr-1.5" />
-                <span>{showKeys ? "Hide Keys" : "Reveal Keys"}</span>
-              </Button>
-            </div>
+            <CardTitle className="text-slate-800 flex items-center gap-2 text-base font-bold">
+              <Key className="h-5 w-5 text-violet-650" />
+              <span>Integration Keys</span>
+            </CardTitle>
+            <CardDescription className="text-slate-400 text-xs font-semibold leading-relaxed">
+              Credentials for Resend email and Razorpay payment gateway APIs are read from server
+              environment variables, not stored here. This panel only shows whether each is configured.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">Razorpay Key ID</Label>
-              <Input
-                type={showKeys ? "text" : "password"}
-                value={razorpayKey}
-                onChange={(e) => setRazorpayKey(e.target.value)}
-                placeholder="rzp_test_..."
-                className="bg-white border-slate-200 text-slate-800 shadow-sm"
-              />
+            <div className="flex items-center justify-between py-3 border-b border-slate-100">
+              <div className="space-y-0.5">
+                <Label className="text-slate-800 text-sm font-bold block">Razorpay</Label>
+                <p className="text-xs text-slate-400 font-semibold leading-relaxed">RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET</p>
+              </div>
+              {integrationStatus.razorpay_configured ? (
+                <span className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
+                  <CheckCircle2 className="h-4 w-4" /> Configured
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 text-red-600 text-xs font-bold">
+                  <XCircle className="h-4 w-4" /> Not configured
+                </span>
+              )}
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">Resend API Key</Label>
-              <Input
-                type={showKeys ? "text" : "password"}
-                value={resendKey}
-                onChange={(e) => setResendKey(e.target.value)}
-                placeholder="re_..."
-                className="bg-white border-slate-200 text-slate-800 shadow-sm"
-              />
+            <div className="flex items-center justify-between py-3">
+              <div className="space-y-0.5">
+                <Label className="text-slate-800 text-sm font-bold block">Resend</Label>
+                <p className="text-xs text-slate-400 font-semibold leading-relaxed">RESEND_API_KEY</p>
+              </div>
+              {integrationStatus.resend_configured ? (
+                <span className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
+                  <CheckCircle2 className="h-4 w-4" /> Configured
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 text-red-600 text-xs font-bold">
+                  <XCircle className="h-4 w-4" /> Not configured
+                </span>
+              )}
             </div>
+            <p className="text-xs text-slate-400 font-semibold leading-relaxed pt-1">
+              To change these, update the environment variables in your hosting provider (e.g. Vercel project settings) and redeploy.
+            </p>
           </CardContent>
         </Card>
 

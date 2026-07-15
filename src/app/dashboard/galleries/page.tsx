@@ -48,7 +48,7 @@ async function getGalleries(eventIds: string[]): Promise<GalleryType[]> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from("galleries")
-    .select("*, event:events(name, slug)")
+    .select("*, event:events(name, slug, cover_image_url, settings)")
     .in("event_id", eventIds)
     .order("created_at", { ascending: false })
 
@@ -82,19 +82,35 @@ function GalleryCard({
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
+  // Galleries themselves rarely have their own cover_image_url set — the
+  // cover is chosen on the parent event (either an uploaded/stock photo, in
+  // event.cover_image_url, or one of the gradient swatches, saved as CSS in
+  // event.settings.cover_gradient since it isn't an image). This card used
+  // to only check the gallery's own cover_image_url, so nearly every card
+  // fell through to the generic placeholder icon even when the event had a
+  // perfectly good cover. Mirrors the fallback used on the Events page.
+  const eventCoverImage = (gallery as any)?.event?.cover_image_url as string | undefined
+  const coverImage = gallery.cover_image_url || eventCoverImage
+  const coverGradient = !coverImage
+    ? ((gallery as any)?.event?.settings as any)?.cover_gradient as string | undefined
+    : undefined
+
   return (
     <>
       <Card className="overflow-hidden border border-border/40 bg-card/60 backdrop-blur-md hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group flex flex-col justify-between">
         <div>
           {/* Gallery Cover Image */}
-          <div className="aspect-video bg-muted relative overflow-hidden">
-            {gallery.cover_image_url ? (
+          <div
+            className="aspect-video bg-muted relative overflow-hidden"
+            style={!coverImage && coverGradient ? { backgroundImage: coverGradient } : undefined}
+          >
+            {coverImage ? (
               <img
-                src={gallery.cover_image_url}
+                src={coverImage}
                 alt={gallery.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-            ) : (
+            ) : coverGradient ? null : (
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-pink-500/5 flex items-center justify-center">
                 <Images className="h-10 w-10 text-muted-foreground/40 group-hover:text-primary/45 transition-colors" />
               </div>

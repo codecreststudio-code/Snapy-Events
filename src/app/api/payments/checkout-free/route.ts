@@ -2,6 +2,7 @@ import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { calculatePrice } from "@/app/api/payments/checkout/route"
+import { getFeatureFlags } from "@/lib/platform-settings"
 
 // Handles the case where /api/payments/checkout's calculatePrice() legitimately
 // comes back to ₹0/$0 — e.g. the host's plan is already active and this
@@ -27,6 +28,11 @@ export const POST = defineRoute({
   body: bodySchema,
   requireAuth: true,
   handler: async ({ body, auth }) => {
+    const flags = await getFeatureFlags()
+    if (!flags.payments_enabled) {
+      return fail("BILLING_UNAVAILABLE", "Billing/checkout is temporarily disabled by the platform. Please try again later.", 503)
+    }
+
     const supabase = await createClient()
     const userId = auth.user!.id
 

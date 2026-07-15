@@ -3,6 +3,7 @@ import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder } from "@/lib/integrations/razorpay"
 import { getLiveAddonCatalog } from "@/lib/payments/addons"
+import { getFeatureFlags } from "@/lib/platform-settings"
 
 const addonCheckoutSchema = z.object({
   boost_type: z.enum(["guest", "shots"]),
@@ -16,6 +17,11 @@ export const POST = defineRoute({
   handler: async ({ body, auth }) => {
     if (!isRazorpayConfigured()) {
       return fail("BILLING_UNAVAILABLE", "Razorpay is not configured", 503)
+    }
+
+    const flags = await getFeatureFlags()
+    if (!flags.payments_enabled) {
+      return fail("BILLING_UNAVAILABLE", "Payments are temporarily disabled by the platform. Please try again later.", 503)
     }
 
     const supabase = await createClient()

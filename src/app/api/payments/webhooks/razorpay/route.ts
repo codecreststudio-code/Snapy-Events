@@ -47,6 +47,22 @@ export async function POST(request: NextRequest) {
         
         const userId = p.notes?.user_id
         if (userId) {
+          // Idempotency: the browser's own /api/payments/verify or
+          // /api/payments/addon-verify call usually beats this webhook to
+          // recording the payment. Without this check, a payment confirmed
+          // both ways would apply its guest/shots boost twice — this table
+          // has a unique constraint on razorpay_payment_id, so re-inserting
+          // silently failed before, but nothing stopped the boost increment
+          // further down from running a second time anyway.
+          const { data: existingTxn } = await supabase
+            .from("transactions")
+            .select("id")
+            .eq("razorpay_payment_id", p.id)
+            .maybeSingle()
+          if (existingTxn) {
+            break
+          }
+
           const { data: userRow } = await supabase
             .from("users")
             .select("id, email, full_name, preferences")

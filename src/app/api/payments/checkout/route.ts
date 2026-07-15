@@ -5,6 +5,7 @@ import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder } fro
 import { adminDb } from "@/lib/supabase/admin"
 import { getLiveAddonCatalog, type LiveAddonCatalog } from "@/lib/payments/addons"
 import { PLAN_BASE_PHOTO_LIMITS } from "@/lib/constants"
+import { getFeatureFlags } from "@/lib/platform-settings"
 
 const checkoutBodySchema = z.object({
   plan_id: z.string().min(1),
@@ -154,6 +155,14 @@ export const POST = defineRoute({
   handler: async ({ body, auth }) => {
     if (!isRazorpayConfigured()) {
       return fail("BILLING_UNAVAILABLE", "Razorpay is not configured", 503)
+    }
+
+    // Admin > Settings / Admin > Feature Flags kill switch. Previously this
+    // toggle was cosmetic — it saved to the database but nothing ever
+    // checked it, so turning "Payments" off during an incident did nothing.
+    const flags = await getFeatureFlags()
+    if (!flags.payments_enabled) {
+      return fail("BILLING_UNAVAILABLE", "Payments are temporarily disabled by the platform. Please try again later.", 503)
     }
 
     const supabase = await createClient()
