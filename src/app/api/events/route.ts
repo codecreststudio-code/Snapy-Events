@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server"
 import { createEventSchema } from "@/lib/validators"
 import { slugify } from "@/lib/utils"
 import { logAudit } from "@/lib/audit/log"
+import { sendEmail } from "@/lib/integrations/resend"
+import { serverEnv } from "@/lib/env"
 
 const listQuery = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -63,6 +65,23 @@ export const POST = defineRoute({
       slug: "all-photos",
     })
     await logAudit({ user_id: auth.user!.id, action: "event.created", resource_type: "event", resource_id: data.id, request })
+
+    // Notify the host once their event actually goes live — draft events
+    // (saved but not published yet) shouldn't trigger this. Fire-and-forget,
+    // same pattern as the welcome email in api/auth/signup/route.ts.
+    if (data.status === "published" && auth.user!.email) {
+      void sendEmail({
+        to: auth.user!.email,
+        templateId: "event_created",
+        variables: {
+          host_name: auth.user!.full_name || auth.user!.email,
+          event_name: data.name,
+          event_link: `${serverEnv.APP_URL}/event/${data.slug}`,
+        },
+        tags: [{ name: "type", value: "event-published" }],
+      })
+    }
+
     return NextResponse.json({ success: true, data })
   },
 }).POST

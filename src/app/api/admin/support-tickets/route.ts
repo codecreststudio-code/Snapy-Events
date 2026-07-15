@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { defineRoute, ok, fail, paginate } from "@/lib/api/handler"
 import { adminDb } from "@/lib/supabase/admin"
+import { sendEmail } from "@/lib/integrations/resend"
 
 const listQuery = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -59,12 +60,31 @@ export const PATCH = defineRoute({
     if (priority) updates.priority = priority
     updates.updated_at = new Date().toISOString()
 
-    const { error } = await sb
+    const { data, error } = await sb
       .from("support_tickets")
       .update(updates)
       .eq("id", ticketId)
+      .select("id, status, user:users(email, full_name)")
+      .single()
 
     if (error) return fail("DB_ERROR", error.message, 500)
+
+    // Only notify on an actual status change, not a priority-only update.
+    const owner = Array.isArray(data?.user) ? data.user[0] : data?.user
+    if (status && owner?.email) {
+      void sendEmail({
+        to: owner.email,
+        templateId: "support_ticket",
+        variables: {
+          host_name: owner.full_name || owner.email,
+          ticket_id: ticketId.slice(0, 8).toUpperCase(),
+          ticket_status: status,
+          ticket_message: `Your support ticket status was updated to "${status}".`,
+        },
+        tags: [{ name: "type", value: "support-ticket-status" }],
+      })
+    }
+
     return ok({ success: true })
   },
 }).PATCH
@@ -90,15 +110,33 @@ export const POST = defineRoute({
     if (msgErr) return fail("DB_ERROR", msgErr.message, 500)
 
     // 2. Set ticket status to pending and update timestamp
-    const { error: ticketErr } = await sb
+    const { data: ticketRow, error: ticketErr } = await sb
       .from("support_tickets")
       .update({
         status: "pending",
         updated_at: new Date().toISOString(),
       })
       .eq("id", ticketId)
+      .select("id, user:users(email, full_name)")
+      .single()
 
     if (ticketErr) return fail("DB_ERROR", ticketErr.message, 500)
+
+    // 3. Notify the ticket owner about the reply
+    const owner = Array.isArray(ticketRow?.user) ? ticketRow.user[0] : ticketRow?.user
+    if (owner?.email) {
+      void sendEmail({
+        to: owner.email,
+        templateId: "support_ticket",
+        variables: {
+          host_name: owner.full_name || owner.email,
+          ticket_id: ticketId.slice(0, 8).toUpperCase(),
+          ticket_status: "pending",
+          ticket_message: message,
+        },
+        tags: [{ name: "type", value: "support-ticket-reply" }],
+      })
+    }
 
     return ok({ success: true })
   },
