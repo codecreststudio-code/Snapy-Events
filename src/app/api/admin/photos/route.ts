@@ -22,11 +22,17 @@ export const GET = defineRoute({
     const from = (query.page - 1) * query.pageSize
     const to = from + query.pageSize - 1
 
+    // NOTE: plain .not("mime_type", "ilike", "video/%") would silently drop
+    // any row where mime_type is NULL — in SQL, `NULL NOT ILIKE 'x'` evaluates
+    // to NULL (not true), so those rows fail the WHERE clause entirely. Rows
+    // without a recorded mime_type (older uploads, or ones written by a path
+    // that didn't set it) still belong here, so NULL is explicitly allowed
+    // through on both filters.
     let q = sb
       .from("photos")
       .select("id, storage_path, thumbnail_path, original_filename, mime_type, file_size, is_approved, created_at, event:events(name)", { count: "exact" })
-      .not("mime_type", "ilike", "video/%")
-      .not("mime_type", "ilike", "audio/%")
+      .or("mime_type.is.null,mime_type.not.ilike.video/%")
+      .or("mime_type.is.null,mime_type.not.ilike.audio/%")
 
     if (query.eventId) {
       q = q.eq("event_id", query.eventId)
