@@ -7,7 +7,7 @@ import { Input } from "@/lib/components/ui/input"
 import { Label } from "@/lib/components/ui/label"
 import { toast } from "@/lib/components/ui/toaster"
 import { Plus, Edit2, Trash2, Loader2, Save, X, Ticket } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, toDatetimeLocalValue } from "@/lib/utils"
 import { Coupon } from "@/lib/types"
 
 export function CouponManager() {
@@ -59,7 +59,7 @@ export function CouponManager() {
     setFormMinMonths(1)
     setFormMaxUses("")
     setFormActive(true)
-    setFormValidFrom(new Date().toISOString().slice(0, 16))
+    setFormValidFrom(toDatetimeLocalValue(new Date()))
     setFormValidUntil("")
     setFormMaxDiscount("")
     setFormMinOrder("")
@@ -77,8 +77,8 @@ export function CouponManager() {
     setFormMinMonths(c.min_subscription_months)
     setFormMaxUses(c.max_uses ? String(c.max_uses) : "")
     setFormActive(c.is_active)
-    setFormValidFrom(c.valid_from ? new Date(c.valid_from).toISOString().slice(0, 16) : "")
-    setFormValidUntil(c.valid_until ? new Date(c.valid_until).toISOString().slice(0, 16) : "")
+    setFormValidFrom(c.valid_from ? toDatetimeLocalValue(c.valid_from) : "")
+    setFormValidUntil(c.valid_until ? toDatetimeLocalValue(c.valid_until) : "")
     setFormMaxDiscount(c.max_discount_amount ? String(c.max_discount_amount) : "")
     setFormMinOrder(c.min_order_value ? String(c.min_order_value) : "")
     setFormStackable(c.stackable || false)

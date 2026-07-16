@@ -6,6 +6,7 @@ import { Card } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
 import { Play, Volume2, X, Download, Heart, Flame, PartyPopper, ThumbsUp, Smile, Send, MessageCircle } from "lucide-react"
+import { WatermarkOverlay } from "@/lib/components/media/watermark-overlay"
 
 type Photo = {
   id: string
@@ -36,7 +37,7 @@ function isVideo(p: Photo) { return p.mime_type?.startsWith("video/") }
 function isAudio(p: Photo) { return p.mime_type?.startsWith("audio/") }
 function isMessage(p: Photo) { return p.mime_type === "text/plain" || p.metadata?.is_message === true }
 
-function MediaThumbnail({ p }: { p: Photo }) {
+function MediaThumbnail({ p, watermarkEnabled }: { p: Photo; watermarkEnabled: boolean }) {
   const reactions = p.metadata?.reactions || {}
   const totalReactions = Object.values(reactions).reduce((a, b) => a + b, 0)
 
@@ -57,6 +58,7 @@ function MediaThumbnail({ p }: { p: Photo }) {
     return (
       <div className="relative aspect-square w-full overflow-hidden bg-black/80">
         <img src={p.url ?? undefined} alt={p.original_filename} className="h-full w-full object-cover" loading="lazy" />
+        {watermarkEnabled && <WatermarkOverlay />}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-10 h-10 rounded-full bg-black/60 flex items-center justify-center backdrop-blur-sm border border-white/20">
             <Play className="h-5 w-5 text-white fill-white ml-0.5" />
@@ -90,6 +92,7 @@ function MediaThumbnail({ p }: { p: Photo }) {
         className="object-cover transition-transform duration-300 group-hover:scale-105"
         loading="lazy"
       />
+      {watermarkEnabled && <WatermarkOverlay />}
       {totalReactions > 0 && (
         <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-md">
           <span>❤️</span> {totalReactions}
@@ -103,17 +106,24 @@ function MediaThumbnail({ p }: { p: Photo }) {
 
 function MediaLightbox({
   p,
+  watermarkEnabled,
   onClose,
   onReact,
   onComment,
 }: {
   p: Photo
+  watermarkEnabled: boolean
   onClose: () => void
   onReact: (emoji: string) => void
   onComment: (commentText: string, authorName: string) => void
 }) {
   const [commentInput, setCommentInput] = useState("")
   const [nameInput, setNameInput] = useState("")
+  const canDownload = !isMessage(p)
+
+  function handleDownload() {
+    window.open(`/api/photos/${p.id}/download`, "_blank")
+  }
 
   const reactions = p.metadata?.reactions || {}
   const comments = p.metadata?.comments || []
@@ -136,9 +146,12 @@ function MediaLightbox({
             <p className="text-xs text-[#D4AF37] font-semibold">Wish by {p.uploader_name || "Guest"}</p>
           </div>
         ) : isVideo(p) && p.url ? (
-          <video src={p.url} controls autoPlay playsInline className="max-h-[75vh] w-auto rounded-lg">
-            Your browser does not support video playback.
-          </video>
+          <div className="relative max-h-[75vh] w-auto">
+            <video src={p.url} controls autoPlay playsInline className="max-h-[75vh] w-auto rounded-lg">
+              Your browser does not support video playback.
+            </video>
+            {watermarkEnabled && <WatermarkOverlay dense />}
+          </div>
         ) : isAudio(p) && p.url ? (
           <div className="flex flex-col items-center gap-4 p-8">
             <Volume2 className="h-16 w-16 text-[#D4AF37]" />
@@ -148,7 +161,10 @@ function MediaLightbox({
             </audio>
           </div>
         ) : p.url ? (
-          <img src={p.url} alt={p.original_filename} className="max-h-[75vh] w-auto object-contain rounded-lg" />
+          <div className="relative max-h-[75vh] w-auto">
+            <img src={p.url} alt={p.original_filename} className="max-h-[75vh] w-auto object-contain rounded-lg" />
+            {watermarkEnabled && <WatermarkOverlay dense />}
+          </div>
         ) : (
           <div className="aspect-square bg-gradient-to-br from-amber-500/20 to-fuchsia-500/20" />
         )}
@@ -162,9 +178,16 @@ function MediaLightbox({
             <p className="text-xs font-semibold text-[#D4AF37]">{p.uploader_name || "Event Guest"}</p>
             <p className="text-[10px] text-white/40">{new Date(p.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="text-white/60 hover:text-white rounded-full">
-            <X className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            {canDownload && (
+              <Button variant="ghost" size="icon" onClick={handleDownload} title="Download" className="text-white/60 hover:text-white rounded-full">
+                <Download className="h-4.5 w-4.5" />
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" onClick={onClose} className="text-white/60 hover:text-white rounded-full">
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         {/* Emoji Reactions Bar */}
@@ -233,11 +256,13 @@ export function GalleryGallery({
   galleryName,
   galleryDescription,
   photos: initialPhotos,
+  watermarkEnabled = false,
 }: {
   eventName: string
   galleryName: string
   galleryDescription: string | null
   photos: Photo[]
+  watermarkEnabled?: boolean
 }) {
   const [photos, setPhotos] = useState<Photo[]>(initialPhotos)
   const [active, setActive] = useState<Photo | null>(null)
@@ -341,7 +366,7 @@ export function GalleryGallery({
               onClick={() => setActive(p)}
               className="mb-4 block w-full break-inside-avoid overflow-hidden rounded-xl border border-[#EAE5DF] bg-[#FAF8F5] shadow-sm hover:shadow-md transition-all text-left cursor-pointer"
             >
-              <MediaThumbnail p={p} />
+              <MediaThumbnail p={p} watermarkEnabled={watermarkEnabled} />
             </button>
           ))}
         </div>
@@ -352,6 +377,7 @@ export function GalleryGallery({
           <div className="relative max-h-full max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
             <MediaLightbox
               p={active}
+              watermarkEnabled={watermarkEnabled}
               onClose={closeLightbox}
               onReact={(emoji) => handleReact(active.id, emoji)}
               onComment={(text, author) => handleComment(active.id, text, author)}

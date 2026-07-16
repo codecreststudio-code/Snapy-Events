@@ -17,6 +17,9 @@ import { Playfair_Display } from "next/font/google"
 import { motion, AnimatePresence } from "framer-motion"
 import { QRCodeSVG } from "qrcode.react"
 import { generateInvitationCard, buildInvitationCaption, type InvitationTheme } from "@/lib/invitation-card"
+import { useWatermarkEnabled } from "@/lib/hooks"
+import { toDatetimeLocalValue } from "@/lib/utils"
+import { WatermarkOverlay } from "@/lib/components/media/watermark-overlay"
 import {
   ArrowLeft,
   Calendar,
@@ -194,6 +197,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [activeMediaTab, setActiveMediaTab] = useState<"all" | "photos" | "videos" | "voices" | "messages">("all")
   const [countdownText, setCountdownText] = useState("")
   const [copied, setCopied] = useState(false)
+  const watermarkEnabled = useWatermarkEnabled()
 
   const publicEventUrl = typeof window !== "undefined"
     ? `${window.location.origin}/event/${slug}`
@@ -469,7 +473,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     if (event) {
       setEditName(event.name)
       setEditStatus(event.status as EventStatus)
-      setEditEndDate(event.end_date ? new Date(event.end_date).toISOString().slice(0, 16) : "")
+      setEditEndDate(event.end_date ? toDatetimeLocalValue(event.end_date) : "")
       setEditAllowedFilters((event.settings as ExtEventSettings)?.allowed_filters || ["normal", "golden_hour", "vintage", "bw", "cinematic", "vivid", "cyberpunk", "dreamy"])
       setEditVideoDuration((event.settings as ExtEventSettings)?.video_duration_limit || 10)
       setEditVoiceDuration((event.settings as ExtEventSettings)?.voice_note_duration_limit || 10)
@@ -820,8 +824,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           {item.photos?.map((p: any, idx: number) => (
                             <div key={idx} className="aspect-square bg-stone-100 rounded-lg overflow-hidden relative group">
                               <img src={getImageUrl(p.thumbnail_path || p.storage_path)} alt="Upload" className="w-full h-full object-cover" />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <Download className="h-4 w-4 text-white cursor-pointer" />
+                              {watermarkEnabled && <WatermarkOverlay />}
+                              <div
+                                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                                onClick={() => window.open(`/api/photos/${p.id}/download`, "_blank")}
+                                title="Download original"
+                              >
+                                <Download className="h-4 w-4 text-white" />
                               </div>
                             </div>
                           ))}
@@ -856,6 +865,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           >
                             Your browser does not support video playback.
                           </video>
+                          {watermarkEnabled && <WatermarkOverlay />}
                         </div>
                         <p className="text-xs font-semibold text-[#1C1A17]">{item.title}</p>
                       </div>

@@ -94,6 +94,54 @@ export async function processImage(
   }
 }
 
+/**
+ * Composites a tiled, semi-transparent "SNAPSY" watermark over an image and
+ * returns the re-encoded buffer. Used for guest photo downloads when
+ * Admin > Feature Flags → "Automated Image Watermarking" is enabled
+ * (src/app/api/photos/[id]/download/route.ts). This burns the mark into the
+ * actual pixels so it survives outside the app; the in-app display-time
+ * equivalent is the CSS <WatermarkOverlay> component, which is free to show
+ * everywhere without re-encoding every image on every view.
+ */
+export async function applyWatermark(buffer: Buffer, mimeType: string): Promise<Buffer> {
+  const image = sharp(buffer, { failOn: "none" })
+  const metadata = await image.metadata()
+  const width = metadata.width || 1200
+  const height = metadata.height || 1200
+
+  const fontSize = Math.max(20, Math.round(Math.min(width, height) * 0.045))
+  const tileW = fontSize * 8
+  const tileH = fontSize * 5
+  const cols = Math.ceil(width / tileW) + 2
+  const rows = Math.ceil(height / tileH) + 2
+
+  let tiles = ""
+  for (let r = -1; r < rows; r++) {
+    for (let c = -1; c < cols; c++) {
+      const x = c * tileW + (Math.abs(r) % 2 === 0 ? 0 : tileW / 2)
+      const y = r * tileH
+      tiles += `<text x="${x}" y="${y}" font-size="${fontSize}" font-family="sans-serif" font-weight="700" fill="#ffffff" fill-opacity="0.32" stroke="#000000" stroke-opacity="0.14" stroke-width="1" transform="rotate(-28 ${x} ${y})">SNAPSY</text>`
+    }
+  }
+  const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">${tiles}</svg>`
+
+  const formatMap: Record<string, "jpeg" | "png" | "webp"> = {
+    "image/jpeg": "jpeg",
+    "image/png": "png",
+    "image/webp": "webp",
+  }
+  // Anything not directly re-encodable in its original format (heic, etc.)
+  // falls back to jpeg, which is fine for a download copy.
+  const outFormat = formatMap[mimeType] || "jpeg"
+
+  let pipeline = image.composite([{ input: Buffer.from(svg), top: 0, left: 0 }])
+  pipeline = outFormat === "png"
+    ? pipeline.png()
+    : pipeline.toFormat(outFormat, { quality: 88 })
+
+  return pipeline.toBuffer()
+}
+
 export async function validateImageDimensions(
   buffer: Buffer,
   maxWidth = 10000,

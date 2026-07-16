@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
-import { slugify } from "@/lib/utils"
+import { slugify, toDatetimeLocalValue } from "@/lib/utils"
 import { useAuth } from "@/lib/hooks"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
@@ -154,7 +154,7 @@ function EditGalleryDialog({
     description: gallery.description || "",
     is_public: gallery.is_public,
     reveal_enabled: gallery.reveal_enabled,
-    reveal_at: gallery.reveal_at ? new Date(gallery.reveal_at).toISOString().slice(0, 16) : "",
+    reveal_at: gallery.reveal_at ? toDatetimeLocalValue(gallery.reveal_at) : "",
     allow_uploads: settings?.allow_uploads !== false,
     allow_downloads: settings?.allow_downloads !== false,
   })

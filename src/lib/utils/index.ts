@@ -79,6 +79,22 @@ export async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+/**
+ * Formats a Date/ISO string for an <input type="datetime-local"> value in
+ * the *local* timezone. `datetime-local` inputs interpret their value as
+ * local wall-clock time with no timezone conversion — feeding them
+ * `date.toISOString().slice(0, 16)` (as several forms in this codebase did)
+ * silently shows the UTC time instead of local time, off by the browser's
+ * UTC offset. For anyone outside UTC+0, opening an edit form for an existing
+ * date showed the wrong time, and saving without changing it would silently
+ * shift the stored timestamp backward by that offset on every save.
+ */
+export function toDatetimeLocalValue(date: Date | string): string {
+  const d = new Date(date)
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message
   if (typeof error === "string") return error
