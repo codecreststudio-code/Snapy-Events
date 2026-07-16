@@ -12,7 +12,19 @@
 -- of validation status. Run `VALIDATE CONSTRAINT` later once data is clean
 -- if you want the historical rows checked too.
 
-ALTER TABLE public.audit_logs
-  ADD CONSTRAINT audit_logs_user_id_fkey
-  FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE SET NULL
-  NOT VALID;
+-- Guarded with an existence check (Postgres has no `ADD CONSTRAINT IF NOT
+-- EXISTS`) so this migration is safe to re-run against an environment where
+-- it already applied — e.g. Supabase's preview-branch CI check, which failed
+-- with "constraint already exists" (SQLSTATE 42710) the first time this ran
+-- unconditionally.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'audit_logs_user_id_fkey'
+  ) THEN
+    ALTER TABLE public.audit_logs
+      ADD CONSTRAINT audit_logs_user_id_fkey
+      FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE SET NULL
+      NOT VALID;
+  END IF;
+END $$;
