@@ -553,7 +553,7 @@ export function CameraCapture({
             />
             <button
               onClick={toggleVideoPlayback}
-              className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors"
+              className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none"
             >
               <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white">
                 {isVideoPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
@@ -587,7 +587,7 @@ export function CameraCapture({
                 <span>Shot captured</span>
                 <button
                   onClick={() => undoCapture(p.id)}
-                  className="rounded-full bg-white/10 hover:bg-white/20 px-2.5 py-1 text-[11px] font-bold text-[#D4AF37] transition-colors"
+                  className="rounded-full bg-white/10 hover:bg-white/20 px-2.5 py-1 text-[11px] font-bold text-[#D4AF37] transition-colors focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none"
                 >
                   Undo
                 </button>
@@ -608,14 +608,14 @@ export function CameraCapture({
                 <span>Upload failed</span>
                 <button
                   onClick={() => retryUpload(p.id)}
-                  className="rounded-full bg-red-500/30 hover:bg-red-500/50 px-2.5 py-1 text-[11px] font-bold text-white transition-colors"
+                  className="rounded-full bg-red-500/30 hover:bg-red-500/50 px-2.5 py-1 text-[11px] font-bold text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none"
                 >
                   Retry
                 </button>
                 <button
                   onClick={() => dismissUpload(p.id)}
                   aria-label="Dismiss upload error"
-                  className="rounded-full p-1 hover:bg-white/10 transition-colors"
+                  className="rounded-full p-1 hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -654,7 +654,7 @@ export function CameraCapture({
                   <button
                     key={filter.id}
                     onClick={() => setActiveFilterId(filter.id)}
-                    className={`flex flex-col items-center gap-1 shrink-0 snap-center transition-all ${activeFilterId === filter.id ? "scale-110" : "opacity-60 scale-90"}`}
+                    className={`flex flex-col items-center gap-1 shrink-0 snap-center transition-all rounded-full focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none ${activeFilterId === filter.id ? "scale-110" : "opacity-60 scale-90"}`}
                   >
                     <div
                       className={`w-14 h-14 rounded-full border-2 overflow-hidden bg-slate-800 ${activeFilterId === filter.id ? "border-[#D4AF37]" : "border-white/20"}`}
@@ -692,7 +692,7 @@ export function CameraCapture({
                 <button
                   onClick={takePhoto}
                   aria-label="Take photo"
-                  className="w-16 h-16 rounded-full border-4 border-[#D4AF37] p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer shadow-[0_0_16px_rgba(212,175,55,0.35)]"
+                  className="w-16 h-16 rounded-full border-4 border-[#D4AF37] p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer shadow-[0_0_16px_rgba(212,175,55,0.35)] focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none"
                 >
                   <div className="w-full h-full bg-white rounded-full" />
                 </button>
@@ -701,7 +701,7 @@ export function CameraCapture({
                   <button
                     onClick={startVideoRecording}
                     aria-label="Start video recording"
-                    className="w-16 h-16 rounded-full border-4 border-red-500/80 p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer"
+                    className="w-16 h-16 rounded-full border-4 border-red-500/80 p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none"
                   >
                     <div className="w-full h-full bg-red-600 rounded-full" />
                   </button>
@@ -709,7 +709,7 @@ export function CameraCapture({
                   <button
                     onClick={stopVideoRecording}
                     aria-label="Stop video recording"
-                    className="w-16 h-16 rounded-full border-4 border-red-500/80 p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer"
+                    className="w-16 h-16 rounded-full border-4 border-red-500/80 p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none"
                   >
                     <Square className="h-6 w-6 fill-red-600 text-red-600" />
                   </button>

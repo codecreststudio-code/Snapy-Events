@@ -11,7 +11,6 @@ import { Input } from "@/lib/components/ui/input"
 import { Switch } from "@/lib/components/ui/switch"
 import { toast } from "@/lib/components/ui/toaster"
 import { useAuth } from "@/lib/hooks"
-import { Playfair_Display } from "next/font/google"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Calendar as CalendarIcon,
@@ -37,11 +36,6 @@ import {
 } from "lucide-react"
 import QRCode from "qrcode"
 import { QRCodeSVG } from "qrcode.react"
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"]
-})
 
 const getSuggestions = (userName?: string) => {
   const name = userName ? userName.trim().split(" ")[0] : "Alex"
@@ -585,7 +579,7 @@ export function NewEventForm() {
       {/* Top Header */}
       <header className="px-4 md:px-6 py-2.5 flex items-center justify-between border-b border-zinc-800 w-full shrink-0 bg-zinc-950/60 backdrop-blur-sm">
         <div className="flex items-center gap-2">
-          <span className={`${playfair.className} text-lg md:text-xl font-bold tracking-wider text-amber-400`}>SNAPSY</span>
+          <span className={`font-playfair text-lg md:text-xl font-bold tracking-wider text-amber-400`}>SNAPSY</span>
           <span className="text-[10px] uppercase tracking-widest text-zinc-500 px-2 py-0.5 border border-zinc-800 rounded-full">Capsule Maker</span>
         </div>
         <div className="flex items-center gap-3">
@@ -629,7 +623,7 @@ export function NewEventForm() {
               {/* STEP 1: EVENT NAME */}
               {step === 1 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
+                  <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     What should we call your event?
                   </h1>
                   <p className="text-sm text-zinc-400 max-w-md">
@@ -667,7 +661,7 @@ export function NewEventForm() {
               {/* STEP 2: EVENT TYPE */}
               {step === 2 && (
                 <div className="space-y-4">
-                  <h1 className={`${playfair.className} text-2xl md:text-3xl font-medium leading-tight tracking-tight text-white`}>
+                  <h1 className={`font-playfair text-2xl md:text-3xl font-medium leading-tight tracking-tight text-white`}>
                     What kind of event are you creating?
                   </h1>
                   <p className="text-xs md:text-sm text-zinc-400">
@@ -721,7 +715,7 @@ export function NewEventForm() {
               {/* STEP 3: EVENT COVER */}
               {step === 3 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
+                  <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     Choose a cover for your memories.
                   </h1>
                   
@@ -825,7 +819,7 @@ export function NewEventForm() {
               {/* STEP 4: EVENT END DATE */}
               {step === 4 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
+                  <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     When does your event end?
                   </h1>
                   <p className="text-sm text-zinc-400">
@@ -872,7 +866,7 @@ export function NewEventForm() {
               {/* STEP 5: REVEAL EXPERIENCE */}
               {step === 5 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
+                  <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     When should guests see the memories?
                   </h1>
                   
@@ -926,7 +920,7 @@ export function NewEventForm() {
               {/* STEP 6: GUEST COUNT & PLANS */}
               {step === 6 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
+                  <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     How many guests are joining?
                   </h1>
                   
@@ -1044,7 +1038,7 @@ export function NewEventForm() {
               {/* STEP 7: CONTENT TYPES & SETTINGS */}
               {step === 7 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
+                  <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     What can your guests contribute?
                   </h1>
                   
@@ -1215,7 +1209,7 @@ export function NewEventForm() {
               {/* STEP 8: AI FEATURES */}
               {step === 8 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
+                  <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     Let AI organize your memories.
                   </h1>
                   <p className="text-sm text-zinc-400">
@@ -1261,7 +1255,7 @@ export function NewEventForm() {
               {/* STEP 9: MEMORY CAPSULE */}
               {step === 9 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
+                  <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     Create a memory capsule?
                   </h1>
                   <p className="text-sm text-zinc-400">
@@ -1316,7 +1310,7 @@ export function NewEventForm() {
                           <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-ping" />
                         </div>
                         <div className="space-y-1">
-                          <p className={`${playfair.className} text-lg font-medium text-white`}>Memory Safe Activated</p>
+                          <p className={`font-playfair text-lg font-medium text-white`}>Memory Safe Activated</p>
                           <p className="text-[10px] text-zinc-400 max-w-xs mx-auto">
                             All media, audio, and messages will remain blurred and unreadable. Unlocking on Anniversary day.
                           </p>
@@ -1330,7 +1324,7 @@ export function NewEventForm() {
               {/* STEP 10: INVITATION CARD DESIGN */}
               {step === 10 && (
                 <div className="space-y-6">
-                  <h1 className={`${playfair.className} text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
+                  <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     Design your invitation experience.
                   </h1>
                   
@@ -1458,7 +1452,7 @@ export function NewEventForm() {
                       {eventType === "custom" ? (customEventTypeName || "Custom Capsule") : `${eventType.replace(/_/g, " ")} Capsule`}
                     </span>
                     
-                    <h3 className={`${playfair.className} text-xl leading-tight font-medium ${currentTheme.titleColor}`}>
+                    <h3 className={`font-playfair text-xl leading-tight font-medium ${currentTheme.titleColor}`}>
                       {name || "Your Event Name"}
                     </h3>
 
@@ -1541,7 +1535,7 @@ export function NewEventForm() {
 
               <div className="text-center pt-8 space-y-2">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37]">Setup Complete</span>
-                <h2 className={`${playfair.className} text-3xl sm:text-4xl font-medium text-white/90`}>
+                <h2 className={`font-playfair text-3xl sm:text-4xl font-medium text-white/90`}>
                   Your memory capsule is ready.
                 </h2>
                 <p className="text-sm text-white/60 max-w-sm mx-auto">

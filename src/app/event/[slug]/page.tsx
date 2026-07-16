@@ -41,6 +41,7 @@ interface EventData {
     cover_image_url: string | null
     reveal_enabled: boolean
     reveal_at: string | null
+    photo_count: number
   }>
 }
 
@@ -252,7 +253,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
             {!checkedIn
               ? "Check in above with your name and contact details to view and share photos."
               : isRevealed
-              ? `${visibleGalleries.length} gallery (${visibleGalleries.reduce((acc, g) => acc, 0)} photos)`
+              ? `${visibleGalleries.length} gallery (${visibleGalleries.reduce((acc, g) => acc + (g.photo_count ?? 0), 0)} photos)`
               : "Photos will be revealed soon"}
           </p>
 

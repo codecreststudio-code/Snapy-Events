@@ -13,7 +13,6 @@ import { Input } from "@/lib/components/ui/input"
 import { Label } from "@/lib/components/ui/label"
 import { Skeleton } from "@/lib/components/ui/skeleton"
 import { toast } from "@/lib/components/ui/toaster"
-import { Playfair_Display } from "next/font/google"
 import { motion, AnimatePresence } from "framer-motion"
 import { QRCodeSVG } from "qrcode.react"
 import { generateInvitationCard, buildInvitationCaption, type InvitationTheme } from "@/lib/invitation-card"
@@ -52,11 +51,6 @@ import {
   Loader2,
   RefreshCw
 } from "lucide-react"
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"]
-})
 
 const TEMPLATE_COVERS = [
   "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=600&auto=format&fit=crop", // Wedding
@@ -350,6 +344,15 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     const theme = (invitation?.theme as InvitationTheme) || "minimal"
     const welcomeMessage = invitation?.welcome_message || "Scan to capture and share moments with us."
 
+    // The canvas-drawn invitation card needs an actual resolved font-family
+    // string (not a CSS class), so read the --font-playfair custom property
+    // the root layout already applies globally via next/font's `.variable`
+    // class — this avoids instantiating a second, duplicate Playfair Display
+    // fetch here just to get its generated font name.
+    const headingFontFamily = typeof window !== "undefined"
+      ? getComputedStyle(document.body).getPropertyValue("--font-playfair").trim() || undefined
+      : undefined
+
     const blob = await generateInvitationCard({
       eventName: event.name,
       welcomeMessage,
@@ -358,7 +361,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       coverImageUrl: event.cover_image_url,
       inviteUrl: publicEventUrl,
       qrSvgElementId: "event-dashboard-qr",
-      headingFontFamily: playfair.style.fontFamily,
+      headingFontFamily,
       joinCode: event.join_code,
     })
     if (!blob) return null
@@ -599,7 +602,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     return (
       <div className="min-h-screen bg-[#141110] flex flex-col items-center justify-center p-6 text-center space-y-4">
         <Camera className="h-12 w-12 text-[#D4AF37]" />
-        <h2 className={`${playfair.className} text-2xl font-light text-white/90`}>Experience Capsule Not Found</h2>
+        <h2 className="font-playfair text-2xl font-light text-white/90">Experience Capsule Not Found</h2>
         <Button asChild className="rounded-full bg-[#D4AF37] hover:bg-[#c19f2e] text-[#141110] font-semibold">
           <Link href="/dashboard/events">Return to Dashboard</Link>
         </Button>
@@ -802,7 +805,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </Link>
             <div>
               <span className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold block">Memory Capsule</span>
-              <h1 className={`${playfair.className} text-xl md:text-2xl font-light text-white`}>{event.name}</h1>
+              <h1 className="font-playfair text-xl md:text-2xl font-light text-white">{event.name}</h1>
             </div>
           </div>
 
@@ -854,7 +857,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 flex items-center justify-between relative overflow-hidden">
             <div className="space-y-1">
               <span className="text-[9px] uppercase tracking-widest text-[#D4AF37] font-bold">Unlocking Capsule</span>
-              <p className={`${playfair.className} text-xl font-bold text-white tabular-nums`}>{countdownText || "Calculating..."}</p>
+              <p className="font-playfair text-xl font-bold text-white tabular-nums">{countdownText || "Calculating..."}</p>
               <p className="text-[10px] text-white/60">Revealing memories automatically</p>
             </div>
             <div className="w-12 h-12 rounded-full border-4 border-[#D4AF37]/30 border-t-[#D4AF37] flex items-center justify-center animate-spin shrink-0" style={{ animationDuration: "10s" }}>
@@ -871,7 +874,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         {/* LEFT COLUMN: Memory timeline */}
         <div className="lg:col-span-2 space-y-8">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#3D332A] pb-3">
-            <h2 className={`${playfair.className} text-2xl font-light text-white`}>Memory Timeline</h2>
+            <h2 className="font-playfair text-2xl font-light text-white">Memory Timeline</h2>
 
             {/* Timeline content filters */}
             <div className="flex items-center gap-1 bg-white/5 border border-white/10 p-0.5 rounded-full text-xs">
@@ -1242,7 +1245,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             >
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                  <h3 className={`${playfair.className} text-xl font-medium text-white`}>Edit Capsule Settings</h3>
+                  <h3 className="font-playfair text-xl font-medium text-white">Edit Capsule Settings</h3>
                   <button onClick={() => setIsDrawerOpen(false)} className="p-1 hover:bg-white/10 rounded-full">
                     <X className="h-5 w-5 text-white/60" />
                   </button>
