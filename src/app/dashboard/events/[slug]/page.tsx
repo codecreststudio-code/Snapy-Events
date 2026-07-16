@@ -16,6 +16,7 @@ import { toast } from "@/lib/components/ui/toaster"
 import { Playfair_Display } from "next/font/google"
 import { motion, AnimatePresence } from "framer-motion"
 import { QRCodeSVG } from "qrcode.react"
+import { generateInvitationCard, buildInvitationCaption, type InvitationTheme } from "@/lib/invitation-card"
 import {
   ArrowLeft,
   Calendar,
@@ -41,7 +42,10 @@ import {
   ChevronRight,
   Users,
   Copy,
-  Check
+  Check,
+  Share2,
+  MessageCircle,
+  Loader2
 } from "lucide-react"
 
 const playfair = Playfair_Display({
@@ -244,6 +248,113 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       qrImg.src = svgUrl
     }
     logoImg.src = "/Logo.png"
+  }
+
+  const [sharing, setSharing] = useState<"native" | "whatsapp" | null>(null)
+
+  // Builds the same branded invitation card the host designed in the event
+  // wizard's "Design your invitation experience" step — cover photo, theme,
+  // welcome message, event date, and the live QR — as a single PNG. Sharing
+  // this (instead of a bare link) is the whole point: guests should receive
+  // what the host actually designed, not a generic scan code.
+  async function buildCard(): Promise<{ blob: Blob; caption: string } | null> {
+    if (!event) return null
+    const invitation = (event.settings as any)?.invitation as
+      | { theme?: string; welcome_message?: string }
+      | undefined
+    const theme = (invitation?.theme as InvitationTheme) || "minimal"
+    const welcomeMessage = invitation?.welcome_message || "Scan to capture and share moments with us."
+
+    const blob = await generateInvitationCard({
+      eventName: event.name,
+      welcomeMessage,
+      theme,
+      eventDate: event.event_date,
+      coverImageUrl: event.cover_image_url,
+      inviteUrl: publicEventUrl,
+      qrSvgElementId: "event-dashboard-qr",
+      headingFontFamily: playfair.style.fontFamily,
+    })
+    if (!blob) return null
+    return { blob, caption: buildInvitationCaption(event.name, welcomeMessage, publicEventUrl) }
+  }
+
+  // Primary share action. Mobile browsers with the Web Share API (the only
+  // way a website can hand an image to an arbitrary installed app — there's
+  // no web URL scheme that opens Instagram with a pre-attached image) get a
+  // single tap that opens the OS share sheet with WhatsApp, Instagram,
+  // Messages etc. all listed and the card already attached. Desktop browsers
+  // don't support sharing files this way, so we fall back to downloading the
+  // card and copying the caption instead.
+  async function handleShareInvitation() {
+    if (!event || sharing) return
+    setSharing("native")
+    try {
+      const built = await buildCard()
+      if (!built) {
+        toast({ title: "Couldn't build the invitation card", variant: "destructive" })
+        return
+      }
+      const file = new File([built.blob], `${event.slug}-invitation.png`, { type: "image/png" })
+      const shareData: ShareData = {
+        title: event.name,
+        text: built.caption,
+        files: [file],
+      }
+      if (typeof navigator !== "undefined" && navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share(shareData)
+        return
+      }
+      // Desktop fallback: download the card + copy the caption so the host
+      // can attach it manually wherever they want to post it.
+      const url = URL.createObjectURL(built.blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = file.name
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      await navigator.clipboard.writeText(built.caption)
+      toast({ title: "Invitation card downloaded", description: "Caption copied too — share it on WhatsApp, Instagram, or anywhere else." })
+    } catch (err: any) {
+      if (err?.name !== "AbortError") {
+        toast({ title: "Sharing failed", description: err?.message, variant: "destructive" })
+      }
+    } finally {
+      setSharing(null)
+    }
+  }
+
+  // Explicit WhatsApp button: wa.me only supports pre-filled text, not an
+  // attached image, so we download the card alongside opening the chat
+  // composer and tell the host to attach it — same trade-off every website
+  // without native share hits, but at least WhatsApp is reachable in one tap
+  // instead of hoping the visitor's browser supports Web Share.
+  async function handleShareWhatsApp() {
+    if (!event || sharing) return
+    setSharing("whatsapp")
+    try {
+      const built = await buildCard()
+      if (!built) {
+        toast({ title: "Couldn't build the invitation card", variant: "destructive" })
+        return
+      }
+      const url = URL.createObjectURL(built.blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${event.slug}-invitation.png`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      window.open(`https://wa.me/?text=${encodeURIComponent(built.caption)}`, "_blank")
+      toast({ title: "Card downloaded", description: "Attach it in WhatsApp along with the message." })
+    } catch (err: any) {
+      toast({ title: "Sharing failed", description: err?.message, variant: "destructive" })
+    } finally {
+      setSharing(null)
+    }
   }
 
   // Server state queries with 3-second live refetch polling for real-time dashboard updates
@@ -820,30 +931,55 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               </div>
             </div>
 
+            {/* Share the host-designed invitation card (cover photo, theme,
+                welcome message from the event wizard + this QR) rather than
+                a bare link — on mobile this opens the OS share sheet with
+                WhatsApp/Instagram/etc. already listed and the card attached. */}
+            <Button
+              size="sm"
+              onClick={handleShareInvitation}
+              disabled={sharing !== null}
+              className="w-full text-xs bg-[#1C1A17] hover:bg-[#2A2620] text-white flex items-center justify-center gap-1.5 rounded-xl"
+            >
+              {sharing === "native" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />}
+              <span>Share Invitation</span>
+            </Button>
+
             {/* QR Actions */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShareWhatsApp}
+                disabled={sharing !== null}
+                className="text-xs border-[#EAE5DF] hover:bg-stone-50 flex items-center justify-center gap-1 text-[#69635C] rounded-xl px-2"
+              >
+                {sharing === "whatsapp" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MessageCircle className="h-3.5 w-3.5" />}
+                <span>WhatsApp</span>
+              </Button>
+
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleCopyLink}
-                className="text-xs border-[#EAE5DF] hover:bg-stone-50 flex items-center justify-center gap-1 text-[#69635C] rounded-xl"
+                className="text-xs border-[#EAE5DF] hover:bg-stone-50 flex items-center justify-center gap-1 text-[#69635C] rounded-xl px-2"
               >
                 {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-                <span>{copied ? "Copied!" : "Copy Link"}</span>
+                <span>{copied ? "Copied!" : "Copy"}</span>
               </Button>
 
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleDownloadQr}
-                className="text-xs border-[#EAE5DF] hover:bg-stone-50 flex items-center justify-center gap-1 text-[#69635C] rounded-xl"
+                className="text-xs border-[#EAE5DF] hover:bg-stone-50 flex items-center justify-center gap-1 text-[#69635C] rounded-xl px-2"
               >
                 <Download className="h-3.5 w-3.5" />
-                <span>Download</span>
+                <span>QR</span>
               </Button>
             </div>
           </div>
-          
+
           {/* AI Matches clustered panel */}
           <div className="bg-white border border-[#EAE5DF] rounded-3xl p-5 space-y-4 shadow-sm">
             <div className="flex items-center gap-2 border-b border-stone-100 pb-2">
