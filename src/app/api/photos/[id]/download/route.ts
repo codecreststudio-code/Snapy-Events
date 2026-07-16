@@ -61,7 +61,10 @@ export async function GET(
       return NextResponse.json({ error: "Failed to fetch photo" }, { status: 500 })
     }
 
-    let buffer = Buffer.from(await fileData.arrayBuffer())
+    // Explicit `Buffer` (not the narrower type TS infers from Buffer.from(ArrayBuffer))
+    // so reassigning from applyWatermark()'s sharp-produced buffer below type-checks —
+    // sharp's output is typed as the wider Buffer<ArrayBufferLike>.
+    let buffer: Buffer = Buffer.from(await fileData.arrayBuffer())
     const mimeType = photo.mime_type || "image/jpeg"
     const isImage = mimeType.startsWith("image/")
 
