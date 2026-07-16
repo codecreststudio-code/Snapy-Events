@@ -68,30 +68,31 @@ export function GuestCaptureModal({ eventId, eventName }: { eventId: string; eve
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
-        className="sm:max-w-[425px]"
+        className="sm:max-w-[425px] rounded-2xl sm:rounded-2xl border border-[#3D332A] bg-[#1C1814] text-white/90"
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold">Welcome to {eventName}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="font-playfair text-2xl font-medium text-white">Welcome to {eventName}</DialogTitle>
+          <DialogDescription className="text-white/60">
             Please check in with your details to view the memory capsule and share your photos.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="guestName">Your Name <span className="text-red-500">*</span></Label>
+            <Label htmlFor="guestName" className="text-white/80">Your Name <span className="text-[#D4AF37]">*</span></Label>
             <Input
               id="guestName"
               placeholder="e.g. John Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              className="border-white/15 bg-white/5 text-white placeholder:text-white/40 focus-visible:ring-[#D4AF37]"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="guestMobile">Mobile Number <span className="text-red-500">*</span></Label>
+            <Label htmlFor="guestMobile" className="text-white/80">Mobile Number <span className="text-[#D4AF37]">*</span></Label>
             <Input
               id="guestMobile"
               type="tel"
@@ -99,11 +100,12 @@ export function GuestCaptureModal({ eventId, eventName }: { eventId: string; eve
               value={mobile}
               onChange={(e) => setMobile(e.target.value)}
               required
+              className="border-white/15 bg-white/5 text-white placeholder:text-white/40 focus-visible:ring-[#D4AF37]"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="guestEmail">Email Address <span className="text-red-500">*</span></Label>
+            <Label htmlFor="guestEmail" className="text-white/80">Email Address <span className="text-[#D4AF37]">*</span></Label>
             <Input
               id="guestEmail"
               type="email"
@@ -111,13 +113,14 @@ export function GuestCaptureModal({ eventId, eventName }: { eventId: string; eve
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className="border-white/15 bg-white/5 text-white placeholder:text-white/40 focus-visible:ring-[#D4AF37]"
             />
           </div>
 
           <div className="pt-4">
             <Button
               type="submit"
-              className="w-full h-11 text-base font-semibold bg-[#9333EA] hover:bg-[#7E22CE] text-white"
+              className="w-full h-11 rounded-full text-base font-semibold bg-[#D4AF37] hover:bg-[#c4a233] text-[#141110]"
               disabled={loading || !name.trim() || !mobile.trim() || !email.trim()}
             >
               {loading ? "Checking in..." : "Enter Capsule"}

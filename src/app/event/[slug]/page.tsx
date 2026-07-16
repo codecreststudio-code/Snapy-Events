@@ -141,11 +141,11 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-[#141110] text-white/90">
       <GuestCaptureModal eventId={event.id} eventName={event.name} />
-      
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
+
+      <header className="sticky top-0 z-50 w-full border-b border-[#3D332A] bg-[#141110]/95 backdrop-blur supports-[backdrop-filter]:bg-[#141110]/80">
+        <div className="container flex h-16 items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
             {event.user?.branding?.logo_url ? (
               <img
@@ -159,7 +159,11 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
           </Link>
           <div className="flex items-center gap-4">
             {checkedIn && (
-              <Button asChild variant="ghost" size="sm">
+              <Button
+                asChild
+                size="sm"
+                className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-[#D4AF37]"
+              >
                 <Link href={`/event/${event.slug}/upload`}>
                   <Upload className="h-4 w-4" />
                   Upload
@@ -171,14 +175,15 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
       </header>
 
       <main className="flex-1">
-        <section className="relative overflow-hidden border-b">
+        <section className="relative overflow-hidden border-b border-[#3D332A]">
           {event.cover_image_url && (
             <div
-              className="absolute inset-0 -z-10 bg-cover bg-center opacity-30"
+              className="absolute inset-0 -z-20 bg-cover bg-center opacity-30"
               style={{ backgroundImage: `url(${event.cover_image_url})` }}
             />
           )}
-          <div className="mx-auto max-w-5xl px-6 py-20 text-center">
+          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#141110]/30 via-[#141110]/70 to-[#141110]" />
+          <div className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 sm:py-20">
             {event.user?.branding?.logo_url && (
               <img
                 src={event.user.branding.logo_url}
@@ -186,18 +191,18 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                 className="mx-auto mb-4 h-10"
               />
             )}
-            <p className="text-sm uppercase tracking-widest text-muted-foreground">
+            <p className="text-sm uppercase tracking-widest text-[#D4AF37]">
               {event.user?.name ?? "Event"}
             </p>
-            <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">
+            <h1 className="font-playfair mt-2 text-4xl font-medium tracking-tight text-white sm:text-5xl">
               {event.name}
             </h1>
             {event.description && (
-              <p className="mx-auto mt-3 max-w-2xl text-pretty text-muted-foreground">
+              <p className="mx-auto mt-3 max-w-2xl text-pretty text-white/60">
                 {event.description}
               </p>
             )}
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-white/60">
               {event.event_date && (
                 <span className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
@@ -213,14 +218,23 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
             </div>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               {settings.allow_guest_uploads && checkedIn && (
-                <Button asChild size="lg">
+                <Button
+                  asChild
+                  size="lg"
+                  className="rounded-full bg-[#D4AF37] px-6 text-[#141110] hover:bg-[#c4a233]"
+                >
                   <Link href={`/event/${event.slug}/upload`}>
                     <Camera className="mr-2 h-4 w-4" />
                     Upload Photos
                   </Link>
                 </Button>
               )}
-              <Button asChild size="lg" variant="outline">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              >
                 <Link href={`/event/${event.slug}/qr`}>
                   <QrCode className="mr-2 h-4 w-4" />
                   Get QR Code
@@ -230,11 +244,11 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
           </div>
         </section>
 
-        <section className="mx-auto max-w-5xl px-6 py-16">
-          <h2 className="text-2xl font-semibold tracking-tight">
+        <section className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
+          <h2 className="font-playfair text-2xl font-medium tracking-tight text-white">
             {!checkedIn ? "Private Memory Capsule" : isRevealed ? "Galleries" : "Coming Soon"}
           </h2>
-          <p className="mt-1 text-muted-foreground">
+          <p className="mt-1 text-white/60">
             {!checkedIn
               ? "Check in above with your name and contact details to view and share photos."
               : isRevealed
@@ -243,25 +257,25 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
           </p>
 
           {!checkedIn ? (
-            <div className="mt-6 flex flex-col items-center justify-center py-16 text-center">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-                <Lock className="h-8 w-8 text-muted-foreground" />
+            <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-[#3D332A] bg-[#1C1814] px-4 py-16 text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/5">
+                <Lock className="h-8 w-8 text-[#D4AF37]" />
               </div>
-              <h3 className="mt-4 text-lg font-medium">Check In to Continue</h3>
-              <p className="mt-2 text-sm text-muted-foreground max-w-md">
+              <h3 className="font-playfair mt-4 text-lg font-medium text-white">Check In to Continue</h3>
+              <p className="mt-2 max-w-md text-sm text-white/60">
                 This event is private to invited guests. Complete the check-in above to view galleries and share your own photos.
               </p>
             </div>
           ) : visibleGalleries.length > 0 ? (
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {visibleGalleries.map((gallery) => (
                 <Link
                   key={gallery.id}
                   href={`/event/${event.slug}/g/${gallery.slug}`}
-                  className="group block overflow-hidden rounded-2xl border bg-card transition hover:shadow-md"
+                  className="group block overflow-hidden rounded-2xl border border-[#3D332A] bg-[#1C1814] transition hover:border-[#D4AF37]/40 hover:shadow-lg hover:shadow-black/30"
                 >
                   <div
-                    className="aspect-[4/3] bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20"
+                    className="aspect-[4/3] bg-gradient-to-br from-[#D4AF37]/20 to-[#3D332A]/60"
                     style={
                       gallery.cover_image_url
                         ? {
@@ -274,23 +288,23 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                   />
                   <div className="flex items-center justify-between p-4">
                     <div>
-                      <p className="font-medium group-hover:underline">{gallery.name}</p>
+                      <p className="font-medium text-white group-hover:text-[#D4AF37] group-hover:underline">{gallery.name}</p>
                       {gallery.description && (
-                        <p className="text-xs text-muted-foreground">{gallery.description}</p>
+                        <p className="text-xs text-white/60">{gallery.description}</p>
                       )}
                     </div>
-                    <Image className="h-5 w-5 text-muted-foreground" />
+                    <Image className="h-5 w-5 text-white/40" />
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
-            <div className="mt-6 flex flex-col items-center justify-center py-16 text-center">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-                <Lock className="h-8 w-8 text-muted-foreground" />
+            <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-[#3D332A] bg-[#1C1814] px-4 py-16 text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/5">
+                <Lock className="h-8 w-8 text-[#D4AF37]" />
               </div>
-              <h3 className="mt-4 text-lg font-medium">Photos Coming Soon</h3>
-              <p className="mt-2 text-sm text-muted-foreground max-w-md">
+              <h3 className="font-playfair mt-4 text-lg font-medium text-white">Photos Coming Soon</h3>
+              <p className="mt-2 max-w-md text-sm text-white/60">
                 {settings.enable_countdown && settings.countdown_date
                   ? `Photos will be revealed on ${formatEventDate(settings.countdown_date)}`
                   : "Photos will be available shortly. Check back soon!"}

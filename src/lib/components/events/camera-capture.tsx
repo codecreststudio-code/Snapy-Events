@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "@/lib/components/ui/button"
-import { Camera, RefreshCw, X, Check, Video, Square, Play, Pause, Zap, ZapOff, Grid3x3, ZoomIn } from "lucide-react"
+import { Camera, RefreshCw, X, Check, Video, Square, Play, Pause, Zap, ZapOff, Grid3x3, ZoomIn, AlertTriangle } from "lucide-react"
 
 export interface FilterPreset {
   id: string
@@ -21,11 +21,35 @@ export const PRESET_FILTERS: FilterPreset[] = [
   { id: "dreamy", name: "Dreamy", cssFilter: "brightness(1.1) contrast(0.9) saturate(1.2) blur(0.5px)" },
 ]
 
+// How long a freshly-captured photo sits in "queued" state (showing an Undo
+// affordance) before the background upload actually kicks off. Keeps the
+// once.film-style "shoot and go" feel while still giving guests a brief,
+// non-blocking window to undo a mis-fire shot instead of forcing a
+// stop-and-confirm screen on every single capture.
+const UNDO_WINDOW_MS = 1200
+
+interface PendingUpload {
+  id: string
+  file: File
+  status: "queued" | "uploading" | "error"
+}
+
 interface CameraCaptureProps {
   allowedFilters?: string[] // array of filter IDs allowed by host
   allowVideo?: boolean
   maxVideoDuration?: number // limit in seconds (e.g. 10, 20, 30)
-  onCapture: (file: File) => void
+  // Starting point for the glanceable shot counter (e.g. photos this guest
+  // has already uploaded for the event), and the event's hard shot limit if
+  // one exists. Sourced by the host page from the same quota info that used
+  // to power the "Uploaded X of Y" banner.
+  initialShotsUsed?: number
+  maxShots?: number | null
+  // Called immediately after a photo is captured (or a video is confirmed).
+  // May return a Promise — if it rejects, the capture's pill shows an error
+  // state with a retry affordance instead of a blocking alert. `captureId`
+  // lets the host page update the same tracking record on retry rather than
+  // creating a duplicate.
+  onCapture: (file: File, captureId?: string) => void | Promise<void>
   onClose: () => void
 }
 
@@ -33,6 +57,8 @@ export function CameraCapture({
   allowedFilters,
   allowVideo = false,
   maxVideoDuration = 30,
+  initialShotsUsed = 0,
+  maxShots = null,
   onCapture,
   onClose,
 }: CameraCaptureProps) {
@@ -52,8 +78,19 @@ export function CameraCapture({
   const [zoomLevel, setZoomLevel] = useState(1)
   const [showGrid, setShowGrid] = useState(false)
 
-  // Photo state
-  const [capturedImage, setCapturedImage] = useState<string | null>(null)
+  // Shutter-flash feedback (replaces the old blocking Retake/Confirm screen
+  // for photos — the camera stays live, this is just a quick visual tick).
+  const [flash, setFlash] = useState(false)
+
+  // Glanceable, always-visible shot counter + its increment animation.
+  const [shotCount, setShotCount] = useState(initialShotsUsed)
+  const [counterPulse, setCounterPulse] = useState(false)
+  const isFirstShotRender = useRef(true)
+
+  // In-flight / queued / failed captures, shown as small non-blocking pills.
+  const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([])
+  const pendingUploadsRef = useRef<PendingUpload[]>([])
+  const undoTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
   // Video recording state
   const [isRecordingVideo, setIsRecordingVideo] = useState(false)
@@ -73,6 +110,56 @@ export function CameraCapture({
     : PRESET_FILTERS
 
   const activeFilter = availableFilters.find(f => f.id === activeFilterId) || availableFilters[0]
+
+  useEffect(() => {
+    pendingUploadsRef.current = pendingUploads
+  }, [pendingUploads])
+
+  // Kept in sync every render so the mount-only unmount-cleanup effect below
+  // (and flushQueuedUploads, which never changes identity) can always reach
+  // the *current* beginUpload without needing beginUpload itself in a
+  // dependency array that would re-run the mount/unmount effect.
+  const beginUploadRef = useRef<(id: string, file: File) => void>(() => {})
+
+  // Pulse the counter every time it changes (but not on first mount).
+  useEffect(() => {
+    if (isFirstShotRender.current) {
+      isFirstShotRender.current = false
+      return
+    }
+    setCounterPulse(true)
+    const t = setTimeout(() => setCounterPulse(false), 320)
+    return () => clearTimeout(t)
+  }, [shotCount])
+
+  // Data-loss guard: a capture sits in "queued" state for UNDO_WINDOW_MS
+  // before its upload timer fires. If the guest closes the camera (X button,
+  // or any other unmount) inside that window, we must NOT just clear the
+  // timer — that would silently drop a photo the shot counter already told
+  // the guest was captured. Instead, immediately kick off the upload for
+  // every still-queued item (bypassing the timer) so the shot is either
+  // uploaded or explicitly undone by the user — never lost.
+  //
+  // Effects can't await, so this fires the upload and moves on; that's fine
+  // because beginUpload's real job (starting the onCapture()/network call)
+  // happens synchronously the moment it's invoked — it doesn't need the
+  // component to stay mounted to complete. Any resulting pill/error state
+  // updates after unmount are harmless no-ops since there's no UI left to
+  // show them.
+  useEffect(() => {
+    return () => {
+      pendingUploadsRef.current.forEach((p) => {
+        if (p.status !== "queued") return
+        const timer = undoTimersRef.current[p.id]
+        if (timer) {
+          clearTimeout(timer)
+          delete undoTimersRef.current[p.id]
+        }
+        beginUploadRef.current(p.id, p.file)
+      })
+      Object.values(undoTimersRef.current).forEach(clearTimeout)
+    }
+  }, [])
 
   const startCamera = useCallback(async () => {
     if (stream) {
@@ -155,35 +242,113 @@ export function CameraCapture({
     setFacingMode(prev => prev === "user" ? "environment" : "user")
   }
 
+  // --- BACKGROUND UPLOAD PIPELINE (pills, undo, retry) ---
+  const beginUpload = useCallback((id: string, file: File) => {
+    setPendingUploads((prev) => prev.map((p) => (p.id === id ? { ...p, status: "uploading" } : p)))
+    Promise.resolve(onCapture(file, id))
+      .then(() => {
+        setPendingUploads((prev) => prev.filter((p) => p.id !== id))
+      })
+      .catch((err) => {
+        console.error("Background upload failed:", err)
+        setPendingUploads((prev) => prev.map((p) => (p.id === id ? { ...p, status: "error" } : p)))
+      })
+  }, [onCapture])
+
+  useEffect(() => {
+    beginUploadRef.current = beginUpload
+  }, [beginUpload])
+
+  // Primary data-loss guard: flush any still-queued (undo-window) captures to
+  // upload the instant the guest initiates the close action, before the
+  // camera actually closes/unmounts. This is more reliable than relying on
+  // the unmount-cleanup effect alone (kept below as a safety net for any
+  // other unmount path), since it runs first and doesn't depend on effect
+  // teardown ordering.
+  const flushQueuedUploads = useCallback(() => {
+    pendingUploadsRef.current.forEach((p) => {
+      if (p.status !== "queued") return
+      const timer = undoTimersRef.current[p.id]
+      if (timer) {
+        clearTimeout(timer)
+        delete undoTimersRef.current[p.id]
+      }
+      beginUpload(p.id, p.file)
+    })
+  }, [beginUpload])
+
+  const handleClose = useCallback(() => {
+    flushQueuedUploads()
+    onClose()
+  }, [flushQueuedUploads, onClose])
+
+  const registerCapture = useCallback((file: File) => {
+    const captureId = `cap_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+    setShotCount((c) => c + 1)
+    setPendingUploads((prev) => [...prev, { id: captureId, file, status: "queued" }])
+
+    const timer = setTimeout(() => {
+      delete undoTimersRef.current[captureId]
+      beginUpload(captureId, file)
+    }, UNDO_WINDOW_MS)
+    undoTimersRef.current[captureId] = timer
+  }, [beginUpload])
+
+  const undoCapture = useCallback((id: string) => {
+    const timer = undoTimersRef.current[id]
+    if (timer) {
+      clearTimeout(timer)
+      delete undoTimersRef.current[id]
+    }
+    setPendingUploads((prev) => prev.filter((p) => p.id !== id))
+    setShotCount((c) => Math.max(0, c - 1))
+  }, [])
+
+  const retryUpload = useCallback((id: string) => {
+    const item = pendingUploadsRef.current.find((p) => p.id === id)
+    if (!item) return
+    beginUpload(id, item.file)
+  }, [beginUpload])
+
+  const dismissUpload = useCallback((id: string) => {
+    const timer = undoTimersRef.current[id]
+    if (timer) {
+      clearTimeout(timer)
+      delete undoTimersRef.current[id]
+    }
+    setPendingUploads((prev) => prev.filter((p) => p.id !== id))
+  }, [])
+
   // --- PHOTO CAPTURE ---
   const takePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return
     const video = videoRef.current
     const canvas = canvasRef.current
-    
+
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
-    
+
     const ctx = canvas.getContext("2d")
     if (!ctx) return
-    
+
     ctx.filter = activeFilter.cssFilter
-    
+
     if (facingMode === "user") {
       ctx.translate(canvas.width, 0)
       ctx.scale(-1, 1)
     }
 
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-    
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.92)
-    setCapturedImage(dataUrl)
-    
+
+    // Quick shutter-flash so the guest gets confirmation the shot landed —
+    // the viewfinder itself never pauses, unlike the old full-screen review.
+    setFlash(true)
+    setTimeout(() => setFlash(false), 150)
+
     canvas.toBlob((blob) => {
-      if (blob) {
-        const file = new File([blob], `snap_${Date.now()}.jpg`, { type: "image/jpeg" })
-        setCapturedFile(file)
-      }
+      if (!blob) return
+      const file = new File([blob], `snap_${Date.now()}.jpg`, { type: "image/jpeg" })
+      registerCapture(file)
     }, "image/jpeg", 0.92)
   }
 
@@ -211,7 +376,7 @@ export function CameraCapture({
       const blob = new Blob(recordedChunksRef.current, { type: mimeType || "video/webm" })
       const ext = blob.type.includes("mp4") ? "mp4" : "webm"
       const file = new File([blob], `video_${Date.now()}.${ext}`, { type: blob.type || "video/webm" })
-      
+
       setRecordedVideoBlob(blob)
       setRecordedVideoUrl(URL.createObjectURL(blob))
       setCapturedFile(file)
@@ -245,7 +410,6 @@ export function CameraCapture({
 
   const handleRetake = () => {
     if (recordedVideoUrl) URL.revokeObjectURL(recordedVideoUrl)
-    setCapturedImage(null)
     setRecordedVideoBlob(null)
     setRecordedVideoUrl(null)
     setCapturedFile(null)
@@ -264,9 +428,22 @@ export function CameraCapture({
     }
   }
 
+  // Video keeps its explicit Confirm tap (a recorded clip is a deliberate,
+  // reviewable artifact, not a rapid-fire shot) — but that tap now triggers
+  // the same immediate background upload as photos, instead of only queueing
+  // the clip for a later manual "Upload Files" batch click.
   const handleConfirm = () => {
     if (capturedFile) {
-      onCapture(capturedFile)
+      // Route the confirmed video through the same pending-uploads/beginUpload
+      // pipeline photos use, instead of a bare `void onCapture(...)`. That bare
+      // call had no .catch, so a failed video upload produced an unhandled
+      // promise rejection and zero feedback to the guest — beginUpload attaches
+      // error handling and (were the camera to stay open) would surface the
+      // same retry pill photos get.
+      const captureId = `cap_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+      setShotCount((c) => c + 1)
+      setPendingUploads((prev) => [...prev, { id: captureId, file: capturedFile, status: "queued" }])
+      beginUpload(captureId, capturedFile)
       if (stream) stream.getTracks().forEach(track => track.stop())
       onClose()
     }
@@ -278,35 +455,39 @@ export function CameraCapture({
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`
   }
 
-  const hasPreview = Boolean(capturedImage || recordedVideoUrl)
+  const hasPreview = Boolean(recordedVideoUrl)
+
+  const queuedUploads = pendingUploads.filter((p) => p.status === "queued")
+  const uploadingCount = pendingUploads.filter((p) => p.status === "uploading").length
+  const erroredUploads = pendingUploads.filter((p) => p.status === "error")
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black flex flex-col sm:p-4 md:p-8"
+      className="fixed inset-0 z-50 bg-[#0B0908] flex flex-col sm:p-4 md:p-8"
       role="dialog"
       aria-modal="true"
       aria-label="Camera"
     >
       {/* Top Header */}
-      <div className="flex items-center justify-between p-4 z-10 bg-gradient-to-b from-black/70 to-transparent absolute top-0 left-0 right-0">
-        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close camera" className="text-white hover:bg-white/20 rounded-full">
+      <div className="flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] z-10 bg-gradient-to-b from-black/70 to-transparent absolute top-0 left-0 right-0">
+        <Button variant="ghost" size="icon" onClick={handleClose} aria-label="Close camera" className="text-white hover:bg-white/20 rounded-full">
           <X className="h-6 w-6" />
         </Button>
 
         {/* Mode Switcher Tabs */}
         {allowVideo && !hasPreview && !isRecordingVideo && (
-          <div className="flex items-center bg-black/60 border border-white/20 rounded-full p-1 backdrop-blur-md">
+          <div className="flex items-center bg-black/60 border border-[#3D332A] rounded-full p-1 backdrop-blur-md">
             <button
               onClick={() => setCaptureMode("photo")}
-              className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
-                captureMode === "photo" ? "bg-white text-black shadow-md" : "text-white/70 hover:text-white"
+              className={`px-4 py-1 rounded-full text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none ${
+                captureMode === "photo" ? "bg-[#D4AF37] text-black shadow-md" : "text-white/70 hover:text-white"
               }`}
             >
               Photo
             </button>
             <button
               onClick={() => setCaptureMode("video")}
-              className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
+              className={`px-4 py-1 rounded-full text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none ${
                 captureMode === "video" ? "bg-red-600 text-white shadow-md" : "text-white/70 hover:text-white"
               }`}
             >
@@ -329,7 +510,7 @@ export function CameraCapture({
               onClick={() => setShowGrid((g) => !g)}
               aria-label="Toggle grid"
               aria-pressed={showGrid}
-              className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors ${showGrid ? "bg-white/30 text-white" : "text-white hover:bg-white/20"}`}
+              className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none ${showGrid ? "bg-[#D4AF37]/30 text-[#D4AF37]" : "text-white hover:bg-white/20"}`}
             >
               <Grid3x3 className="h-5 w-5" />
             </button>
@@ -339,7 +520,7 @@ export function CameraCapture({
               onClick={toggleTorch}
               aria-label="Toggle flashlight"
               aria-pressed={torchOn}
-              className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors ${torchOn ? "bg-yellow-400/90 text-black" : "text-white hover:bg-white/20"}`}
+              className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none ${torchOn ? "bg-[#D4AF37]/90 text-black" : "text-white hover:bg-white/20"}`}
             >
               {torchOn ? <Zap className="h-5 w-5" /> : <ZapOff className="h-5 w-5" />}
             </button>
@@ -353,7 +534,7 @@ export function CameraCapture({
       </div>
 
       {/* Main Viewfinder */}
-      <div className="flex-1 relative overflow-hidden flex items-center justify-center bg-black sm:rounded-2xl sm:border border-white/10">
+      <div className="flex-1 relative overflow-hidden flex items-center justify-center bg-black sm:rounded-2xl sm:border border-[#3D332A]">
         {!hasPreview && showGrid && (
           <div className="pointer-events-none absolute inset-0 z-[5] grid grid-cols-3 grid-rows-3">
             {Array.from({ length: 9 }).map((_, i) => (
@@ -361,9 +542,7 @@ export function CameraCapture({
             ))}
           </div>
         )}
-        {capturedImage ? (
-          <img src={capturedImage} alt="Captured" className="w-full h-full object-cover" />
-        ) : recordedVideoUrl ? (
+        {recordedVideoUrl ? (
           <div className="relative w-full h-full">
             <video
               ref={previewVideoRef}
@@ -391,6 +570,60 @@ export function CameraCapture({
             style={{ filter: activeFilter.cssFilter }}
           />
         )}
+
+        {/* Shutter-flash feedback overlay (photo capture) */}
+        <div
+          className={`pointer-events-none absolute inset-0 z-30 bg-white transition-opacity duration-150 ${flash ? "opacity-70" : "opacity-0"}`}
+        />
+
+        {/* Non-blocking upload status pills: queued/undo, aggregate uploading count, and per-item errors */}
+        {!hasPreview && (queuedUploads.length > 0 || uploadingCount > 0 || erroredUploads.length > 0) && (
+          <div className="absolute top-20 inset-x-0 z-20 flex flex-col items-center gap-1.5 px-4 pointer-events-none">
+            {queuedUploads.map((p) => (
+              <div
+                key={p.id}
+                className="pointer-events-auto flex items-center gap-2 bg-black/70 border border-[#3D332A] backdrop-blur-md rounded-full pl-3 pr-1.5 py-1 text-xs font-medium text-white shadow-lg"
+              >
+                <span>Shot captured</span>
+                <button
+                  onClick={() => undoCapture(p.id)}
+                  className="rounded-full bg-white/10 hover:bg-white/20 px-2.5 py-1 text-[11px] font-bold text-[#D4AF37] transition-colors"
+                >
+                  Undo
+                </button>
+              </div>
+            ))}
+            {uploadingCount > 0 && (
+              <div className="pointer-events-auto flex items-center gap-2 bg-black/60 border border-[#3D332A] backdrop-blur-md rounded-full px-3 py-1.5 text-xs font-medium text-white shadow-lg">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
+                {uploadingCount === 1 ? "Uploading…" : `${uploadingCount} uploading…`}
+              </div>
+            )}
+            {erroredUploads.map((p) => (
+              <div
+                key={p.id}
+                className="pointer-events-auto flex items-center gap-2 bg-red-950/80 border border-red-500/40 backdrop-blur-md rounded-full pl-3 pr-1.5 py-1 text-xs font-medium text-red-100 shadow-lg"
+              >
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                <span>Upload failed</span>
+                <button
+                  onClick={() => retryUpload(p.id)}
+                  className="rounded-full bg-red-500/30 hover:bg-red-500/50 px-2.5 py-1 text-[11px] font-bold text-white transition-colors"
+                >
+                  Retry
+                </button>
+                <button
+                  onClick={() => dismissUpload(p.id)}
+                  aria-label="Dismiss upload error"
+                  className="rounded-full p-1 hover:bg-white/10 transition-colors"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         {!hasPreview && zoomSupported && zoomRange.max > zoomRange.min && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-black/50 backdrop-blur-md rounded-full px-4 py-2 w-56 max-w-[80%]">
             <ZoomIn className="h-4 w-4 text-white shrink-0" />
@@ -402,7 +635,7 @@ export function CameraCapture({
               value={zoomLevel}
               onChange={(e) => handleZoomChange(Number(e.target.value))}
               aria-label="Camera zoom"
-              className="w-full accent-orange-500"
+              className="w-full accent-[#D4AF37]"
             />
             <span className="text-[10px] font-mono text-white/80 w-8 text-right shrink-0">{zoomLevel.toFixed(1)}x</span>
           </div>
@@ -411,7 +644,7 @@ export function CameraCapture({
       </div>
 
       {/* Bottom Controls */}
-      <div className="h-48 bg-black shrink-0 flex flex-col justify-center pb-8 pt-4">
+      <div className="h-48 bg-[#141110] shrink-0 flex flex-col justify-center pb-[max(2rem,env(safe-area-inset-bottom))] pt-4">
         {!hasPreview ? (
           <>
             {/* Filter Carousel */}
@@ -423,10 +656,10 @@ export function CameraCapture({
                     onClick={() => setActiveFilterId(filter.id)}
                     className={`flex flex-col items-center gap-1 shrink-0 snap-center transition-all ${activeFilterId === filter.id ? "scale-110" : "opacity-60 scale-90"}`}
                   >
-                    <div 
-                      className={`w-14 h-14 rounded-full border-2 overflow-hidden bg-slate-800 ${activeFilterId === filter.id ? "border-orange-500" : "border-white/20"}`}
+                    <div
+                      className={`w-14 h-14 rounded-full border-2 overflow-hidden bg-slate-800 ${activeFilterId === filter.id ? "border-[#D4AF37]" : "border-white/20"}`}
                     >
-                      <div 
+                      <div
                         className="w-full h-full bg-[url('https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=200&h=200&fit=crop')] bg-cover bg-center"
                         style={{ filter: filter.cssFilter }}
                       />
@@ -437,13 +670,29 @@ export function CameraCapture({
               </div>
             )}
 
-            {/* Shutter / Record Button */}
-            <div className="flex justify-center">
+            {/* Shutter / Record Button + glanceable shot counter */}
+            <div className="flex items-center justify-center gap-8">
+              <div className="w-14 flex flex-col items-center justify-center">
+                {captureMode === "photo" && (
+                  <div className="flex flex-col items-center gap-0.5 rounded-full bg-black/40 border border-[#3D332A] px-3 py-1.5">
+                    <span className="text-[9px] uppercase tracking-widest text-white/50 font-semibold">Shots</span>
+                    <span
+                      className={`font-playfair text-base font-bold text-[#D4AF37] leading-none transition-all duration-300 ${counterPulse ? "scale-125" : "scale-100"}`}
+                    >
+                      {shotCount}
+                      {typeof maxShots === "number" && maxShots > 0 && (
+                        <span className="text-white/40 font-sans text-[10px] font-normal"> / {maxShots}</span>
+                      )}
+                    </span>
+                  </div>
+                )}
+              </div>
+
               {captureMode === "photo" ? (
                 <button
                   onClick={takePhoto}
                   aria-label="Take photo"
-                  className="w-16 h-16 rounded-full border-4 border-white/80 p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer"
+                  className="w-16 h-16 rounded-full border-4 border-[#D4AF37] p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer shadow-[0_0_16px_rgba(212,175,55,0.35)]"
                 >
                   <div className="w-full h-full bg-white rounded-full" />
                 </button>
@@ -466,16 +715,20 @@ export function CameraCapture({
                   </button>
                 )
               )}
+
+              {/* Spacer to balance the counter's width so the shutter stays centered */}
+              <div className="w-14" aria-hidden="true" />
             </div>
           </>
         ) : (
-          /* Confirm / Retake Controls */
+          /* Video Confirm / Retake Controls (unchanged for video — a recorded
+             clip is a deliberate artifact worth reviewing before it's sent) */
           <div className="flex items-center justify-center gap-12">
             <Button variant="ghost" onClick={handleRetake} className="text-white flex flex-col items-center gap-1 h-auto py-2 hover:bg-white/10">
               <RefreshCw className="h-6 w-6" />
               <span className="text-xs">Retake</span>
             </Button>
-            <Button onClick={handleConfirm} className="bg-orange-500 hover:bg-orange-600 text-white rounded-full w-16 h-16 shadow-lg shadow-orange-500/20">
+            <Button onClick={handleConfirm} className="bg-[#D4AF37] hover:bg-[#B3922E] text-black rounded-full w-16 h-16 shadow-lg shadow-[#D4AF37]/20">
               <Check className="h-8 w-8" />
             </Button>
           </div>

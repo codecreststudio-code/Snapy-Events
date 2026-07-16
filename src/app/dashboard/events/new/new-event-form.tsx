@@ -1526,32 +1526,32 @@ export function NewEventForm() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-[#141110]/85 backdrop-blur-md flex items-center justify-center z-50 p-4"
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 max-w-lg w-full shadow-2xl relative space-y-6"
+              className="bg-[#1C1814] border border-[#3D332A] rounded-3xl p-8 sm:p-10 max-w-lg w-full shadow-2xl relative space-y-6"
             >
-              
-              {/* Confetti Visual Mock */}
-              <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-gradient-to-tr from-[#FFDEB4] to-[#FAD0C4] flex items-center justify-center text-3xl shadow-lg border-4 border-white animate-bounce">
-                🎉
+
+              {/* Celebratory Badge */}
+              <div className="absolute -top-9 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-[#D4AF37] flex items-center justify-center shadow-lg border-4 border-[#1C1814]">
+                <Sparkles className="h-8 w-8 text-[#141110]" />
               </div>
 
               <div className="text-center pt-8 space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">Setup Complete</span>
-                <h2 className={`${playfair.className} text-3xl font-medium text-white`}>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37]">Setup Complete</span>
+                <h2 className={`${playfair.className} text-3xl sm:text-4xl font-medium text-white/90`}>
                   Your memory capsule is ready.
                 </h2>
-                <p className="text-xs text-zinc-400 max-w-sm mx-auto">
+                <p className="text-sm text-white/60 max-w-sm mx-auto">
                   The portal has been created. Invite guests to share photos, video clips, and vocal greetings.
                 </p>
               </div>
 
               {/* Real Custom Snapsy Logo QR Card Output */}
-              <div className="border border-zinc-800 rounded-2xl p-4 bg-zinc-900 flex flex-col sm:flex-row items-center gap-4 shadow-sm">
-                <div className="p-2 bg-white rounded-xl border border-zinc-800 relative overflow-hidden flex items-center justify-center shrink-0">
+              <div className="border border-[#3D332A] rounded-2xl p-6 bg-[#141110] flex flex-col items-center gap-4 shadow-sm">
+                <div className="p-3 bg-white rounded-2xl border border-[#3D332A] relative overflow-hidden flex items-center justify-center shrink-0">
                   <img
                     src="/Favicon.png"
                     alt="Snapsy Logo Background"
@@ -1560,48 +1560,63 @@ export function NewEventForm() {
                   <QRCodeSVG
                     id="new-event-modal-qr"
                     value={createdEvent ? `${typeof window !== "undefined" ? window.location.origin : "https://snapsy-events.vercel.app"}/event/${createdEvent.slug}` : "https://snapsy-events.vercel.app"}
-                    size={120}
+                    size={168}
                     bgColor={"transparent"}
-                    fgColor={"#1c1a17"}
+                    fgColor={"#141110"}
                     level={"H"}
                     imageSettings={{
                       src: "/Favicon.png",
                       x: undefined,
                       y: undefined,
-                      height: 32,
-                      width: 32,
+                      height: 40,
+                      width: 40,
                       excavate: true,
                     }}
                     className="relative z-10"
                   />
                 </div>
 
-                <div className="flex-1 space-y-3 w-full text-center sm:text-left">
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-bold text-white">{name}</p>
-                    <p className="text-[10px] text-amber-400">Plan: {guestCountPlan.toUpperCase()}</p>
-                  </div>
-                  
-                  {/* Share/Actions */}
-                  <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
-                    <button
-                      onClick={copyInviteLink}
-                      className="px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-800 hover:bg-zinc-800 text-[10px] font-semibold text-zinc-400 transition-all flex items-center gap-1.5 cursor-pointer"
+                <div className="text-center space-y-0.5">
+                  <p className="text-sm font-semibold text-white/90">{name}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold">Plan: {guestCountPlan.toUpperCase()}</p>
+                </div>
+
+                {/* Copyable join/invite pill */}
+                <button
+                  onClick={copyInviteLink}
+                  className="w-full max-w-xs flex items-center justify-between gap-2 rounded-full border border-white/15 bg-transparent px-4 py-2 text-white/80 hover:bg-white/10 transition-all cursor-pointer"
+                >
+                  <span className="truncate text-xs font-mono">{createdEvent?.slug}</span>
+                  <Copy className="h-3.5 w-3.5 shrink-0 text-[#D4AF37]" />
+                </button>
+
+                {/* Share/Download Actions */}
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <button
+                    onClick={() => {
+                      const host = typeof window !== "undefined" ? window.location.host : ""
+                      const url = `https://${host}/event/${createdEvent?.slug}`
+                      if (typeof navigator !== "undefined" && "share" in navigator) {
+                        (navigator as any).share({ title: name, url }).catch(() => {})
+                      } else {
+                        copyInviteLink()
+                      }
+                    }}
+                    className="px-4 py-1.5 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-[11px] font-semibold text-white/70 transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Share2 className="h-3.5 w-3.5" />
+                    <span>Share</span>
+                  </button>
+                  {qrCodeUrl && (
+                    <a
+                      href={qrCodeUrl}
+                      download={`${slugify(name)}-qr-code.png`}
+                      className="px-4 py-1.5 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-[11px] font-semibold text-white/70 transition-all flex items-center gap-1.5"
                     >
-                      <Copy className="h-3.5 w-3.5" />
-                      <span>Copy link</span>
-                    </button>
-                    {qrCodeUrl && (
-                      <a
-                        href={qrCodeUrl}
-                        download={`${slugify(name)}-qr-code.png`}
-                        className="px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-800 hover:bg-zinc-800 text-[10px] font-semibold text-zinc-400 transition-all flex items-center gap-1.5"
-                      >
-                        <DownloadIcon className="h-3.5 w-3.5" />
-                        <span>Download QR</span>
-                      </a>
-                    )}
-                  </div>
+                      <DownloadIcon className="h-3.5 w-3.5" />
+                      <span>Download QR</span>
+                    </a>
+                  )}
                 </div>
               </div>
 
@@ -1610,13 +1625,13 @@ export function NewEventForm() {
                 <Button
                   variant="outline"
                   onClick={() => router.push("/dashboard/events")}
-                  className="flex-1 border-zinc-800 text-zinc-400 hover:bg-zinc-800 rounded-xl py-5"
+                  className="flex-1 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 py-5"
                 >
                   Go to Dashboard
                 </Button>
                 <Button
                   onClick={handleLaunch}
-                  className="flex-1 bg-amber-500 text-white hover:bg-amber-600 font-bold rounded-xl py-5 border-none shadow-[0_4px_14px_rgba(165,130,99,0.2)]"
+                  className="flex-1 rounded-full bg-[#D4AF37] text-[#141110] hover:bg-[#c6a230] font-bold py-5 border-none shadow-[0_4px_14px_rgba(212,175,55,0.25)]"
                 >
                   Launch Event
                 </Button>

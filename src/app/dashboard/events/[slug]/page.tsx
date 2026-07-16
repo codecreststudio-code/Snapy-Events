@@ -588,19 +588,19 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
   if (authLoading || eventLoading) {
     return (
-      <div className="min-h-screen bg-[#FAF9F6] p-8 space-y-6 flex flex-col justify-center items-center">
-        <Skeleton className="h-12 w-64 rounded-xl" />
-        <Skeleton className="h-64 w-full max-w-4xl rounded-2xl" />
+      <div className="min-h-screen bg-[#141110] p-8 space-y-6 flex flex-col justify-center items-center">
+        <Skeleton className="h-12 w-64 rounded-xl !bg-white/10" />
+        <Skeleton className="h-64 w-full max-w-4xl rounded-2xl !bg-white/10" />
       </div>
     )
   }
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center p-6 text-center space-y-4">
-        <Camera className="h-12 w-12 text-[#A58263]" />
-        <h2 className={`${playfair.className} text-2xl font-light`}>Experience Capsule Not Found</h2>
-        <Button asChild className="bg-[#A58263] hover:bg-[#8D6B50] text-white">
+      <div className="min-h-screen bg-[#141110] flex flex-col items-center justify-center p-6 text-center space-y-4">
+        <Camera className="h-12 w-12 text-[#D4AF37]" />
+        <h2 className={`${playfair.className} text-2xl font-light text-white/90`}>Experience Capsule Not Found</h2>
+        <Button asChild className="rounded-full bg-[#D4AF37] hover:bg-[#c19f2e] text-[#141110] font-semibold">
           <Link href="/dashboard/events">Return to Dashboard</Link>
         </Button>
       </div>
@@ -791,23 +791,23 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] text-[#1C1A17] flex flex-col font-sans selection:bg-[#EAE4D9] pb-16">
-      
+    <div className="min-h-screen bg-[#141110] text-white/90 flex flex-col font-sans selection:bg-[#D4AF37]/30 pb-16">
+
       {/* Top Banner Navigation */}
-      <header className="px-6 py-4 bg-white border-b border-[#EAE5DF] sticky top-0 z-30 shadow-sm">
+      <header className="px-6 py-4 bg-[#1C1814] border-b border-[#3D332A] sticky top-0 z-30">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard/events" className="p-2 hover:bg-stone-50 rounded-full transition-colors">
-              <ArrowLeft className="h-5 w-5 text-[#69635C]" />
+            <Link href="/dashboard/events" className="p-2 hover:bg-white/5 rounded-full transition-colors">
+              <ArrowLeft className="h-5 w-5 text-white/70" />
             </Link>
             <div>
-              <span className="text-[10px] uppercase tracking-widest text-[#A58263] font-bold block">Memory Capsule</span>
-              <h1 className={`${playfair.className} text-xl md:text-2xl font-light text-[#1C1A17]`}>{event.name}</h1>
+              <span className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold block">Memory Capsule</span>
+              <h1 className={`${playfair.className} text-xl md:text-2xl font-light text-white`}>{event.name}</h1>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <Button asChild variant="outline" className="border-[#EAE5DF] text-[#69635C] rounded-full text-xs">
+            <Button asChild variant="outline" className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/5 text-xs">
               <Link href={`/event/${event.slug}`} target="_blank" className="flex items-center gap-1">
                 <span>Live Portal</span>
                 <ExternalLink className="h-3 w-3" />
@@ -815,7 +815,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </Button>
             <Button
               onClick={() => setIsDrawerOpen(true)}
-              className="bg-[#A58263] text-white hover:bg-[#8D6B50] rounded-full text-xs flex items-center gap-1 border-none cursor-pointer"
+              className="rounded-full bg-[#D4AF37] text-[#141110] hover:bg-[#c19f2e] text-xs font-semibold flex items-center gap-1 border-none cursor-pointer"
             >
               <Settings className="h-4 w-4" />
               <span>Settings</span>
@@ -825,40 +825,40 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       </header>
 
       {/* Hero Stats Board */}
-      <section className="bg-gradient-to-b from-white to-transparent py-8 px-6 border-b border-[#EAE5DF]/55">
+      <section className="bg-gradient-to-b from-[#1C1814]/60 to-transparent py-8 px-6 border-b border-[#3D332A]/60">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-          
+
           {/* Circular/Visual Metrics Widget */}
           <div className="md:col-span-2 grid grid-cols-3 sm:grid-cols-6 gap-3">
             {[
-              { label: "Photos", value: totalPhotosCount, icon: ImageIcon, color: "text-[#B89B85]" },
-              { label: "Videos", value: totalVideosCount, icon: Video, color: "text-[#D29F6C]" },
-              { label: "Voice Notes", value: totalVoicesCount, icon: Mic, color: "text-[#C68CA3]" },
-              { label: "Messages", value: totalMessagesCount, icon: MessageSquare, color: "text-[#5F87A8]" },
-              { label: "Guests", value: totalGuestsCount, icon: Users, color: "text-[#6EB887]" },
-              { label: "AI Matches", value: totalAiClusters, icon: Sparkles, color: "text-[#B28659]" },
+              { label: "Photos", value: totalPhotosCount, icon: ImageIcon },
+              { label: "Videos", value: totalVideosCount, icon: Video },
+              { label: "Voice Notes", value: totalVoicesCount, icon: Mic },
+              { label: "Messages", value: totalMessagesCount, icon: MessageSquare },
+              { label: "Guests", value: totalGuestsCount, icon: Users },
+              { label: "AI Matches", value: totalAiClusters, icon: Sparkles },
             ].map((stat, idx) => (
-              <div key={idx} className="bg-white border border-[#EAE5DF] rounded-2xl p-3 text-center space-y-1.5 shadow-sm hover:shadow-md transition-all">
-                <div className={`w-8 h-8 rounded-full bg-stone-50 flex items-center justify-center mx-auto ${stat.color}`}>
+              <div key={idx} className="rounded-2xl border border-[#3D332A] bg-[#1C1814] p-3 text-center space-y-1.5 hover:border-[#D4AF37]/40 transition-all">
+                <div className="w-8 h-8 rounded-full bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center mx-auto">
                   <stat.icon className="h-4 w-4" />
                 </div>
                 <div className="space-y-0.5">
-                  <p className="text-xl font-bold text-[#1C1A17]">{stat.value}</p>
-                  <p className="text-[9px] uppercase tracking-wider text-[#9C958E] font-medium">{stat.label}</p>
+                  <p className="text-xl font-bold text-[#D4AF37]">{stat.value}</p>
+                  <p className="text-[9px] uppercase tracking-wider text-white/60 font-medium">{stat.label}</p>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Capsule countdown indicator circle */}
-          <div className="bg-[#FAF2EB] border border-[#EAE5DF] rounded-3xl p-5 flex items-center justify-between shadow-sm relative overflow-hidden">
+          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 flex items-center justify-between relative overflow-hidden">
             <div className="space-y-1">
-              <span className="text-[9px] uppercase tracking-widest text-[#A58263] font-bold">Unlocking Capsule</span>
-              <p className={`${playfair.className} text-xl font-bold text-[#1C1A17] tabular-nums`}>{countdownText || "Calculating..."}</p>
-              <p className="text-[10px] text-[#7A756E]">Revealing memories automatically</p>
+              <span className="text-[9px] uppercase tracking-widest text-[#D4AF37] font-bold">Unlocking Capsule</span>
+              <p className={`${playfair.className} text-xl font-bold text-white tabular-nums`}>{countdownText || "Calculating..."}</p>
+              <p className="text-[10px] text-white/60">Revealing memories automatically</p>
             </div>
-            <div className="w-12 h-12 rounded-full border-4 border-[#A58263]/30 border-t-[#A58263] flex items-center justify-center animate-spin shrink-0" style={{ animationDuration: "10s" }}>
-              <Clock className="h-5 w-5 text-[#A58263] rotate-[-45deg]" />
+            <div className="w-12 h-12 rounded-full border-4 border-[#D4AF37]/30 border-t-[#D4AF37] flex items-center justify-center animate-spin shrink-0" style={{ animationDuration: "10s" }}>
+              <Clock className="h-5 w-5 text-[#D4AF37] rotate-[-45deg]" />
             </div>
           </div>
 
@@ -870,11 +870,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         
         {/* LEFT COLUMN: Memory timeline */}
         <div className="lg:col-span-2 space-y-8">
-          <div className="flex items-center justify-between border-b border-[#EAE5DF] pb-3">
-            <h2 className={`${playfair.className} text-2xl font-light text-[#1C1A17]`}>Memory Timeline</h2>
-            
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#3D332A] pb-3">
+            <h2 className={`${playfair.className} text-2xl font-light text-white`}>Memory Timeline</h2>
+
             {/* Timeline content filters */}
-            <div className="flex items-center gap-1 bg-stone-100/80 p-0.5 rounded-lg text-xs">
+            <div className="flex items-center gap-1 bg-white/5 border border-white/10 p-0.5 rounded-full text-xs">
               {[
                 { id: "all", label: "All" },
                 { id: "photos", label: "Photos" },
@@ -885,8 +885,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 <button
                   key={tab.id}
                   onClick={() => setActiveMediaTab(tab.id as any)}
-                  className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
-                    activeMediaTab === tab.id ? "bg-white text-[#1C1A17] font-bold shadow-sm" : "text-[#7A756E]"
+                  className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${
+                    activeMediaTab === tab.id ? "bg-[#D4AF37] text-[#141110] font-bold" : "text-white/60 hover:text-white"
                   }`}
                 >
                   {tab.label}
@@ -896,7 +896,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           </div>
 
           {/* Chronological media timeline content list */}
-          <div className="space-y-6 relative before:absolute before:top-4 before:bottom-4 before:left-6 before:w-0.5 before:bg-[#EAE5DF]">
+          <div className="space-y-6 relative before:absolute before:top-4 before:bottom-4 before:left-6 before:w-0.5 before:bg-[#3D332A]">
             
             <AnimatePresence mode="popLayout">
               
@@ -912,9 +912,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="timeline-item flex gap-4 items-start relative z-10"
                 >
-                  <div className="w-12 h-12 rounded-full border-4 border-[#FAF9F6] bg-[#FAF2EB] flex items-center justify-center shrink-0 shadow-sm relative">
+                  <div className="w-12 h-12 rounded-full border-4 border-[#141110] bg-[#1C1814] flex items-center justify-center shrink-0 relative">
                     <img src={item.avatar} alt={item.guest} className="w-full h-full object-cover rounded-full" />
-                    <div className="absolute -bottom-1 -right-1 w-5.5 h-5.5 rounded-full bg-white flex items-center justify-center text-[10px] shadow-sm">
+                    <div className="absolute -bottom-1 -right-1 w-5.5 h-5.5 rounded-full bg-[#1C1814] border border-[#3D332A] flex items-center justify-center text-[10px]">
                       {item.type === "photo_group" && "📸"}
                       {item.type === "message" && "💌"}
                       {item.type === "voice" && "🎤"}
@@ -922,10 +922,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     </div>
                   </div>
 
-                  <div className="flex-1 bg-white border border-[#EAE5DF] rounded-2xl p-4 space-y-3 shadow-sm hover:shadow-md transition-all">
+                  <div className="flex-1 rounded-2xl border border-[#3D332A] bg-[#1C1814] p-4 space-y-3 hover:border-[#D4AF37]/30 transition-all">
                     <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-[#1C1A17]">{item.guest}</span>
-                      <span className="text-[#9C958E]">{item.time}</span>
+                      <span className="font-bold text-white/90">{item.guest}</span>
+                      <span className="text-white/50">{item.time}</span>
                     </div>
 
                     {/* Photo group display */}
@@ -935,7 +935,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           {item.photos?.map((p: any, idx: number) => (
                             <div
                               key={idx}
-                              className="aspect-square bg-stone-100 rounded-lg overflow-hidden relative group cursor-pointer"
+                              className="aspect-square bg-white/5 rounded-lg overflow-hidden relative group cursor-pointer"
                               onClick={() => setActiveLightboxMedia(toLightboxMedia(p))}
                               title="View & react"
                             >
@@ -947,17 +947,17 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                             </div>
                           ))}
                         </div>
-                        <p className="text-[10px] text-[#A58263] font-semibold">Uploaded {item.photos?.length || 0} high-resolution prints to Capsule</p>
+                        <p className="text-[10px] text-[#D4AF37] font-semibold">Uploaded {item.photos?.length || 0} high-resolution prints to Capsule</p>
                       </div>
                     )}
 
                     {/* Messages content display */}
                     {item.type === "message" && (
                       <div className="space-y-2">
-                        <blockquote className="text-sm italic text-[#5C564F] leading-relaxed">
+                        <blockquote className="text-sm italic text-white/70 leading-relaxed">
                           "{item.content}"
                         </blockquote>
-                        <div className="text-[10px] bg-stone-50 border border-stone-100 rounded-full px-2 py-0.5 inline-block text-[#69635C]">
+                        <div className="text-[10px] bg-white/5 border border-white/10 rounded-full px-2 py-0.5 inline-block text-white/70">
                           {item.reaction}
                         </div>
                       </div>
@@ -966,7 +966,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     {/* Video player visual display */}
                     {item.type === "video" && (
                       <div className="space-y-2">
-                        <div className="aspect-video bg-stone-900 rounded-xl overflow-hidden relative flex items-center justify-center group shadow-inner">
+                        <div className="aspect-video bg-black rounded-xl overflow-hidden relative flex items-center justify-center group shadow-inner">
                           <video
                             src={item.videoUrl}
                             poster={item.thumbnail}
@@ -980,10 +980,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           {watermarkEnabled && <WatermarkOverlay />}
                         </div>
                         <div className="flex items-center justify-between">
-                          <p className="text-xs font-semibold text-[#1C1A17]">{item.title}</p>
+                          <p className="text-xs font-semibold text-white/90">{item.title}</p>
                           <button
                             onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
-                            className="text-[10px] font-bold text-[#A58263] hover:text-[#1C1A17] flex items-center gap-1"
+                            className="text-[10px] font-bold text-[#D4AF37] hover:text-white flex items-center gap-1"
                           >
                             <MessageSquare className="h-3 w-3" /> React & Comment
                           </button>
@@ -994,7 +994,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     {/* Voice audio card contribution */}
                     {item.type === "voice" && (
                       <div className="space-y-2.5">
-                        <div className="flex items-center gap-3 bg-[#FAF9F6] border border-[#F2EDE7] p-3 rounded-xl">
+                        <div className="flex items-center gap-3 bg-white/5 border border-white/10 p-3 rounded-xl">
                           <audio
                             src={item.audioUrl}
                             controls
@@ -1006,7 +1006,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                         </div>
                         <button
                           onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
-                          className="text-[10px] font-bold text-[#A58263] hover:text-[#1C1A17] flex items-center gap-1"
+                          className="text-[10px] font-bold text-[#D4AF37] hover:text-white flex items-center gap-1"
                         >
                           <MessageSquare className="h-3 w-3" /> React & Comment
                         </button>
@@ -1025,20 +1025,20 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         <div className="space-y-8">
 
           {/* Default Persistent Event QR Code Card with Custom Snapsy Logo */}
-          <div className="bg-white border border-[#EAE5DF] rounded-3xl p-5 space-y-4 shadow-sm text-center relative overflow-hidden">
-            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4 text-center relative overflow-hidden">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
-                <QrCode className="h-4.5 w-4.5 text-[#A58263]" />
-                <h3 className="text-sm font-bold text-[#1C1A17]">Event QR Code</h3>
+                <QrCode className="h-4.5 w-4.5 text-[#D4AF37]" />
+                <h3 className="text-sm font-bold text-white/90">Event QR Code</h3>
               </div>
-              <span className="text-[10px] bg-emerald-50 text-emerald-600 font-bold px-2 py-0.5 rounded-full border border-emerald-100 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live QR
+              <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live QR
               </span>
             </div>
 
             {/* Custom Branded QR Code Display (Full Logo Embedded behind QR matrix) */}
-            <div className="p-4 bg-gradient-to-b from-[#FAF9F6] to-white border border-[#EAE5DF] rounded-2xl flex flex-col items-center justify-center space-y-3 shadow-inner group">
-              <div className="p-3 bg-white rounded-2xl shadow-md border border-[#EAE5DF] relative overflow-hidden flex items-center justify-center">
+            <div className="p-4 sm:p-6 bg-white/5 border border-white/10 rounded-2xl flex flex-col items-center justify-center space-y-3 group">
+              <div className="p-3 bg-white rounded-2xl shadow-lg shadow-black/30 border border-[#3D332A] relative overflow-hidden flex items-center justify-center">
                 <img
                   src="/Favicon.png"
                   alt="Snapsy Logo Background"
@@ -1047,7 +1047,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 <QRCodeSVG
                   id="event-dashboard-qr"
                   value={publicEventUrl}
-                  size={180}
+                  size={200}
                   bgColor={"transparent"}
                   fgColor={"#1c1a17"}
                   level={"H"}
@@ -1055,24 +1055,24 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     src: "/Favicon.png",
                     x: undefined,
                     y: undefined,
-                    height: 44,
-                    width: 44,
+                    height: 48,
+                    width: 48,
                     excavate: true,
                   }}
                   className="relative z-10"
                 />
               </div>
               <div className="space-y-0.5 text-center">
-                <p className="text-xs font-bold text-[#1C1A17]">Scan to Upload Photos</p>
+                <p className="text-xs font-bold text-white/90">Scan to Upload Photos</p>
               </div>
             </div>
 
             {/* Short join code — no-scan fallback for guests who'd rather type
                 a code than scan/paste a link (migrations/0023_event_join_code.sql). */}
-            <div className="p-3 bg-[#FAF9F6] border border-[#EAE5DF] rounded-2xl flex items-center justify-between gap-2">
+            <div className="p-3 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between gap-2">
               <div className="text-left">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-[#9C958E]">Or Join With Code</p>
-                <p className="text-base font-bold tracking-[0.15em] text-[#1C1A17] font-mono">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-white/50">Or Join With Code</p>
+                <p className="inline-block mt-1 text-base font-bold tracking-[0.2em] text-[#D4AF37] font-mono bg-[#141110] border border-[#3D332A] rounded-full px-3 py-1">
                   {event.join_code || "——————"}
                 </p>
               </div>
@@ -1082,17 +1082,17 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   size="sm"
                   onClick={handleCopyJoinCode}
                   disabled={!event.join_code}
-                  className="h-8 w-8 p-0 border-[#EAE5DF] hover:bg-white text-[#69635C] rounded-lg"
+                  className="h-8 w-8 p-0 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white"
                   title="Copy code"
                 >
-                  {codeCopied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                  {codeCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleRegenerateJoinCode}
                   disabled={regeneratingCode}
-                  className="h-8 w-8 p-0 border-[#EAE5DF] hover:bg-white text-[#69635C] rounded-lg"
+                  className="h-8 w-8 p-0 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white"
                   title="Generate a new code (old one stops working)"
                 >
                   {regeneratingCode ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
@@ -1108,7 +1108,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               size="sm"
               onClick={handleShareInvitation}
               disabled={sharing !== null}
-              className="w-full text-xs bg-[#1C1A17] hover:bg-[#2A2620] text-white flex items-center justify-center gap-1.5 rounded-xl"
+              className="w-full text-xs bg-[#D4AF37] hover:bg-[#c19f2e] text-[#141110] font-semibold flex items-center justify-center gap-1.5 rounded-full"
             >
               {sharing === "native" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />}
               <span>Share Invitation</span>
@@ -1121,7 +1121,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 size="sm"
                 onClick={handleShareWhatsApp}
                 disabled={sharing !== null}
-                className="text-xs border-[#EAE5DF] hover:bg-stone-50 flex items-center justify-center gap-1 text-[#69635C] rounded-xl px-2"
+                className="text-xs rounded-full border border-white/15 bg-transparent hover:bg-white/10 flex items-center justify-center gap-1 text-white px-2"
               >
                 {sharing === "whatsapp" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MessageCircle className="h-3.5 w-3.5" />}
                 <span>WhatsApp</span>
@@ -1131,9 +1131,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 variant="outline"
                 size="sm"
                 onClick={handleCopyLink}
-                className="text-xs border-[#EAE5DF] hover:bg-stone-50 flex items-center justify-center gap-1 text-[#69635C] rounded-xl px-2"
+                className="text-xs rounded-full border border-white/15 bg-transparent hover:bg-white/10 flex items-center justify-center gap-1 text-white px-2"
               >
-                {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                 <span>{copied ? "Copied!" : "Copy"}</span>
               </Button>
 
@@ -1141,7 +1141,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 variant="outline"
                 size="sm"
                 onClick={handleDownloadQr}
-                className="text-xs border-[#EAE5DF] hover:bg-stone-50 flex items-center justify-center gap-1 text-[#69635C] rounded-xl px-2"
+                className="text-xs rounded-full border border-white/15 bg-transparent hover:bg-white/10 flex items-center justify-center gap-1 text-white px-2"
               >
                 <Download className="h-3.5 w-3.5" />
                 <span>QR</span>
@@ -1150,68 +1150,68 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           </div>
 
           {/* AI Matches clustered panel */}
-          <div className="bg-white border border-[#EAE5DF] rounded-3xl p-5 space-y-4 shadow-sm">
-            <div className="flex items-center gap-2 border-b border-stone-100 pb-2">
-              <Sparkles className="h-4.5 w-4.5 text-[#A58263]" />
-              <h3 className="text-sm font-bold text-[#1C1A17]">AI Smart Clusters</h3>
+          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+              <Sparkles className="h-4.5 w-4.5 text-[#D4AF37]" />
+              <h3 className="text-sm font-bold text-white/90">AI Smart Clusters</h3>
             </div>
-            
+
             <div className="space-y-3">
               {dynamicAiMatches.length > 0 ? dynamicAiMatches.map((cluster) => (
-                <div key={cluster.id} className="flex items-center justify-between text-xs p-2 rounded-xl hover:bg-stone-50 border border-transparent hover:border-stone-150 transition-all cursor-pointer">
+                <div key={cluster.id} className="flex items-center justify-between text-xs p-2 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all cursor-pointer">
                   <div className="flex items-center gap-3">
-                    <img src={cluster.cover} alt="Cluster Cover" className="w-10 h-10 rounded-lg object-cover border border-stone-100 shrink-0" />
+                    <img src={cluster.cover} alt="Cluster Cover" className="w-10 h-10 rounded-lg object-cover border border-white/10 shrink-0" />
                     <div>
-                      <p className="font-semibold text-[#1C1A17]">{cluster.label}</p>
-                      <p className="text-[10px] text-[#9C958E]">{cluster.photoCount} match files</p>
+                      <p className="font-semibold text-white/90">{cluster.label}</p>
+                      <p className="text-[10px] text-white/50">{cluster.photoCount} match files</p>
                     </div>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-stone-300" />
+                  <ChevronRight className="h-4 w-4 text-white/30" />
                 </div>
               )) : (
-                <p className="text-xs text-stone-500 text-center py-4">No smart clusters found yet.</p>
+                <p className="text-xs text-white/50 text-center py-4">No smart clusters found yet.</p>
               )}
             </div>
 
-            <Button variant="outline" className="w-full text-xs py-5 border-[#EAE5DF] text-[#69635C] rounded-xl flex items-center justify-center gap-1.5">
+            <Button variant="outline" className="w-full text-xs py-5 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 flex items-center justify-center gap-1.5">
               <Search className="h-3.5 w-3.5" />
               <span>Initiate New Face Match</span>
             </Button>
           </div>
 
           {/* Recent Activity waterfall feed */}
-          <div className="bg-white border border-[#EAE5DF] rounded-3xl p-5 space-y-4 shadow-sm">
-            <div className="flex items-center gap-2 border-b border-stone-100 pb-2">
-              <Activity className="h-4.5 w-4.5 text-[#A58263]" />
-              <h3 className="text-sm font-bold text-[#1C1A17]">Recent Guest Activity</h3>
+          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+              <Activity className="h-4.5 w-4.5 text-[#D4AF37]" />
+              <h3 className="text-sm font-bold text-white/90">Recent Guest Activity</h3>
             </div>
 
             <div className="space-y-3 text-xs leading-relaxed">
               {dynamicActivities.length > 0 ? dynamicActivities.slice(0, 10).map((act, idx) => (
-                <div key={idx} className="flex justify-between items-start gap-4 text-stone-600 border-b border-stone-50 pb-2.5 last:border-none last:pb-0">
+                <div key={idx} className="flex justify-between items-start gap-4 text-white/70 border-b border-white/5 pb-2.5 last:border-none last:pb-0">
                   <p>
-                    <span className="font-bold text-[#1C1A17]">{act.actor}</span> {act.action}
+                    <span className="font-bold text-white/90">{act.actor}</span> {act.action}
                   </p>
-                  <span className="text-[9px] text-[#9C958E] shrink-0">{act.time}</span>
+                  <span className="text-[9px] text-white/50 shrink-0">{act.time}</span>
                 </div>
               )) : (
-                <p className="text-xs text-stone-500 text-center py-4">No recent activity.</p>
+                <p className="text-xs text-white/50 text-center py-4">No recent activity.</p>
               )}
             </div>
           </div>
 
           {/* Quick Actions Shortcuts */}
-          <div className="bg-white border border-[#EAE5DF] rounded-3xl p-5 space-y-3 shadow-sm">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#A58263]">Host Quick Tools</h3>
-            
+          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#D4AF37]">Host Quick Tools</h3>
+
             <div className="grid grid-cols-2 gap-2.5">
-              <Link href={`/dashboard/events/${event.slug}/qr`} className="p-3 border border-[#EAE5DF] rounded-xl text-center space-y-1 hover:border-[#A58263] transition-all bg-stone-50/50">
-                <QrCode className="h-4 w-4 text-[#A58263] mx-auto" />
-                <p className="text-[10px] font-bold">QR Manager</p>
+              <Link href={`/dashboard/events/${event.slug}/qr`} className="p-3 border border-white/10 rounded-xl text-center space-y-1 hover:border-[#D4AF37]/50 transition-all bg-white/5">
+                <QrCode className="h-4 w-4 text-[#D4AF37] mx-auto" />
+                <p className="text-[10px] font-bold text-white/80">QR Manager</p>
               </Link>
-              <Link href={`/dashboard/events/${event.slug}/gallery`} className="p-3 border border-[#EAE5DF] rounded-xl text-center space-y-1 hover:border-[#A58263] transition-all bg-stone-50/50">
-                <Images className="h-4 w-4 text-[#A58263] mx-auto" />
-                <p className="text-[10px] font-bold">Gallery Toggles</p>
+              <Link href={`/dashboard/events/${event.slug}/gallery`} className="p-3 border border-white/10 rounded-xl text-center space-y-1 hover:border-[#D4AF37]/50 transition-all bg-white/5">
+                <Images className="h-4 w-4 text-[#D4AF37] mx-auto" />
+                <p className="text-[10px] font-bold text-white/80">Gallery Toggles</p>
               </Link>
             </div>
           </div>
@@ -1238,45 +1238,45 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.35, ease: "easeInOut" }}
-              className="absolute top-0 right-0 bottom-0 w-full max-w-md bg-white shadow-2xl p-6 overflow-y-auto flex flex-col justify-between"
+              className="absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#1C1814] border-l border-[#3D332A] shadow-2xl p-6 overflow-y-auto flex flex-col justify-between"
             >
               <div className="space-y-6">
-                <div className="flex justify-between items-center border-b border-[#EAE5DF] pb-3">
-                  <h3 className={`${playfair.className} text-xl font-medium text-[#1C1A17]`}>Edit Capsule Settings</h3>
-                  <button onClick={() => setIsDrawerOpen(false)} className="p-1 hover:bg-stone-100 rounded-full">
-                    <X className="h-5 w-5 text-stone-500" />
+                <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                  <h3 className={`${playfair.className} text-xl font-medium text-white`}>Edit Capsule Settings</h3>
+                  <button onClick={() => setIsDrawerOpen(false)} className="p-1 hover:bg-white/10 rounded-full">
+                    <X className="h-5 w-5 text-white/60" />
                   </button>
                 </div>
 
                 <form onSubmit={handleUpdateSave} className="space-y-5">
                   <div className="space-y-1.5">
-                    <Label htmlFor="name" className="text-xs font-bold text-stone-600">Event Name</Label>
+                    <Label htmlFor="name" className="text-xs font-bold text-white/60">Event Name</Label>
                     <Input
                       id="name"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="border-[#EAE5DF] focus:border-[#A58263]"
+                      className="!bg-white/5 border-white/15 !text-white placeholder:!text-white/30 focus-visible:!ring-[#D4AF37] focus:border-[#D4AF37]"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="end_date" className="text-xs font-bold text-stone-600">Countdown Ends Lock Date</Label>
+                    <Label htmlFor="end_date" className="text-xs font-bold text-white/60">Countdown Ends Lock Date</Label>
                     <Input
                       id="end_date"
                       type="datetime-local"
                       value={editEndDate}
                       onChange={(e) => setEditEndDate(e.target.value)}
-                      className="border-[#EAE5DF] focus:border-[#A58263]"
+                      className="!bg-white/5 border-white/15 !text-white placeholder:!text-white/30 focus-visible:!ring-[#D4AF37] focus:border-[#D4AF37] [color-scheme:dark]"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="status" className="text-xs font-bold text-stone-600">Event Status</Label>
+                    <Label htmlFor="status" className="text-xs font-bold text-white/60">Event Status</Label>
                     <select
                       id="status"
                       value={editStatus}
                       onChange={(e) => setEditStatus(e.target.value as EventStatus)}
-                      className="w-full h-10 rounded-md border border-[#EAE5DF] bg-white px-3 py-2 text-sm focus:border-[#A58263] outline-none"
+                      className="w-full h-10 rounded-md border border-white/15 bg-white/5 text-white px-3 py-2 text-sm focus:border-[#D4AF37] outline-none [color-scheme:dark]"
                     >
                       <option value="draft">Draft</option>
                       <option value="published">Published (Live)</option>
@@ -1286,8 +1286,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-bold text-stone-600">Guest Camera Filters</Label>
-                    <p className="text-[10px] text-stone-500 mb-2">Select which premium filters guests can use.</p>
+                    <Label className="text-xs font-bold text-white/60">Guest Camera Filters</Label>
+                    <p className="text-[10px] text-white/50 mb-2">Select which premium filters guests can use.</p>
                     <div className="grid grid-cols-2 gap-2">
                       {[
                         { id: "normal", name: "Normal" },
@@ -1311,29 +1311,29 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                                 setEditAllowedFilters(prev => prev.filter(id => id !== filter.id))
                               }
                             }}
-                            className="rounded border-[#EAE5DF] text-[#A58263] focus:ring-[#A58263]"
+                            className="rounded border-white/20 bg-white/5 text-[#D4AF37] focus:ring-[#D4AF37]"
                           />
-                          <Label htmlFor={`filter-${filter.id}`} className="text-xs">{filter.name}</Label>
+                          <Label htmlFor={`filter-${filter.id}`} className="text-xs text-white/80">{filter.name}</Label>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Settings toggle display list */}
-                  <div className="border border-stone-100 rounded-xl p-4 bg-stone-50/50 space-y-4">
-                    <p className="text-[10px] uppercase tracking-wider text-[#A58263] font-bold">Capsule Locks & Limits</p>
-                    
-                    <div className="flex items-center justify-between text-xs">
+                  <div className="border border-white/10 rounded-xl p-4 bg-white/5 space-y-4">
+                    <p className="text-[10px] uppercase tracking-wider text-[#D4AF37] font-bold">Capsule Locks & Limits</p>
+
+                    <div className="flex items-center justify-between text-xs text-white/80">
                       <span>Auto face cluster indexing</span>
-                      <span className="font-semibold text-stone-600">{settings.ai_features?.face_search ? "Active" : "Inactive"}</span>
+                      <span className="font-semibold text-white/60">{settings.ai_features?.face_search ? "Active" : "Inactive"}</span>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs gap-4">
+                    <div className="flex items-center justify-between text-xs gap-4 text-white/80">
                       <span className="shrink-0">Video durations allowed</span>
                       <select
                         value={editVideoDuration}
                         onChange={(e) => setEditVideoDuration(Number(e.target.value))}
-                        className="rounded-lg border border-[#EAE5DF] bg-white px-2.5 py-1 text-xs font-semibold text-[#1C1A17] focus:outline-none focus:ring-1 focus:ring-[#A58263]"
+                        className="rounded-lg border border-white/15 bg-[#141110] px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-[#D4AF37] [color-scheme:dark]"
                       >
                         <option value={5}>5 seconds</option>
                         <option value={10}>10 seconds</option>
@@ -1344,12 +1344,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       </select>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs gap-4">
+                    <div className="flex items-center justify-between text-xs gap-4 text-white/80">
                       <span className="shrink-0">Vocal note greetings allowed</span>
                       <select
                         value={editVoiceDuration}
                         onChange={(e) => setEditVoiceDuration(Number(e.target.value))}
-                        className="rounded-lg border border-[#EAE5DF] bg-white px-2.5 py-1 text-xs font-semibold text-[#1C1A17] focus:outline-none focus:ring-1 focus:ring-[#A58263]"
+                        className="rounded-lg border border-white/15 bg-[#141110] px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-[#D4AF37] [color-scheme:dark]"
                       >
                         <option value={5}>5 seconds</option>
                         <option value={10}>10 seconds</option>
@@ -1361,11 +1361,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     </div>
                   </div>
 
-                  <div className="pt-4 flex gap-3 border-t border-[#EAE5DF]">
-                    <Button type="button" variant="outline" onClick={() => setIsDrawerOpen(false)} className="flex-1 rounded-xl">
+                  <div className="pt-4 flex gap-3 border-t border-white/10">
+                    <Button type="button" variant="outline" onClick={() => setIsDrawerOpen(false)} className="flex-1 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10">
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={updateMutation.isPending} className="flex-1 bg-[#A58263] text-white hover:bg-[#8D6B50] rounded-xl border-none">
+                    <Button type="submit" disabled={updateMutation.isPending} className="flex-1 bg-[#D4AF37] text-[#141110] font-semibold hover:bg-[#c19f2e] rounded-full border-none">
                       {updateMutation.isPending ? "Saving..." : "Save Settings"}
                     </Button>
                   </div>
@@ -1373,27 +1373,27 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               </div>
 
               {/* Danger zone delete option */}
-              <div className="border-t border-red-100 pt-6">
+              <div className="border-t border-red-500/20 pt-6">
                 {!isDeleteOpen ? (
                   <button
                     onClick={() => setIsDeleteOpen(true)}
-                    className="w-full py-3 bg-red-50 text-red-600 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                    className="w-full py-3 bg-red-500/10 text-red-400 rounded-full text-xs font-bold hover:bg-red-500/20 transition-colors flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <Trash2 className="h-4 w-4" />
                     <span>Delete Memory Capsule</span>
                   </button>
                 ) : (
-                  <div className="bg-red-50 border border-red-100 rounded-xl p-4 space-y-3">
-                    <p className="text-xs font-bold text-red-700">Are you absolutely sure?</p>
-                    <p className="text-[10px] text-red-600">This action permanently deletes all photos, messages, audio and event configuration files. It is irreversible.</p>
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 space-y-3">
+                    <p className="text-xs font-bold text-red-400">Are you absolutely sure?</p>
+                    <p className="text-[10px] text-red-300/80">This action permanently deletes all photos, messages, audio and event configuration files. It is irreversible.</p>
                     <div className="flex gap-2">
-                      <Button onClick={() => setIsDeleteOpen(false)} variant="outline" className="flex-1 text-xs py-1 border-stone-200">
+                      <Button onClick={() => setIsDeleteOpen(false)} variant="outline" className="flex-1 text-xs py-1 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10">
                         Cancel
                       </Button>
                       <Button
                         onClick={() => deleteMutation.mutate(slug)}
                         disabled={deleteMutation.isPending}
-                        className="flex-1 bg-red-650 text-white hover:bg-red-700 text-xs py-1 border-none"
+                        className="flex-1 bg-red-600 text-white hover:bg-red-700 text-xs py-1 border-none rounded-full"
                       >
                         {deleteMutation.isPending ? "Deleting..." : "Confirm Delete"}
                       </Button>

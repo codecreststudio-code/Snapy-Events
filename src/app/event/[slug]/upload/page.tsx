@@ -274,6 +274,126 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     setShowVoiceRecorder(false)
   }, [])
 
+  // Shared single-file upload pipeline (signed URL -> direct storage PUT ->
+  // register in DB). Extracted so both the instant-upload-on-capture path
+  // (handlePhotoCapture below) and the manual batch uploader (uploadFiles)
+  // hit the exact same API calls instead of maintaining two copies.
+  const uploadFileDirect = useCallback(async (
+    file: File,
+    targetGallery: string,
+    cleanName: string,
+    cleanEmail: string,
+    isApproved: boolean
+  ): Promise<void> => {
+    const effectiveMimeType = file.type || "image/jpeg"
+
+    const urlRes = await fetch("/api/photos/upload/url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        gallery_id: targetGallery,
+        file_name: file.name || `mobile_upload_${Date.now()}.jpg`,
+        file_type: effectiveMimeType,
+        file_size: file.size,
+        uploader_name: cleanName,
+        uploader_email: cleanEmail,
+      }),
+    })
+
+    if (!urlRes.ok) {
+      const errData = await urlRes.json()
+      throw new Error(errData?.error || "Failed to obtain signed upload URL")
+    }
+
+    const { data: signedData } = await urlRes.json()
+    const { signedUrl, path } = signedData
+
+    const directUploadRes = await fetch(signedUrl, {
+      method: "PUT",
+      headers: { "Content-Type": effectiveMimeType },
+      body: file,
+    })
+
+    if (!directUploadRes.ok) {
+      let errBody = ""
+      try { errBody = await directUploadRes.text() } catch {}
+      throw new Error(`Storage upload failed (${directUploadRes.status})${errBody ? ": " + errBody.slice(0, 120) : ""}`)
+    }
+
+    const res = await fetch(`/api/photos/upload?gallery_id=${targetGallery}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        storage_path: path,
+        file_name: file.name || `mobile_upload_${Date.now()}.jpg`,
+        file_type: effectiveMimeType,
+        mime_type: effectiveMimeType,
+        file_size: file.size,
+        uploader_name: cleanName,
+        uploader_email: cleanEmail,
+        is_approved: isApproved,
+      }),
+    })
+
+    if (!res.ok) {
+      const errData = await res.json()
+      const msg = typeof errData?.error === "object"
+        ? (errData.error.message || errData.error.code)
+        : (errData?.error || "Media upload failed")
+      throw new Error(msg)
+    }
+  }, [])
+
+  // Camera-captured photos (and confirmed videos) skip the old "queue, then
+  // tap Upload Files" flow entirely — CameraCapture calls this the instant a
+  // shot is taken (after its brief undo window), so the upload runs silently
+  // in the background while the guest keeps shooting. Returns/rejects a
+  // Promise so CameraCapture's pill can show a non-blocking error + retry
+  // affordance instead of a blocking alert.
+  const handlePhotoCapture = useCallback(async (file: File, captureId?: string) => {
+    const id = captureId || Math.random().toString(36).substring(7)
+    const targetGallery = selectedGallery || uploadGalleries[0]?.id || galleries?.[0]?.id
+    const cleanName = guestName.trim()
+    const cleanEmail = guestEmail.trim().toLowerCase()
+
+    setFiles((prev) => {
+      const existing = prev.find((f) => f.id === id)
+      const record: UploadFile = {
+        id,
+        file,
+        preview: existing?.preview || URL.createObjectURL(file),
+        progress: 0,
+        status: "uploading",
+      }
+      return existing ? prev.map((f) => (f.id === id ? record : f)) : [...prev, record]
+    })
+
+    if (!targetGallery) {
+      const msg = "No gallery is available to accept uploads for this event."
+      setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, status: "error", error: msg } : f)))
+      throw new Error(msg)
+    }
+    if (!cleanName) {
+      const msg = "Add your name above to enable upload."
+      setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, status: "error", error: msg } : f)))
+      throw new Error(msg)
+    }
+    if (quotaInfo && quotaInfo.max > 0 && quotaInfo.uploaded >= quotaInfo.max) {
+      const msg = `You've reached the ${quotaInfo.max}-shot limit for this event.`
+      setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, status: "error", error: msg } : f)))
+      throw new Error(msg)
+    }
+
+    try {
+      await uploadFileDirect(file, targetGallery, cleanName, cleanEmail, settings.auto_approve_photos)
+      setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, progress: 100, status: "done" } : f)))
+      setQuotaInfo((prev) => (prev ? { ...prev, uploaded: prev.uploaded + 1 } : prev))
+    } catch (err) {
+      setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, status: "error", error: (err as Error).message } : f)))
+      throw err
+    }
+  }, [selectedGallery, uploadGalleries, galleries, guestName, guestEmail, settings.auto_approve_photos, quotaInfo, uploadFileDirect])
+
   function removeFile(id: string) {
     setPreviewFile((prev) => (prev?.id === id ? null : prev))
     setFiles((prev) => {
@@ -379,65 +499,9 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
             )
           )
 
-          const effectiveMimeType = uploadFile.file.type || "image/jpeg"
-
-          // Perform direct pre-signed URL upload to Supabase storage to bypass Vercel serverless limits & sharp processing crashes
-          const urlRes = await fetch("/api/photos/upload/url", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              gallery_id: targetGallery,
-              file_name: uploadFile.file.name || `mobile_upload_${Date.now()}.jpg`,
-              file_type: effectiveMimeType,
-              file_size: uploadFile.file.size,
-              uploader_name: cleanName,
-              uploader_email: cleanEmail,
-            }),
-          })
-
-          if (!urlRes.ok) {
-            const errData = await urlRes.json()
-            throw new Error(errData?.error || "Failed to obtain signed upload URL")
-          }
-
-          const { data: signedData } = await urlRes.json()
-          const { signedUrl, path } = signedData
-
-          const directUploadRes = await fetch(signedUrl, {
-            method: "PUT",
-            headers: { "Content-Type": effectiveMimeType },
-            body: uploadFile.file,
-          })
-
-          if (!directUploadRes.ok) {
-            let errBody = ""
-            try { errBody = await directUploadRes.text() } catch {}
-            throw new Error(`Storage upload failed (${directUploadRes.status})${errBody ? ": " + errBody.slice(0, 120) : ""}`)
-          }
-
-          // Register photo record in database with pre-uploaded storage path
-          const res = await fetch(`/api/photos/upload?gallery_id=${targetGallery}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              storage_path: path,
-              file_name: uploadFile.file.name || `mobile_upload_${Date.now()}.jpg`,
-              file_type: effectiveMimeType,
-              mime_type: effectiveMimeType,
-              file_size: uploadFile.file.size,
-              uploader_name: cleanName,
-              uploader_email: cleanEmail,
-              is_approved: settings.auto_approve_photos,
-            }),
-          })
-
-          if (!res.ok) {
-            const errData = await res.json()
-            const msg = typeof errData?.error === "object"
-              ? (errData.error.message || errData.error.code)
-              : (errData?.error || "Media upload failed")
-            throw new Error(msg)
-          }
+          // Shared pipeline (signed URL -> direct storage PUT -> register) —
+          // same helper the instant-upload-on-capture path uses.
+          await uploadFileDirect(uploadFile.file, targetGallery, cleanName, cleanEmail, settings.auto_approve_photos)
 
           setFiles((prev) =>
             prev.map((f) =>
@@ -613,22 +677,11 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
           </div>
         </Card>
 
-        {/* Live Guest Quota Status Banner */}
-        {guestName.trim() && quotaInfo && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between shadow-sm">
-            <div className="space-y-0.5">
-              <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Your Guest Upload Quota</p>
-              <p className="text-sm font-medium text-white">
-                Uploaded <span className="font-bold text-amber-400">{quotaInfo.uploaded}</span> of <span className="font-bold text-white">{quotaInfo.max}</span> media uploads allowed for this event
-              </p>
-            </div>
-            <div className="text-right shrink-0">
-              <span className="text-xs bg-amber-500 text-white font-bold px-3 py-1.5 rounded-full shadow-sm">
-                {Math.max(0, quotaInfo.max - quotaInfo.uploaded)} Slots Remaining
-              </span>
-            </div>
-          </div>
-        )}
+        {/* The old "Uploaded X of Y" banner has been replaced by a
+            glanceable, always-visible shot counter positioned right next to
+            the shutter button inside CameraCapture itself (see
+            initialShotsUsed/maxShots below) — matching once.film's in-camera
+            counter instead of a separate page banner. */}
 
         <Card className="bg-zinc-900 border-zinc-800 shadow-sm">
           <CardContent className="p-6">
@@ -661,11 +714,13 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
           return (
             <>
               {showCamera && (
-                <CameraCapture 
+                <CameraCapture
                   allowedFilters={(event.settings as any)?.allowed_filters}
                   allowVideo={allowVideo}
                   maxVideoDuration={videoLimit}
-                  onCapture={handleCameraCapture}
+                  initialShotsUsed={quotaInfo?.uploaded ?? 0}
+                  maxShots={quotaInfo?.max ?? null}
+                  onCapture={handlePhotoCapture}
                   onClose={() => setShowCamera(false)}
                 />
               )}

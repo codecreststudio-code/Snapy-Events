@@ -16,13 +16,13 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: Photo; watermarkEnabled: b
 
   if (isMessage(p)) {
     return (
-      <div className="aspect-square bg-gradient-to-br from-amber-500/10 to-amber-700/20 p-4 flex flex-col justify-between border border-amber-500/20 rounded-lg">
+      <div className="aspect-square bg-gradient-to-br from-[#D4AF37]/10 to-[#3D332A]/40 p-4 flex flex-col justify-between border border-[#D4AF37]/20 rounded-lg">
         <div className="flex items-center gap-2">
-          <MessageCircle className="h-4 w-4 text-amber-500" />
-          <span className="text-xs font-semibold text-amber-600 truncate">{p.uploader_name || "Guest Wish"}</span>
+          <MessageCircle className="h-4 w-4 text-[#D4AF37]" />
+          <span className="text-xs font-semibold text-[#D4AF37] truncate">{p.uploader_name || "Guest Wish"}</span>
         </div>
-        <p className="text-xs italic text-stone-700 line-clamp-3 my-auto font-serif">"{p.metadata?.text || p.original_filename}"</p>
-        <span className="text-[10px] text-stone-400">Written Note</span>
+        <p className="font-playfair text-xs italic text-white/80 line-clamp-3 my-auto">"{p.metadata?.text || p.original_filename}"</p>
+        <span className="text-[10px] text-white/40">Written Note</span>
       </div>
     )
   }
@@ -48,9 +48,9 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: Photo; watermarkEnabled: b
 
   if (isAudio(p)) {
     return (
-      <div className="aspect-square bg-gradient-to-br from-amber-500/20 to-purple-500/20 flex flex-col items-center justify-center p-3 gap-2 relative">
-        <Volume2 className="h-10 w-10 text-amber-500" />
-        <span className="text-xs text-stone-700 font-medium line-clamp-1">{p.uploader_name || "Voice Note"}</span>
+      <div className="aspect-square bg-gradient-to-br from-[#D4AF37]/20 to-[#3D332A]/60 flex flex-col items-center justify-center p-3 gap-2 relative">
+        <Volume2 className="h-10 w-10 text-[#D4AF37]" />
+        <span className="text-xs text-white/80 font-medium line-clamp-1">{p.uploader_name || "Voice Note"}</span>
       </div>
     )
   }
@@ -73,7 +73,7 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: Photo; watermarkEnabled: b
       )}
     </div>
   ) : (
-    <div className="aspect-square bg-gradient-to-br from-amber-500/20 to-fuchsia-500/20" />
+    <div className="aspect-square bg-gradient-to-br from-[#D4AF37]/20 to-[#3D332A]/60" />
   )
 }
 
@@ -216,29 +216,31 @@ export function GalleryGallery({
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
-      <p className="text-xs font-semibold uppercase tracking-wider text-[#A58263]">{eventName}</p>
-      <h1 className="mt-1 text-3xl font-serif font-semibold tracking-tight text-[#1C1A17]">{galleryName}</h1>
-      {galleryDescription && <p className="mt-2 text-sm text-[#7D756D]">{galleryDescription}</p>}
-      <p className="mt-1 text-xs text-[#9C958E]">{photos.length} items</p>
+    <div className="min-h-screen bg-[#141110] px-4 py-8 sm:px-6 sm:py-10">
+      <div className="mx-auto max-w-6xl">
+      <p className="text-xs font-semibold uppercase tracking-wider text-[#D4AF37]">{eventName}</p>
+      <h1 className="font-playfair mt-1 text-3xl font-medium tracking-tight text-white">{galleryName}</h1>
+      {galleryDescription && <p className="mt-2 text-sm text-white/60">{galleryDescription}</p>}
+      <p className="mt-1 text-xs text-white/40">{photos.length} items</p>
 
       {photos.length === 0 ? (
-        <Card className="mt-8 p-8 text-center text-sm text-[#9C958E] bg-[#FAF8F5] border-[#EAE5DF]">
+        <Card className="mt-8 rounded-2xl border border-[#3D332A] bg-[#1C1814] p-8 text-center text-sm text-white/60">
           No photos or wishes yet — be the first to share!
         </Card>
       ) : (
-        <div className="mt-6 columns-2 gap-4 md:columns-3 lg:columns-4 space-y-4">
+        <div className="mt-6 columns-2 gap-4 sm:columns-3 lg:columns-4 space-y-4">
           {photos.map((p) => (
             <button
               key={p.id}
               onClick={() => setActive(p)}
-              className="mb-4 block w-full break-inside-avoid overflow-hidden rounded-xl border border-[#EAE5DF] bg-[#FAF8F5] shadow-sm hover:shadow-md transition-all text-left cursor-pointer"
+              className="mb-4 block w-full break-inside-avoid overflow-hidden rounded-xl border border-[#3D332A] bg-[#1C1814] shadow-sm hover:border-[#D4AF37]/40 hover:shadow-md transition-all text-left cursor-pointer"
             >
               <MediaThumbnail p={p} watermarkEnabled={watermarkEnabled} />
             </button>
           ))}
         </div>
       )}
+      </div>
 
       {active && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4" onClick={closeLightbox}>
