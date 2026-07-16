@@ -359,10 +359,18 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         }
       }
 
-      // 2. Perform uploads via secure API route (using direct signed upload for large files/videos)
-      for (const uploadFile of files) {
-        if (uploadFile.status === "done") continue
+      // 2. Perform uploads via secure API route (direct signed upload for
+      // large files/videos). Previously these ran strictly one-at-a-time in
+      // a `for...of` loop with `await` on every file — with a signed direct-
+      // to-storage upload per file, there's no reason to serialize them; the
+      // browser can happily have several in flight at once. This was the
+      // single biggest lever on "uploading is too slow" when a guest selects
+      // multiple photos: 10 photos at ~1.5s each was ~15s serial, now runs
+      // in ~4 overlapping batches instead of 10 sequential round trips.
+      const CONCURRENCY = 4
 
+      async function uploadOne(uploadFile: UploadFile): Promise<boolean> {
+        if (uploadFile.status === "done") return false
         try {
           setFiles((prev) =>
             prev.map((f) =>
@@ -371,7 +379,6 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
           )
 
           const effectiveMimeType = uploadFile.file.type || "image/jpeg"
-          let res: Response
 
           // Perform direct pre-signed URL upload to Supabase storage to bypass Vercel serverless limits & sharp processing crashes
           const urlRes = await fetch("/api/photos/upload/url", {
@@ -408,7 +415,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
           }
 
           // Register photo record in database with pre-uploaded storage path
-          res = await fetch(`/api/photos/upload?gallery_id=${targetGallery}`, {
+          const res = await fetch(`/api/photos/upload?gallery_id=${targetGallery}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -431,7 +438,6 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
             throw new Error(msg)
           }
 
-          newlyUploadedCount++
           setFiles((prev) =>
             prev.map((f) =>
               f.id === uploadFile.id
@@ -439,6 +445,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 : f
             )
           )
+          return true
         } catch (err) {
           setFiles((prev) =>
             prev.map((f) =>
@@ -447,8 +454,23 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 : f
             )
           )
+          return false
         }
       }
+
+      const queue = [...files]
+      let queueIdx = 0
+      const outcomes: boolean[] = []
+      async function worker() {
+        while (queueIdx < queue.length) {
+          const current = queue[queueIdx++]
+          outcomes.push(await uploadOne(current))
+        }
+      }
+      await Promise.all(
+        Array.from({ length: Math.min(CONCURRENCY, queue.length) }, () => worker())
+      )
+      newlyUploadedCount = outcomes.filter(Boolean).length
     } catch (err: any) {
       toast({
         title: "Upload Failed",

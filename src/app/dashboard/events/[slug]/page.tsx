@@ -20,6 +20,7 @@ import { generateInvitationCard, buildInvitationCaption, type InvitationTheme } 
 import { useWatermarkEnabled } from "@/lib/hooks"
 import { toDatetimeLocalValue } from "@/lib/utils"
 import { WatermarkOverlay } from "@/lib/components/media/watermark-overlay"
+import { MediaLightbox, type LightboxMedia } from "@/lib/components/media/media-lightbox"
 import {
   ArrowLeft,
   Calendar,
@@ -200,6 +201,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [copied, setCopied] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
   const [regeneratingCode, setRegeneratingCode] = useState(false)
+  const [activeLightboxMedia, setActiveLightboxMedia] = useState<LightboxMedia | null>(null)
   const watermarkEnabled = useWatermarkEnabled()
 
   const publicEventUrl = typeof window !== "undefined"
@@ -283,6 +285,51 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       toast({ title: "Couldn't regenerate the code", description: err?.message, variant: "destructive" })
     } finally {
       setRegeneratingCode(false)
+    }
+  }
+
+  // These back the shared media lightbox opened from the activity timeline
+  // below. Rather than hand-rolling optimistic local state here too, they
+  // just call the same public endpoint the guest gallery uses and let the
+  // existing 3-second photo poll (see the event-photos useQuery above) pick
+  // up the change — simple, and correct even if the host has this page open
+  // in two tabs.
+  async function handleDashboardReact(photoId: string, emoji: string) {
+    try {
+      await fetch(`/api/photos/${photoId}/react`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emoji }),
+      })
+      queryClient.invalidateQueries({ queryKey: ["event-photos", event?.id] })
+    } catch (err) {
+      toast({ title: "Couldn't save reaction", variant: "destructive" })
+    }
+  }
+
+  async function handleDashboardComment(photoId: string, text: string, author: string) {
+    try {
+      await fetch(`/api/photos/${photoId}/react`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ comment: text, author_name: author }),
+      })
+      queryClient.invalidateQueries({ queryKey: ["event-photos", event?.id] })
+    } catch (err) {
+      toast({ title: "Couldn't save comment", variant: "destructive" })
+    }
+  }
+
+  async function handleDashboardVoiceComment(photoId: string, file: File, author: string) {
+    try {
+      const fd = new FormData()
+      fd.set("audio", file)
+      fd.set("author_name", author)
+      const res = await fetch(`/api/photos/${photoId}/react`, { method: "POST", body: fd })
+      if (!res.ok) throw new Error("Upload failed")
+      queryClient.invalidateQueries({ queryKey: ["event-photos", event?.id] })
+    } catch (err) {
+      toast({ title: "Couldn't save voice reply", variant: "destructive" })
     }
   }
 
@@ -567,6 +614,22 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     return `${supabaseUrl}/storage/v1/object/public/photos/${path}`
   }
 
+  // Converts a raw `photos` row into the shape the shared media viewer
+  // (src/lib/components/media/media-lightbox.tsx) expects, so the host
+  // dashboard's activity timeline can open the exact same full-size
+  // viewer + reactions/comments/voice-reply panel as the guest gallery,
+  // instead of the previous behavior where clicking a thumbnail did nothing
+  // (or, for the photo grid, silently triggered a download on hover-click).
+  const toLightboxMedia = (p: any): LightboxMedia => ({
+    id: p.id,
+    original_filename: p.original_filename || "Untitled",
+    uploader_name: p.uploader_name || null,
+    mime_type: p.mime_type || null,
+    created_at: p.created_at,
+    url: p.storage_path ? getImageUrl(p.storage_path) : null,
+    metadata: p.metadata || {},
+  })
+
   // Dynamic guest processing
   const dynamicGuestsMap = new Map()
   photos.forEach((p: any) => {
@@ -605,7 +668,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         videoUrl: getImageUrl(p.storage_path, ""),
         thumbnail: p.thumbnail_path ? getImageUrl(p.thumbnail_path, "") : undefined,
         title: p.original_filename || "Video clip",
-        duration: "0:15"
+        duration: "0:15",
+        raw: p,
       })
     } else if (p.mime_type?.startsWith("audio/")) {
       rawTimelineItems.push({
@@ -617,7 +681,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(p.uploader_name || "A")}&background=random`,
         time: new Date(p.created_at).toLocaleString("en-IN", { month: "short", day: "numeric", hour: '2-digit', minute: '2-digit' }),
         timestamp: new Date(p.created_at).getTime(),
-        audioUrl: getImageUrl(p.storage_path, "")
+        audioUrl: getImageUrl(p.storage_path, ""),
+        raw: p,
       })
     } else {
       justPhotos.push(p)
@@ -866,15 +931,16 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       <div className="space-y-3">
                         <div className="grid grid-cols-3 gap-2">
                           {item.photos?.map((p: any, idx: number) => (
-                            <div key={idx} className="aspect-square bg-stone-100 rounded-lg overflow-hidden relative group">
+                            <div
+                              key={idx}
+                              className="aspect-square bg-stone-100 rounded-lg overflow-hidden relative group cursor-pointer"
+                              onClick={() => setActiveLightboxMedia(toLightboxMedia(p))}
+                              title="View & react"
+                            >
                               <img src={getImageUrl(p.thumbnail_path || p.storage_path)} alt="Upload" className="w-full h-full object-cover" />
                               {watermarkEnabled && <WatermarkOverlay />}
-                              <div
-                                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-                                onClick={() => window.open(`/api/photos/${p.id}/download`, "_blank")}
-                                title="Download original"
-                              >
-                                <Download className="h-4 w-4 text-white" />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <Search className="h-4 w-4 text-white" />
                               </div>
                             </div>
                           ))}
@@ -911,7 +977,15 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           </video>
                           {watermarkEnabled && <WatermarkOverlay />}
                         </div>
-                        <p className="text-xs font-semibold text-[#1C1A17]">{item.title}</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold text-[#1C1A17]">{item.title}</p>
+                          <button
+                            onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
+                            className="text-[10px] font-bold text-[#A58263] hover:text-[#1C1A17] flex items-center gap-1"
+                          >
+                            <MessageSquare className="h-3 w-3" /> React & Comment
+                          </button>
+                        </div>
                       </div>
                     )}
 
@@ -928,6 +1002,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                             Your browser does not support audio playback.
                           </audio>
                         </div>
+                        <button
+                          onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
+                          className="text-[10px] font-bold text-[#A58263] hover:text-[#1C1A17] flex items-center gap-1"
+                        >
+                          <MessageSquare className="h-3 w-3" /> React & Comment
+                        </button>
                       </div>
                     )}
 
@@ -1323,6 +1403,24 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           </div>
         )}
       </AnimatePresence>
+
+      {activeLightboxMedia && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4"
+          onClick={() => setActiveLightboxMedia(null)}
+        >
+          <div className="relative max-h-full max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
+            <MediaLightbox
+              p={activeLightboxMedia}
+              watermarkEnabled={watermarkEnabled}
+              onClose={() => setActiveLightboxMedia(null)}
+              onReact={(emoji) => handleDashboardReact(activeLightboxMedia.id, emoji)}
+              onComment={(text, author) => handleDashboardComment(activeLightboxMedia.id, text, author)}
+              onVoiceComment={(file, author) => handleDashboardVoiceComment(activeLightboxMedia.id, file, author)}
+            />
+          </div>
+        </div>
+      )}
 
     </div>
   )

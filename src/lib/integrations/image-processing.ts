@@ -94,36 +94,45 @@ export async function processImage(
   }
 }
 
+// The logo composited onto downloaded media (mirrors the in-app
+// <WatermarkOverlay> CSS mark, src/lib/components/media/watermark-overlay.tsx,
+// which uses the same /Favicon.png). Fetched over HTTP rather than read off
+// disk because on Vercel the `public/` folder isn't reliably available to a
+// serverless function's filesystem — an outbound fetch to the app's own
+// public asset URL always works regardless of bundling. Cached in module
+// scope so a warm serverless instance only fetches it once.
+let cachedLogoBuffer: Buffer | null = null
+async function getWatermarkLogoBuffer(): Promise<Buffer | null> {
+  if (cachedLogoBuffer) return cachedLogoBuffer
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "https://snapsy-events.vercel.app"
+    const res = await fetch(`${baseUrl}/Favicon.png`)
+    if (!res.ok) return null
+    cachedLogoBuffer = Buffer.from(await res.arrayBuffer())
+    return cachedLogoBuffer
+  } catch {
+    return null
+  }
+}
+
 /**
- * Composites a tiled, semi-transparent "SNAPSY" watermark over an image and
+ * Composites a small logo mark into the bottom-right corner of an image and
  * returns the re-encoded buffer. Used for guest photo downloads when
  * Admin > Feature Flags → "Automated Image Watermarking" is enabled
  * (src/app/api/photos/[id]/download/route.ts). This burns the mark into the
  * actual pixels so it survives outside the app; the in-app display-time
  * equivalent is the CSS <WatermarkOverlay> component, which is free to show
  * everywhere without re-encoding every image on every view.
+ *
+ * Previously this tiled a rotated "SNAPSY" text string across the entire
+ * image, which made downloaded photos unreadable. Replaced with a single
+ * small corner logo so the actual photo stays fully visible.
  */
 export async function applyWatermark(buffer: Buffer, mimeType: string): Promise<Buffer> {
   const image = sharp(buffer, { failOn: "none" })
   const metadata = await image.metadata()
   const width = metadata.width || 1200
   const height = metadata.height || 1200
-
-  const fontSize = Math.max(20, Math.round(Math.min(width, height) * 0.045))
-  const tileW = fontSize * 8
-  const tileH = fontSize * 5
-  const cols = Math.ceil(width / tileW) + 2
-  const rows = Math.ceil(height / tileH) + 2
-
-  let tiles = ""
-  for (let r = -1; r < rows; r++) {
-    for (let c = -1; c < cols; c++) {
-      const x = c * tileW + (Math.abs(r) % 2 === 0 ? 0 : tileW / 2)
-      const y = r * tileH
-      tiles += `<text x="${x}" y="${y}" font-size="${fontSize}" font-family="sans-serif" font-weight="700" fill="#ffffff" fill-opacity="0.32" stroke="#000000" stroke-opacity="0.14" stroke-width="1" transform="rotate(-28 ${x} ${y})">SNAPSY</text>`
-    }
-  }
-  const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">${tiles}</svg>`
 
   const formatMap: Record<string, "jpeg" | "png" | "webp"> = {
     "image/jpeg": "jpeg",
@@ -134,7 +143,30 @@ export async function applyWatermark(buffer: Buffer, mimeType: string): Promise<
   // falls back to jpeg, which is fine for a download copy.
   const outFormat = formatMap[mimeType] || "jpeg"
 
-  let pipeline = image.composite([{ input: Buffer.from(svg), top: 0, left: 0 }])
+  const logoBuf = await getWatermarkLogoBuffer()
+  let overlay: sharp.OverlayOptions
+
+  if (logoBuf) {
+    const logoTargetSize = Math.max(40, Math.min(220, Math.round(width * 0.12)))
+    const padding = Math.max(14, Math.round(width * 0.02))
+    const resizedLogo = await sharp(logoBuf)
+      .resize(logoTargetSize, logoTargetSize, { fit: "inside" })
+      .ensureAlpha()
+      .png()
+      .toBuffer()
+    const logoMeta = await sharp(resizedLogo).metadata()
+    const logoW = logoMeta.width || logoTargetSize
+    const logoH = logoMeta.height || logoTargetSize
+    overlay = { input: resizedLogo, left: Math.max(0, width - logoW - padding), top: Math.max(0, height - logoH - padding) }
+  } else {
+    // Fallback if the logo fetch fails: a small single-line text mark in the
+    // corner (not tiled) so a download is never fully unwatermarked.
+    const fontSize = Math.max(16, Math.round(Math.min(width, height) * 0.032))
+    const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg"><text x="${width - 16}" y="${height - 16}" font-size="${fontSize}" font-family="sans-serif" font-weight="700" fill="#ffffff" fill-opacity="0.85" stroke="#000000" stroke-opacity="0.25" stroke-width="1" text-anchor="end">SNAPSY</text></svg>`
+    overlay = { input: Buffer.from(svg), top: 0, left: 0 }
+  }
+
+  let pipeline = image.composite([overlay])
   pipeline = outFormat === "png"
     ? pipeline.png()
     : pipeline.toFormat(outFormat, { quality: 88 })
