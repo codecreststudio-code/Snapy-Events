@@ -666,6 +666,16 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
   const handleUpdateSave = (e: React.FormEvent) => {
     e.preventDefault()
+    // This "Countdown Ends Lock Date" field drives two things that were
+    // previously out of sync: this dashboard's own "Unlocking Capsule"
+    // countdown (reads the top-level end_date column) AND the guest-facing
+    // reveal gate on the public event page (event/[slug]/page.tsx's
+    // isRevealed/visibleGalleries, which read settings.countdown_date
+    // instead). Only end_date was ever updated here, so changing this date
+    // after creation updated what the host saw on this dashboard while
+    // guests stayed locked to (or revealed by) whatever date was set when
+    // the event was first created. Keep both fields in lockstep on save.
+    const isoEndDate = editEndDate ? new Date(editEndDate).toISOString() : null
     updateMutation.mutate({
       name: editName,
       status: editStatus,
@@ -675,6 +685,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         allowed_filters: editAllowedFilters,
         video_duration_limit: Number(editVideoDuration),
         voice_note_duration_limit: Number(editVoiceDuration),
+        ...(isoEndDate ? { countdown_date: isoEndDate } : {}),
       }
     })
   }
