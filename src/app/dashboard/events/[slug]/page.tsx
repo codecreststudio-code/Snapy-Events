@@ -296,11 +296,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   // in two tabs.
   async function handleDashboardReact(photoId: string, emoji: string) {
     try {
-      await fetch(`/api/photos/${photoId}/react`, {
+      const res = await fetch(`/api/photos/${photoId}/react`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ emoji }),
       })
+      if (!res.ok) throw new Error(`Reaction request failed (${res.status})`)
       queryClient.invalidateQueries({ queryKey: ["event-photos", event?.id] })
     } catch (err) {
       toast({ title: "Couldn't save reaction", variant: "destructive" })
@@ -309,11 +310,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
   async function handleDashboardComment(photoId: string, text: string, author: string) {
     try {
-      await fetch(`/api/photos/${photoId}/react`, {
+      const res = await fetch(`/api/photos/${photoId}/react`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ comment: text, author_name: author }),
       })
+      if (!res.ok) throw new Error(`Comment request failed (${res.status})`)
       queryClient.invalidateQueries({ queryKey: ["event-photos", event?.id] })
     } catch (err) {
       toast({ title: "Couldn't save comment", variant: "destructive" })
@@ -1413,6 +1415,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             <MediaLightbox
               p={activeLightboxMedia}
               watermarkEnabled={watermarkEnabled}
+              maxVoiceDuration={Number((settings as ExtEventSettings)?.voice_note_duration_limit) || 10}
               onClose={() => setActiveLightboxMedia(null)}
               onReact={(emoji) => handleDashboardReact(activeLightboxMedia.id, emoji)}
               onComment={(text, author) => handleDashboardComment(activeLightboxMedia.id, text, author)}

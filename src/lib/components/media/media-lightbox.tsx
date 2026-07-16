@@ -75,6 +75,7 @@ function VoiceCommentPlayer({ url, label }: { url: string; label: string }) {
 export function MediaLightbox({
   p,
   watermarkEnabled,
+  maxVoiceDuration = 10,
   onClose,
   onReact,
   onComment,
@@ -82,6 +83,12 @@ export function MediaLightbox({
 }: {
   p: LightboxMedia
   watermarkEnabled: boolean
+  // Event-configured cap (seconds) for the voice-note reply recorder. Passed
+  // down from the event's settings.voice_note_duration_limit by both call
+  // sites (guest gallery + host dashboard) — defaults to 10 to match the
+  // host wizard's own default, rather than the recorder component's
+  // internal 30s default, which previously ignored the event setting entirely.
+  maxVoiceDuration?: number
   onClose: () => void
   onReact: (emoji: string) => void
   onComment: (commentText: string, authorName: string) => void
@@ -237,7 +244,7 @@ export function MediaLightbox({
 
       {showRecorder && onVoiceComment && (
         <VoiceNoteRecorder
-          maxDuration={30}
+          maxDuration={maxVoiceDuration}
           onCapture={(file) => {
             onVoiceComment(file, nameInput.trim() || "Guest")
             setShowRecorder(false)

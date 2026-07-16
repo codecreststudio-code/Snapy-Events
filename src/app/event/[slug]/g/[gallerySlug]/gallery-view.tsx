@@ -6,6 +6,7 @@ import { Card } from "@/lib/components/ui/card"
 import { Play, Volume2, MessageCircle } from "lucide-react"
 import { WatermarkOverlay } from "@/lib/components/media/watermark-overlay"
 import { MediaLightbox, isVideo, isAudio, isMessage, type LightboxMedia } from "@/lib/components/media/media-lightbox"
+import { toast } from "@/lib/components/ui/toaster"
 
 type Photo = LightboxMedia & { storage_path: string; thumbnail_path: string | null }
 
@@ -82,19 +83,32 @@ export function GalleryGallery({
   galleryDescription,
   photos: initialPhotos,
   watermarkEnabled = false,
+  voiceNoteDurationLimit = 10,
 }: {
   eventName: string
   galleryName: string
   galleryDescription: string | null
   photos: Photo[]
   watermarkEnabled?: boolean
+  voiceNoteDurationLimit?: number
 }) {
   const [photos, setPhotos] = useState<Photo[]>(initialPhotos)
   const [active, setActive] = useState<Photo | null>(null)
 
   function closeLightbox() { setActive(null) }
 
+  // Reverts a failed optimistic update back to the last known-good photo
+  // list/active item. Used when the server rejects a reaction/comment so the
+  // UI doesn't show something as "sent" that never actually got saved.
+  function revertOptimistic(previousPhotos: Photo[], previousActive: Photo | null) {
+    setPhotos(previousPhotos)
+    if (previousActive) setActive(previousActive)
+  }
+
   async function handleReact(photoId: string, emoji: string) {
+    const previousPhotos = photos
+    const previousActive = active
+
     // Optimistic UI update
     setPhotos((prev) =>
       prev.map((p) => {
@@ -120,17 +134,22 @@ export function GalleryGallery({
     }
 
     try {
-      await fetch(`/api/photos/${photoId}/react`, {
+      const res = await fetch(`/api/photos/${photoId}/react`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ emoji }),
       })
+      if (!res.ok) throw new Error(`Reaction request failed (${res.status})`)
     } catch (err) {
       console.error("Failed to save reaction", err)
+      revertOptimistic(previousPhotos, previousActive)
+      toast({ title: "Couldn't save your reaction", description: "Please check your connection and try again.", variant: "destructive" })
     }
   }
 
   async function handleComment(photoId: string, commentText: string, authorName: string) {
+    const previousPhotos = photos
+    const previousActive = active
     const newCommentObj = {
       id: Math.random().toString(36).substr(2, 9),
       author_name: authorName,
@@ -162,13 +181,16 @@ export function GalleryGallery({
     }
 
     try {
-      await fetch(`/api/photos/${photoId}/react`, {
+      const res = await fetch(`/api/photos/${photoId}/react`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ comment: commentText, author_name: authorName }),
       })
+      if (!res.ok) throw new Error(`Comment request failed (${res.status})`)
     } catch (err) {
       console.error("Failed to save comment", err)
+      revertOptimistic(previousPhotos, previousActive)
+      toast({ title: "Couldn't post your comment", description: "Please check your connection and try again.", variant: "destructive" })
     }
   }
 
@@ -181,14 +203,15 @@ export function GalleryGallery({
       fd.set("audio", file)
       fd.set("author_name", authorName)
       const res = await fetch(`/api/photos/${photoId}/react`, { method: "POST", body: fd })
-      if (!res.ok) throw new Error("Voice reply upload failed")
+      if (!res.ok) throw new Error(`Voice reply upload failed (${res.status})`)
       const { data } = await res.json()
       const newComments = data?.comments
-      if (!newComments) return
+      if (!newComments) throw new Error("Voice reply response missing comments")
       setPhotos((prev) => prev.map((p) => (p.id === photoId ? { ...p, metadata: { ...p.metadata, comments: newComments } } : p)))
       setActive((prev) => (prev && prev.id === photoId ? { ...prev, metadata: { ...prev.metadata, comments: newComments } } : prev))
     } catch (err) {
       console.error("Failed to save voice reply", err)
+      toast({ title: "Couldn't save your voice reply", description: "Please check your connection and try again.", variant: "destructive" })
     }
   }
 
@@ -223,6 +246,7 @@ export function GalleryGallery({
             <MediaLightbox
               p={active}
               watermarkEnabled={watermarkEnabled}
+              maxVoiceDuration={voiceNoteDurationLimit}
               onClose={closeLightbox}
               onReact={(emoji) => handleReact(active.id, emoji)}
               onComment={(text, author) => handleComment(active.id, text, author)}

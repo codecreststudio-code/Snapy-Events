@@ -9,13 +9,14 @@ export const metadata = { title: "Gallery" }
 export default async function GalleryPage({ params }: PageProps<"/event/[slug]/g/[gallerySlug]">) {
   const { slug, gallerySlug } = await params
   const supabase = await createClient()
-  const { data: ev } = await supabase.from("events").select("id, name").eq("slug", slug).neq("status", "archived").single()
+  const { data: ev } = await supabase.from("events").select("id, name, settings").eq("slug", slug).neq("status", "archived").single()
   if (!ev) return <div className="p-8 text-center text-sm text-muted-foreground">Event not found.</div>
   const { data: gallery } = await supabase.from("galleries").select("*").eq("event_id", ev.id).eq("slug", gallerySlug).single()
   if (!gallery) return <div className="p-8 text-center text-sm text-muted-foreground">Gallery not found.</div>
   const { data: photos } = await supabase.from("photos").select("id, storage_path, thumbnail_path, original_filename, uploader_name, mime_type, created_at").eq("gallery_id", gallery.id).neq("is_approved", false).order("created_at", { ascending: false }).limit(200)
   const urls = (photos ?? []).map((p) => ({ ...p, url: publicUrl("PHOTOS", p.storage_path) }))
   const flags = await getFeatureFlags()
+  const voiceNoteDurationLimit = Number((ev.settings as any)?.voice_note_duration_limit) || 10
   return (
     <>
       <GuestCaptureModal eventId={ev.id} eventName={ev.name} />
@@ -25,6 +26,7 @@ export default async function GalleryPage({ params }: PageProps<"/event/[slug]/g
         galleryDescription={gallery.description}
         photos={urls}
         watermarkEnabled={flags.watermark_enabled}
+        voiceNoteDurationLimit={voiceNoteDurationLimit}
       />
     </>
   )
