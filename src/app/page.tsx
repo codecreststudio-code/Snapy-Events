@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   Camera,
   QrCode,
@@ -179,6 +180,75 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
         </Link>
       </div>
     </motion.div>
+  )
+}
+
+// --- "Have a code?" Join Box ---
+// Lets a guest who has an event's short join_code (see /api/events/join)
+// skip scanning a QR or hunting down a shared link — type the code, land
+// straight on that event's page, same as any other entry point.
+function JoinEventCodeBox() {
+  const router = useRouter()
+  const [code, setCode] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleJoin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const trimmed = code.trim()
+    if (!trimmed || loading) return
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch("/api/events/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: trimmed }),
+      })
+      const result = await res.json()
+      if (res.ok && result.success) {
+        router.push(`/event/${result.data.slug}`)
+      } else {
+        setError(result?.error?.message || "That code doesn't match a live event.")
+      }
+    } catch {
+      setError("Something went wrong. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <motion.form
+      onSubmit={handleJoin}
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.4 }}
+      className="mx-auto flex w-full max-w-sm flex-col items-center gap-2"
+    >
+      <div className="flex w-full items-stretch gap-2 rounded-full border border-slate-200 bg-white/80 backdrop-blur p-1.5 shadow-sm">
+        <input
+          value={code}
+          onChange={(e) => {
+            setCode(e.target.value.toUpperCase())
+            if (error) setError(null)
+          }}
+          placeholder="Have a code? e.g. K7XQ9M"
+          maxLength={12}
+          aria-label="Event join code"
+          className="min-w-0 flex-1 bg-transparent px-4 text-sm font-medium tracking-wider text-slate-800 placeholder:text-slate-400 placeholder:tracking-normal focus:outline-none"
+        />
+        <Button
+          type="submit"
+          disabled={loading || !code.trim()}
+          size="sm"
+          className="rounded-full bg-slate-950 hover:bg-slate-800 text-white font-medium px-5 disabled:opacity-50"
+        >
+          {loading ? "Joining..." : "Join Event"}
+        </Button>
+      </div>
+      {error && <p className="text-xs text-rose-500 font-medium px-2 text-center">{error}</p>}
+    </motion.form>
   )
 }
 
@@ -647,6 +717,10 @@ export default function HomePage() {
               <span>•</span>
               <span>✓ Secure & Private</span>
             </motion.div>
+
+            <div className="pt-6">
+              <JoinEventCodeBox />
+            </div>
           </div>
 
           {/* Floating Polaroid Stacks */}

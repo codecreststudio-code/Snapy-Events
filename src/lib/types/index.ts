@@ -51,6 +51,7 @@ export interface Event {
   timezone: string
   cover_image_url: string | null
   settings: EventSettings
+  join_code: string
   status: EventStatus
   view_count: number
   created_at: string

@@ -48,7 +48,8 @@ import {
   Check,
   Share2,
   MessageCircle,
-  Loader2
+  Loader2,
+  RefreshCw
 } from "lucide-react"
 
 const playfair = Playfair_Display({
@@ -197,6 +198,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [activeMediaTab, setActiveMediaTab] = useState<"all" | "photos" | "videos" | "voices" | "messages">("all")
   const [countdownText, setCountdownText] = useState("")
   const [copied, setCopied] = useState(false)
+  const [codeCopied, setCodeCopied] = useState(false)
+  const [regeneratingCode, setRegeneratingCode] = useState(false)
   const watermarkEnabled = useWatermarkEnabled()
 
   const publicEventUrl = typeof window !== "undefined"
@@ -254,6 +257,35 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     logoImg.src = "/Logo.png"
   }
 
+  const handleCopyJoinCode = () => {
+    if (!event?.join_code) return
+    navigator.clipboard.writeText(event.join_code)
+    setCodeCopied(true)
+    toast({ title: "Join code copied to clipboard!" })
+    setTimeout(() => setCodeCopied(false), 2000)
+  }
+
+  // Rotates the event's join code via the SECURITY DEFINER RPC (migrations/
+  // 0023_event_join_code.sql) — e.g. if the old code leaked or the host wants
+  // to cut off anyone who has it. The old code stops resolving immediately.
+  const handleRegenerateJoinCode = async () => {
+    if (!event || regeneratingCode) return
+    setRegeneratingCode(true)
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase.rpc("regenerate_event_join_code", { p_event_id: event.id })
+      if (error) throw error
+      queryClient.setQueryData(["event", slug, orgId], (prev: Event | undefined) =>
+        prev ? { ...prev, join_code: data as string } : prev
+      )
+      toast({ title: "New join code generated", description: "The old code no longer works." })
+    } catch (err: any) {
+      toast({ title: "Couldn't regenerate the code", description: err?.message, variant: "destructive" })
+    } finally {
+      setRegeneratingCode(false)
+    }
+  }
+
   const [sharing, setSharing] = useState<"native" | "whatsapp" | null>(null)
 
   // Builds the same branded invitation card the host designed in the event
@@ -278,9 +310,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       inviteUrl: publicEventUrl,
       qrSvgElementId: "event-dashboard-qr",
       headingFontFamily: playfair.style.fontFamily,
+      joinCode: event.join_code,
     })
     if (!blob) return null
-    return { blob, caption: buildInvitationCaption(event.name, welcomeMessage, publicEventUrl) }
+    return { blob, caption: buildInvitationCaption(event.name, welcomeMessage, publicEventUrl, event.join_code) }
   }
 
   // Primary share action. Mobile browsers with the Web Share API (the only
@@ -949,6 +982,39 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               </div>
               <div className="space-y-0.5 text-center">
                 <p className="text-xs font-bold text-[#1C1A17]">Scan to Upload Photos</p>
+              </div>
+            </div>
+
+            {/* Short join code — no-scan fallback for guests who'd rather type
+                a code than scan/paste a link (migrations/0023_event_join_code.sql). */}
+            <div className="p-3 bg-[#FAF9F6] border border-[#EAE5DF] rounded-2xl flex items-center justify-between gap-2">
+              <div className="text-left">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-[#9C958E]">Or Join With Code</p>
+                <p className="text-base font-bold tracking-[0.15em] text-[#1C1A17] font-mono">
+                  {event.join_code || "——————"}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopyJoinCode}
+                  disabled={!event.join_code}
+                  className="h-8 w-8 p-0 border-[#EAE5DF] hover:bg-white text-[#69635C] rounded-lg"
+                  title="Copy code"
+                >
+                  {codeCopied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRegenerateJoinCode}
+                  disabled={regeneratingCode}
+                  className="h-8 w-8 p-0 border-[#EAE5DF] hover:bg-white text-[#69635C] rounded-lg"
+                  title="Generate a new code (old one stops working)"
+                >
+                  {regeneratingCode ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                </Button>
               </div>
             </div>
 

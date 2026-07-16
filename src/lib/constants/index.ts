@@ -111,6 +111,7 @@ export const API_RATE_LIMITS = {
   FACE_SEARCH: Number(process.env.RATE_LIMIT_AI_FACE_SEARCH) || 10, // 10 searches per min
   UPLOAD_PHOTOS: Number(process.env.RATE_LIMIT_UPLOAD_PHOTOS) || 30, // 30 uploads per min
   COUPON_VALIDATE: Number(process.env.RATE_LIMIT_COUPON_VALIDATE) || 20, // 20 checks per min — this is an unauthenticated code-guessing surface
+  JOIN_CODE: Number(process.env.RATE_LIMIT_JOIN_CODE) || 15, // 15 checks per min — 6-char code is an unauthenticated guessing surface too
 
   // 3. Authenticated User Routes
   USER_DEFAULT: Number(process.env.RATE_LIMIT_USER_DEFAULT) || 120, // 120 requests per min

@@ -43,6 +43,8 @@ export interface InvitationCardOptions {
   qrSvgElementId: string
   /** Pass playfair.style.fontFamily from the calling component so headings use the site's serif font. */
   headingFontFamily?: string
+  /** Short join_code (migrations/0023_event_join_code.sql) — printed under the QR as a no-scan fallback. */
+  joinCode?: string
 }
 
 function loadImage(src: string, crossOrigin?: "anonymous"): Promise<HTMLImageElement | null> {
@@ -196,6 +198,14 @@ export async function generateInvitationCard(opts: InvitationCardOptions): Promi
     ctx.font = "600 26px system-ui, -apple-system, sans-serif"
     ctx.fillText("Scan to upload photos", W / 2, panelY + panelSize + 50)
 
+    // No-scan fallback: the event's short join code, for anyone typing it in
+    // manually (e.g. off a printed card) instead of scanning.
+    if (opts.joinCode) {
+      ctx.fillStyle = palette.accent
+      ctx.font = "700 30px system-ui, -apple-system, sans-serif"
+      ctx.fillText(`Or enter code: ${opts.joinCode}`, W / 2, panelY + panelSize + 92)
+    }
+
     // Footer: fallback link text + brand
     ctx.fillStyle = palette.subtext
     ctx.font = "400 22px system-ui, -apple-system, sans-serif"
@@ -210,6 +220,7 @@ export async function generateInvitationCard(opts: InvitationCardOptions): Promi
   return render(false)
 }
 
-export function buildInvitationCaption(eventName: string, welcomeMessage: string, inviteUrl: string): string {
-  return `${welcomeMessage}\n\nJoin "${eventName}" and share your photos:\n${inviteUrl}`
+export function buildInvitationCaption(eventName: string, welcomeMessage: string, inviteUrl: string, joinCode?: string): string {
+  const codeLine = joinCode ? `\n\nOr enter code ${joinCode} at ${new URL(inviteUrl).origin}` : ""
+  return `${welcomeMessage}\n\nJoin "${eventName}" and share your photos:\n${inviteUrl}${codeLine}`
 }
