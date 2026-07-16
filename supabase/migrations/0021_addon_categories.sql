@@ -27,12 +27,19 @@ SET
   value = COALESCE(value, (regexp_match(name, '\+(\d+)'))[1]::INTEGER)
 WHERE category IS NULL;
 
-ALTER TABLE public.addons
-  ADD CONSTRAINT addons_category_check CHECK (
-    category IS NULL OR category IN (
-      'guest_boost', 'shot_boost', 'photo_limit_boost', 'video_addon', 'voice_addon'
-    )
-  );
+-- Guarded (matches the DO/EXCEPTION idiom already used in
+-- 0016_prod_hardening.sql) so this is safe to re-run against an environment
+-- where it already applied — bare `ADD CONSTRAINT` failed with "already
+-- exists" (SQLSTATE 42710 / duplicate_object) on Supabase's preview-branch
+-- CI check.
+DO $$ BEGIN
+  ALTER TABLE public.addons
+    ADD CONSTRAINT addons_category_check CHECK (
+      category IS NULL OR category IN (
+        'guest_boost', 'shot_boost', 'photo_limit_boost', 'video_addon', 'voice_addon'
+      )
+    );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 CREATE INDEX IF NOT EXISTS idx_addons_category ON public.addons(category);
 
