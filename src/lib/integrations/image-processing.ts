@@ -144,7 +144,9 @@ export async function applyWatermark(buffer: Buffer, mimeType: string): Promise<
   const outFormat = formatMap[mimeType] || "jpeg"
 
   const logoBuf = await getWatermarkLogoBuffer()
-  let overlay: sharp.OverlayOptions
+  let overlayInput: Buffer
+  let overlayLeft = 0
+  let overlayTop = 0
 
   if (logoBuf) {
     const logoTargetSize = Math.max(40, Math.min(220, Math.round(width * 0.12)))
@@ -157,16 +159,18 @@ export async function applyWatermark(buffer: Buffer, mimeType: string): Promise<
     const logoMeta = await sharp(resizedLogo).metadata()
     const logoW = logoMeta.width || logoTargetSize
     const logoH = logoMeta.height || logoTargetSize
-    overlay = { input: resizedLogo, left: Math.max(0, width - logoW - padding), top: Math.max(0, height - logoH - padding) }
+    overlayInput = resizedLogo
+    overlayLeft = Math.max(0, width - logoW - padding)
+    overlayTop = Math.max(0, height - logoH - padding)
   } else {
     // Fallback if the logo fetch fails: a small single-line text mark in the
     // corner (not tiled) so a download is never fully unwatermarked.
     const fontSize = Math.max(16, Math.round(Math.min(width, height) * 0.032))
     const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg"><text x="${width - 16}" y="${height - 16}" font-size="${fontSize}" font-family="sans-serif" font-weight="700" fill="#ffffff" fill-opacity="0.85" stroke="#000000" stroke-opacity="0.25" stroke-width="1" text-anchor="end">SNAPSY</text></svg>`
-    overlay = { input: Buffer.from(svg), top: 0, left: 0 }
+    overlayInput = Buffer.from(svg)
   }
 
-  let pipeline = image.composite([overlay])
+  let pipeline = image.composite([{ input: overlayInput, left: overlayLeft, top: overlayTop }])
   pipeline = outFormat === "png"
     ? pipeline.png()
     : pipeline.toFormat(outFormat, { quality: 88 })
