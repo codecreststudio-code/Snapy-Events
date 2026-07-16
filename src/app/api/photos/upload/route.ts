@@ -8,6 +8,7 @@ import { validateFile, isDangerousExtension, isSvgContent } from "@/lib/security
 import { MAX_FILE_SIZES, ALLOWED_MIME_TYPES, API_RATE_LIMITS } from "@/lib/constants"
 import { trackEvent } from "@/lib/analytics/track"
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
+import { hasGuestSessionFromRequest, isEventHost } from "@/lib/security/guest-session"
 
 const querySchema = z.object({ gallery_id: z.string().uuid() })
 
@@ -100,6 +101,16 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const eventObj = Array.isArray(event) ? event[0] : event
     const hostId = eventObj?.host_id
     const settings = (eventObj?.settings as Record<string, any>) || {}
+
+    // Guest uploads require a completed check-in for this specific event
+    // (see src/lib/security/guest-session.ts). The authenticated host is
+    // exempt — they upload from their own dashboard under their own account,
+    // not as a guest. Without this, anyone with the gallery/event URL could
+    // upload regardless of whether they ever checked in, which defeated the
+    // point of the per-event join code and check-in modal entirely.
+    if (!(await isEventHost(hostId)) && !hasGuestSessionFromRequest(request, gallery.event_id)) {
+      return fail("FORBIDDEN", "Please check in to this event before uploading.", 403)
+    }
 
     if (category === "PHOTO") {
       const contentTypes = settings.content_types || {}

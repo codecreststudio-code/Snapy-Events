@@ -339,6 +339,15 @@ export function NewEventForm() {
           enable_countdown: invitationCountdown,
           countdown_date: calculatedEndDate,
           guest_count_plan: guestCountPlan,
+          // Informational record of this event's own payment state — set to
+          // "free" immediately for the free tier (no checkout ever happens
+          // for it), or "pending" for a paid tier until /api/payments/verify
+          // (or the free-checkout fallback) flips it to "paid"/"free" once
+          // the purchase for THIS event actually completes. Previously there
+          // was no per-event payment record at all — only an account-level
+          // subscription — so nothing could tell whether a given event had
+          // actually been paid for.
+          payment_status: guestCountPlan === "free" ? "free" : "pending",
           guests_boost: guestsBoost,
           shots_boost: shotsBoost,
           content_types: {
@@ -514,6 +523,7 @@ export function NewEventForm() {
     const params = new URLSearchParams({
       plan: guestCountPlan,
       event: createdEvent.slug,
+      event_id: createdEvent.id,
       guests: String(guestsBoost),
       shots: String(shotsBoost),
       photo_limit: String(photoLimit),

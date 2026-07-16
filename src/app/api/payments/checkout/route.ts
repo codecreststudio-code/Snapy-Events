@@ -9,6 +9,13 @@ import { getFeatureFlags } from "@/lib/platform-settings"
 
 const checkoutBodySchema = z.object({
   plan_id: z.string().min(1),
+  // Which event this purchase is for. Required — previously the checkout
+  // API had no idea which event a payment was for at all (it only ever
+  // touched the account-level `subscriptions` table), so there was no way to
+  // record, per event, whether it had actually been paid for. Verified
+  // against auth.user's own events below so one host can't pay against
+  // another host's event_id.
+  event_id: z.string().uuid(),
   coupon_code: z.string().optional(),
   guest_boost: z.number().default(0),
   shots_boost: z.number().default(0),
@@ -72,23 +79,17 @@ export async function calculatePrice(
 ) {
   let price = 0
 
-  // If user already owns this plan tier and is purchasing add-ons, base plan price is $0
-  let isCurrentPlanActive = false
-  if (userId) {
-    const { data: userRec } = await supabase
-      .from("subscriptions")
-      .select("plan_id")
-      .eq("user_id", userId)
-      .eq("status", "active")
-      .limit(1)
-      .maybeSingle()
-
-    if (userRec?.plan_id === planId && (guestBoost > 0 || shotsBoost > 0)) {
-      isCurrentPlanActive = true
-    }
-  }
-
-  if (!isCurrentPlanActive) {
+  // Every event is its own purchase — "Per Event (Pay-per-Event)" is the
+  // actual billing model this product advertises on the Billing page. This
+  // function used to waive the base plan price entirely whenever the host
+  // already had an `active` row in `subscriptions` for the same plan_id,
+  // treating that one-time purchase as if it were a 30-day recurring
+  // subscription. In practice that meant: pay once for Standard, then every
+  // new event on Standard checked out at ₹0 for the next month, and
+  // /api/payments/checkout-free would activate it with no Razorpay flow at
+  // all. Removed — the plan's price is always charged, regardless of what
+  // the host has purchased for any other event.
+  {
     const { data: planRecord } = await supabase
       .from("plans")
       .select("price_inr, price_usd")
@@ -168,6 +169,17 @@ export const POST = defineRoute({
     const supabase = await createClient()
     const targetCurrency = body.currency || "INR"
 
+    // Confirm this event actually belongs to the paying user before we let
+    // them attach a Razorpay order (and eventually a "paid" flag) to it.
+    const { data: eventRow } = await supabase
+      .from("events")
+      .select("id, host_id")
+      .eq("id", body.event_id)
+      .maybeSingle()
+    if (!eventRow || eventRow.host_id !== auth.user!.id) {
+      return fail("FORBIDDEN", "You don't have access to this event", 403)
+    }
+
     let price = 0
     try {
       price = await calculatePrice(
@@ -221,6 +233,7 @@ export const POST = defineRoute({
         receipt: `chk_${Date.now().toString(36)}_${auth.user!.id.slice(0, 8)}`,
         notes: {
           user_id: auth.user!.id,
+          event_id: body.event_id,
           plan_id: body.plan_id,
           guest_boost: String(body.guest_boost),
           shots_boost: String(body.shots_boost),

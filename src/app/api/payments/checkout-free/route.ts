@@ -14,6 +14,7 @@ import { getFeatureFlags } from "@/lib/platform-settings"
 // would, without involving the payment gateway at all.
 const bodySchema = z.object({
   plan_id: z.string().min(1),
+  event_id: z.string().uuid(),
   guest_boost: z.number().int().min(0).max(1000).default(0),
   shots_boost: z.number().int().min(0).max(10000).default(0),
   coupon_code: z.string().optional(),
@@ -35,6 +36,15 @@ export const POST = defineRoute({
 
     const supabase = await createClient()
     const userId = auth.user!.id
+
+    const { data: eventRow } = await supabase
+      .from("events")
+      .select("id, host_id, settings")
+      .eq("id", body.event_id)
+      .maybeSingle()
+    if (!eventRow || eventRow.host_id !== userId) {
+      return fail("FORBIDDEN", "You don't have access to this event", 403)
+    }
 
     // Re-derive the price server-side — never trust the client's claim that
     // a checkout is free. If it isn't actually zero, bounce back to the paid
@@ -108,6 +118,24 @@ export const POST = defineRoute({
         current_period_end: null,
       })
     }
+
+    // Mark this specific event as covered — either a genuinely free plan or
+    // a 100%-off coupon, both legitimate ₹0 outcomes now that
+    // calculatePrice() no longer waives the base price just because the
+    // host purchased this tier before.
+    const currentSettings = (eventRow.settings as Record<string, any>) || {}
+    await supabase
+      .from("events")
+      .update({
+        settings: {
+          ...currentSettings,
+          payment_status: "free",
+          plan_tier: body.plan_id,
+          paid_amount_inr: 0,
+          paid_at: new Date().toISOString(),
+        },
+      })
+      .eq("id", body.event_id)
 
     // Consume a coupon use if one somehow drove the price to zero.
     if (body.coupon_code) {

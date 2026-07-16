@@ -62,6 +62,8 @@ function CheckoutForm() {
   const { currency, symbol, getPrice } = useCurrency()
   
   const plan = searchParams?.get("plan") || "starter"
+  const eventId = searchParams?.get("event_id") || ""
+  const eventSlug = searchParams?.get("event") || ""
   const guests = parseInt(searchParams?.get("guests") || "0")
   const shots = parseInt(searchParams?.get("shots") || "0")
   const photoLimitParam = searchParams?.get("photo_limit")
@@ -84,34 +86,16 @@ function CheckoutForm() {
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponError, setCouponError] = useState("")
 
-  const [userCurrentPlan, setUserCurrentPlan] = useState<string | null>(null)
-
-  // Fetch active subscription for current user
-  useEffect(() => {
-    const checkSub = async () => {
-      if (!user) return
-      const { createClient } = await import("@/lib/supabase/client")
-      const supabase = createClient()
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("plan_id")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .limit(1)
-        .maybeSingle()
-      if (data?.plan_id) {
-        setUserCurrentPlan(data.plan_id)
-      }
-    }
-    checkSub()
-  }, [user])
-
-  // Check if user is already on this active plan
-  const isCurrentPlanActive = userCurrentPlan === plan
-
-  // Dynamic Multi-Currency Calculations
-  const rawBaseInr = isCurrentPlanActive ? 0 : (planPrices[plan] || PLAN_DEFAULT_PRICES[plan] || 0)
-  const rawBaseUsd = isCurrentPlanActive ? 0 : (planUsdPrices[plan] || PLAN_DEFAULT_USD[plan] || Math.round((planPrices[plan] || 0) / 80) || 1)
+  // Every event is its own purchase — there is no "already on this plan, so
+  // the base price is waived" concept in a per-event billing model. This
+  // page used to check the account's `subscriptions` row and zero out the
+  // base price whenever it matched the plan being checked out again, which
+  // is exactly the bug that let a second event go through with no payment:
+  // pay once for a tier, and every later event on that tier priced at ₹0 for
+  // as long as the subscription row said "active". Removed — the full plan
+  // price is always shown and always charged.
+  const rawBaseInr = planPrices[plan] || PLAN_DEFAULT_PRICES[plan] || 0
+  const rawBaseUsd = planUsdPrices[plan] || PLAN_DEFAULT_USD[plan] || Math.round((planPrices[plan] || 0) / 80) || 1
   
   const rawGuestInr = guestPrices[guests] || (guests > 0 ? Math.round(guests * 19.9) : 0)
   const rawGuestUsd = Math.round(rawGuestInr / 80) || (guests > 0 ? 3 : 0)
@@ -254,6 +238,7 @@ function CheckoutForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           plan_id: plan,
+          event_id: eventId,
           guest_boost: guests,
           shots_boost: shots,
           coupon_code: appliedCoupon?.code,
@@ -354,6 +339,7 @@ function CheckoutForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           plan_id: plan,
+          event_id: eventId,
           guest_boost: guests,
           shots_boost: shots,
           coupon_code: appliedCoupon?.code,
@@ -384,6 +370,25 @@ function CheckoutForm() {
     return (
       <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+      </div>
+    )
+  }
+
+  if (!eventId) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center space-y-4">
+          <AlertCircle className="h-10 w-10 text-orange-500 mx-auto" />
+          <h1 className="text-lg font-bold text-slate-900">Missing event</h1>
+          <p className="text-sm text-slate-500">
+            This checkout link is missing its event. Please start checkout from your event creation wizard or dashboard.
+          </p>
+          <Link href="/dashboard">
+            <Button className="mt-2 bg-orange-500 text-white hover:bg-orange-600 font-bold rounded-xl border-none">
+              Back to Dashboard
+            </Button>
+          </Link>
+        </div>
       </div>
     )
   }
@@ -420,11 +425,11 @@ function CheckoutForm() {
                   <div className="space-y-0.5">
                     <span className="font-semibold text-slate-800">{PLAN_NAMES[plan] || plan}</span>
                     <p className="text-xs text-slate-400">
-                      {isCurrentPlanActive ? "Active workspace tier (Base price waived)" : "Base event plan features"}
+                      Base event plan features
                     </p>
                   </div>
                   <span className="font-bold text-slate-800">
-                    {isCurrentPlanActive ? "Included ($0)" : `${symbol}${basePrice}`}
+                    {symbol}{basePrice}
                   </span>
                 </div>
 

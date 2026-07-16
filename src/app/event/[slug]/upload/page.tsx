@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/lib/components/ui/card"
 import { Input } from "@/lib/components/ui/input"
 import { Label } from "@/lib/components/ui/label"
 import { toast } from "@/lib/components/ui/toaster"
+import { GuestCaptureModal } from "@/lib/components/events/guest-capture-modal"
 
 import { VoiceNoteRecorder } from "@/lib/components/events/voice-note-recorder"
 import {
@@ -549,6 +550,11 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
+      {/* Guests reaching this page directly (bookmarked link, shared upload
+          URL) without ever visiting the event landing page still need to
+          check in — the modal issues the guest-session cookie the upload
+          API now requires (see src/lib/security/guest-session.ts). */}
+      <GuestCaptureModal eventId={event.id} eventName={event.name} />
       <header className="sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur">
         <div className="container flex h-14 items-center justify-between px-4">
           <Link

@@ -7,10 +7,8 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/hooks"
 import { createClient } from "@/lib/supabase/client"
 
-import { formatDate } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/lib/components/ui/card"
 import { Button } from "@/lib/components/ui/button"
-import { Badge } from "@/lib/components/ui/badge"
 import { Skeleton } from "@/lib/components/ui/skeleton"
 import { toast } from "@/lib/components/ui/toaster"
 import { Label } from "@/lib/components/ui/label"
@@ -185,12 +183,10 @@ async function getUserProfile() {
 function PricingCard({
   plan,
   isSelected,
-  isCurrent,
   onClick,
 }: {
   plan: PlanInfo
   isSelected: boolean
-  isCurrent: boolean
   onClick: () => void
 }) {
   const [coords, setCoords] = useState({ x: 0, y: 0 })
@@ -272,14 +268,6 @@ function PricingCard({
         </div>
       )}
 
-      {/* Current Plan Indicator for existing active plan */}
-      {isCurrent && (
-        <div className="absolute -top-3 left-4 rounded-full bg-emerald-600 px-3 py-1 text-[8px] font-bold text-white tracking-widest uppercase shadow-md z-20 flex items-center gap-1">
-          <Check className="h-3 w-3" />
-          YOUR ACTIVE PLAN
-        </div>
-      )}
-
       <div className="relative z-10">
         <div className="flex justify-between items-start">
           <div>
@@ -331,20 +319,18 @@ function PricingCard({
         <button
           type="button"
           className={`w-full font-bold py-2.5 rounded-xl transition-all active:scale-[0.98] text-xs border-none ${
-            isCurrent
-              ? "bg-emerald-600 text-white shadow-md cursor-default"
-              : isSelected
-                ? plan.id === "free"
-                  ? "bg-slate-950 text-white shadow-md"
-                  : plan.id === "starter"
-                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10"
-                  : isPopular
-                  ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/20"
-                  : "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/20"
-                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+            isSelected
+              ? plan.id === "free"
+                ? "bg-slate-950 text-white shadow-md"
+                : plan.id === "starter"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10"
+                : isPopular
+                ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/20"
+                : "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/20"
+              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
           }`}
         >
-          {isCurrent ? "Current Active Plan" : isSelected ? "Selected" : `Choose ${plan.name}`}
+          {isSelected ? "Selected" : `Choose ${plan.name}`}
         </button>
       </div>
     </motion.div>
@@ -377,9 +363,6 @@ export default function BillingPage() {
   })
 
   const currentPlan = userProfile?.plan || "free"
-  const currentSettings = (userProfile?.settings as any) || {}
-  const currentGuestBoost = currentSettings.guest_boost || 0
-  const currentShotsBoost = currentSettings.shots_boost || 0
 
   // Set default plan selection based on current organization plan on load
   useEffect(() => {
@@ -516,12 +499,12 @@ export default function BillingPage() {
   }
 
   const activePlanDetails = plansList.find((p) => p.id === selectedPlan) || plansList[0]
-  
-  // Calculate price dynamically — if plan is already active, base price is 0
+
+  // Every plan tier is always full price — each event is its own separate
+  // purchase, so having used a tier before never waives its price.
   const isSamePlan = selectedPlan === currentPlan
-  const basePrice = isSamePlan ? 0 : (activePlanDetails?.price || 0)
-  const basePriceUsd = isSamePlan ? 0 : (activePlanDetails?.priceUsd || Math.round((activePlanDetails?.price || 0) / 80))
-  
+  const basePrice = activePlanDetails?.price || 0
+
   const guestAddOnPrice = guestBoostsList.find((b) => b.value === guestBoost)?.price || 0
   const shotAddOnPrice = shotBoostsList.find((b) => b.value === shotBoost)?.price || 0
   const totalPrice = basePrice + guestAddOnPrice + shotAddOnPrice
@@ -530,14 +513,15 @@ export default function BillingPage() {
   const baseShotLimitStr = activePlanDetails?.features.find(f => f.toLowerCase().includes("shot")) || "10 shots per guest"
   const accent = getAccentColor()
 
-  const isActionDisabled = 
-    selectedPlan === currentPlan && 
-    guestBoost === currentGuestBoost && 
-    shotBoost === currentShotsBoost
+  // The only legitimate "nothing to do" state left is Free→Free: there is no
+  // subscription to cancel and no purchase to make. This is NOT a price
+  // waiver — paid tiers are always full price, even if the host used that
+  // tier before, because every event is its own separate purchase.
+  const isFreeNoOp = selectedPlan === "free" && currentPlan === "free"
 
   const getContinueButtonClass = () => {
     const base = "w-full sm:w-auto font-bold px-8 py-6 rounded-2xl flex items-center justify-center gap-2 text-base transition-all active:scale-[0.98] border-none "
-    if (isActionDisabled) {
+    if (isFreeNoOp) {
       return base + "bg-slate-100 text-slate-500 cursor-not-allowed shadow-none"
     }
     if (selectedPlan === "free") {
@@ -555,22 +539,24 @@ export default function BillingPage() {
   const getActionButtonText = () => {
     if (cancelMutation.isPending) return "Processing Downgrade..."
     if (selectedPlan === "free") {
-      if (currentPlan === "free") return "Current Plan Active"
+      if (isFreeNoOp) return "Already on Free"
       return "Downgrade to Free"
     }
-    if (isActionDisabled) return "Current Plan Active"
-    if (selectedPlan === currentPlan) return "Purchase Add-Ons"
-    return "Upgrade Plan Tier"
+    return "Continue to Create Event"
   }
 
   const handleActionClick = () => {
-    if (isActionDisabled) return
+    if (isFreeNoOp) return
     if (selectedPlan === "free") {
       if (confirm("Are you sure you want to cancel your paid subscription and downgrade to the Free plan? Your additional storage and guest limits will be reset.")) {
         cancelMutation.mutate()
       }
     } else {
-      router.push(`/checkout?plan=${selectedPlan}&guests=${guestBoost}&shots=${shotBoost}`)
+      // Every plan is purchased per event — there is no standalone checkout
+      // without a specific event to attach the payment to. Send the host
+      // into the event creation wizard, where the plan/add-on selection made
+      // here is just an informational preview of that flow's pricing.
+      router.push("/dashboard/events/new")
     }
   }
 
@@ -599,46 +585,22 @@ export default function BillingPage() {
         <CurrencyToggle />
       </div>
 
-      {/* Subscription Details if active */}
+      {/* Last purchased plan — historical reference only. Snapsy is strictly
+          pay-per-event, so this is never an ongoing/free/already-active
+          entitlement for the next event a host creates. */}
       {subscription && (
         <Card className="border-slate-200 shadow-sm overflow-hidden">
           <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg font-bold text-slate-800">Current Subscription</CardTitle>
-                <CardDescription>Your active billing and period details</CardDescription>
-              </div>
-              <Badge
-                variant={subscription.status === "active" ? "success" : "secondary"}
-                className="text-xs uppercase font-semibold tracking-wider px-2.5 py-0.5"
-              >
-                {subscription.status}
-              </Badge>
-            </div>
+            <CardTitle className="text-lg font-bold text-slate-800">Last Purchased Plan</CardTitle>
+            <CardDescription>
+              Reference only. Snapsy bills per event, so this reflects your most recent purchase — not an ongoing subscription or a discount on your next event.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            <div className="grid gap-6 md:grid-cols-3">
-              <div>
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Plan Tier</p>
-                <p className="text-lg font-bold text-slate-800 capitalize mt-1">{subscription.plan_id}</p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Billing Model</p>
-                <p className="text-sm font-medium text-slate-700 mt-1">Per Event (Pay-per-Event)</p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Next Billing Date</p>
-                <p className="text-sm font-medium text-slate-700 mt-1">N/A (No Recurring Subscription)</p>
-              </div>
+          <CardContent className="p-6">
+            <div>
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Plan Tier</p>
+              <p className="text-lg font-bold text-slate-800 capitalize mt-1">{subscription.plan_id}</p>
             </div>
-            
-            {subscription.cancel_at_period_end && (
-              <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 mt-2">
-                <p className="text-sm text-amber-800">
-                  Your subscription will cancel at the end of the current billing period on {formatDate(subscription.current_period_end!)}.
-                </p>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}
@@ -660,7 +622,6 @@ export default function BillingPage() {
             key={plan.id}
             plan={plan}
             isSelected={selectedPlan === plan.id}
-            isCurrent={currentPlan === plan.id}
             onClick={() => handleSelectPlan(plan.id)}
           />
         ))}
@@ -758,38 +719,37 @@ export default function BillingPage() {
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1.5 font-light">
-            {isActionDisabled ? (
-              <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                <Check className="h-3.5 w-3.5 shrink-0" />
-                Your workspace is active on the {activePlanDetails.name} plan. Select add-ons above if you wish to boost event limits.
-              </span>
+            {selectedPlan === "free" ? (
+              isFreeNoOp ? (
+                <span className="text-slate-500">You&apos;re currently on the Free plan.</span>
+              ) : (
+                <span className="text-slate-500">No charge — downgrading resets any paid add-ons.</span>
+              )
             ) : (
               <>
-                {isSamePlan ? (
-                  <span className="text-slate-600 font-medium">
-                    {activePlanDetails.name} Plan Active ({symbol}0 base)
-                    {guestBoost > 0 && ` + Guest Boost ${symbol}${getPrice(guestAddOnPrice, Math.round(guestAddOnPrice / 80))}`}
-                    {shotBoost > 0 && ` + Shots Boost ${symbol}${getPrice(shotAddOnPrice, Math.round(shotAddOnPrice / 80))}`}
+                Base {symbol}{getPrice(basePrice, Math.round(basePrice / 80))}
+                {guestBoost > 0 && ` + Guest Boost ${symbol}${getPrice(guestAddOnPrice, Math.round(guestAddOnPrice / 80))}`}
+                {shotBoost > 0 && ` + Shots Boost ${symbol}${getPrice(shotAddOnPrice, Math.round(shotAddOnPrice / 80))}`}
+                {isSamePlan && (
+                  <span className="block text-[11px] text-slate-400 mt-1">
+                    You&apos;ve purchased the {activePlanDetails.name} plan before — this will be a new, full-price purchase for a new event.
                   </span>
-                ) : selectedPlan !== "free" && (
-                  <>
-                    Base {symbol}{getPrice(basePrice, Math.round(basePrice / 80))}
-                    {guestBoost > 0 && ` + Guest Boost ${symbol}${getPrice(guestAddOnPrice, Math.round(guestAddOnPrice / 80))}`}
-                    {shotBoost > 0 && ` + Shots Boost ${symbol}${getPrice(shotAddOnPrice, Math.round(shotAddOnPrice / 80))}`}
-                  </>
                 )}
               </>
             )}
+          </p>
+          <p className="text-[11px] text-slate-400 mt-2 font-light">
+            Plans are purchased per event — pricing above is a preview. Checkout always happens from Create Event.
           </p>
         </div>
 
         <Button
           onClick={handleActionClick}
-          disabled={isActionDisabled || cancelMutation.isPending}
+          disabled={isFreeNoOp || cancelMutation.isPending}
           className={getContinueButtonClass()}
         >
           <span>{getActionButtonText()}</span>
-          {selectedPlan !== "free" && !isActionDisabled && <ArrowRight className="h-5 w-5" />}
+          {selectedPlan !== "free" && <ArrowRight className="h-5 w-5" />}
         </Button>
       </div>
     </div>

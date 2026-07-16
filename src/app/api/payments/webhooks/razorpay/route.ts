@@ -32,13 +32,14 @@ export async function POST(request: NextRequest) {
   try {
     switch (evt.event) {
       case "payment.captured": {
-        const p = evt.payload.payment as { 
+        const p = evt.payload.payment as {
           id: string
           amount: number
           currency: string
           subscription_id?: string
-          notes?: { 
+          notes?: {
             user_id?: string
+            event_id?: string
             plan_id?: string
             guest_boost?: string
             shots_boost?: string
@@ -127,6 +128,36 @@ export async function POST(request: NextRequest) {
                 .from("users")
                 .update({ preferences: newPrefs })
                 .eq("id", userRow.id)
+            }
+
+            // Mark the specific event this payment was for as paid — mirrors
+            // the same write in /api/payments/verify. This webhook is a
+            // background confirmation that may arrive before or after the
+            // browser's own /verify call; the idempotency check above (via
+            // the transactions table) means only one of the two paths
+            // actually reaches this block per payment.
+            if (p.notes?.event_id) {
+              const { data: eventRow } = await supabase
+                .from("events")
+                .select("id, host_id, settings")
+                .eq("id", p.notes.event_id)
+                .maybeSingle()
+              if (eventRow && eventRow.host_id === userId) {
+                const currentSettings = (eventRow.settings as Record<string, any>) || {}
+                await supabase
+                  .from("events")
+                  .update({
+                    settings: {
+                      ...currentSettings,
+                      payment_status: "paid",
+                      plan_tier: p.notes.plan_id,
+                      paid_amount_inr: p.amount / 100,
+                      razorpay_payment_id: p.id,
+                      paid_at: new Date().toISOString(),
+                    },
+                  })
+                  .eq("id", p.notes.event_id)
+              }
             }
 
             // Fetch user email for receipt

@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/server"
 import { uploadFile } from "@/lib/integrations/storage"
 import { isDangerousExtension, isSvgContent, validateFile } from "@/lib/security/file-validation"
 import { MAX_FILE_SIZES, API_RATE_LIMITS } from "@/lib/constants"
+import { hasGuestSessionFromRequest, isEventHost } from "@/lib/security/guest-session"
 
 // Public guest-facing engagement endpoint — emoji reactions, text comments,
 // and voice-note replies on a single photo/video/audio item. This route
@@ -24,7 +25,7 @@ async function loadPlayablePhoto(photoId: string) {
   const supabase = await createServiceClient()
   const { data: photo, error } = await supabase
     .from("photos")
-    .select("id, event_id, gallery_id, is_approved")
+    .select("id, event_id, gallery_id, is_approved, event:events(host_id)")
     .eq("id", photoId)
     .single()
   if (error || !photo) return null
@@ -37,7 +38,9 @@ async function loadPlayablePhoto(photoId: string) {
     .maybeSingle()
   if (gallery && gallery.is_public === false) return null
 
-  return photo
+  const eventRel = photo.event as any
+  const hostId = (Array.isArray(eventRel) ? eventRel[0] : eventRel)?.host_id as string | undefined
+  return { ...photo, host_id: hostId }
 }
 
 function cleanAuthorName(raw: unknown): string {
@@ -56,6 +59,13 @@ export const POST = defineRoute<unknown, unknown, { id: string }>({
 
     const photo = await loadPlayablePhoto(photoId)
     if (!photo) return fail("NOT_FOUND", "Photo not found", 404)
+
+    // Same check-in gate as uploads — reacting/commenting/voice-replying is
+    // still a write to this event's data and was previously reachable by
+    // anyone with the photo ID, checked in or not.
+    if (!(await isEventHost(photo.host_id)) && !hasGuestSessionFromRequest(request, photo.event_id)) {
+      return fail("FORBIDDEN", "Please check in to this event before reacting or commenting.", 403)
+    }
 
     const supabase = await createServiceClient()
     const contentType = request.headers.get("content-type") || ""

@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/server"
 import { isDangerousExtension } from "@/lib/security/file-validation"
 import { MAX_FILE_SIZES, ALLOWED_MIME_TYPES, API_RATE_LIMITS } from "@/lib/constants"
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
+import { hasGuestSessionFromRequest, isEventHost } from "@/lib/security/guest-session"
 
 const bodySchema = z.object({
   gallery_id: z.string().uuid(),
@@ -29,7 +30,7 @@ export const POST = defineRoute({
   body: bodySchema,
   requireAuth: false,
   rateLimit: { key: "photos:upload-url", limit: API_RATE_LIMITS.UPLOAD_PHOTOS, windowSeconds: 60 },
-  handler: async ({ body }) => {
+  handler: async ({ body, request, auth }) => {
     const supabase = await createServiceClient()
 
     if (isDangerousExtension(body.file_name)) {
@@ -58,6 +59,13 @@ export const POST = defineRoute({
     const event = gallery.event as any
     const eventObj = Array.isArray(event) ? event[0] : event
     const hostId = eventObj?.host_id
+
+    // Same check-in gate as the confirm step (/api/photos/upload) — this is
+    // the route that actually hands out the signed storage URL, so it must
+    // be gated here too, not just at confirm time.
+    if (!(await isEventHost(hostId)) && !hasGuestSessionFromRequest(request, gallery.event_id)) {
+      return fail("FORBIDDEN", "Please check in to this event before uploading.", 403)
+    }
 
     const { data: subscription } = hostId
       ? await supabase

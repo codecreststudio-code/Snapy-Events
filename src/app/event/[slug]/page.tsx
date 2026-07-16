@@ -6,6 +6,7 @@ import { Button } from "@/lib/components/ui/button"
 import { Camera, Calendar, MapPin, QrCode, Lock, Image, Upload } from "lucide-react"
 import { Logo } from "@/lib/components/layout/logo"
 import { GuestCaptureModal } from "@/lib/components/events/guest-capture-modal"
+import { hasGuestSessionSSR } from "@/lib/security/guest-session"
 
 interface EventData {
   id: string
@@ -108,6 +109,13 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
     !settings.enable_countdown ||
     (settings.countdown_date && new Date(settings.countdown_date) <= new Date())
 
+  // Real, server-checked gate — replaces what used to be a purely cosmetic
+  // check-in popup. Until a guest has actually completed check-in (see
+  // src/app/actions/guest.ts), they don't get gallery links or an upload
+  // entry point from this page, and the upload/react API routes reject them
+  // even if they reach those URLs directly.
+  const checkedIn = await hasGuestSessionSSR(event.id)
+
   const visibleGalleries = event.galleries?.filter((g) => {
     if (
       (settings as any).photo_reveal_mode === "instant" ||
@@ -150,12 +158,14 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
             )}
           </Link>
           <div className="flex items-center gap-4">
-            <Button asChild variant="ghost" size="sm">
-              <Link href={`/event/${event.slug}/upload`}>
-                <Upload className="h-4 w-4" />
-                Upload
-              </Link>
-            </Button>
+            {checkedIn && (
+              <Button asChild variant="ghost" size="sm">
+                <Link href={`/event/${event.slug}/upload`}>
+                  <Upload className="h-4 w-4" />
+                  Upload
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -202,7 +212,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
               )}
             </div>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              {settings.allow_guest_uploads && (
+              {settings.allow_guest_uploads && checkedIn && (
                 <Button asChild size="lg">
                   <Link href={`/event/${event.slug}/upload`}>
                     <Camera className="mr-2 h-4 w-4" />
@@ -222,15 +232,27 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
 
         <section className="mx-auto max-w-5xl px-6 py-16">
           <h2 className="text-2xl font-semibold tracking-tight">
-            {isRevealed ? "Galleries" : "Coming Soon"}
+            {!checkedIn ? "Private Memory Capsule" : isRevealed ? "Galleries" : "Coming Soon"}
           </h2>
           <p className="mt-1 text-muted-foreground">
-            {isRevealed
+            {!checkedIn
+              ? "Check in above with your name and contact details to view and share photos."
+              : isRevealed
               ? `${visibleGalleries.length} gallery (${visibleGalleries.reduce((acc, g) => acc, 0)} photos)`
               : "Photos will be revealed soon"}
           </p>
 
-          {visibleGalleries.length > 0 ? (
+          {!checkedIn ? (
+            <div className="mt-6 flex flex-col items-center justify-center py-16 text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+                <Lock className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="mt-4 text-lg font-medium">Check In to Continue</h3>
+              <p className="mt-2 text-sm text-muted-foreground max-w-md">
+                This event is private to invited guests. Complete the check-in above to view galleries and share your own photos.
+              </p>
+            </div>
+          ) : visibleGalleries.length > 0 ? (
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               {visibleGalleries.map((gallery) => (
                 <Link

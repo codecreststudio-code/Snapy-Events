@@ -79,6 +79,7 @@ export const POST = defineRoute({
     const guest_boost = parseInt(notes.guest_boost || "0", 10) || 0
     const shots_boost = parseInt(notes.shots_boost || "0", 10) || 0
     const coupon_code = notes.coupon_code || undefined
+    const eventId = notes.event_id || undefined
     // Amount actually captured by Razorpay, in paise — authoritative for records.
     const amountInPaise = typeof order.amount === "number" ? order.amount : Number(order.amount) || 0
 
@@ -175,7 +176,37 @@ export const POST = defineRoute({
       payment_method: "razorpay",
     })
 
-    // 7. Consume one coupon use (guarded by the idempotency check above, so a
+    // 7. Mark the specific event this payment was for as paid. This is the
+    //    piece that used to be entirely missing — payment only ever touched
+    //    the account-level `subscriptions` row, so there was no record
+    //    anywhere of whether any individual event had actually been paid
+    //    for. Verified against host_id so a payment can't be attributed to
+    //    an event that isn't the payer's own.
+    if (eventId) {
+      const { data: eventRow } = await supabase
+        .from("events")
+        .select("id, host_id, settings")
+        .eq("id", eventId)
+        .maybeSingle()
+      if (eventRow && eventRow.host_id === userId) {
+        const currentSettings = (eventRow.settings as Record<string, any>) || {}
+        await supabase
+          .from("events")
+          .update({
+            settings: {
+              ...currentSettings,
+              payment_status: "paid",
+              plan_tier: plan_id,
+              paid_amount_inr: amountInPaise / 100,
+              razorpay_payment_id: razorpay_payment_id,
+              paid_at: new Date().toISOString(),
+            },
+          })
+          .eq("id", eventId)
+      }
+    }
+
+    // 8. Consume one coupon use (guarded by the idempotency check above, so a
     //    replay can't over-increment). Enforces max_uses over time.
     if (coupon_code) {
       const { data: coupon } = await supabase
