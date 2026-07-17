@@ -101,15 +101,6 @@ export function MediaGrid({
 
   function closeLightbox() { setActive(null) }
 
-  // Derived from the live `photos` array (rather than a separately-tracked
-  // index) so it stays correct after optimistic reaction/comment updates,
-  // which replace items in place without reordering the array.
-  const activeIndex = active ? photos.findIndex((p) => p.id === active.id) : -1
-  const hasPrev = activeIndex > 0
-  const hasNext = activeIndex >= 0 && activeIndex < photos.length - 1
-  function goToPrev() { if (hasPrev) setActive(photos[activeIndex - 1]) }
-  function goToNext() { if (hasNext) setActive(photos[activeIndex + 1]) }
-
   // Reverts a failed optimistic update back to the last known-good photo
   // list/active item. Used when the server rejects a reaction/comment so the
   // UI doesn't show something as "sent" that never actually got saved.
@@ -257,10 +248,6 @@ export function MediaGrid({
               onReact={(emoji) => handleReact(active.id, emoji)}
               onComment={(text, author) => handleComment(active.id, text, author)}
               onVoiceComment={(file, author) => handleVoiceComment(active.id, file, author)}
-              onPrev={goToPrev}
-              onNext={goToNext}
-              hasPrev={hasPrev}
-              hasNext={hasNext}
             />
           </div>
         </div>

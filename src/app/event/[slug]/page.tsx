@@ -109,14 +109,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
   const isRevealed = (settings as any).photo_reveal_mode === "instant" ||
     (settings as any).reveal_type === "instant" ||
     (settings as any).reveal_experience === "immediately" ||
-    // The event-creation wizard's "During Event" option writes id "during",
-    // not "during_event" — this check never matched it, so choosing "During
-    // Event" silently behaved like a locked/delayed capsule instead of an
-    // instant one. Match both spellings so existing events created before
-    // this fix (which may have persisted "during_event" from an earlier
-    // wizard revision) keep working too.
     (settings as any).reveal_experience === "during_event" ||
-    (settings as any).reveal_experience === "during" ||
     !settings.enable_countdown ||
     (settings.countdown_date && new Date(settings.countdown_date) <= new Date())
 
@@ -132,8 +125,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
       (settings as any).photo_reveal_mode === "instant" ||
       (settings as any).reveal_type === "instant" ||
       (settings as any).reveal_experience === "immediately" ||
-      (settings as any).reveal_experience === "during_event" ||
-      (settings as any).reveal_experience === "during"
+      (settings as any).reveal_experience === "during_event"
     ) return true
     if (!g.reveal_enabled) return true
     return g.reveal_at && new Date(g.reveal_at) <= new Date()

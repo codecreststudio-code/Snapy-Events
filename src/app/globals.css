@@ -56,22 +56,6 @@
   --claude-success: #5db872;
   --claude-warning: #d4a017;
   --claude-error: #c64545;
-
-  /* ─── Snapy event-surface tokens ────────────────────────────────────────
-     The dark gold/cream identity used across every guest- and host-facing
-     event page (hero, wizard, gallery, dashboard event view) was, until now,
-     hardcoded as raw hex via Tailwind arbitrary values (bg-[#141110], etc.)
-     repeated across ~15 files with no single source of truth. Registering
-     them here as real tokens means new components can use bg-surface-dark /
-     text-gold / border-hairline-dark instead of retyping hex, and the whole
-     palette can be retuned from one place. Existing arbitrary-value usages
-     keep working unchanged — this is additive, not a breaking rename. */
-  --snapy-gold: #d4af37;
-  --snapy-gold-strong: #b3922e;
-  --snapy-surface-dark: #141110;
-  --snapy-surface-card: #1c1814;
-  --snapy-surface-card-elevated: #241f19;
-  --snapy-hairline-dark: #3d332a;
 }
 
 .dark {
@@ -151,13 +135,6 @@
   --color-claude-on-dark-soft: var(--claude-on-dark-soft);
   --color-claude-accent-teal: var(--claude-accent-teal);
   --color-claude-accent-amber: var(--claude-accent-amber);
-
-  --color-gold: var(--snapy-gold);
-  --color-gold-strong: var(--snapy-gold-strong);
-  --color-surface-dark: var(--snapy-surface-dark);
-  --color-surface-card: var(--snapy-surface-card);
-  --color-surface-card-elevated: var(--snapy-surface-card-elevated);
-  --color-hairline-dark: var(--snapy-hairline-dark);
 }
 
 * {
@@ -215,29 +192,4 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* ─── Shared glass/frosted surface ──────────────────────────────────────
-   Every "floating over media" panel (invite card, upload progress overlay,
-   settings sheet header, etc.) previously reimplemented its own
-   backdrop-blur + translucent-bg + border combo per element. One class,
-   applied on top of the dark surface tokens above, keeps every floating
-   panel visually identical. */
-.glass-panel {
-  background-color: color-mix(in srgb, var(--snapy-surface-card) 72%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid color-mix(in srgb, var(--snapy-gold) 14%, var(--snapy-hairline-dark));
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-}
-
-/* Referenced by several existing components (media-lightbox, camera-capture,
-   about page) but never actually defined, so it silently did nothing —
-   scrollable chip rows / comment feeds always showed a visible scrollbar. */
-.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
 }

@@ -6,10 +6,10 @@
 // page) so the host dashboard's media timeline — which previously had no
 // click-to-open viewer at all — can show the exact same experience instead
 // of duplicating ~150 lines of reaction/comment UI a second time.
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
-import { Volume2, X, Download, Heart, Flame, PartyPopper, ThumbsUp, Smile, Send, MessageCircle, Mic, Play, Pause, ChevronLeft, ChevronRight } from "lucide-react"
+import { Volume2, X, Download, Heart, Flame, PartyPopper, ThumbsUp, Smile, Send, MessageCircle, Mic, Play, Pause } from "lucide-react"
 import { WatermarkOverlay } from "@/lib/components/media/watermark-overlay"
 import { VoiceNoteRecorder } from "@/lib/components/events/voice-note-recorder"
 
@@ -80,10 +80,6 @@ export function MediaLightbox({
   onReact,
   onComment,
   onVoiceComment,
-  onPrev,
-  onNext,
-  hasPrev = false,
-  hasNext = false,
 }: {
   p: LightboxMedia
   watermarkEnabled: boolean
@@ -97,20 +93,11 @@ export function MediaLightbox({
   onReact: (emoji: string) => void
   onComment: (commentText: string, authorName: string) => void
   onVoiceComment?: (file: File, authorName: string) => void
-  // Move to the previous/next item in the current media set. Optional so
-  // this component still works standalone (e.g. a single-item preview) —
-  // the arrow buttons and swipe/keyboard handling below only activate when
-  // both a handler and hasPrev/hasNext are provided by the caller.
-  onPrev?: () => void
-  onNext?: () => void
-  hasPrev?: boolean
-  hasNext?: boolean
 }) {
   const [commentInput, setCommentInput] = useState("")
   const [nameInput, setNameInput] = useState("")
   const [showRecorder, setShowRecorder] = useState(false)
   const canDownload = !isMessage(p)
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null)
 
   function handleDownload() {
     window.open(`/api/photos/${p.id}/download`, "_blank")
@@ -126,73 +113,10 @@ export function MediaLightbox({
     setCommentInput("")
   }
 
-  // Left/Right arrow keys move between media, Escape closes — matches the
-  // behavior guests expect from every other photo viewer (Google Photos,
-  // native OS galleries, etc). Typing in the comment/name inputs shouldn't
-  // be hijacked by arrow keys, so those are ignored while an input/textarea
-  // has focus.
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      const target = e.target as HTMLElement | null
-      const isTyping = target?.tagName === "INPUT" || target?.tagName === "TEXTAREA"
-      if (isTyping) {
-        if (e.key === "Escape") (target as HTMLElement).blur()
-        return
-      }
-      if (e.key === "ArrowLeft" && hasPrev && onPrev) onPrev()
-      else if (e.key === "ArrowRight" && hasNext && onNext) onNext()
-      else if (e.key === "Escape") onClose()
-    }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [hasPrev, hasNext, onPrev, onNext, onClose])
-
-  // Swipe support for touch/mobile — a horizontal drag past a small
-  // threshold moves to the next/previous item, same gesture as any native
-  // photo gallery. Vertical scrolling and taps (small movement) are ignored.
-  function handleTouchStart(e: React.TouchEvent) {
-    const t = e.touches[0]
-    touchStartRef.current = { x: t.clientX, y: t.clientY }
-  }
-  function handleTouchEnd(e: React.TouchEvent) {
-    const start = touchStartRef.current
-    touchStartRef.current = null
-    if (!start) return
-    const t = e.changedTouches[0]
-    const dx = t.clientX - start.x
-    const dy = t.clientY - start.y
-    const SWIPE_THRESHOLD = 50
-    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy)) return
-    if (dx < 0 && hasNext && onNext) onNext()
-    else if (dx > 0 && hasPrev && onPrev) onPrev()
-  }
-
   return (
     <div className="bg-[#1C1814] border border-[#3D332A] rounded-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] w-full max-w-4xl shadow-2xl">
       {/* Media Content Box */}
-      <div
-        className="flex-1 bg-black flex items-center justify-center min-h-[300px] md:min-h-[480px] p-2 relative"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        {hasPrev && onPrev && (
-          <button
-            onClick={onPrev}
-            aria-label="Previous"
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm border border-white/10 hover:bg-black/70 transition"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-        )}
-        {hasNext && onNext && (
-          <button
-            onClick={onNext}
-            aria-label="Next"
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm border border-white/10 hover:bg-black/70 transition"
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
-        )}
+      <div className="flex-1 bg-black flex items-center justify-center min-h-[300px] md:min-h-[480px] p-2 relative">
         {isMessage(p) ? (
           <div className="p-8 text-center max-w-md space-y-4">
             <MessageCircle className="h-12 w-12 text-[#D4AF37] mx-auto" />
