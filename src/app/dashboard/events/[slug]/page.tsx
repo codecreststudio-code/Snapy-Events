@@ -639,10 +639,15 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const handleShareRecap = () => {
     if (!recapVideo?.video_url) return
     const shareData = { title: `${event?.name || "Event"} — Recap Video`, url: recapVideo.video_url }
-    if (typeof navigator !== "undefined" && "share" in navigator) {
-      ;(navigator as any).share(shareData).catch(() => {})
-    } else if (typeof navigator !== "undefined") {
-      navigator.clipboard?.writeText(recapVideo.video_url)
+    // Scoped to a local `nav` const (rather than narrowing the global `navigator`
+    // via `"share" in navigator`) — the `in`-based narrowing previously collapsed
+    // the else-if branch's `navigator` type to `never` under this codebase's lib
+    // config, which failed the production type-check.
+    const nav = typeof navigator !== "undefined" ? navigator : undefined
+    if (nav && typeof (nav as any).share === "function") {
+      ;(nav as any).share(shareData).catch(() => {})
+    } else if (nav) {
+      nav.clipboard?.writeText(recapVideo.video_url)
       toast({ title: "Link copied", description: "Recap video link copied to clipboard." })
     }
   }

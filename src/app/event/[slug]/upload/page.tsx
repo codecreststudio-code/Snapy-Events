@@ -415,7 +415,13 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
       return
     }
 
-    const targetGallery = selectedGallery || uploadGalleries[0]?.id || galleries?.[0]?.id
+    // Explicit `string` fallback (rather than leaving this `string | undefined`)
+    // so the type stays narrowed to `string` inside uploadOne() below — a
+    // nested function declaration closing over this const doesn't retain
+    // TypeScript's post-guard narrowing the way inline code does, which
+    // previously failed the production type-check at the uploadFileDirect
+    // call site.
+    const targetGallery: string = selectedGallery || uploadGalleries[0]?.id || galleries?.[0]?.id || ""
 
     if (!targetGallery) {
       toast({
