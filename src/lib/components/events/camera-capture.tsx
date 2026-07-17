@@ -469,7 +469,7 @@ export function CameraCapture({
       aria-label="Camera"
     >
       {/* Top Header */}
-      <div className="flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] z-10 bg-gradient-to-b from-black/70 to-transparent absolute top-0 left-0 right-0">
+      <div className="flex flex-wrap items-center justify-between gap-2 p-4 pt-[max(1rem,env(safe-area-inset-top))] z-10 bg-gradient-to-b from-black/70 to-transparent absolute top-0 left-0 right-0">
         <Button variant="ghost" size="icon" onClick={handleClose} aria-label="Close camera" className="text-white hover:bg-white/20 rounded-full">
           <X className="h-6 w-6" />
         </Button>

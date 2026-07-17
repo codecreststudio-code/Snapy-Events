@@ -17,9 +17,9 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: Photo; watermarkEnabled: b
   if (isMessage(p)) {
     return (
       <div className="aspect-square bg-gradient-to-br from-[#D4AF37]/10 to-[#3D332A]/40 p-4 flex flex-col justify-between border border-[#D4AF37]/20 rounded-lg">
-        <div className="flex items-center gap-2">
-          <MessageCircle className="h-4 w-4 text-[#D4AF37]" />
-          <span className="text-xs font-semibold text-[#D4AF37] truncate">{p.uploader_name || "Guest Wish"}</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <MessageCircle className="h-4 w-4 shrink-0 text-[#D4AF37]" />
+          <span className="min-w-0 truncate text-xs font-semibold text-[#D4AF37]">{p.uploader_name || "Guest Wish"}</span>
         </div>
         <p className="font-playfair text-xs italic text-white/80 line-clamp-3 my-auto">"{p.metadata?.text || p.original_filename}"</p>
         <span className="text-[10px] text-white/40">Written Note</span>

@@ -68,7 +68,7 @@ export function GuestCaptureModal({ eventId, eventName }: { eventId: string; eve
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
-        className="sm:max-w-[425px] rounded-2xl sm:rounded-2xl border border-[#3D332A] bg-[#1C1814] text-white/90"
+        className="sm:max-w-[425px] rounded-2xl sm:rounded-2xl border border-[#3D332A] bg-[#1C1814] text-white/90 max-h-[90vh] overflow-y-auto"
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>

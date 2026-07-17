@@ -1525,7 +1525,7 @@ export function NewEventForm() {
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
-              className="bg-[#1C1814] border border-[#3D332A] rounded-3xl p-8 sm:p-10 max-w-lg w-full shadow-2xl relative space-y-6"
+              className="bg-[#1C1814] border border-[#3D332A] rounded-3xl p-8 sm:p-10 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl relative space-y-6"
             >
 
               {/* Celebratory Badge */}

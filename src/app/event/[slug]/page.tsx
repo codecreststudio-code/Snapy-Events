@@ -287,14 +287,14 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                         : undefined
                     }
                   />
-                  <div className="flex items-center justify-between p-4">
-                    <div>
-                      <p className="font-medium text-white group-hover:text-[#D4AF37] group-hover:underline">{gallery.name}</p>
+                  <div className="flex items-center justify-between gap-3 p-4">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-white group-hover:text-[#D4AF37] group-hover:underline">{gallery.name}</p>
                       {gallery.description && (
-                        <p className="text-xs text-white/60">{gallery.description}</p>
+                        <p className="truncate text-xs text-white/60">{gallery.description}</p>
                       )}
                     </div>
-                    <Image className="h-5 w-5 text-white/40" />
+                    <Image className="h-5 w-5 shrink-0 text-white/40" />
                   </div>
                 </Link>
               ))}

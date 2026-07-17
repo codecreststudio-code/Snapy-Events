@@ -49,7 +49,9 @@ import {
   Share2,
   MessageCircle,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Film,
+  AlertCircle
 } from "lucide-react"
 
 const TEMPLATE_COVERS = [
@@ -94,6 +96,23 @@ interface ExtEventSettings extends EventSettings {
     theme: string
     welcome_message: string
     countdown_enabled: boolean
+  }
+  // Populated server-side by the recap generation pipeline
+  // (POST /api/events/[id]/recap/generate). Not present until a host has
+  // triggered generation at least once for this event.
+  recap_video?: {
+    status: "idle" | "rendering" | "ready" | "failed"
+    mood?: "joyful" | "sentimental"
+    video_url?: string
+    generated_at?: string
+    error?: string
+    stats?: {
+      guests: number
+      photos: number
+      videos: number
+      voiceNotes: number
+      messages: number
+    }
   }
 }
 
@@ -546,6 +565,88 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     }
   })
 
+  // --- Recap Video (highlight reel) ---
+  // The generate call is a long-running synchronous request (up to ~300s,
+  // same pattern as /api/events/[id]/download-zip) — no job-queue/polling
+  // endpoint. We await the full response, then invalidate the event query
+  // (same queryKey pattern as updateMutation above) so the server-persisted
+  // settings.recap_video survives a hard refresh, not just local state.
+  const recapVideo = (event?.settings as ExtEventSettings | undefined)?.recap_video
+  const recapServerStatus: "idle" | "rendering" | "ready" | "failed" = recapVideo?.status || "idle"
+
+  const [recapMood, setRecapMood] = useState<"joyful" | "sentimental">("joyful")
+  // Forces the mood-selector view back open after "Regenerate" / "Try Again"
+  // even though the server-persisted status is still "ready"/"failed".
+  const [recapViewOverride, setRecapViewOverride] = useState(false)
+
+  useEffect(() => {
+    if (recapVideo?.mood) setRecapMood(recapVideo.mood)
+  }, [recapVideo?.mood])
+
+  const recapMutation = useMutation({
+    mutationFn: async (mood: "joyful" | "sentimental") => {
+      if (!event?.id) throw new Error("Missing event id")
+      const res = await fetch(`/api/events/${event.id}/recap/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mood }),
+      })
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) {
+        throw new Error(json?.error?.message || `Recap generation failed (${res.status})`)
+      }
+      return json.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["event", slug] })
+      setRecapViewOverride(false)
+      toast({ title: "Recap video ready!", description: "Your highlight reel has been generated." })
+    },
+    onError: (error: Error) => {
+      // The backend also persists a "failed" status onto settings.recap_video
+      // server-side — invalidate so a refresh reflects that too, not just
+      // this in-memory mutation error.
+      queryClient.invalidateQueries({ queryKey: ["event", slug] })
+      toast({ title: "Couldn't generate recap", description: error.message, variant: "destructive" })
+    },
+  })
+
+  // Effective status shown by the card: in-flight mutation and the
+  // Regenerate/Try Again override both take priority over whatever the
+  // server currently has persisted.
+  const recapStatus: "idle" | "rendering" | "ready" | "failed" = recapMutation.isPending
+    ? "rendering"
+    : recapViewOverride
+      ? "idle"
+      : recapMutation.isError
+        ? "failed"
+        : recapServerStatus
+
+  const recapErrorMessage =
+    recapMutation.error?.message ||
+    recapVideo?.error ||
+    "Something went wrong generating your recap. Please try again."
+
+  const handleGenerateRecap = () => {
+    recapMutation.mutate(recapMood)
+  }
+
+  const handleResetRecap = () => {
+    recapMutation.reset()
+    setRecapViewOverride(true)
+  }
+
+  const handleShareRecap = () => {
+    if (!recapVideo?.video_url) return
+    const shareData = { title: `${event?.name || "Event"} — Recap Video`, url: recapVideo.video_url }
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      ;(navigator as any).share(shareData).catch(() => {})
+    } else if (typeof navigator !== "undefined") {
+      navigator.clipboard?.writeText(recapVideo.video_url)
+      toast({ title: "Link copied", description: "Recap video link copied to clipboard." })
+    }
+  }
+
   // Local Form state for settings edits
   const [editName, setEditName] = useState("")
   const [editStatus, setEditStatus] = useState<EventStatus>("published")
@@ -797,19 +898,19 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     <div className="min-h-screen bg-[#141110] text-white/90 flex flex-col font-sans selection:bg-[#D4AF37]/30 pb-16">
 
       {/* Top Banner Navigation */}
-      <header className="px-6 py-4 bg-[#1C1814] border-b border-[#3D332A] sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard/events" className="p-2 hover:bg-white/5 rounded-full transition-colors">
+      <header className="px-4 py-4 sm:px-6 bg-[#1C1814] border-b border-[#3D332A] sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-4">
+            <Link href="/dashboard/events" className="shrink-0 p-2 hover:bg-white/5 rounded-full transition-colors">
               <ArrowLeft className="h-5 w-5 text-white/70" />
             </Link>
-            <div>
+            <div className="min-w-0">
               <span className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold block">Memory Capsule</span>
-              <h1 className="font-playfair text-xl md:text-2xl font-light text-white">{event.name}</h1>
+              <h1 className="font-playfair text-xl md:text-2xl font-light text-white truncate">{event.name}</h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <Button asChild variant="outline" className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/5 text-xs">
               <Link href={`/event/${event.slug}`} target="_blank" className="flex items-center gap-1">
                 <span>Live Portal</span>
@@ -828,7 +929,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       </header>
 
       {/* Hero Stats Board */}
-      <section className="bg-gradient-to-b from-[#1C1814]/60 to-transparent py-8 px-6 border-b border-[#3D332A]/60">
+      <section className="bg-gradient-to-b from-[#1C1814]/60 to-transparent py-8 px-4 sm:px-6 border-b border-[#3D332A]/60">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
 
           {/* Circular/Visual Metrics Widget */}
@@ -869,7 +970,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       </section>
 
       {/* Master Workspace Layout */}
-      <section className="max-w-7xl w-full mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <section className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* LEFT COLUMN: Memory timeline */}
         <div className="lg:col-span-2 space-y-8">
@@ -1085,7 +1186,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   size="sm"
                   onClick={handleCopyJoinCode}
                   disabled={!event.join_code}
-                  className="h-8 w-8 p-0 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white"
+                  className="h-10 w-10 p-0 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white"
                   title="Copy code"
                 >
                   {codeCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
@@ -1095,7 +1196,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   size="sm"
                   onClick={handleRegenerateJoinCode}
                   disabled={regeneratingCode}
-                  className="h-8 w-8 p-0 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white"
+                  className="h-10 w-10 p-0 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white"
                   title="Generate a new code (old one stops working)"
                 >
                   {regeneratingCode ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
@@ -1127,7 +1228,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 className="text-xs rounded-full border border-white/15 bg-transparent hover:bg-white/10 flex items-center justify-center gap-1 text-white px-2"
               >
                 {sharing === "whatsapp" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MessageCircle className="h-3.5 w-3.5" />}
-                <span>WhatsApp</span>
+                <span className="hidden sm:inline">WhatsApp</span>
               </Button>
 
               <Button
@@ -1137,7 +1238,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 className="text-xs rounded-full border border-white/15 bg-transparent hover:bg-white/10 flex items-center justify-center gap-1 text-white px-2"
               >
                 {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                <span>{copied ? "Copied!" : "Copy"}</span>
+                <span className="hidden sm:inline">{copied ? "Copied!" : "Copy"}</span>
               </Button>
 
               <Button
@@ -1147,9 +1248,145 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 className="text-xs rounded-full border border-white/15 bg-transparent hover:bg-white/10 flex items-center justify-center gap-1 text-white px-2"
               >
                 <Download className="h-3.5 w-3.5" />
-                <span>QR</span>
+                <span className="hidden sm:inline">QR</span>
               </Button>
             </div>
+          </div>
+
+          {/* Recap Video card — auto-composed highlight reel with an
+              animated stats intro, generated via the long-running
+              POST /api/events/[id]/recap/generate route (same up-to-~300s
+              synchronous pattern as the download-zip route: the client
+              awaits the full response with a loading state, no polling). */}
+          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <Film className="h-4.5 w-4.5 text-[#D4AF37]" />
+                <h3 className="font-playfair text-lg font-light text-white">Recap Video</h3>
+              </div>
+              {recapStatus === "ready" && (
+                <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20 capitalize">
+                  {recapVideo?.mood}
+                </span>
+              )}
+            </div>
+
+            {(recapStatus === "idle" || recapStatus === "rendering") && (
+              <div className="space-y-4">
+                <p className="text-xs text-white/60">Turn your event into a highlight reel — an auto-composed video with an animated stats intro built from your photos, videos, and messages.</p>
+
+                <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Recap mood">
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={recapMood === "joyful"}
+                    disabled={recapStatus === "rendering"}
+                    onClick={() => setRecapMood("joyful")}
+                    className={`rounded-2xl border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] disabled:opacity-50 disabled:cursor-not-allowed ${
+                      recapMood === "joyful"
+                        ? "border-[#D4AF37] bg-[#D4AF37]/10"
+                        : "border-white/15 bg-transparent hover:bg-white/5"
+                    }`}
+                  >
+                    <p className="text-xs font-bold text-white/90">Joyful</p>
+                    <p className="text-[10px] text-white/50 mt-0.5">Upbeat and vibrant</p>
+                  </button>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={recapMood === "sentimental"}
+                    disabled={recapStatus === "rendering"}
+                    onClick={() => setRecapMood("sentimental")}
+                    className={`rounded-2xl border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] disabled:opacity-50 disabled:cursor-not-allowed ${
+                      recapMood === "sentimental"
+                        ? "border-[#D4AF37] bg-[#D4AF37]/10"
+                        : "border-white/15 bg-transparent hover:bg-white/5"
+                    }`}
+                  >
+                    <p className="text-xs font-bold text-white/90">Sentimental</p>
+                    <p className="text-[10px] text-white/50 mt-0.5">Warm and reflective</p>
+                  </button>
+                </div>
+
+                {recapStatus === "rendering" ? (
+                  <div className="flex flex-col items-center justify-center gap-2 py-6 text-center border border-white/10 bg-white/5 rounded-2xl">
+                    <Loader2 className="h-5 w-5 text-[#D4AF37] animate-spin" />
+                    <p className="text-xs font-semibold text-white/80">Composing your recap… this can take a few minutes</p>
+                    <p className="text-[10px] text-white/50">You can leave this page — we'll save it here when it's ready.</p>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={handleGenerateRecap}
+                    disabled={recapMutation.isPending}
+                    className="w-full text-xs bg-[#D4AF37] hover:bg-[#c19f2e] text-[#141110] font-semibold flex items-center justify-center gap-1.5 rounded-full"
+                  >
+                    <Film className="h-3.5 w-3.5" />
+                    <span>Generate Recap</span>
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {recapStatus === "ready" && recapVideo?.video_url && (
+              <div className="space-y-3">
+                <video
+                  src={recapVideo.video_url}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  poster={event?.cover_image_url || undefined}
+                  className="w-full aspect-video rounded-2xl border border-white/10 bg-black"
+                >
+                  Your browser does not support video playback.
+                </video>
+
+                <p className="text-[10px] text-white/50 text-center">
+                  {recapVideo.stats
+                    ? `${recapVideo.stats.guests} guests · ${recapVideo.stats.photos} photos · ${recapVideo.stats.videos} videos · ${recapVideo.stats.voiceNotes} voice notes`
+                    : `${totalGuestsCount} guests · ${totalPhotosCount} photos · ${totalVideosCount} videos · ${totalVoicesCount} voice notes`}
+                </p>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href={recapVideo.video_url}
+                    download
+                    className="rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]"
+                  >
+                    <Download className="h-3.5 w-3.5" /> Download
+                  </a>
+                  <button
+                    type="button"
+                    onClick={handleShareRecap}
+                    className="rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]"
+                  >
+                    <Share2 className="h-3.5 w-3.5" /> Share
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleResetRecap}
+                  className="w-full text-[11px] font-semibold text-white/60 hover:text-white flex items-center justify-center gap-1.5 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] rounded-full"
+                >
+                  <RefreshCw className="h-3 w-3" /> Regenerate
+                </button>
+              </div>
+            )}
+
+            {recapStatus === "failed" && (
+              <div className="space-y-3 text-center py-2">
+                <AlertCircle className="h-6 w-6 text-red-400 mx-auto" />
+                <p className="text-xs text-white/70">{recapErrorMessage}</p>
+                <Button
+                  size="sm"
+                  onClick={handleResetRecap}
+                  className="w-full text-xs bg-[#D4AF37] hover:bg-[#c19f2e] text-[#141110] font-semibold rounded-full"
+                >
+                  Try Again
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* AI Matches clustered panel */}
