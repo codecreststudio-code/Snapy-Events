@@ -30,8 +30,4 @@ export const POST = defineRoute({
     const { facesDetected } = await detectAndStoreFaces(supabase, {
       eventId: body.event_id,
       photoId: body.photo_id,
-      imageUrl: url,
-    })
-    return ok({ faces_detected: facesDetected })
-  },
-}).POST
+      imageUrl

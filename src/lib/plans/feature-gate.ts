@@ -176,33 +176,4 @@ export async function checkOrgFeatureAccess(
         .select("plan")
         .eq("id", orgId)
         .maybeSingle()
-      if (org?.plan) planId = org.plan
-    }
-
-    const { data: planRecord } = await supabase
-      .from("plans")
-      .select("limits")
-      .eq("id", planId)
-      .maybeSingle()
-
-    const limits = (planRecord?.limits as Record<string, any>) || {}
-
-    if (limits[featureKey] !== undefined) {
-      const isAllowed = Boolean(limits[featureKey])
-      return {
-        allowed: isAllowed,
-        planId,
-        reason: isAllowed ? undefined : `Feature '${featureKey}' requires upgrading your plan.`,
-      }
-    }
-
-    if (["ai_face_search", "live_photo_wall", "video_uploads", "voice_notes", "print_ready_downloads", "whatsapp_alerts", "priority_support"].includes(featureKey)) {
-      const isPaid = planId !== "free"
-      return { allowed: isPaid, planId }
-    }
-
-    return { allowed: true, planId }
-  } catch (err) {
-    return { allowed: true, planId: "free" }
-  }
-}
+      if (org?.plan) planId = or
