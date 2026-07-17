@@ -132,28 +132,4 @@ export const POST = defineRoute<{ mood: RecapMood }, unknown, { id: string }>({
       // exposing raw internals (ffmpeg stderr, /tmp paths, Supabase errors)
       // in the HTTP response or persisted settings.
       const ref = `${eventId.slice(0, 8)}-${Date.now().toString(36)}`
-      logger.error("recap generate: generation failed", { eventId, mood, ref, error: rawMessage })
-
-      const userMessage = `${GENERIC_FAILURE_MESSAGE} (ref: ${ref})`
-
-      const recapVideoSettings = {
-        status: "failed" as const,
-        mood,
-        error: userMessage,
-      }
-
-      try {
-        await supabase
-          .from("events")
-          .update({
-            settings: { ...currentSettings, recap_video: recapVideoSettings },
-          })
-          .eq("id", eventId)
-      } catch (persistErr) {
-        logger.error("recap generate: failed to persist failed state", { eventId, error: String(persistErr) })
-      }
-
-      return fail("RECAP_GENERATION_FAILED", userMessage, 500)
-    }
-  },
-}).POST
+      logger.error("recap generate: generation failed", { eventId, mood, ref, erro

@@ -120,19 +120,4 @@ export async function GET(
     // reads these to warn the host rather than letting a truncated download
     // look identical to a complete one.
     const truncated = filesAdded < photos.length
-    return new NextResponse(zipArray as unknown as BodyInit, {
-      status: 200,
-      headers: {
-        "Content-Type": "application/zip",
-        "Content-Disposition": `attachment; filename="${sanitizedTitle}-print-ready.zip"`,
-        "Cache-Control": "no-cache",
-        "X-Zip-Total-Photos": String(photos.length),
-        "X-Zip-Included-Photos": String(filesAdded),
-        "X-Zip-Truncated": String(truncated),
-      },
-    })
-  } catch (error: any) {
-    logger.error("download-zip internal error", { error: String(error) })
-    return NextResponse.json({ error: "Failed to generate ZIP archive" }, { status: 500 })
-  }
-}
+    return 
