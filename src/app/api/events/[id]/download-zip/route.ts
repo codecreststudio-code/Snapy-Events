@@ -52,23 +52,16 @@ export async function GET(
       )
     }
 
-    // 3. Fetch this event's photos. Approval is a guest-facing moderation
-    // concept (whether OTHER guests can see a photo in the public gallery)
-    // — it has nothing to do with whether the HOST can download their own
-    // event's content. Filtering on is_approved=true here meant "Download
-    // All" 400'd with "No approved photos available" for any host who
-    // hadn't manually approved every upload (which most never do, since
-    // there's no moderation step in the normal flow), even on a fully
-    // populated, paid event. The host already passed the ownership check
-    // above, so every photo on this event is fair game.
+    // 3. Fetch approved photos only — unapproved drafts must never appear in downloads
     const { data: photos, error: photoErr } = await supabase
       .from("photos")
       .select("id, storage_path, original_filename, file_size")
       .eq("event_id", eventId)
+      .eq("is_approved", true)
       .order("created_at", { ascending: true })
 
     if (photoErr || !photos || photos.length === 0) {
-      return NextResponse.json({ error: "No photos available to download yet" }, { status: 400 })
+      return NextResponse.json({ error: "No approved photos available to download" }, { status: 400 })
     }
 
     // Hard limits to prevent OOM — each file is buffered in-process.
@@ -118,4 +111,28 @@ export async function GET(
     }
 
     const zipArray = await zip.generateAsync({ type: "uint8array" })
-    const sanitizedTitle = (event.name || "snapsy-ev
+    const sanitizedTitle = (event.name || "snapsy-event").replace(/[^a-zA-Z0-9_-]/g, "_")
+
+    // filesAdded can be less than photos.length because of MAX_ZIP_FILES /
+    // MAX_ZIP_BYTES above, or because individual downloads failed. Surface
+    // that via response headers (can't attach a JSON body to a binary ZIP
+    // response) instead of silently shipping a partial archive — the client
+    // reads these to warn the host rather than letting a truncated download
+    // look identical to a complete one.
+    const truncated = filesAdded < photos.length
+    return new NextResponse(zipArray as unknown as BodyInit, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/zip",
+        "Content-Disposition": `attachment; filename="${sanitizedTitle}-print-ready.zip"`,
+        "Cache-Control": "no-cache",
+        "X-Zip-Total-Photos": String(photos.length),
+        "X-Zip-Included-Photos": String(filesAdded),
+        "X-Zip-Truncated": String(truncated),
+      },
+    })
+  } catch (error: any) {
+    logger.error("download-zip internal error", { error: String(error) })
+    return NextResponse.json({ error: "Failed to generate ZIP archive" }, { status: 500 })
+  }
+}

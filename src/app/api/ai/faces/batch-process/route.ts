@@ -3,7 +3,6 @@ import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { detectAndStoreFaces } from "@/lib/integrations/face"
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
-import { logger } from "@/lib/logger"
 
 const body = z.object({ event_id: z.string().uuid(), photo_ids: z.array(z.string().uuid()).min(1).max(500) })
 
@@ -21,4 +20,32 @@ export const POST = defineRoute({
       return fail("FORBIDDEN", gate.reason || "AI Face Search is disabled for this event", 403)
     }
 
-    const supabase = await create
+    const supabase = await createClient()
+    const { data: photos } = await supabase.from("photos").select("id, storage_path").in("id", body.photo_ids)
+
+    // batchProcessFaces() used to run detection per photo and only ever
+    // return counts — it never wrote a single row to `faces`, so batch runs
+    // silently produced nothing to cluster. detectAndStoreFaces persists
+    // each detected face AND assigns/creates its face_clusters row.
+    let processed = 0
+    let facesDetected = 0
+    const errors: { photoId: string; error: string }[] = []
+
+    for (const photo of photos ?? []) {
+      try {
+        const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${photo.storage_path}`
+        const result = await detectAndStoreFaces(supabase, {
+          eventId: body.event_id,
+          photoId: photo.id,
+          imageUrl: url,
+        })
+        processed++
+        facesDetected += result.facesDetected
+      } catch (e) {
+        errors.push({ photoId: photo.id, error: String(e) })
+      }
+    }
+
+    return ok({ processed, facesDetected, errors })
+  },
+}).POST

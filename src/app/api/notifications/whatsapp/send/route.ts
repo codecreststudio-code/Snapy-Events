@@ -52,4 +52,11 @@ export const POST = defineRoute({
         message: textMessage,
         url: galleryUrl,
       },
-     
+      status: "pending",
+      scheduled_for: new Date().toISOString(),
+    }).select().single()
+
+    if (error) return fail("DB_ERROR", "Failed to queue notification", 500)
+    return ok({ success: true, notification_id: data.id, message: textMessage })
+  },
+}).POST

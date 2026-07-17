@@ -385,4 +385,36 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       }
     }
 
-    void trackEvent({ user_id: auth.user?.id ?? undefined, event_type: "
+    void trackEvent({ user_id: auth.user?.id ?? undefined, event_type: "photo.uploaded", event_data: { gallery_id: id }, request })
+
+    // Kick off AI face detection for photo uploads without blocking the
+    // guest's upload response on it. Detection was previously only
+    // reachable by manually calling /api/ai/faces/detect or the batch
+    // route (and both of those were separately broken — see face.ts) —
+    // there was no automatic trigger anywhere in the upload path at all.
+    // `after()` schedules this to run once the response has been sent but
+    // guarantees (via the platform's waitUntil) that it actually finishes,
+    // unlike a bare detached promise which Vercel can freeze mid-flight
+    // right after the response is returned.
+    if (category === "PHOTO" && finalStoragePath) {
+      const photoId = data.id
+      const eventIdForDetection = gallery.event_id
+      const detectionUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${finalStoragePath}`
+      after(async () => {
+        try {
+          const gate = await checkEventFeatureAccess(eventIdForDetection, "ai_face_search")
+          if (!gate.allowed) return
+          await detectAndStoreFaces(supabase, {
+            eventId: eventIdForDetection,
+            photoId,
+            imageUrl: detectionUrl,
+          })
+        } catch (err) {
+          console.warn("[face detection after-response failed]", err)
+        }
+      })
+    }
+
+    return created(data)
+  },
+}).POST

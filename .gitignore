@@ -122,4 +122,6 @@ BASH_WRITE_TEST.txt
 /models/
 /zzz-*.md
 /snapsy-feature-prompts - AI face etc.md
-/snapsy-audit-repo
+/snapsy-audit-report.md
+/AUDIT-SUMMARY.md
+/UI-UX-IMPROVEMENTS.md

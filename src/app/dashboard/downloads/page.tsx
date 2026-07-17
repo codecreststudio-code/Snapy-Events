@@ -345,4 +345,15 @@ export default function DownloadsPage() {
           <CardDescription>Recent download activity</CardDescription>
         </CardHeader>
         <CardContent>
-     
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <History className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="font-medium mb-2">No download history</h3>
+            <p className="text-sm text-muted-foreground text-center max-w-md">
+              Your download history will appear here.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
