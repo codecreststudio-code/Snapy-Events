@@ -34,19 +34,33 @@ export async function checkEventFeatureAccess(
       return { allowed: false, planId: "free", reason: "Feature disabled in event settings" }
     }
 
-    // 2. Fetch Active Subscription Plan by Host User ID (needed below, both
-    // for the content_types fallback and the plan-limits check further down)
+    // 2. Determine this EVENT's own plan tier. Snapy Events charges per
+    // event, not as an ongoing account subscription (fixed earlier — see
+    // calculatePrice()/verify/checkout-free route comments) — so the
+    // authoritative entitlement lives on the event itself
+    // (settings.plan_tier, set at successful checkout), not on a
+    // user-scoped `subscriptions` row. That table is a single row per host
+    // and gets overwritten by whichever event the host most recently paid
+    // for, so keying off it here silently misattributed plan tier to every
+    // OTHER event that same host owns (e.g. a free test event would
+    // inherit "premium" from a later purchase, or vice versa). Only fall
+    // back to `subscriptions` for events created before `plan_tier` started
+    // being persisted on settings.
     let planId = "free"
-    const { data: sub } = await supabase
-      .from("subscriptions")
-      .select("plan_id")
-      .eq("user_id", event.host_id)
-      .eq("status", "active")
-      .limit(1)
-      .maybeSingle()
+    if (typeof eventSettings.plan_tier === "string" && eventSettings.plan_tier) {
+      planId = eventSettings.plan_tier
+    } else {
+      const { data: sub } = await supabase
+        .from("subscriptions")
+        .select("plan_id")
+        .eq("user_id", event.host_id)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle()
 
-    if (sub?.plan_id) {
-      planId = sub.plan_id
+      if (sub?.plan_id) {
+        planId = sub.plan_id
+      }
     }
 
     // Check nested content_types toggles. An explicit true/false is honored
@@ -118,7 +132,7 @@ export async function checkEventFeatureAccess(
     // Default Fallback Rules based on Plan Tier
     // NOTE: video_uploads and voice_notes are controlled by event content_types settings (checked above).
     // Only block premium AI features when host has no paid plan.
-    if (["ai_face_search", "live_photo_wall", "print_ready_downloads", "whatsapp_alerts", "priority_support"].includes(featureKey)) {
+    if (["ai_face_search", "live_photo_wall", "print_ready_downloads", "whatsapp_alerts", "priority_support", "recap_video"].includes(featureKey)) {
       const isPaid = planId !== "free"
       return {
         allowed: isPaid,

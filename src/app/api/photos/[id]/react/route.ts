@@ -21,7 +21,17 @@ const KNOWN_EMOJI = new Set(["heart", "fire", "party", "clap", "adore"])
 const MAX_COMMENT_LENGTH = 500
 const MAX_AUTHOR_NAME_LENGTH = 60
 
-async function loadPlayablePhoto(photoId: string) {
+// Loads the photo unconditionally — approval/visibility are access-control
+// concerns, not existence concerns, and are checked separately below once we
+// know whether the requester is the event host. They used to live inside
+// this loader and ran before any host check was possible, which meant every
+// reaction/comment/voice-reply attempt from the HOST's own dashboard 404'd
+// as "Photo not found" for any not-yet-approved photo — even though that
+// dashboard timeline intentionally shows every upload regardless of
+// approval status. Hosts manage their own event's content and must always
+// be able to interact with it; only guests need the moderation/visibility
+// gate.
+async function loadPhoto(photoId: string) {
   const supabase = await createServiceClient()
   const { data: photo, error } = await supabase
     .from("photos")
@@ -29,18 +39,21 @@ async function loadPlayablePhoto(photoId: string) {
     .eq("id", photoId)
     .single()
   if (error || !photo) return null
-  if (photo.is_approved === false) return null
 
+  const eventRel = photo.event as any
+  const hostId = (Array.isArray(eventRel) ? eventRel[0] : eventRel)?.host_id as string | undefined
+  return { ...photo, host_id: hostId }
+}
+
+async function isVisibleToGuest(photo: { is_approved: boolean | null; gallery_id: string }): Promise<boolean> {
+  if (photo.is_approved === false) return false
+  const supabase = await createServiceClient()
   const { data: gallery } = await supabase
     .from("galleries")
     .select("is_public")
     .eq("id", photo.gallery_id)
     .maybeSingle()
-  if (gallery && gallery.is_public === false) return null
-
-  const eventRel = photo.event as any
-  const hostId = (Array.isArray(eventRel) ? eventRel[0] : eventRel)?.host_id as string | undefined
-  return { ...photo, host_id: hostId }
+  return !(gallery && gallery.is_public === false)
 }
 
 function cleanAuthorName(raw: unknown): string {
@@ -57,14 +70,22 @@ export const POST = defineRoute<unknown, unknown, { id: string }>({
     if (!parsedParams.success) return fail("VALIDATION_ERROR", "Invalid photo ID", 422)
     const photoId = parsedParams.data.id
 
-    const photo = await loadPlayablePhoto(photoId)
+    const photo = await loadPhoto(photoId)
     if (!photo) return fail("NOT_FOUND", "Photo not found", 404)
+
+    const requesterIsHost = await isEventHost(photo.host_id)
 
     // Same check-in gate as uploads — reacting/commenting/voice-replying is
     // still a write to this event's data and was previously reachable by
     // anyone with the photo ID, checked in or not.
-    if (!(await isEventHost(photo.host_id)) && !hasGuestSessionFromRequest(request, photo.event_id)) {
+    if (!requesterIsHost && !hasGuestSessionFromRequest(request, photo.event_id)) {
       return fail("FORBIDDEN", "Please check in to this event before reacting or commenting.", 403)
+    }
+
+    // Approval/gallery-visibility gate applies to guests only — see
+    // loadPhoto()'s comment above for why the host is exempt.
+    if (!requesterIsHost && !(await isVisibleToGuest(photo))) {
+      return fail("NOT_FOUND", "Photo not found", 404)
     }
 
     const supabase = await createServiceClient()

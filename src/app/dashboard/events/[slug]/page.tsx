@@ -183,6 +183,37 @@ async function getLiveWallMessages(eventId: string) {
   return data || []
 }
 
+// Fetch advisory plan-gate results for the three paid-plan-only actions on
+// this page (Recap Video, AI Smart Clusters, Download All) in a single round
+// trip — see src/app/api/events/[id]/feature-access/route.ts. Used purely
+// for proactive UX (disable + "upgrade" tag before the host clicks); the
+// underlying action routes still enforce their own gate server-side.
+interface FeatureAccessResult {
+  allowed: boolean
+  planId: string
+  reason?: string
+}
+interface FeatureAccessResponse {
+  recap_video: FeatureAccessResult
+  ai_face_search: FeatureAccessResult
+  print_ready_downloads: FeatureAccessResult
+}
+async function getFeatureAccess(eventId: string): Promise<FeatureAccessResponse> {
+  const res = await fetch(`/api/events/${eventId}/feature-access`)
+  const json = await res.json().catch(() => null)
+  if (!res.ok || !json?.success) {
+    // Fail open (all allowed) rather than fail closed — this is advisory UX
+    // only. If the check itself errors, the host still hits the real action
+    // routes' own server-side gate on click, so nothing bypasses enforcement.
+    return {
+      recap_video: { allowed: true, planId: "free" },
+      ai_face_search: { allowed: true, planId: "free" },
+      print_ready_downloads: { allowed: true, planId: "free" },
+    }
+  }
+  return json.data
+}
+
 // Fetch photo access (for guest activity)
 async function getPhotoAccess(eventId: string) {
   const supabase = createClient()
@@ -599,6 +630,21 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     // No realtime listener for photo_access — keep a 10s safety-net poll.
     refetchInterval: 10000,
   })
+
+  // Advisory plan-gate check for Recap Video / AI Smart Clusters / Download
+  // All — fetched once per event load so the UI can show a calm disabled
+  // state with an "upgrade" tag instead of letting the host click into a
+  // 403 from the actual action route. Not refetched on an interval since
+  // plan tier doesn't change mid-session; invalidated implicitly on next
+  // event load / navigation.
+  const { data: featureAccess } = useQuery({
+    queryKey: ["feature-access", event?.id],
+    queryFn: () => getFeatureAccess(event!.id),
+    enabled: !!event?.id,
+  })
+  const recapAllowed = featureAccess?.recap_video?.allowed ?? true
+  const faceSearchAllowed = featureAccess?.ai_face_search?.allowed ?? true
+  const downloadAllAllowed = featureAccess?.print_ready_downloads?.allowed ?? true
 
   // Supabase Realtime live stream listener for instant push updates
   useEffect(() => {
@@ -1053,16 +1099,32 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={handleDownloadZip}
-              disabled={isDownloadingZip}
-              className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/5 text-xs flex items-center gap-1"
-              title="Download all approved photos as a print-ready ZIP"
-            >
-              {isDownloadingZip ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-              <span>{isDownloadingZip ? "Preparing ZIP…" : "Download All"}</span>
-            </Button>
+            {downloadAllAllowed ? (
+              <Button
+                variant="outline"
+                onClick={handleDownloadZip}
+                disabled={isDownloadingZip}
+                className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/5 text-xs flex items-center gap-1"
+                title="Download all approved photos as a print-ready ZIP"
+              >
+                {isDownloadingZip ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                <span>{isDownloadingZip ? "Preparing ZIP…" : "Download All"}</span>
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                disabled
+                aria-disabled="true"
+                title={featureAccess?.print_ready_downloads?.reason || "Print-ready downloads require a paid plan"}
+                className="rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37]/70 text-xs flex items-center gap-1.5 cursor-not-allowed opacity-80 hover:bg-[#D4AF37]/10"
+              >
+                <Download className="h-3.5 w-3.5" />
+                <span>Download All</span>
+                <span className="text-[9px] font-bold uppercase tracking-wide border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37] rounded-full px-1.5 py-0.5 ml-0.5">
+                  Upgrade
+                </span>
+              </Button>
+            )}
             <Button asChild variant="outline" className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/5 text-xs">
               <Link href={`/event/${event.slug}`} target="_blank" className="flex items-center gap-1">
                 <span>Live Portal</span>
@@ -1416,9 +1478,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 <Film className="h-4.5 w-4.5 text-[#D4AF37]" />
                 <h3 className="font-playfair text-lg font-light text-white">Recap Video</h3>
               </div>
-              {recapStatus === "ready" && (
+              {recapStatus === "ready" && recapAllowed && (
                 <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20 capitalize">
                   {recapVideo?.mood}
+                </span>
+              )}
+              {!recapAllowed && (
+                <span className="text-[10px] font-bold uppercase tracking-wide border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37] rounded-full px-2 py-0.5 shrink-0">
+                  Premium feature
                 </span>
               )}
             </div>
@@ -1427,55 +1494,89 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               <div className="space-y-4">
                 <p className="text-xs text-white/60">Turn your event into a highlight reel — an auto-composed video with an animated stats intro built from your photos, videos, and messages.</p>
 
-                <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Recap mood">
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={recapMood === "joyful"}
-                    disabled={recapStatus === "rendering"}
-                    onClick={() => setRecapMood("joyful")}
-                    className={`rounded-2xl border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] disabled:opacity-50 disabled:cursor-not-allowed ${
-                      recapMood === "joyful"
-                        ? "border-[#D4AF37] bg-[#D4AF37]/10"
-                        : "border-white/15 bg-transparent hover:bg-white/5"
-                    }`}
-                  >
-                    <p className="text-xs font-bold text-white/90">Joyful</p>
-                    <p className="text-[10px] text-white/50 mt-0.5">Upbeat and vibrant</p>
-                  </button>
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={recapMood === "sentimental"}
-                    disabled={recapStatus === "rendering"}
-                    onClick={() => setRecapMood("sentimental")}
-                    className={`rounded-2xl border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] disabled:opacity-50 disabled:cursor-not-allowed ${
-                      recapMood === "sentimental"
-                        ? "border-[#D4AF37] bg-[#D4AF37]/10"
-                        : "border-white/15 bg-transparent hover:bg-white/5"
-                    }`}
-                  >
-                    <p className="text-xs font-bold text-white/90">Sentimental</p>
-                    <p className="text-[10px] text-white/50 mt-0.5">Warm and reflective</p>
-                  </button>
-                </div>
+                {recapAllowed ? (
+                  <>
+                    <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Recap mood">
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked={recapMood === "joyful"}
+                        disabled={recapStatus === "rendering"}
+                        onClick={() => setRecapMood("joyful")}
+                        className={`rounded-2xl border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] disabled:opacity-50 disabled:cursor-not-allowed ${
+                          recapMood === "joyful"
+                            ? "border-[#D4AF37] bg-[#D4AF37]/10"
+                            : "border-white/15 bg-transparent hover:bg-white/5"
+                        }`}
+                      >
+                        <p className="text-xs font-bold text-white/90">Joyful</p>
+                        <p className="text-[10px] text-white/50 mt-0.5">Upbeat and vibrant</p>
+                      </button>
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked={recapMood === "sentimental"}
+                        disabled={recapStatus === "rendering"}
+                        onClick={() => setRecapMood("sentimental")}
+                        className={`rounded-2xl border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] disabled:opacity-50 disabled:cursor-not-allowed ${
+                          recapMood === "sentimental"
+                            ? "border-[#D4AF37] bg-[#D4AF37]/10"
+                            : "border-white/15 bg-transparent hover:bg-white/5"
+                        }`}
+                      >
+                        <p className="text-xs font-bold text-white/90">Sentimental</p>
+                        <p className="text-[10px] text-white/50 mt-0.5">Warm and reflective</p>
+                      </button>
+                    </div>
 
-                {recapStatus === "rendering" ? (
-                  <div className="flex flex-col items-center justify-center gap-2 py-6 text-center border border-white/10 bg-white/5 rounded-2xl">
-                    <Loader2 className="h-5 w-5 text-[#D4AF37] animate-spin" />
-                    <p className="text-xs font-semibold text-white/80">Composing your recap… this can take a few minutes</p>
-                    <p className="text-[10px] text-white/50">You can leave this page — we'll save it here when it's ready.</p>
-                  </div>
+                    {recapStatus === "rendering" ? (
+                      <div className="flex flex-col items-center justify-center gap-2 py-6 text-center border border-white/10 bg-white/5 rounded-2xl">
+                        <Loader2 className="h-5 w-5 text-[#D4AF37] animate-spin" />
+                        <p className="text-xs font-semibold text-white/80">Composing your recap… this can take a few minutes</p>
+                        <p className="text-[10px] text-white/50">You can leave this page — we'll save it here when it's ready.</p>
+                      </div>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={handleGenerateRecap}
+                        disabled={recapMutation.isPending}
+                        className="w-full text-xs bg-[#D4AF37] hover:bg-[#c19f2e] text-[#141110] font-semibold flex items-center justify-center gap-1.5 rounded-full"
+                      >
+                        <Film className="h-3.5 w-3.5" />
+                        <span>Generate Recap</span>
+                      </Button>
+                    )}
+                  </>
                 ) : (
-                  <Button
-                    size="sm"
-                    onClick={handleGenerateRecap}
-                    disabled={recapMutation.isPending}
-                    className="w-full text-xs bg-[#D4AF37] hover:bg-[#c19f2e] text-[#141110] font-semibold flex items-center justify-center gap-1.5 rounded-full"
-                  >
-                    <Film className="h-3.5 w-3.5" />
-                    <span>Generate Recap</span>
-                  </Button>
+                  // Locked state — this event's plan doesn't include Recap Video.
+                  // Shown up front instead of letting the host click "Generate
+                  // Recap" and land on a 403 after the fact.
+                  <div className="space-y-3">
+                    <div
+                      className="grid grid-cols-2 gap-2 opacity-40 pointer-events-none select-none"
+                      aria-hidden="true"
+                    >
+                      <div className="rounded-2xl border border-white/15 bg-transparent p-3 text-left">
+                        <p className="text-xs font-bold text-white/70">Joyful</p>
+                        <p className="text-[10px] text-white/40 mt-0.5">Upbeat and vibrant</p>
+                      </div>
+                      <div className="rounded-2xl border border-white/15 bg-transparent p-3 text-left">
+                        <p className="text-xs font-bold text-white/70">Sentimental</p>
+                        <p className="text-[10px] text-white/40 mt-0.5">Warm and reflective</p>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      disabled
+                      aria-disabled="true"
+                      title={featureAccess?.recap_video?.reason || "Recap Video requires a paid plan"}
+                      className="w-full text-xs bg-[#D4AF37]/10 border border-[#D4AF37]/40 text-[#D4AF37]/70 font-semibold flex items-center justify-center gap-1.5 rounded-full cursor-not-allowed pointer-events-none opacity-90"
+                    >
+                      <Film className="h-3.5 w-3.5" />
+                      <span>Generate Recap</span>
+                    </Button>
+                    <p className="text-[10px] text-white/40 text-center">Upgrade your plan to unlock recap videos for this event.</p>
+                  </div>
                 )}
               </div>
             )}
@@ -1543,9 +1644,16 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
           {/* AI Matches clustered panel */}
           <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-              <Sparkles className="h-4.5 w-4.5 text-[#D4AF37]" />
-              <h3 className="text-sm font-bold text-white/90">AI Smart Clusters</h3>
+            <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4.5 w-4.5 text-[#D4AF37]" />
+                <h3 className="text-sm font-bold text-white/90">AI Smart Clusters</h3>
+              </div>
+              {!faceSearchAllowed && (
+                <span className="text-[10px] font-bold uppercase tracking-wide border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37] rounded-full px-2 py-0.5 shrink-0">
+                  Premium feature
+                </span>
+              )}
             </div>
 
             <div className="space-y-3">
@@ -1561,19 +1669,34 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   <ChevronRight className="h-4 w-4 text-white/30" />
                 </div>
               )) : (
-                <p className="text-xs text-white/50 text-center py-4">No smart clusters found yet.</p>
+                <p className="text-xs text-white/50 text-center py-4">
+                  {faceSearchAllowed ? "No smart clusters found yet." : "AI face clustering isn't included on this event's plan."}
+                </p>
               )}
             </div>
 
-            <Button
-              variant="outline"
-              className="w-full text-xs py-5 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
-              disabled={faceMatchMutation.isPending}
-              onClick={() => faceMatchMutation.mutate()}
-            >
-              <Search className={`h-3.5 w-3.5 ${faceMatchMutation.isPending ? "animate-spin" : ""}`} />
-              <span>{faceMatchMutation.isPending ? "Scanning photos..." : "Initiate New Face Match"}</span>
-            </Button>
+            {faceSearchAllowed ? (
+              <Button
+                variant="outline"
+                className="w-full text-xs py-5 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
+                disabled={faceMatchMutation.isPending}
+                onClick={() => faceMatchMutation.mutate()}
+              >
+                <Search className={`h-3.5 w-3.5 ${faceMatchMutation.isPending ? "animate-spin" : ""}`} />
+                <span>{faceMatchMutation.isPending ? "Scanning photos..." : "Initiate New Face Match"}</span>
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                disabled
+                aria-disabled="true"
+                title={featureAccess?.ai_face_search?.reason || "AI Smart Clusters require a paid plan"}
+                className="w-full text-xs py-5 rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37]/70 flex items-center justify-center gap-1.5 cursor-not-allowed pointer-events-none opacity-90"
+              >
+                <Search className="h-3.5 w-3.5" />
+                <span>Initiate New Face Match</span>
+              </Button>
+            )}
           </div>
 
           {/* Recent Activity waterfall feed */}

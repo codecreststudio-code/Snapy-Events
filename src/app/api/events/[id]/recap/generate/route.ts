@@ -14,6 +14,7 @@ import { createServiceClient } from "@/lib/supabase/server"
 import { generateRecapVideo, type RecapMood } from "@/lib/integrations/recap-video"
 import { logger } from "@/lib/logger"
 import { API_RATE_LIMITS } from "@/lib/constants"
+import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
 
 const paramsSchema = z.object({ id: z.string().uuid() })
 const bodySchema = z.object({ mood: z.enum(["joyful", "sentimental"]) })
@@ -48,6 +49,17 @@ export const POST = defineRoute<{ mood: RecapMood }, unknown, { id: string }>({
     if (eventErr || !eventRow) return fail("NOT_FOUND", "Event not found", 404)
     if (eventRow.host_id !== auth.user!.id) {
       return fail("FORBIDDEN", "You don't have access to this event", 403)
+    }
+
+    // Recap Video is a paid-plan-only feature (same gate list as
+    // ai_face_search / print_ready_downloads in feature-gate.ts) — was
+    // previously ungated here, so a free-plan host would only find out
+    // after this (up to ~300s) render ran and failed at the very end.
+    // Mirrors the gate check in
+    // src/app/api/ai/faces/batch-process/route.ts.
+    const gate = await checkEventFeatureAccess(eventId, "recap_video")
+    if (!gate.allowed) {
+      return fail("FORBIDDEN", gate.reason || "Recap Video is not available on this event's plan", 403)
     }
 
     // Guard against concurrent/duplicate renders: re-fetch settings
