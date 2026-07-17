@@ -7,6 +7,19 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
 
+  // ─── Recap-video ffmpeg pipeline ──────────────────────────────────────────
+  // @ffmpeg-installer/ffmpeg resolves its platform-specific binary package
+  // (e.g. @ffmpeg-installer/linux-x64) via a runtime-computed `require(...)`
+  // path, which Turbopack's static import tracing can't follow ("server
+  // relative imports are not implemented yet", module-not-found at build
+  // time for src/lib/integrations/recap-video.ts's import chain). Marking
+  // both packages external tells Next.js to leave them as plain Node
+  // `require()` calls resolved at runtime inside the Lambda instead of
+  // trying to statically bundle/trace them — the standard fix for native/
+  // binary-resolving npm packages under Turbopack (same class of issue as
+  // `sharp`, `canvas`, etc.).
+  serverExternalPackages: ["@ffmpeg-installer/ffmpeg", "fluent-ffmpeg"],
+
   // ─── Face detection model weights ────────────────────────────────────────
   // @vladmandic/face-api ships its model weights inside its own npm package
   // (node_modules/@vladmandic/face-api/model). Those files are loaded via
@@ -15,6 +28,12 @@ const nextConfig: NextConfig = {
   // face-detection route functions.
   outputFileTracingIncludes: {
     "/api/ai/faces/*": ["./node_modules/@vladmandic/face-api/model/**/*"],
+    // The ffmpeg binary itself is located via a runtime filesystem check
+    // inside @ffmpeg-installer/ffmpeg, not a statically-analyzable require —
+    // explicit tracing (same pattern as the face-api weights above) ensures
+    // the actual platform binary ships inside the recap route's function
+    // bundle rather than relying on NFT to infer it automatically.
+    "/api/events/*/recap/*": ["./node_modules/@ffmpeg-installer/**/*"],
   },
 
   // ─── Image Optimization ───────────────────────────────────────────────────
