@@ -3,13 +3,10 @@ import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { Button } from "@/lib/components/ui/button"
-import { Camera, Calendar, MapPin, QrCode, Lock, Upload } from "lucide-react"
+import { Camera, Calendar, MapPin, QrCode, Lock, Image, Upload } from "lucide-react"
 import { Logo } from "@/lib/components/layout/logo"
 import { GuestCaptureModal } from "@/lib/components/events/guest-capture-modal"
 import { hasGuestSessionSSR } from "@/lib/security/guest-session"
-import { publicUrl } from "@/lib/integrations/storage"
-import { getFeatureFlags } from "@/lib/platform-settings"
-import { MediaGrid, type GridPhoto } from "@/lib/components/media/media-grid"
 
 interface EventData {
   id: string
@@ -131,30 +128,6 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
     return g.reveal_at && new Date(g.reveal_at) <= new Date()
   }) || []
 
-  // Fetch each visible gallery's media inline — guests used to have to click
-  // through to a separate /g/[gallerySlug] page just to see photos, which was
-  // an extra hop for the common case of a single "All Photos" gallery per
-  // event. Only fetched once check-in has actually passed, matching the same
-  // gate the standalone gallery page enforces.
-  const photosByGallery: Record<string, GridPhoto[]> = {}
-  if (checkedIn && visibleGalleries.length > 0) {
-    const { data: photos } = await supabase
-      .from("photos")
-      .select("id, gallery_id, storage_path, thumbnail_path, original_filename, uploader_name, mime_type, created_at")
-      .in("gallery_id", visibleGalleries.map((g) => g.id))
-      .neq("is_approved", false)
-      .order("created_at", { ascending: false })
-      .limit(200)
-
-    for (const p of photos ?? []) {
-      const withUrl = { ...p, url: publicUrl("PHOTOS", p.storage_path) } as GridPhoto & { gallery_id: string }
-      if (!photosByGallery[p.gallery_id]) photosByGallery[p.gallery_id] = []
-      photosByGallery[p.gallery_id].push(withUrl)
-    }
-  }
-  const flags = await getFeatureFlags()
-  const voiceNoteDurationLimit = Number((settings as any)?.voice_note_duration_limit) || 10
-
   const formatEventDate = (dateStr: string | null) => {
     if (!dateStr) return null
     const date = new Date(dateStr)
@@ -272,15 +245,15 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+        <section className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
           <h2 className="font-playfair text-2xl font-medium tracking-tight text-white">
-            {!checkedIn ? "Private Memory Capsule" : isRevealed ? "Photos" : "Coming Soon"}
+            {!checkedIn ? "Private Memory Capsule" : isRevealed ? "Galleries" : "Coming Soon"}
           </h2>
           <p className="mt-1 text-white/60">
             {!checkedIn
               ? "Check in above with your name and contact details to view and share photos."
               : isRevealed
-              ? `${visibleGalleries.reduce((acc, g) => acc + (photosByGallery[g.id]?.length ?? 0), 0)} photos`
+              ? `${visibleGalleries.length} gallery (${visibleGalleries.reduce((acc, g) => acc + (g.photo_count ?? 0), 0)} photos)`
               : "Photos will be revealed soon"}
           </p>
 
@@ -295,21 +268,35 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
               </p>
             </div>
           ) : visibleGalleries.length > 0 ? (
-            <div className="mt-6 space-y-12">
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {visibleGalleries.map((gallery) => (
-                <div key={gallery.id}>
-                  {visibleGalleries.length > 1 && (
-                    <div className="mb-1">
-                      <h3 className="font-playfair text-lg font-medium text-white">{gallery.name}</h3>
-                      {gallery.description && <p className="text-sm text-white/60">{gallery.description}</p>}
-                    </div>
-                  )}
-                  <MediaGrid
-                    photos={photosByGallery[gallery.id] ?? []}
-                    watermarkEnabled={flags.watermark_enabled}
-                    voiceNoteDurationLimit={voiceNoteDurationLimit}
+                <Link
+                  key={gallery.id}
+                  href={`/event/${event.slug}/g/${gallery.slug}`}
+                  className="group block overflow-hidden rounded-2xl border border-[#3D332A] bg-[#1C1814] transition hover:border-[#D4AF37]/40 hover:shadow-lg hover:shadow-black/30"
+                >
+                  <div
+                    className="aspect-[4/3] bg-gradient-to-br from-[#D4AF37]/20 to-[#3D332A]/60"
+                    style={
+                      gallery.cover_image_url
+                        ? {
+                            backgroundImage: `url(${gallery.cover_image_url})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                          }
+                        : undefined
+                    }
                   />
-                </div>
+                  <div className="flex items-center justify-between gap-3 p-4">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-white group-hover:text-[#D4AF37] group-hover:underline">{gallery.name}</p>
+                      {gallery.description && (
+                        <p className="truncate text-xs text-white/60">{gallery.description}</p>
+                      )}
+                    </div>
+                    <Image className="h-5 w-5 shrink-0 text-white/40" />
+                  </div>
+                </Link>
               ))}
             </div>
           ) : (

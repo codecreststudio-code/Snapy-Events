@@ -80,6 +80,9 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       if (!validation.valid) return fail("VALIDATION_ERROR", validation.error!, 415)
     }
 
+    // Guests may never self-approve; only an authenticated host action approves.
+    if (!auth?.user?.id) approvedFlag = false
+
     if (isDangerousExtension(originalFilename)) return fail("VALIDATION_ERROR", "File type not allowed", 415)
 
     const category = getMimeCategory(mimeType)
@@ -100,26 +103,6 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const eventObj = Array.isArray(event) ? event[0] : event
     const hostId = eventObj?.host_id
     const settings = (eventObj?.settings as Record<string, any>) || {}
-
-    // Guests may never self-approve based on their own request body — that
-    // would let a malicious guest force-approve their own upload regardless
-    // of the host's moderation preference. But this route always runs with
-    // requireAuth:false (guests must be able to hit it anonymously after
-    // check-in), so `auth.user` is empty for EVERY caller here, including
-    // the host's own uploads from the guest-facing upload page — a blind
-    // `if (!auth?.user?.id) approvedFlag = false` therefore forced
-    // is_approved=false on every single upload ever made through this route,
-    // permanently, regardless of the event's auto_approve_photos toggle.
-    // Since there is no moderation UI in the normal flow to flip it back to
-    // true, this meant nothing ever appeared on the guest-facing gallery
-    // page (which filters on is_approved) — every photo, video, and voice
-    // note uploaded looked like it "disappeared" after uploading.
-    // The event's own auto_approve_photos setting (a host-controlled,
-    // server-side value looked up here, not something the guest's request
-    // body can influence) is the correct source of truth for guest uploads.
-    if (!auth?.user?.id) {
-      approvedFlag = settings.auto_approve_photos === true
-    }
 
     // Guest uploads require a completed check-in for this specific event
     // (see src/lib/security/guest-session.ts). The authenticated host is
