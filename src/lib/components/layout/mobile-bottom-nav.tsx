@@ -59,22 +59,22 @@ function TabButton({
   return (
     <Link
       href={href}
-      className="relative flex flex-1 flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-lg"
+      className="relative flex flex-1 flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 rounded-lg"
       aria-current={active ? "page" : undefined}
     >
       <span
         className={cn(
-          "absolute top-0 h-[3px] w-5 rounded-full bg-primary transition-all duration-300",
+          "absolute top-0 h-[3px] w-5 rounded-full bg-gold transition-all duration-300",
           active ? "opacity-100 scale-100" : "opacity-0 scale-50"
         )}
       />
       <Icon
         className={cn(
           "h-5 w-5 transition-colors duration-200",
-          active ? "text-primary" : "text-muted-foreground"
+          active ? "text-gold" : "text-white/50"
         )}
       />
-      <span className={cn("transition-colors duration-200", active ? "text-primary" : "text-muted-foreground")}>
+      <span className={cn("transition-colors duration-200", active ? "text-gold" : "text-white/50")}>
         {label}
       </span>
     </Link>
@@ -121,22 +121,22 @@ export function MobileBottomNav() {
               href="/dashboard"
               aria-label="Dashboard home"
               aria-current={homeActive ? "page" : undefined}
-              className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+              className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
             >
               <motion.div
                 whileTap={{ scale: 0.92 }}
                 className={cn(
-                  "-mt-6 flex h-14 w-14 items-center justify-center rounded-full shadow-lg shadow-primary/30 ring-4 ring-sidebar transition-transform",
-                  "bg-gradient-to-br from-primary to-purple-600"
+                  "-mt-6 flex h-14 w-14 items-center justify-center rounded-full shadow-lg shadow-gold/30 ring-4 ring-sidebar transition-transform",
+                  "bg-gradient-to-br from-gold to-gold-strong"
                 )}
               >
-                <LayoutDashboard className="h-6 w-6 text-white" />
+                <LayoutDashboard className="h-6 w-6 text-surface-dark" />
               </motion.div>
             </Link>
             <span
               className={cn(
                 "mt-1 text-[10px] font-medium transition-colors",
-                homeActive ? "text-primary" : "text-muted-foreground"
+                homeActive ? "text-gold" : "text-white/50"
               )}
             >
               Home
@@ -157,16 +157,16 @@ export function MobileBottomNav() {
           <button
             type="button"
             onClick={() => setMoreOpen(true)}
-            className="relative flex flex-1 flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-lg"
+            className="relative flex flex-1 flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 rounded-lg"
           >
             <span
               className={cn(
-                "absolute top-0 h-[3px] w-5 rounded-full bg-primary transition-all duration-300",
+                "absolute top-0 h-[3px] w-5 rounded-full bg-gold transition-all duration-300",
                 moreActive ? "opacity-100 scale-100" : "opacity-0 scale-50"
               )}
             />
-            <MoreHorizontal className={cn("h-5 w-5", moreActive ? "text-primary" : "text-muted-foreground")} />
-            <span className={cn(moreActive ? "text-primary" : "text-muted-foreground")}>More</span>
+            <MoreHorizontal className={cn("h-5 w-5", moreActive ? "text-gold" : "text-white/50")} />
+            <span className={cn(moreActive ? "text-gold" : "text-white/50")}>More</span>
           </button>
         </div>
       </nav>
@@ -200,7 +200,7 @@ export function MobileBottomNav() {
                     onClick={() => setMoreOpen(false)}
                     className={cn(
                       "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors",
-                      active ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
+                      active ? "bg-gold/10 text-gold" : "text-foreground hover:bg-muted"
                     )}
                   >
                     <item.icon className="h-5 w-5" />
