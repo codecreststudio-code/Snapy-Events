@@ -237,6 +237,13 @@ async function updateEvent(slug: string, data: any, currentSettings: any) {
     end_date: data.end_date ? new Date(data.end_date).toISOString() : null,
     settings: mergedSettings,
   }
+  // cover_image_url is a top-level column (set at creation by the event
+  // wizard) rather than inside settings — only touch it when the caller
+  // actually supplied a new value, so saving the rest of the form never
+  // accidentally blanks out an existing cover.
+  if (data.cover_image_url !== undefined) {
+    eventData.cover_image_url = data.cover_image_url
+  }
 
   const { error } = await supabase.from("events").update(eventData).eq("slug", slug)
   if (error) throw new Error(error.message)
@@ -855,6 +862,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [editAllowedFilters, setEditAllowedFilters] = useState<string[]>([])
   const [editVideoDuration, setEditVideoDuration] = useState<number>(10)
   const [editVoiceDuration, setEditVoiceDuration] = useState<number>(10)
+  // Previously creation-only fields — the settings drawer only let hosts
+  // touch name/status/end-date/filters/durations, so fixing a typo in the
+  // cover photo or changing when guests can see photos meant deleting and
+  // recreating the whole event. These three make the drawer a true "edit
+  // anything" surface instead of a "tweak a few fields" one.
+  const [editCoverImage, setEditCoverImage] = useState<string>("")
+  const [uploadingCover, setUploadingCover] = useState(false)
+  const [editRevealExperience, setEditRevealExperience] = useState<string>("immediately")
 
   useEffect(() => {
     if (event) {
@@ -864,8 +879,67 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       setEditAllowedFilters((event.settings as ExtEventSettings)?.allowed_filters || ["normal", "golden_hour", "vintage", "bw", "cinematic", "vivid", "cyberpunk", "dreamy"])
       setEditVideoDuration((event.settings as ExtEventSettings)?.video_duration_limit || 10)
       setEditVoiceDuration((event.settings as ExtEventSettings)?.voice_note_duration_limit || 10)
+      setEditCoverImage(event.cover_image_url || "")
+      setEditRevealExperience((event.settings as ExtEventSettings)?.reveal_experience || "immediately")
     }
   }, [event, isDrawerOpen])
+
+  // Mirrors the event-creation wizard's handleCustomCoverUpload (see
+  // src/app/dashboard/events/new/new-event-form.tsx) so an existing event's
+  // cover can be replaced the same way it was originally set — same storage
+  // bucket/path convention, same base64 fallback if the upload itself fails.
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please upload an image file (JPG, PNG, WebP).", variant: "destructive" })
+      return
+    }
+    setUploadingCover(true)
+    try {
+      const supabase = createClient()
+      const fileExt = file.name.split(".").pop() || "jpg"
+      const fileName = `cover-${Date.now()}-${Math.random().toString(36).slice(-4)}.${fileExt}`
+      const filePath = `covers/${fileName}`
+      const { error: uploadError } = await supabase.storage
+        .from("photos")
+        .upload(filePath, file, { cacheControl: "3600", upsert: true })
+      if (uploadError) {
+        const reader = new FileReader()
+        reader.onload = (evt) => {
+          if (evt.target?.result) {
+            setEditCoverImage(evt.target.result as string)
+            toast({ title: "Cover updated", description: "Save settings to apply your new cover photo." })
+          }
+        }
+        reader.readAsDataURL(file)
+        return
+      }
+      const { data: publicData } = supabase.storage.from("photos").getPublicUrl(filePath)
+      if (publicData?.publicUrl) {
+        setEditCoverImage(publicData.publicUrl)
+        toast({ title: "Cover updated", description: "Save settings to apply your new cover photo." })
+      }
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err?.message || "Please try again.", variant: "destructive" })
+    } finally {
+      setUploadingCover(false)
+    }
+  }
+
+  // One-click Archive — same status column the manual dropdown already
+  // supports, just surfaced as its own action (matching once.film's
+  // dedicated Archive button in Film Settings) instead of requiring the host
+  // to know "archived" is hiding in the status <select>.
+  const handleArchive = () => {
+    updateMutation.mutate({
+      name: editName,
+      status: "archived",
+      end_date: editEndDate,
+      cover_image_url: editCoverImage || null,
+      settings: { ...event?.settings },
+    })
+  }
 
   // Countdown timer calculation
   useEffect(() => {
@@ -1042,7 +1116,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       timestamp: new Date(a.accessed_at).getTime(),
     })
   })
-  
+
   dynamicTimeline.slice(0, 8).forEach((t: any) => {
     if (t.type === "photo_group") dynamicActivities.push({ actor: t.guest, action: `uploaded ${t.photos.length} photos`, time: t.time, timestamp: t.timestamp })
     if (t.type === "video") dynamicActivities.push({ actor: t.guest, action: `uploaded a video`, time: t.time, timestamp: t.timestamp })
@@ -1081,15 +1155,24 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     // guests stayed locked to (or revealed by) whatever date was set when
     // the event was first created. Keep both fields in lockstep on save.
     const isoEndDate = editEndDate ? new Date(editEndDate).toISOString() : null
+    // Same instant/delayed derivation the creation wizard uses (see
+    // new-event-form.tsx) so editing this post-creation drives the guest-
+    // facing reveal gate (event/[slug]/page.tsx) exactly the same way
+    // choosing it during setup would have.
+    const isInstantReveal = editRevealExperience === "immediately" || editRevealExperience === "during"
     updateMutation.mutate({
       name: editName,
       status: editStatus,
       end_date: editEndDate,
+      cover_image_url: editCoverImage || null,
       settings: {
         ...event?.settings,
         allowed_filters: editAllowedFilters,
         video_duration_limit: Number(editVideoDuration),
         voice_note_duration_limit: Number(editVoiceDuration),
+        reveal_experience: editRevealExperience,
+        photo_reveal_mode: isInstantReveal ? "instant" : "delayed",
+        reveal_type: isInstantReveal ? "instant" : "delayed",
         ...(isoEndDate ? { countdown_date: isoEndDate } : {}),
       }
     })
@@ -1198,7 +1281,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
       {/* Master Workspace Layout */}
       <section className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* LEFT COLUMN: Memory timeline */}
         <div className="lg:col-span-2 space-y-8">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#3D332A] pb-3">
@@ -1228,9 +1311,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
           {/* Chronological media timeline content list */}
           <div className="space-y-6 relative before:absolute before:top-4 before:bottom-4 before:left-6 before:w-0.5 before:bg-[#3D332A]">
-            
+
             <AnimatePresence mode="popLayout">
-              
+
 
 
               {/* Dynamic filtered Mock Timeline items (voice, videos, messages) */}
@@ -1771,7 +1854,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.35, ease: "easeInOut" }}
-              className="absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#1C1814] border-l border-[#3D332A] shadow-2xl p-6 overflow-y-auto flex flex-col justify-between"
+              className="absolute top-0 right-0 bottom-0 w-full max-w-md glass-panel !rounded-none border-l border-hairline-dark shadow-2xl p-6 overflow-y-auto flex flex-col justify-between"
             >
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-white/10 pb-3">
@@ -1782,6 +1865,20 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 </div>
 
                 <form onSubmit={handleUpdateSave} className="space-y-5">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold text-white/60">Cover Photo</Label>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="h-16 w-16 shrink-0 rounded-xl bg-cover bg-center border border-hairline-dark bg-surface-dark"
+                        style={{ backgroundImage: editCoverImage ? `url(${editCoverImage})` : undefined }}
+                      />
+                      <label className="flex-1 cursor-pointer rounded-lg border border-dashed border-hairline-dark bg-white/5 px-3 py-2.5 text-center text-xs font-medium text-white/70 hover:border-gold/40 hover:text-white transition-colors">
+                        {uploadingCover ? "Uploading…" : "Change cover photo"}
+                        <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} disabled={uploadingCover} />
+                      </label>
+                    </div>
+                  </div>
+
                   <div className="space-y-1.5">
                     <Label htmlFor="name" className="text-xs font-bold text-white/60">Event Name</Label>
                     <Input
@@ -1816,6 +1913,46 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       <option value="completed">Completed</option>
                       <option value="archived">Archived</option>
                     </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="reveal" className="text-xs font-bold text-white/60">When guests see the memories</Label>
+                    <select
+                      id="reveal"
+                      value={editRevealExperience}
+                      onChange={(e) => setEditRevealExperience(e.target.value)}
+                      className="w-full h-10 rounded-md border border-white/15 bg-white/5 text-white px-3 py-2 text-sm focus:border-[#D4AF37] outline-none [color-scheme:dark]"
+                    >
+                      <option value="immediately">Immediately</option>
+                      <option value="during">During Event</option>
+                      <option value="after">After Event Ends</option>
+                      <option value="24h">24 Hours Later</option>
+                      <option value="7d">7 Days Later</option>
+                      <option value="custom">Custom Date</option>
+                    </select>
+                    {(editRevealExperience === "after" || editRevealExperience === "24h" || editRevealExperience === "7d" || editRevealExperience === "custom") && (
+                      <p className="text-[10px] text-white/50">Uses the Countdown Ends Lock Date above as the reveal moment.</p>
+                    )}
+                  </div>
+
+                  <div className="rounded-xl border border-hairline-dark bg-white/5 p-4 space-y-2">
+                    <p className="text-[10px] uppercase tracking-wider text-gold font-bold">Capacity</p>
+                    <div className="flex items-center justify-between text-xs text-white/80">
+                      <span>Guests plan</span>
+                      <span className="font-semibold text-white">
+                        {settings.guest_count_plan || "free"}{(settings.guests_boost ?? 0) > 0 ? ` +${settings.guests_boost} boost` : ""}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-white/80">
+                      <span>Shots per guest boost</span>
+                      <span className="font-semibold text-white">{settings.shots_boost ?? 0}</span>
+                    </div>
+                    <Link
+                      href="/dashboard/billing"
+                      className="inline-block text-[10px] font-semibold text-gold hover:underline pt-1"
+                    >
+                      Need more capacity? Manage add-ons in Billing →
+                    </Link>
                   </div>
 
                   <div className="space-y-1.5">
@@ -1905,16 +2042,28 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 </form>
               </div>
 
-              {/* Danger zone delete option */}
-              <div className="border-t border-red-500/20 pt-6">
+              {/* Archive + Delete actions */}
+              <div className="border-t border-red-500/20 pt-6 space-y-2">
                 {!isDeleteOpen ? (
-                  <button
-                    onClick={() => setIsDeleteOpen(true)}
-                    className="w-full py-3 bg-red-500/10 text-red-400 rounded-full text-xs font-bold hover:bg-red-500/20 transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span>Delete Memory Capsule</span>
-                  </button>
+                  <>
+                    {event.status !== "archived" && (
+                      <button
+                        onClick={handleArchive}
+                        disabled={updateMutation.isPending}
+                        className="w-full py-3 bg-white/5 text-white/80 border border-hairline-dark rounded-full text-xs font-bold hover:bg-white/10 hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
+                      >
+                        <Images className="h-4 w-4" />
+                        <span>{updateMutation.isPending ? "Archiving…" : "Archive Memory Capsule"}</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setIsDeleteOpen(true)}
+                      className="w-full py-3 bg-red-500/10 text-red-400 rounded-full text-xs font-bold hover:bg-red-500/20 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span>Delete Memory Capsule</span>
+                    </button>
+                  </>
                 ) : (
                   <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 space-y-3">
                     <p className="text-xs font-bold text-red-400">Are you absolutely sure?</p>
