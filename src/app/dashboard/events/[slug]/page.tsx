@@ -784,10 +784,23 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["face-clusters", event?.id] })
       queryClient.invalidateQueries({ queryKey: ["event-photos", event?.id] })
-      toast({
-        title: "Face match complete",
-        description: `Scanned ${data?.processed ?? 0} photo(s), found ${data?.facesDetected ?? 0} face(s).`,
-      })
+      const errorCount = Array.isArray(data?.errors) ? data.errors.length : 0
+      // A 200 with processed=0 used to look identical to "ran fine, no
+      // faces in these photos" — surface the first real error instead of
+      // hiding it, so a genuine failure (model/storage/etc.) is visible
+      // here rather than only in server logs.
+      if (errorCount > 0 && (data?.processed ?? 0) === 0) {
+        toast({
+          title: "Face match ran into errors",
+          description: `${errorCount} photo(s) failed to process. First error: ${data.errors[0]?.error ?? "unknown"}`,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "Face match complete",
+          description: `Scanned ${data?.processed ?? 0} photo(s), found ${data?.facesDetected ?? 0} face(s).${errorCount > 0 ? ` (${errorCount} failed)` : ""}`,
+        })
+      }
     },
     onError: (error: Error) => {
       toast({ title: "Couldn't run face match", description: error.message, variant: "destructive" })

@@ -114,7 +114,12 @@ export async function proxy(request: NextRequest) {
       [
         "default-src 'self'",
         "img-src 'self' data: blob: https:",
-        "media-src 'self' blob:",
+        // Voice-note replies and recap videos are served straight from
+        // Supabase Storage's public URL (not proxied through our own
+        // origin), so 'self' alone 404-blocks every <audio>/<video> element
+        // pointed at them — this was silently breaking voice-note playback
+        // in production (console: "violates ... media-src 'self' blob:").
+        "media-src 'self' blob: https://*.supabase.co",
         "script-src 'self' 'unsafe-inline' https://*.supabase.co https://*.razorpay.com",
         "style-src 'self' 'unsafe-inline'",
         "font-src 'self' data: https://*.gstatic.com",

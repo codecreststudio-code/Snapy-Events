@@ -3,6 +3,7 @@ import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { detectAndStoreFaces } from "@/lib/integrations/face"
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
+import { logger } from "@/lib/logger"
 
 const body = z.object({ event_id: z.string().uuid(), photo_ids: z.array(z.string().uuid()).min(1).max(500) })
 
@@ -42,6 +43,17 @@ export const POST = defineRoute({
         processed++
         facesDetected += result.facesDetected
       } catch (e) {
+        // Previously swallowed into an array nobody read: the route still
+        // returned 200 with processed=0/facesDetected=0 and the client only
+        // ever showed "Scanned 0 photo(s), found 0 face(s)" with no hint
+        // why — indistinguishable from "ran fine, nobody has a face in
+        // frame." Log server-side so a real failure (model load, storage
+        // fetch, RLS) shows up in Vercel logs instead of vanishing.
+        logger.error("[ai/faces/batch-process] detectAndStoreFaces failed", {
+          eventId: body.event_id,
+          photoId: photo.id,
+          error: String(e),
+        })
         errors.push({ photoId: photo.id, error: String(e) })
       }
     }

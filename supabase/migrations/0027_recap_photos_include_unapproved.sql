@@ -1,13 +1,18 @@
--- Pending migration: 0027_recap_photos_include_unapproved.sql
+-- 0027_recap_photos_include_unapproved.sql
 --
--- Paste this into Supabase Dashboard -> SQL Editor and run it once.
--- Safe to run more than once (CREATE OR REPLACE FUNCTION).
---
--- 0001-0026 are already applied (confirmed via the Supabase dashboard's
--- "Last Migration" indicator showing fix_face_clusters_representative_fk).
--- This is the only new one, fixing the recap-video RPCs so they no longer
--- silently exclude every event that has never had a photo manually
--- approved (i.e. almost every event).
+-- get_top_reacted_photos and get_timeline_sampled_photos (0025) both filtered
+-- `AND p.is_approved = true`. Approval is a guest-facing moderation concept —
+-- it has nothing to do with whether the HOST can generate a recap of their
+-- own event. Since most events never go through a manual approval step
+-- (there's no moderation UI in the normal flow), this filter meant
+-- selectHighlightPhotos() in recap-video.ts returned an empty array for
+-- practically every event, which generateRecapVideo() treats as a hard
+-- failure ("No approved photos are available yet to generate a recap
+-- video") — the exact 500 hosts were seeing on "Generate Recap", even on
+-- fully populated, paid events. recap/generate/route.ts already verifies
+-- the caller owns the event before either RPC is ever called, so dropping
+-- the approval filter here is safe — every photo on this event is fair
+-- game for the host's own recap.
 
 CREATE OR REPLACE FUNCTION public.get_top_reacted_photos(p_event_id UUID, p_limit INT DEFAULT 10)
 RETURNS TABLE(
@@ -67,7 +72,3 @@ $$ LANGUAGE plpgsql STABLE;
 
 GRANT EXECUTE ON FUNCTION public.get_top_reacted_photos(UUID, INT) TO service_role;
 GRANT EXECUTE ON FUNCTION public.get_timeline_sampled_photos(UUID, INT) TO service_role;
-
--- Done. If this ran without errors, "Generate Recap" will now include
--- unapproved photos too, so it stops 500ing on events where nothing was
--- ever manually approved.

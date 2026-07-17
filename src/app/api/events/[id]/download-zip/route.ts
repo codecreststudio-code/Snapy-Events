@@ -52,16 +52,23 @@ export async function GET(
       )
     }
 
-    // 3. Fetch approved photos only — unapproved drafts must never appear in downloads
+    // 3. Fetch this event's photos. Approval is a guest-facing moderation
+    // concept (whether OTHER guests can see a photo in the public gallery)
+    // — it has nothing to do with whether the HOST can download their own
+    // event's content. Filtering on is_approved=true here meant "Download
+    // All" 400'd with "No approved photos available" for any host who
+    // hadn't manually approved every upload (which most never do, since
+    // there's no moderation step in the normal flow), even on a fully
+    // populated, paid event. The host already passed the ownership check
+    // above, so every photo on this event is fair game.
     const { data: photos, error: photoErr } = await supabase
       .from("photos")
       .select("id, storage_path, original_filename, file_size")
       .eq("event_id", eventId)
-      .eq("is_approved", true)
       .order("created_at", { ascending: true })
 
     if (photoErr || !photos || photos.length === 0) {
-      return NextResponse.json({ error: "No approved photos available to download" }, { status: 400 })
+      return NextResponse.json({ error: "No photos available to download yet" }, { status: 400 })
     }
 
     // Hard limits to prevent OOM — each file is buffered in-process.
