@@ -136,4 +136,33 @@ export const POST = defineRoute<unknown, unknown, { id: string }>({
     const body = await request.json().catch(() => ({}))
 
     if (typeof body.emoji === "string") {
-      if (!KNOWN_EMOJI.has(body.e
+      if (!KNOWN_EMOJI.has(body.emoji)) return fail("VALIDATION_ERROR", "Unknown reaction", 422)
+      const { data: reactions, error } = await supabase.rpc("increment_photo_reaction", {
+        p_photo_id: photoId,
+        p_emoji: body.emoji,
+      })
+      if (error) return fail("DB_ERROR", `Failed to save reaction: ${error.message}`, 500)
+      return ok({ reactions })
+    }
+
+    if (typeof body.comment === "string") {
+      const text = body.comment.trim().slice(0, MAX_COMMENT_LENGTH)
+      if (!text) return fail("VALIDATION_ERROR", "Comment cannot be empty", 422)
+      const comment = {
+        id: crypto.randomUUID(),
+        type: "text",
+        author_name: cleanAuthorName(body.author_name),
+        comment: text,
+        created_at: new Date().toISOString(),
+      }
+      const { data: comments, error } = await supabase.rpc("add_photo_comment", {
+        p_photo_id: photoId,
+        p_comment: comment,
+      })
+      if (error) return fail("DB_ERROR", `Failed to save comment: ${error.message}`, 500)
+      return ok({ comments })
+    }
+
+    return fail("VALIDATION_ERROR", "Expected an emoji, comment, or audio file", 422)
+  },
+}).POST

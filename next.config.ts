@@ -112,4 +112,40 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://*.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' blob: data: https:; connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://api.razorpay.com
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://*.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' blob: data: https:; connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://api.razorpay.com https://*.razorpay.com https://*.resend.com; frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://*.razorpay.com;",
+          },
+          {
+            key: "Permissions-Policy",
+            // microphone must allow self — guest video recording (with audio)
+            // and voice-note recording both call getUserMedia({ audio: true }),
+            // which a blanket microphone=() silently blocks in production.
+            value: "camera=(self), microphone=(self), geolocation=(), interest-cohort=()",
+          },
+        ],
+      },
+      // ─── Static assets — long cache ────────────────────────────────────────
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      // ─── Public images ────────────────────────────────────────────────────
+      {
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+    ]
+  },
+}
+
+export default nextConfig;
+

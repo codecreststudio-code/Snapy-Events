@@ -114,6 +114,7 @@ google-credentials*.json
 *.pdf
 *.xlsx
 *.pptx
+*.md
 
 # Debug/scratch artifacts (not part of the app — face-api models load
 # from node_modules/@vladmandic/face-api/model, not a local models/ dir)
@@ -122,3 +123,5 @@ BASH_WRITE_TEST.txt
 /zzz-*.md
 /snapsy-feature-prompts - AI face etc.md
 /snapsy-audit-report.md
+/AUDIT-SUMMARY.md
+/UI-UX-IMPROVEMENTS.md

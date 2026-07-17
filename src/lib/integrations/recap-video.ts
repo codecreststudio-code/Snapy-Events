@@ -451,4 +451,39 @@ async function composeRecapVideo({ introFramePaths, photoFilePaths, outputPath, 
     // version summed raw durations and only ever subtracted a single
     // `xfadeDuration` regardless of how many transitions had already been
     // chained, so offsets drifted later by one full `xfadeDuration` per
- 
+    // additional clip — for a full 16-photo highlight reel (18 clips, 17
+    // transitions) that's over +5s (joyful) to +15s (sentimental) of drift,
+    // eventually requesting an `offset` past the end of the actual upstream
+    // stream and causing ffmpeg to exit non-zero. Even the minimum case (2
+    // intro frames + 1 photo = 3 clips = 2 transitions) was already wrong
+    // for the second transition.
+    let finalLabel = clipLabels[0]
+    let cumulativeDuration = clips[0].duration
+    for (let i = 1; i < clipLabels.length; i++) {
+      const outLabel = i === clipLabels.length - 1 ? "vout" : `x${i}`
+      const offset = Math.max(cumulativeDuration - xfadeDuration, 0)
+      filterParts.push(
+        `[${finalLabel}][${clipLabels[i]}]xfade=transition=fade:duration=${xfadeDuration.toFixed(3)}:offset=${offset.toFixed(3)}[${outLabel}]`,
+      )
+      finalLabel = outLabel
+      cumulativeDuration = offset + clips[i].duration
+    }
+
+    command
+      .complexFilter(filterParts, finalLabel)
+      .outputOptions([
+        "-c:v libx264",
+        "-pix_fmt yuv420p",
+        "-preset veryfast",
+        "-b:v 4M",
+        "-movflags +faststart",
+        // No audio track at all — no music/licensing dependency was
+        // introduced for this feature, per the build brief.
+        "-an",
+      ])
+      .output(outputPath)
+      .on("error", (err: Error) => reject(err))
+      .on("end", () => resolve())
+      .run()
+  })
+}
