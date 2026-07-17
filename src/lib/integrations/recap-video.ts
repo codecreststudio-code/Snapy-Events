@@ -269,7 +269,13 @@ function buildStatsIntroSvgFrames(eventName: string, stats: RecapStats): string[
   const bg = "#141110"
   const gold = "#D4AF37"
   const cream = "#F4E9CE"
-  const safeName = escapeXml(eventName).slice(0, 60)
+  // Truncate the raw name BEFORE escaping, not after — escaping first and
+  // then slicing to 60 chars can cut an entity reference in half (e.g.
+  // "...Bob &amp" with the trailing ";" chopped off), producing malformed
+  // XML that sharp's SVG rasterizer fails to parse. Event names can be up
+  // to 200 chars (src/lib/validators/index.ts), so this boundary is
+  // reachable in normal use, not just a theoretical edge case.
+  const safeName = escapeXml(eventName.slice(0, 60))
   const totalMoments = stats.photos + stats.videos
 
   const frameOne = `<svg width="${OUTPUT_WIDTH}" height="${OUTPUT_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
@@ -433,9 +439,24 @@ async function composeRecapVideo({ introFramePaths, photoFilePaths, outputPath, 
     })
 
     // Chain `xfade` transitions pairwise across all clips. `offset` is the
-    // time (relative to the start of the concatenated timeline so far) at
-    // which each transition begins — the standard multi-clip xfade
-    // chaining recipe: offset_i = sum(durations of clips 0..i) - xfadeDuration.
+    // time, relative to the *current* combined stream's own timeline
+    // (`finalLabel`), at which the next transition begins.
+    //
+    // Each xfade node's output duration is `offset + duration(secondInput)`
+    // — the combined stream does NOT retain the full sum of the two inputs'
+    // raw durations, it loses `xfadeDuration` to the overlap. So the running
+    // duration tracked here must be reset to `offset + clips[i].duration`
+    // after every merge, not incremented by the next clip's raw duration on
+    // top of the previous (already-correct) cumulative total. The previous
+    // version summed raw durations and only ever subtracted a single
+    // `xfadeDuration` regardless of how many transitions had already been
+    // chained, so offsets drifted later by one full `xfadeDuration` per
+    // additional clip — for a full 16-photo highlight reel (18 clips, 17
+    // transitions) that's over +5s (joyful) to +15s (sentimental) of drift,
+    // eventually requesting an `offset` past the end of the actual upstream
+    // stream and causing ffmpeg to exit non-zero. Even the minimum case (2
+    // intro frames + 1 photo = 3 clips = 2 transitions) was already wrong
+    // for the second transition.
     let finalLabel = clipLabels[0]
     let cumulativeDuration = clips[0].duration
     for (let i = 1; i < clipLabels.length; i++) {
@@ -445,7 +466,7 @@ async function composeRecapVideo({ introFramePaths, photoFilePaths, outputPath, 
         `[${finalLabel}][${clipLabels[i]}]xfade=transition=fade:duration=${xfadeDuration.toFixed(3)}:offset=${offset.toFixed(3)}[${outLabel}]`,
       )
       finalLabel = outLabel
-      cumulativeDuration += clips[i].duration
+      cumulativeDuration = offset + clips[i].duration
     }
 
     command

@@ -201,29 +201,123 @@ export function searchByEmbedding(input: SearchInput): SearchHit[] {
     .slice(0, k)
 }
 
-export interface BatchProcessInput {
-  organizationId: string
-  eventId: string
-  photoIds: string[]
-  imageUrls: string[]
+export interface FaceClusterCandidate {
+  id: string
+  embedding: number[]
 }
 
-export interface BatchProcessResult {
-  processed: number
-  facesDetected: number
-  errors: { photoId: string; error: string }[]
-}
-
-export async function batchProcessFaces(input: BatchProcessInput): Promise<BatchProcessResult> {
-  const out: BatchProcessResult = { processed: 0, facesDetected: 0, errors: [] }
-  for (let i = 0; i < input.photoIds.length; i++) {
-    try {
-      const r = await detectFaces({ imageUrl: input.imageUrls[i] })
-      out.processed++
-      out.facesDetected += r.faces.length
-    } catch (e) {
-      out.errors.push({ photoId: input.photoIds[i], error: String(e) })
+/**
+ * Greedy nearest-cluster assignment: compares a new face's descriptor against
+ * every existing cluster's representative-face descriptor (cosine similarity,
+ * same metric/threshold as searchByEmbedding) and returns the best match
+ * above `threshold`, or null when nothing qualifies — callers should start a
+ * new cluster in that case.
+ */
+export function pickBestCluster(
+  embedding: number[],
+  clusters: FaceClusterCandidate[],
+  threshold = 0.75,
+): string | null {
+  let bestId: string | null = null
+  let bestScore = -Infinity
+  for (const c of clusters) {
+    if (!Array.isArray(c.embedding) || c.embedding.length !== embedding.length) continue
+    const score = cosSim(embedding, c.embedding)
+    if (score >= threshold && score > bestScore) {
+      bestScore = score
+      bestId = c.id
     }
   }
-  return out
+  return bestId
+}
+
+export interface DetectAndStoreParams {
+  eventId: string
+  photoId: string
+  imageUrl: string
+}
+
+export interface DetectAndStoreResult {
+  facesDetected: number
+}
+
+/**
+ * Runs detection for a single photo, persists each detected face to the
+ * `faces` table, and greedily assigns each face to an existing `face_clusters`
+ * row (by comparing against that cluster's representative face) or creates a
+ * new cluster when nothing matches closely enough. This is the piece that
+ * was entirely missing before: `faces` rows could be created by the old
+ * per-route insert logic, but nothing anywhere ever wrote to `face_clusters`,
+ * so the "AI Smart Clusters" panel (which queries `face_clusters` directly)
+ * was permanently empty regardless of how much detection ran.
+ *
+ * `supabase` is typed loosely (any Supabase client shape with `.from`) so
+ * this can be called with either the cookie-scoped server client or the
+ * service-role client depending on the caller's auth context.
+ */
+export async function detectAndStoreFaces(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  params: DetectAndStoreParams,
+): Promise<DetectAndStoreResult> {
+  const det = await detectFaces({ imageUrl: params.imageUrl })
+
+  if (det.faces.length > 0) {
+    // Existing clusters for this event, each carrying its representative
+    // face's descriptor so newly detected faces can be matched against them.
+    const { data: existingClusters } = await supabase
+      .from("face_clusters")
+      .select("id, representative_face:representative_face_id(embedding)")
+      .eq("event_id", params.eventId)
+
+    const clusterCandidates: FaceClusterCandidate[] = (existingClusters ?? [])
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((c: any) => ({ id: c.id, embedding: c.representative_face?.embedding }))
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .filter((c: any) => Array.isArray(c.embedding) && c.embedding.length > 0)
+
+    for (const f of det.faces) {
+      const { data: inserted } = await supabase
+        .from("faces")
+        .insert({
+          photo_id: params.photoId,
+          event_id: params.eventId,
+          bounding_box: f.boundingBox,
+          confidence: f.confidence,
+          embedding: f.embedding,
+          embedding_model: det.model,
+        })
+        .select("id")
+        .single()
+
+      if (!inserted) continue
+
+      const clusterId = pickBestCluster(f.embedding, clusterCandidates)
+      if (clusterId) {
+        await supabase.from("faces").update({ cluster_id: clusterId }).eq("id", inserted.id)
+        const { data: clusterRow } = await supabase
+          .from("face_clusters")
+          .select("face_count")
+          .eq("id", clusterId)
+          .single()
+        await supabase
+          .from("face_clusters")
+          .update({ face_count: (clusterRow?.face_count ?? 0) + 1, updated_at: new Date().toISOString() })
+          .eq("id", clusterId)
+      } else {
+        const { data: newCluster } = await supabase
+          .from("face_clusters")
+          .insert({ event_id: params.eventId, representative_face_id: inserted.id, face_count: 1 })
+          .select("id")
+          .single()
+        if (newCluster) {
+          await supabase.from("faces").update({ cluster_id: newCluster.id }).eq("id", inserted.id)
+          clusterCandidates.push({ id: newCluster.id, embedding: f.embedding })
+        }
+      }
+    }
+  }
+
+  await supabase.from("photos").update({ face_count: det.faces.length }).eq("id", params.photoId)
+  return { facesDetected: det.faces.length }
 }

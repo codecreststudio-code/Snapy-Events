@@ -83,9 +83,15 @@ async function getDownloadHistory() {
 
 async function downloadPhoto(storagePath: string, filename: string) {
   const supabase = createClient()
+  // `download: filename` makes Supabase Storage itself send
+  // `Content-Disposition: attachment` on the signed URL response. Without
+  // it, the anchor's `download` attribute below is silently ignored by
+  // browsers (it's only honored for same-origin URLs, and the signed URL
+  // points at the Supabase Storage domain, not this app), so clicking
+  // download would just open/navigate to the file instead of saving it.
   const { data, error } = await supabase.storage
     .from("photos")
-    .createSignedUrl(storagePath, 3600)
+    .createSignedUrl(storagePath, 3600, { download: filename })
 
   if (error || !data?.signedUrl) {
     throw new Error("Failed to generate download URL")

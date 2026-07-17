@@ -259,21 +259,6 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     }
   }, [event?.settings])
 
-  const handleCameraCapture = useCallback((file: File) => {
-    setFiles((prev) => {
-      const newUpload: UploadFile = {
-        id: Math.random().toString(36).substring(7),
-        file,
-        preview: URL.createObjectURL(file),
-        progress: 0,
-        status: "pending" as const,
-      }
-      return [...prev, newUpload]
-    })
-    setShowCamera(false)
-    setShowVoiceRecorder(false)
-  }, [])
-
   // Shared single-file upload pipeline (signed URL -> direct storage PUT ->
   // register in DB). Extracted so both the instant-upload-on-capture path
   // (handlePhotoCapture below) and the manual batch uploader (uploadFiles)
@@ -734,7 +719,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
               {showVoiceRecorder && (
                 <VoiceNoteRecorder
                   maxDuration={voiceLimit}
-                  onCapture={handleCameraCapture}
+                  onCapture={handlePhotoCapture}
                   onClose={() => setShowVoiceRecorder(false)}
                 />
               )}

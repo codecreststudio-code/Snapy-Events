@@ -116,6 +116,25 @@ interface ExtEventSettings extends EventSettings {
   }
 }
 
+// Cross-origin links to Supabase Storage need the server to actually send
+// `Content-Disposition: attachment` for the browser to save the file — a
+// plain `<a href={crossOriginUrl} download>` is silently ignored by browsers
+// for cross-origin resources (the anchor's `download` attribute is only
+// honored same-origin), so clicking "Download" just re-navigates to/plays
+// the video instead of saving it. Supabase's storage server recognizes a
+// `?download` query param and adds that header itself, which works
+// regardless of origin — see @supabase/storage-js's createSignedUrl/
+// getPublicUrl `download` option, which does exactly this under the hood.
+function forceDownloadUrl(url: string, filename: string): string {
+  try {
+    const u = new URL(url)
+    u.searchParams.set("download", filename)
+    return u.toString()
+  } catch {
+    return url
+  }
+}
+
 // Fetch event details
 async function getEvent(slug: string, orgId: string): Promise<Event> {
   const supabase = createClient()
@@ -215,6 +234,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [codeCopied, setCodeCopied] = useState(false)
   const [regeneratingCode, setRegeneratingCode] = useState(false)
   const [activeLightboxMedia, setActiveLightboxMedia] = useState<LightboxMedia | null>(null)
+  const [isDownloadingZip, setIsDownloadingZip] = useState(false)
   const watermarkEnabled = useWatermarkEnabled()
 
   const publicEventUrl = typeof window !== "undefined"
@@ -272,6 +292,56 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     logoImg.src = "/Logo.png"
   }
 
+  // "Download All" — fetches the print-ready ZIP from
+  // /api/events/[id]/download-zip (up to ~300s server-side, see vercel.json)
+  // and saves it via a same-origin blob URL. Previously there was no UI
+  // element wired to this route at all, so the working backend was
+  // completely unreachable from the dashboard. Uses fetch (not a plain
+  // <a href download>) so a gating/error JSON response (403 plan-gated, 400
+  // no approved photos, 500 zip failure) surfaces as a toast instead of
+  // silently downloading a JSON file or doing nothing.
+  const handleDownloadZip = async () => {
+    if (!event || isDownloadingZip) return
+    setIsDownloadingZip(true)
+    try {
+      const res = await fetch(`/api/events/${event.id}/download-zip`)
+      if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        throw new Error(body?.error || `Download failed (${res.status})`)
+      }
+      // The route caps files/bytes per ZIP (see MAX_ZIP_FILES/MAX_ZIP_BYTES in
+      // download-zip/route.ts) and reports the shortfall via headers, since a
+      // binary ZIP response can't carry a JSON body alongside it — surface
+      // that instead of letting a partial archive look complete.
+      const truncated = res.headers.get("X-Zip-Truncated") === "true"
+      const includedCount = res.headers.get("X-Zip-Included-Photos")
+      const totalCount = res.headers.get("X-Zip-Total-Photos")
+
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${event.slug || "event"}-print-ready.zip`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      if (truncated && includedCount && totalCount) {
+        toast({
+          title: "Download started (partial)",
+          description: `This ZIP includes ${includedCount} of ${totalCount} photos — the rest exceeded the per-download size/count limit.`,
+        })
+      } else {
+        toast({ title: "Download started", description: "Your print-ready photos are downloading as a ZIP." })
+      }
+    } catch (err: any) {
+      toast({ title: "Couldn't download photos", description: err?.message || "Please try again.", variant: "destructive" })
+    } finally {
+      setIsDownloadingZip(false)
+    }
+  }
+
   const handleCopyJoinCode = () => {
     if (!event?.join_code) return
     navigator.clipboard.writeText(event.join_code)
@@ -302,11 +372,19 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   }
 
   // These back the shared media lightbox opened from the activity timeline
-  // below. Rather than hand-rolling optimistic local state here too, they
-  // just call the same public endpoint the guest gallery uses and let the
-  // existing 3-second photo poll (see the event-photos useQuery above) pick
-  // up the change — simple, and correct even if the host has this page open
-  // in two tabs.
+  // below. They call the same public endpoint the guest gallery uses, then
+  // apply the server-returned (canonical, merged) reactions/comments both to
+  // the react-query cache AND directly to `activeLightboxMedia`.
+  //
+  // The second part matters: activeLightboxMedia is a one-off local snapshot
+  // captured via toLightboxMedia() at the moment the lightbox was opened
+  // (see setActiveLightboxMedia below). invalidateQueries() alone refetches
+  // the `event-photos` list, but that refetch flows into the `photos` array,
+  // not into this already-detached snapshot — so without patching it here
+  // directly, the open lightbox would keep showing stale counts (e.g.
+  // "Wishes & Comments (0)") forever, even though the save succeeded and the
+  // background grid updated. This previously caused reactions/comments to
+  // look like a silent no-op on the host dashboard.
   async function handleDashboardReact(photoId: string, emoji: string) {
     try {
       const res = await fetch(`/api/photos/${photoId}/react`, {
@@ -315,6 +393,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         body: JSON.stringify({ emoji }),
       })
       if (!res.ok) throw new Error(`Reaction request failed (${res.status})`)
+      const { data } = await res.json()
+      const reactions = data?.reactions
+      if (reactions) {
+        setActiveLightboxMedia((prev) =>
+          prev && prev.id === photoId ? { ...prev, metadata: { ...prev.metadata, reactions } } : prev
+        )
+      }
       queryClient.invalidateQueries({ queryKey: ["event-photos", event?.id] })
     } catch (err) {
       toast({ title: "Couldn't save reaction", variant: "destructive" })
@@ -329,6 +414,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         body: JSON.stringify({ comment: text, author_name: author }),
       })
       if (!res.ok) throw new Error(`Comment request failed (${res.status})`)
+      const { data } = await res.json()
+      const comments = data?.comments
+      if (comments) {
+        setActiveLightboxMedia((prev) =>
+          prev && prev.id === photoId ? { ...prev, metadata: { ...prev.metadata, comments } } : prev
+        )
+      }
       queryClient.invalidateQueries({ queryKey: ["event-photos", event?.id] })
     } catch (err) {
       toast({ title: "Couldn't save comment", variant: "destructive" })
@@ -342,6 +434,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       fd.set("author_name", author)
       const res = await fetch(`/api/photos/${photoId}/react`, { method: "POST", body: fd })
       if (!res.ok) throw new Error("Upload failed")
+      const { data } = await res.json()
+      const comments = data?.comments
+      if (comments) {
+        setActiveLightboxMedia((prev) =>
+          prev && prev.id === photoId ? { ...prev, metadata: { ...prev.metadata, comments } } : prev
+        )
+      }
       queryClient.invalidateQueries({ queryKey: ["event-photos", event?.id] })
     } catch (err) {
       toast({ title: "Couldn't save voice reply", variant: "destructive" })
@@ -608,6 +707,44 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       // this in-memory mutation error.
       queryClient.invalidateQueries({ queryKey: ["event", slug] })
       toast({ title: "Couldn't generate recap", description: error.message, variant: "destructive" })
+    },
+  })
+
+  // "Initiate New Face Match" used to be a plain <Button> with no onClick at
+  // all — clicking it did nothing. Detection also never ran automatically,
+  // so this is the host's only manual way to (re)process this event's
+  // photos. Feeds all current photo IDs to the batch-process route, which
+  // now actually persists detected faces and assigns them into
+  // face_clusters (see src/lib/integrations/face.ts detectAndStoreFaces).
+  const faceMatchMutation = useMutation({
+    mutationFn: async () => {
+      if (!event?.id) throw new Error("Missing event id")
+      const photoIds = photos
+        .filter((p: any) => !p.mime_type?.startsWith("video/") && !p.mime_type?.startsWith("audio/"))
+        .map((p: any) => p.id)
+        .slice(0, 500)
+      if (photoIds.length === 0) throw new Error("No photos to scan yet.")
+      const res = await fetch(`/api/ai/faces/batch-process`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event_id: event.id, photo_ids: photoIds }),
+      })
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) {
+        throw new Error(json?.error?.message || `Face match failed (${res.status})`)
+      }
+      return json.data
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["face-clusters", event?.id] })
+      queryClient.invalidateQueries({ queryKey: ["event-photos", event?.id] })
+      toast({
+        title: "Face match complete",
+        description: `Scanned ${data?.processed ?? 0} photo(s), found ${data?.facesDetected ?? 0} face(s).`,
+      })
+    },
+    onError: (error: Error) => {
+      toast({ title: "Couldn't run face match", description: error.message, variant: "destructive" })
     },
   })
 
@@ -916,6 +1053,16 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleDownloadZip}
+              disabled={isDownloadingZip}
+              className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/5 text-xs flex items-center gap-1"
+              title="Download all approved photos as a print-ready ZIP"
+            >
+              {isDownloadingZip ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+              <span>{isDownloadingZip ? "Preparing ZIP…" : "Download All"}</span>
+            </Button>
             <Button asChild variant="outline" className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/5 text-xs">
               <Link href={`/event/${event.slug}`} target="_blank" className="flex items-center gap-1">
                 <span>Live Portal</span>
@@ -1354,7 +1501,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
                 <div className="grid grid-cols-2 gap-2">
                   <a
-                    href={recapVideo.video_url}
+                    href={forceDownloadUrl(recapVideo.video_url, `${event.slug || "event"}-recap.mp4`)}
                     download
                     className="rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]"
                   >
@@ -1418,9 +1565,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               )}
             </div>
 
-            <Button variant="outline" className="w-full text-xs py-5 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 flex items-center justify-center gap-1.5">
-              <Search className="h-3.5 w-3.5" />
-              <span>Initiate New Face Match</span>
+            <Button
+              variant="outline"
+              className="w-full text-xs py-5 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
+              disabled={faceMatchMutation.isPending}
+              onClick={() => faceMatchMutation.mutate()}
+            >
+              <Search className={`h-3.5 w-3.5 ${faceMatchMutation.isPending ? "animate-spin" : ""}`} />
+              <span>{faceMatchMutation.isPending ? "Scanning photos..." : "Initiate New Face Match"}</span>
             </Button>
           </div>
 

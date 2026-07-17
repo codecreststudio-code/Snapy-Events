@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
-import { detectFaces } from "@/lib/integrations/face"
+import { detectAndStoreFaces } from "@/lib/integrations/face"
 
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
 
@@ -20,20 +20,18 @@ export const POST = defineRoute({
     const supabase = await createClient()
     const { data: photo } = await supabase.from("photos").select("storage_path").eq("id", body.photo_id).single()
     if (!photo) return fail("NOT_FOUND", "Photo not found", 404)
-    const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/sign/photos/${photo.storage_path}`
-    const det = await detectFaces({ imageUrl: url })
-    for (const f of det.faces) {
-      await supabase.from("faces").insert({
-        photo_id: body.photo_id,
-        event_id: body.event_id,
-        bounding_box: f.boundingBox,
-        confidence: f.confidence,
-        embedding: f.embedding,
-        embedding_path: `${body.photo_id}/${det.faces.indexOf(f)}.bin`,
-        embedding_model: det.model,
-      })
-    }
-    await supabase.from("photos").update({ face_count: det.faces.length }).eq("id", body.photo_id)
-    return ok({ faces_detected: det.faces.length })
+    // The `photos` bucket is public (see 0015_ensure_photos_bucket_public.sql)
+    // — every other consumer of storage_path resolves it via /object/public/,
+    // not /object/sign/ (which requires a token minted by createSignedUrl()
+    // and 400s on a bare GET). The old /object/sign/ URL here made every
+    // detection call silently fetch a 400 response, so faces.length was
+    // always 0 no matter how this route was triggered.
+    const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${photo.storage_path}`
+    const { facesDetected } = await detectAndStoreFaces(supabase, {
+      eventId: body.event_id,
+      photoId: body.photo_id,
+      imageUrl: url,
+    })
+    return ok({ faces_detected: facesDetected })
   },
 }).POST

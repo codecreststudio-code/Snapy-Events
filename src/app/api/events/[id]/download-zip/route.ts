@@ -31,7 +31,7 @@ export async function GET(
     // 1. Fetch event metadata and verify ownership
     const { data: event, error: eventErr } = await supabase
       .from("events")
-      .select("title, slug, host_id")
+      .select("name, slug, host_id")
       .eq("id", eventId)
       .single()
 
@@ -111,14 +111,24 @@ export async function GET(
     }
 
     const zipArray = await zip.generateAsync({ type: "uint8array" })
-    const sanitizedTitle = (event.title || "snapsy-event").replace(/[^a-zA-Z0-9_-]/g, "_")
+    const sanitizedTitle = (event.name || "snapsy-event").replace(/[^a-zA-Z0-9_-]/g, "_")
 
+    // filesAdded can be less than photos.length because of MAX_ZIP_FILES /
+    // MAX_ZIP_BYTES above, or because individual downloads failed. Surface
+    // that via response headers (can't attach a JSON body to a binary ZIP
+    // response) instead of silently shipping a partial archive — the client
+    // reads these to warn the host rather than letting a truncated download
+    // look identical to a complete one.
+    const truncated = filesAdded < photos.length
     return new NextResponse(zipArray as unknown as BodyInit, {
       status: 200,
       headers: {
         "Content-Type": "application/zip",
         "Content-Disposition": `attachment; filename="${sanitizedTitle}-print-ready.zip"`,
         "Cache-Control": "no-cache",
+        "X-Zip-Total-Photos": String(photos.length),
+        "X-Zip-Included-Photos": String(filesAdded),
+        "X-Zip-Truncated": String(truncated),
       },
     })
   } catch (error: any) {

@@ -19,7 +19,7 @@ export const POST = defineRoute({
     const supabase = await createServiceClient()
     const { data: event } = await supabase
       .from("events")
-      .select("title, slug, host_id")
+      .select("name, slug, host_id")
       .eq("id", body.event_id)
       .single()
 
@@ -34,9 +34,13 @@ export const POST = defineRoute({
     const guestName = body.guest_name || "Guest"
     const galleryUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://snapsy-events.vercel.app"}/event/${event.slug}`
 
-    let textMessage = `Hello ${guestName}! Photos from ${event.title} are live. Upload & view them here: ${galleryUrl}`
+    // events has no `title` column (schema only defines `name` —
+    // supabase/migrations/0001_init.sql:121); this route was reading an
+    // undefined field into every outbound message, same bug class as the
+    // download-zip route fixed alongside this one.
+    let textMessage = `Hello ${guestName}! Photos from ${event.name} are live. Upload & view them here: ${galleryUrl}`
     if (body.template === "gallery_unlocked") {
-      textMessage = `✨ Good news ${guestName}! The gallery for ${event.title} has unlocked! View all event memories now: ${galleryUrl}`
+      textMessage = `✨ Good news ${guestName}! The gallery for ${event.name} has unlocked! View all event memories now: ${galleryUrl}`
     }
 
     const { data, error } = await supabase.from("notification_queue").insert({
@@ -44,7 +48,7 @@ export const POST = defineRoute({
       recipient: body.phone_number,
       payload: {
         template: body.template,
-        event_title: event.title,
+        event_title: event.name,
         message: textMessage,
         url: galleryUrl,
       },
