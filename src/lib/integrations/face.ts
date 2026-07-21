@@ -37,6 +37,17 @@ export interface DetectionResult {
 const MODEL_DIR = path.join(process.cwd(), "node_modules", "@vladmandic", "face-api", "model")
 const MODEL_ID = "face-api-tiny-wasm-v1"
 
+// @tensorflow/tfjs-backend-wasm's package.json "main" points at the Node
+// build (dist/tf-backend-wasm.node.js), but bundlers commonly prefer its
+// "module" field (dist/index.js, the browser/isomorphic build) instead —
+// that build locates its .wasm binary via a `scriptDirectory`-relative
+// guess that breaks once Next.js re-packages this route into a serverless
+// Lambda (the .wasm file no longer sits where the bundled code expects).
+// Importing the Node subpath explicitly forces the fs-based build
+// regardless of what the bundler would otherwise resolve — same defensive
+// pattern already used below for face-api's own node-wasm build.
+const WASM_DIR = path.join(process.cwd(), "node_modules", "@tensorflow", "tfjs-backend-wasm", "dist") + "/"
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let faceapiPromise: Promise<any> | null = null
 let modelsLoadedPromise: Promise<void> | null = null
@@ -46,7 +57,19 @@ async function getFaceApi(): Promise<any> {
   if (!faceapiPromise) {
     faceapiPromise = (async () => {
       const tf = await import("@tensorflow/tfjs")
-      await import("@tensorflow/tfjs-backend-wasm")
+      // This subpath (the Node-native build) has no adjacent .d.ts, unlike
+      // the package's top-level "index.d.ts" — @ts-expect-error is the
+      // correct suppression (not a real "any" typing issue) since import()
+      // itself is what TS can't resolve types for here.
+      // @ts-expect-error - no type declarations for this subpath import
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const wasmBackend: any = await import("@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.node.js")
+      // Point directly at the on-disk .wasm binaries (also explicitly
+      // included in next.config.ts's outputFileTracingIncludes, since
+      // Next's automatic tracer can't see this fs-based lookup either) and
+      // force the platform `fs.readFileSync` path instead of a `fetch()`,
+      // which wouldn't work against a plain filesystem path under Node.
+      wasmBackend.setWasmPaths(WASM_DIR, true)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const faceapi: any = await import("@vladmandic/face-api/dist/face-api.node-wasm.js")
       await tf.setBackend("wasm")
@@ -265,10 +288,14 @@ export async function detectAndStoreFaces(
   if (det.faces.length > 0) {
     // Existing clusters for this event, each carrying its representative
     // face's descriptor so newly detected faces can be matched against them.
-    const { data: existingClusters } = await supabase
+    const { data: existingClusters, error: clustersReadErr } = await supabase
       .from("face_clusters")
       .select("id, representative_face:representative_face_id(embedding)")
       .eq("event_id", params.eventId)
+
+    if (clustersReadErr) {
+      logger.error("[face] failed to read existing face_clusters", { eventId: params.eventId, error: clustersReadErr.message })
+    }
 
     const clusterCandidates: FaceClusterCandidate[] = (existingClusters ?? [])
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -277,7 +304,7 @@ export async function detectAndStoreFaces(
       .filter((c: any) => Array.isArray(c.embedding) && c.embedding.length > 0)
 
     for (const f of det.faces) {
-      const { data: inserted } = await supabase
+      const { data: inserted, error: insertErr } = await supabase
         .from("faces")
         .insert({
           photo_id: params.photoId,
@@ -290,22 +317,33 @@ export async function detectAndStoreFaces(
         .select("id")
         .single()
 
-      if (!inserted) continue
+      // Previously: a failed insert (RLS denial, constraint violation, etc.)
+      // silently `continue`d to the next face with no log and no error
+      // surfaced anywhere — the route would still report facesDetected
+      // based on raw detection count, so a host could see "found 3 faces"
+      // in the toast while zero rows (and zero clusters) actually existed
+      // in the database. Throwing here instead lets the per-photo try/catch
+      // in the batch-process route record and surface the real failure.
+      if (insertErr || !inserted) {
+        throw new Error(`Failed to persist detected face: ${insertErr?.message || "insert returned no row"}`)
+      }
 
       const clusterId = pickBestCluster(f.embedding, clusterCandidates)
       if (clusterId) {
-        await supabase.from("faces").update({ cluster_id: clusterId }).eq("id", inserted.id)
+        const { error: assignErr } = await supabase.from("faces").update({ cluster_id: clusterId }).eq("id", inserted.id)
+        if (assignErr) logger.error("[face] failed to assign face to cluster", { faceId: inserted.id, clusterId, error: assignErr.message })
         const { data: clusterRow } = await supabase
           .from("face_clusters")
           .select("face_count")
           .eq("id", clusterId)
           .single()
-        await supabase
+        const { error: countErr } = await supabase
           .from("face_clusters")
           .update({ face_count: (clusterRow?.face_count ?? 0) + 1, updated_at: new Date().toISOString() })
           .eq("id", clusterId)
+        if (countErr) logger.error("[face] failed to update cluster face_count", { clusterId, error: countErr.message })
       } else {
-        const { data: newCluster } = await supabase
+        const { data: newCluster, error: newClusterErr } = await supabase
           .from("face_clusters")
           .insert({ event_id: params.eventId, representative_face_id: inserted.id, face_count: 1 })
           .select("id")
@@ -313,6 +351,12 @@ export async function detectAndStoreFaces(
         if (newCluster) {
           await supabase.from("faces").update({ cluster_id: newCluster.id }).eq("id", inserted.id)
           clusterCandidates.push({ id: newCluster.id, embedding: f.embedding })
+        } else {
+          logger.error("[face] failed to create new face_cluster", {
+            eventId: params.eventId,
+            faceId: inserted.id,
+            error: newClusterErr?.message,
+          })
         }
       }
     }

@@ -27,7 +27,19 @@ const nextConfig: NextConfig = {
   // discover them — list them explicitly so Vercel bundles them into the
   // face-detection route functions.
   outputFileTracingIncludes: {
-    "/api/ai/faces/*": ["./node_modules/@vladmandic/face-api/model/**/*"],
+    // The tfjs-backend-wasm .wasm binaries are located via a runtime
+    // filesystem lookup (see src/lib/integrations/face.ts's setWasmPaths
+    // call), not a statically-analyzable require/import, so — same as the
+    // face-api model weights below — Next's automatic tracer drops them
+    // from the deployed function bundle unless listed here explicitly.
+    // Without this, face detection silently returns zero faces on every
+    // request in production (the wasm backend fails to initialize, caught
+    // and swallowed by detectFaces()'s try/catch) while working fine
+    // locally, where the full node_modules tree is still on disk.
+    "/api/ai/faces/*": [
+      "./node_modules/@vladmandic/face-api/model/**/*",
+      "./node_modules/@tensorflow/tfjs-backend-wasm/dist/*.wasm",
+    ],
     // The ffmpeg binary itself is located via a runtime filesystem check
     // inside @ffmpeg-installer/ffmpeg, not a statically-analyzable require —
     // explicit tracing (same pattern as the face-api weights above) ensures

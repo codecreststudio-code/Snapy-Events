@@ -105,6 +105,7 @@ interface ExtEventSettings extends EventSettings {
     mood?: "joyful" | "sentimental"
     video_url?: string
     generated_at?: string
+    started_at?: string
     error?: string
     stats?: {
       guests: number
@@ -728,7 +729,20 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   // (same queryKey pattern as updateMutation above) so the server-persisted
   // settings.recap_video survives a hard refresh, not just local state.
   const recapVideo = (event?.settings as ExtEventSettings | undefined)?.recap_video
-  const recapServerStatus: "idle" | "rendering" | "ready" | "failed" = recapVideo?.status || "idle"
+  // A "rendering" marker left over from a render the server never finished
+  // (killed mid-flight by a platform timeout, cold-deploy recycle, etc. —
+  // see the matching staleness check in recap/generate/route.ts) shouldn't
+  // show an infinite spinner on every future page load with no way to
+  // retry. Anything older than the route's own 300s maxDuration plus a
+  // comfortable buffer is treated as abandoned rather than in-progress.
+  const RECAP_RENDERING_STALE_MS = 10 * 60 * 1000
+  const recapRenderingStartedAt = recapVideo?.started_at ? Date.parse(recapVideo.started_at) : NaN
+  const recapIsStaleRendering =
+    recapVideo?.status === "rendering" &&
+    (!Number.isFinite(recapRenderingStartedAt) || Date.now() - recapRenderingStartedAt > RECAP_RENDERING_STALE_MS)
+  const recapServerStatus: "idle" | "rendering" | "ready" | "failed" = recapIsStaleRendering
+    ? "failed"
+    : recapVideo?.status || "idle"
 
   const [recapMood, setRecapMood] = useState<"joyful" | "sentimental">("joyful")
   // Forces the mood-selector view back open after "Regenerate" / "Try Again"

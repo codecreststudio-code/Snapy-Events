@@ -220,7 +220,7 @@ export function MediaLightbox({
             {watermarkEnabled && <WatermarkOverlay dense />}
           </div>
         ) : (
-          <div className="aspect-square bg-gradient-to-br from-amber-500/20 to-fuchsia-500/20" />
+          <div className="aspect-square bg-gradient-to-br from-mauve/20 to-mauve-strong/20" />
         )}
       </div>
 

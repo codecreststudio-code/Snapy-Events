@@ -88,7 +88,25 @@ export const POST = defineRoute<{ mood: RecapMood; photo_ids?: string[] }, unkno
 
     const currentSettings = (freshEventRow.settings as Record<string, any>) || {}
 
-    if (currentSettings.recap_video?.status === "rendering") {
+    // A "rendering" marker older than this is treated as abandoned rather
+    // than genuinely in-progress. Without this, any hard kill of the
+    // function that skips the try/catch below (e.g. the host's platform
+    // enforcing a lower real timeout than this route's maxDuration: 300 in
+    // vercel.json — common on lower hosting tiers that cap serverless
+    // duration regardless of what a project's config requests, or a cold
+    // deploy recycling the instance mid-render) leaves settings.recap_video
+    // stuck at "rendering" forever: every future attempt gets rejected
+    // below with ALREADY_RENDERING, and the dashboard card shows an
+    // infinite "Composing your recap…" spinner on every reload with no way
+    // for the host to ever retry.
+    const RENDERING_STALE_MS = 10 * 60 * 1000 // 10 min — comfortably past the 300s maxDuration
+    const existingRecap = currentSettings.recap_video
+    const renderingStartedAt = existingRecap?.started_at ? Date.parse(existingRecap.started_at) : NaN
+    const isStaleRendering =
+      existingRecap?.status === "rendering" &&
+      (!Number.isFinite(renderingStartedAt) || Date.now() - renderingStartedAt > RENDERING_STALE_MS)
+
+    if (existingRecap?.status === "rendering" && !isStaleRendering) {
       return fail("ALREADY_RENDERING", "A recap video is already being generated for this event.", 409)
     }
 
@@ -98,12 +116,15 @@ export const POST = defineRoute<{ mood: RecapMood; photo_ids?: string[] }, unkno
     // multi-minute) render starts so that even if the client's own request
     // times out, the event record reflects an in-progress attempt rather
     // than silently reverting to whatever state it was in before.
+    // `started_at` is what lets the next request (or a page reload, via the
+    // dashboard's own staleness check) tell a genuinely-in-progress render
+    // apart from an abandoned one.
     await supabase
       .from("events")
       .update({
         settings: {
           ...currentSettings,
-          recap_video: { status: "rendering", mood, generated_at: null },
+          recap_video: { status: "rendering", mood, generated_at: null, started_at: new Date().toISOString() },
         },
       })
       .eq("id", eventId)
