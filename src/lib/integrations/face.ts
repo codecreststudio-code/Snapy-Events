@@ -19,6 +19,7 @@
 
 import "server-only"
 import path from "node:path"
+import sharp from "sharp"
 import { logger } from "@/lib/logger"
 
 export interface DetectedFace {
@@ -36,6 +37,18 @@ export interface DetectionResult {
 
 const MODEL_DIR = path.join(process.cwd(), "node_modules", "@vladmandic", "face-api", "model")
 const MODEL_ID = "face-api-tiny-wasm-v1"
+
+// The tiny face detector runs at a fixed inputSize of 416px (see
+// TinyFaceDetectorOptions below) — feeding it a full-resolution phone-camera
+// original (commonly 3000-4000px+, 12MP+) buys zero detection benefit while
+// multiplying memory cost at every step of the pipeline below: decoding to
+// raw RGBA pixels, boxing those pixels into a tensor, and holding the WASM
+// backend + model weights in the same process. A 12MP RGBA buffer alone is
+// ~48M bytes; without this cap this route was crashing the entire Vercel
+// serverless function (an OOM kill, surfaced to the client as a raw
+// platform-level 500 with no app-level error detail — not a caught
+// exception) rather than gracefully returning zero faces for that photo.
+const MAX_DETECT_DIMENSION = 1280
 
 // @tensorflow/tfjs-backend-wasm's package.json "main" points at the Node
 // build (dist/tf-backend-wasm.node.js), but bundlers commonly prefer its
@@ -139,20 +152,42 @@ export async function detectFaces(input: DetectInput): Promise<DetectionResult> 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let tensor: any
   try {
-    const canvas = await canvasImage.imageFromBuffer(buffer)
+    // Downscale BEFORE decoding to raw pixels — sharp resizes the compressed
+    // (jpeg/png/webp) buffer itself, so the decoder below never has to hold
+    // a full-resolution RGBA buffer in memory for a typical multi-megapixel
+    // phone-camera original. Falls back to the original buffer if sharp
+    // can't process it (e.g. an already-tiny or corrupt image) rather than
+    // failing detection outright.
+    let detectBuffer = buffer
+    try {
+      detectBuffer = await sharp(buffer)
+        .resize(MAX_DETECT_DIMENSION, MAX_DETECT_DIMENSION, { fit: "inside", withoutEnlargement: true })
+        .toBuffer()
+    } catch (resizeErr) {
+      logger.error("[face] resize before detect failed, using original buffer", { error: String(resizeErr) })
+    }
+
+    const canvas = await canvasImage.imageFromBuffer(detectBuffer)
     const imageData = canvasImage.getImageData(canvas)
     if (!imageData) throw new Error("Failed to read pixel data from decoded image")
     width = canvas.width
     height = canvas.height
     tensor = tf.tidy(() => {
-      const data = tf.tensor(Array.from(imageData.data), [canvas.height, canvas.width, 4], "int32")
+      // Pass the decoded Uint8ClampedArray straight to tf.tensor — the
+      // previous Array.from(imageData.data) boxed every pixel byte into a
+      // plain JS array first, an unnecessary allocation on top of an
+      // already resize-capped buffer that (combined with the WASM backend +
+      // model weights sharing the same process) was pushing this function
+      // past its serverless memory budget and getting OOM-killed — which
+      // surfaces to the client as a raw platform 500, not a catchable error.
+      const data = tf.tensor(imageData.data, [canvas.height, canvas.width, 4], "int32")
       const channels = tf.split(data, 4, 2)
       const rgb = tf.stack([channels[0], channels[1], channels[2]], 2)
       return tf.reshape(rgb, [1, canvas.height, canvas.width, 3])
     })
   } catch (err) {
     logger.error("[face] failed to decode image", { error: String(err) })
-    return { model: MODEL_ID, faces: [] }
+    return { model: MODEL_ID, faces: [], width, height }
   }
 
   try {

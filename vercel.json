@@ -5,7 +5,8 @@
       "maxDuration": 300
     },
     "src/app/api/ai/faces/batch-process/route.ts": {
-      "maxDuration": 300
+      "maxDuration": 300,
+      "memory": 3009
     },
     "src/app/api/events/[id]/recap/generate/route.ts": {
       "maxDuration": 300
