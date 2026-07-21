@@ -1034,6 +1034,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
   const unviewedStory = memoriesStories?.stories?.find((s) => !s.viewed_at)
 
+  // Host opt-out — mirrors isMemoriesEnabled() in src/lib/integrations/memories.ts,
+  // duplicated inline rather than imported since that module is server-only
+  // (importing it here would break the client bundle). Missing key defaults
+  // to enabled, matching every other settings toggle in this codebase.
+  const memoriesEnabled = (event?.settings as ExtEventSettings | undefined)?.memories_enabled !== false
+
   // Local Form state for settings edits
   const [editName, setEditName] = useState("")
   const [editStatus, setEditStatus] = useState<EventStatus>("published")
@@ -2075,7 +2081,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
           {/* ✨ Snapsy Memories — Guest Awards, Event Summary, Auto Collage, Slideshow, Stories.
               Pure Next.js + Supabase, no ffmpeg/AI services (Highlight Movie above reuses the
-              existing Recap Video pipeline instead of duplicating it). */}
+              existing Recap Video pipeline instead of duplicating it). Gated behind the host's
+              memories_enabled toggle in Edit Capsule Settings — this whole section disappears
+              when the host turns it off, matching that toggle's description. */}
+          {memoriesEnabled && (
+          <>
           <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-3">
             <p className="text-[10px] uppercase tracking-[0.2em] text-[#B28DAE] font-bold">✨ Snapsy Memories</p>
           </div>
@@ -2286,6 +2296,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 <ExternalLink className="h-3.5 w-3.5" /> Open Share Page
               </Link>
             </div>
+          )}
+          </>
           )}
 
           {/* Recent Activity waterfall feed */}
