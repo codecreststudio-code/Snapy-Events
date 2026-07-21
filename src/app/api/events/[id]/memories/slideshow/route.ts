@@ -13,6 +13,7 @@ import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createServiceClient } from "@/lib/supabase/server"
 import { getScoredPhotos } from "@/lib/integrations/memories"
+import { isValidTrackId, resolveTrackUrl } from "@/lib/integrations/slideshow-music"
 import { logger } from "@/lib/logger"
 
 const paramsSchema = z.object({ id: z.string().uuid() })
@@ -20,6 +21,9 @@ const bodySchema = z.object({
   duration_seconds: z.union([z.literal(30), z.literal(60), z.literal(180)]).default(60),
   transition: z.enum(["fade", "zoom"]).default("fade"),
   show_brand: z.boolean().default(true),
+  // null/omitted = silent, matching prior behavior. Validated against the
+  // fixed catalog rather than accepting arbitrary strings.
+  music_track: z.string().nullable().optional(),
 })
 
 const SECONDS_PER_PHOTO = 4
@@ -56,6 +60,8 @@ export const POST = defineRoute<z.infer<typeof bodySchema>, unknown, { id: strin
       return fail("NO_PHOTOS", "No approved photos are available yet to build a slideshow", 409)
     }
 
+    const musicTrack = isValidTrackId(body.music_track) ? body.music_track! : null
+
     // Only one "auto" slideshow active per event at a time — deactivate any
     // previous auto-generated ones rather than accumulating unused rows.
     await supabase.from("slideshows").update({ is_active: false }).eq("event_id", eventId).eq("name", "Auto Slideshow")
@@ -69,9 +75,10 @@ export const POST = defineRoute<z.infer<typeof bodySchema>, unknown, { id: strin
         transition: body.transition,
         interval_seconds: SECONDS_PER_PHOTO,
         show_brand: body.show_brand,
+        music_track: musicTrack,
         is_active: true,
       })
-      .select("id, photo_ids, transition, interval_seconds, show_brand, is_active, created_at")
+      .select("id, photo_ids, transition, interval_seconds, show_brand, music_track, is_active, created_at")
       .single()
 
     if (insertErr || !inserted) {
@@ -91,7 +98,11 @@ export const POST = defineRoute<z.infer<typeof bodySchema>, unknown, { id: strin
       .map((id) => photoMap.get(id))
       .filter((p): p is { id: string; storage_path: string; thumbnail_path: string | null } => !!p)
 
-    return ok({ slideshow: inserted, photos: orderedPhotos })
+    return ok({
+      slideshow: inserted,
+      photos: orderedPhotos,
+      musicTrackUrl: resolveTrackUrl(inserted.music_track as string | null),
+    })
   },
 }).POST
 
@@ -109,14 +120,14 @@ export const GET = defineRoute<unknown, unknown, { id: string }>({
 
     const { data: slideshow, error } = await supabase
       .from("slideshows")
-      .select("id, photo_ids, transition, interval_seconds, show_brand, is_active, created_at")
+      .select("id, photo_ids, transition, interval_seconds, show_brand, music_track, is_active, created_at")
       .eq("event_id", eventId)
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle()
 
-    if (error || !slideshow) return ok({ slideshow: null, photos: [] })
+    if (error || !slideshow) return ok({ slideshow: null, photos: [], musicTrackUrl: null })
 
     const { data: photoRows } = await supabase
       .from("photos")
@@ -128,6 +139,10 @@ export const GET = defineRoute<unknown, unknown, { id: string }>({
       .map((id) => photoMap.get(id))
       .filter((p): p is { id: string; storage_path: string; thumbnail_path: string | null } => !!p)
 
-    return ok({ slideshow, photos: orderedPhotos })
+    return ok({
+      slideshow,
+      photos: orderedPhotos,
+      musicTrackUrl: resolveTrackUrl(slideshow.music_track as string | null),
+    })
   },
 }).GET

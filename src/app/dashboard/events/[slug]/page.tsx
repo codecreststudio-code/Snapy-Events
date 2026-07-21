@@ -20,6 +20,7 @@ import { useWatermarkEnabled } from "@/lib/hooks"
 import { toDatetimeLocalValue } from "@/lib/utils"
 import { WatermarkOverlay } from "@/lib/components/media/watermark-overlay"
 import { MediaLightbox, type LightboxMedia } from "@/lib/components/media/media-lightbox"
+import { SLIDESHOW_TRACKS } from "@/lib/integrations/slideshow-music"
 import {
   ArrowLeft,
   Calendar,
@@ -965,10 +966,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     queryFn: async () => {
       const res = await fetch(`/api/events/${event!.id}/memories/slideshow`)
       const json = await res.json().catch(() => null)
-      if (!res.ok || !json?.success) return { slideshow: null, photos: [] }
+      if (!res.ok || !json?.success) return { slideshow: null, photos: [], musicTrackUrl: null }
       return json.data as {
-        slideshow: { id: string; transition: string; interval_seconds: number } | null
+        slideshow: { id: string; transition: string; interval_seconds: number; music_track: string | null } | null
         photos: { id: string; storage_path: string; thumbnail_path: string | null }[]
+        musicTrackUrl: string | null
       }
     },
     enabled: !!event?.id,
@@ -1007,13 +1009,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   })
 
   const [slideshowDuration, setSlideshowDuration] = useState<30 | 60 | 180>(60)
+  const [slideshowMusicTrack, setSlideshowMusicTrack] = useState<string | null>(SLIDESHOW_TRACKS[0]?.id ?? null)
   const [showSlideshowPlayer, setShowSlideshowPlayer] = useState(false)
   const slideshowMutation = useMutation({
     mutationFn: async (duration: typeof slideshowDuration) => {
       const res = await fetch(`/api/events/${event!.id}/memories/slideshow`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ duration_seconds: duration, transition: "fade", show_brand: true }),
+        body: JSON.stringify({ duration_seconds: duration, transition: "fade", show_brand: true, music_track: slideshowMusicTrack }),
       })
       const json = await res.json().catch(() => null)
       if (!res.ok || !json?.success) throw new Error(json?.error?.message || "Failed to build slideshow")
@@ -2218,6 +2221,35 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 </button>
               ))}
             </div>
+            <div className="space-y-1.5">
+              <p className="text-[10px] uppercase tracking-wide text-white/40 font-semibold">Background music</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  onClick={() => setSlideshowMusicTrack(null)}
+                  className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left ${
+                    slideshowMusicTrack === null
+                      ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
+                      : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                  }`}
+                >
+                  🔇 None
+                </button>
+                {SLIDESHOW_TRACKS.map((track) => (
+                  <button
+                    key={track.id}
+                    onClick={() => setSlideshowMusicTrack(track.id)}
+                    title={track.mood}
+                    className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left ${
+                      slideshowMusicTrack === track.id
+                        ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
+                        : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                    }`}
+                  >
+                    🎵 {track.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <Button
               variant="outline"
               className="w-full text-xs py-5 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
@@ -2587,6 +2619,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         <SlideshowPlayer
           photos={memoriesSlideshow.photos}
           intervalSeconds={memoriesSlideshow.slideshow?.interval_seconds || 4}
+          musicTrackUrl={memoriesSlideshow.musicTrackUrl}
           onClose={() => setShowSlideshowPlayer(false)}
         />
       )}
@@ -2602,13 +2635,20 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 function SlideshowPlayer({
   photos,
   intervalSeconds,
+  musicTrackUrl,
   onClose,
 }: {
   photos: { id: string; storage_path: string; thumbnail_path: string | null }[]
   intervalSeconds: number
+  musicTrackUrl?: string | null
   onClose: () => void
 }) {
   const [index, setIndex] = useState(0)
+  const [muted, setMuted] = useState(false)
+  // If the track file 404s (audio asset not uploaded yet), fall back to a
+  // silent slideshow instead of showing a broken mute button.
+  const [musicUnavailable, setMusicUnavailable] = useState(false)
+  const audioRef = useRef<HTMLAudioElement>(null)
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -2617,14 +2657,50 @@ function SlideshowPlayer({
     return () => clearInterval(timer)
   }, [photos.length, intervalSeconds])
 
+  // Opening the player is itself a user gesture (clicking "Watch Slideshow"),
+  // which satisfies browser autoplay-with-sound policies — but some mobile
+  // browsers still need an explicit play() call rather than the `autoPlay`
+  // attribute alone, so trigger it here and swallow the rare rejected-promise
+  // case (e.g. a browser that blocks it anyway) rather than throwing.
+  useEffect(() => {
+    if (!musicTrackUrl) return
+    audioRef.current?.play().catch(() => {
+      /* autoplay blocked — host can still tap unmute/replay manually */
+    })
+    return () => {
+      audioRef.current?.pause()
+    }
+  }, [musicTrackUrl])
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const photoUrl = (path: string) => `${supabaseUrl}/storage/v1/object/public/photos/${path}`
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex items-center justify-center" onClick={onClose}>
+      {musicTrackUrl && !musicUnavailable && (
+        <audio
+          ref={audioRef}
+          src={musicTrackUrl}
+          loop
+          muted={muted}
+          onError={() => setMusicUnavailable(true)}
+        />
+      )}
       <button onClick={onClose} className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20">
         <X className="h-5 w-5 text-white" />
       </button>
+      {musicTrackUrl && !musicUnavailable && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setMuted((m) => !m)
+          }}
+          className="absolute top-4 right-16 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-xs text-white"
+          title={muted ? "Unmute music" : "Mute music"}
+        >
+          {muted ? "🔇" : "🎵"}
+        </button>
+      )}
       {photos.map((photo, i) => (
         <img
           key={photo.id}
