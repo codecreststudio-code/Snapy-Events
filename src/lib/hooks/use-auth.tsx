@@ -28,7 +28,6 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>
   signInWithGoogle: () => Promise<{ error: Error | null }>
-  signInWithApple: () => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: Error | null }>
   updatePassword: (password: string) => Promise<{ error: Error | null }>
@@ -157,20 +156,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: error ? new Error(toFriendlyAuthError(error.message, "Google sign-in failed. Please try again.")) : null }
   }
 
-  // Mirrors signInWithGoogle above — same redirect target, same provider-
-  // agnostic /api/auth/callback route handles the code exchange either way.
-  // The Apple provider itself (Services ID, private key, team ID) is
-  // configured in the hosted Supabase Dashboard, not in this repo.
-  const signInWithApple = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "apple",
-      options: {
-        redirectTo: `${window.location.origin}/api/auth/callback`,
-      },
-    })
-    return { error: error ? new Error(toFriendlyAuthError(error.message, "Apple sign-in failed. Please try again.")) : null }
-  }
-
   return (
     <AuthContext.Provider
       value={{
@@ -181,7 +166,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signUp,
         signInWithGoogle,
-        signInWithApple,
         signOut,
         resetPassword,
         updatePassword,
