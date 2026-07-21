@@ -27,15 +27,26 @@ export function ContactForm() {
     }
   }
 
-  if (done) return <p className="text-sm text-primary">Thanks — we'll be in touch.</p>
+  if (done) return <p className="text-sm text-mauve">Thanks — we'll be in touch.</p>
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="grid gap-2"><Label htmlFor="name">Name</Label><Input id="name" name="name" required /></div>
-      <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" required /></div>
-      <div className="grid gap-2"><Label htmlFor="message">Message</Label><Textarea id="message" name="message" rows={5} required /></div>
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      <Button type="submit" disabled={pending}>{pending ? "Sending…" : "Send message"}</Button>
+      <div className="grid gap-2">
+        <Label htmlFor="name" className="text-white/70">Name</Label>
+        <Input id="name" name="name" required className="bg-white/5 border-hairline-dark text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve" />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="email" className="text-white/70">Email</Label>
+        <Input id="email" name="email" type="email" required className="bg-white/5 border-hairline-dark text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve" />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="message" className="text-white/70">Message</Label>
+        <Textarea id="message" name="message" rows={5} required className="bg-white/5 border-hairline-dark text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve" />
+      </div>
+      {error && <p className="text-sm text-red-400">{error}</p>}
+      <Button type="submit" disabled={pending} className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+        {pending ? "Sending…" : "Send message"}
+      </Button>
     </form>
   )
 }

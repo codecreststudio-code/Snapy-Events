@@ -139,7 +139,7 @@ export default function AdminVoiceNotesPage() {
                           }}
                           className="h-10 w-10 rounded-full bg-mauve/10 hover:bg-mauve/10 flex items-center justify-center text-mauve border border-mauve/20 shrink-0 shadow-sm"
                         >
-                          {isPlaying ? <Pause className="h-4.5 w-4.5" /> : <Play className="h-4.5 w-4.5 fill-violet-600 ml-0.5" />}
+                          {isPlaying ? <Pause className="h-4.5 w-4.5" /> : <Play className="h-4.5 w-4.5 fill-mauve ml-0.5" />}
                         </button>
                         
                         <div className="flex-1 min-w-0 space-y-1">

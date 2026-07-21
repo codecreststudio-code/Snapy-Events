@@ -313,7 +313,7 @@ export function PublicFooter() {
             </div>
             {/* Text & Socials on the right */}
             <div className="flex flex-col items-start">
-              <p className="text-slate-400 text-sm leading-relaxed mb-4 max-w-sm text-left font-light">
+              <p className="text-white/50 text-sm leading-relaxed mb-4 max-w-sm text-left font-light">
                 Empowering event organizers with reliable, scalable, and innovative live photo sharing and event management solutions.
               </p>
               <div className="flex space-x-3 justify-start items-center">
@@ -321,7 +321,7 @@ export function PublicFooter() {
                 <a
                   href="#"
                   aria-label="Facebook"
-                  className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-slate-400 hover:text-violet-400 hover:border-violet-500/50 hover:bg-violet-500/10 transition-all duration-200"
+                  className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-white/50 hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
                 >
                   <FacebookIcon className="h-4.5 w-4.5" />
                 </a>
@@ -329,7 +329,7 @@ export function PublicFooter() {
                 <a
                   href="#"
                   aria-label="Instagram"
-                  className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-slate-400 hover:text-violet-400 hover:border-violet-500/50 hover:bg-violet-500/10 transition-all duration-200"
+                  className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-white/50 hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
                 >
                   <InstagramIcon className="h-4.5 w-4.5" />
                 </a>
@@ -337,7 +337,7 @@ export function PublicFooter() {
                 <a
                   href="#"
                   aria-label="Twitter"
-                  className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-slate-400 hover:text-violet-400 hover:border-violet-500/50 hover:bg-violet-500/10 transition-all duration-200"
+                  className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-white/50 hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
                 >
                   <TwitterIcon className="h-4.5 w-4.5" />
                 </a>
@@ -345,7 +345,7 @@ export function PublicFooter() {
                 <a
                   href="#"
                   aria-label="LinkedIn"
-                  className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-slate-400 hover:text-violet-400 hover:border-violet-500/50 hover:bg-violet-500/10 transition-all duration-200"
+                  className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-white/50 hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
                 >
                   <LinkedInIcon className="h-4.5 w-4.5" />
                 </a>
@@ -355,20 +355,20 @@ export function PublicFooter() {
 
           {/* Column 2: Solutions */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-200">Solutions</h4>
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/70">Solutions</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/features" className="text-sm text-slate-400 hover:text-white transition-colors duration-200">
+                <Link href="/features" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
                   Features
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="text-sm text-slate-400 hover:text-white transition-colors duration-200">
+                <Link href="/pricing" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-sm text-slate-400 hover:text-white transition-colors duration-200">
+                <Link href="/faq" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
                   FAQs
                 </Link>
               </li>
@@ -377,20 +377,20 @@ export function PublicFooter() {
 
           {/* Column 3: Company */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-200">Company</h4>
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/70">Company</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/about" className="text-sm text-slate-400 hover:text-white transition-colors duration-200">
+                <Link href="/about" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/blog" className="text-sm text-slate-400 hover:text-white transition-colors duration-200">
+                <Link href="/blog" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
                   Blog
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm text-slate-400 hover:text-white transition-colors duration-200">
+                <Link href="/contact" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
                   Contact
                 </Link>
               </li>
@@ -401,14 +401,14 @@ export function PublicFooter() {
 
         {/* Bottom Row */}
         <div className="border-t border-white/10 pt-8 flex flex-col items-center justify-between gap-4 md:flex-row">
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-white/50">
             &copy; {new Date().getFullYear()} Snapsy. All rights reserved.
           </p>
           <div className="flex space-x-6">
-            <Link href="/privacy" className="text-xs text-slate-400 hover:text-white transition-colors duration-200">
+            <Link href="/privacy" className="text-xs text-white/50 hover:text-white transition-colors duration-200">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="text-xs text-slate-400 hover:text-white transition-colors duration-200">
+            <Link href="/terms" className="text-xs text-white/50 hover:text-white transition-colors duration-200">
               Terms of Service
             </Link>
           </div>
