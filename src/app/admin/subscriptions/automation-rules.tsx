@@ -126,41 +126,41 @@ export function AutomationRules() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       <div className="lg:col-span-2 space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-bold text-slate-800">Automation Engine</h2>
-          <Button onClick={startAdd} className="h-8 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold gap-1">
+          <h2 className="text-lg font-bold text-white/80">Automation Engine</h2>
+          <Button onClick={startAdd} className="h-8 bg-mauve hover:bg-mauve-strong text-[#141110] text-xs font-bold gap-1">
             <Plus className="h-3.5 w-3.5" /> New Rule
           </Button>
         </div>
         
         {loading ? (
-          <div className="p-16 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-violet-600" /></div>
+          <div className="p-16 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-mauve" /></div>
         ) : rules.length === 0 ? (
-          <div className="p-16 border border-dashed border-slate-200 bg-white text-slate-400 text-center rounded-2xl text-xs font-semibold">
-            <Bot className="h-8 w-8 mx-auto mb-2 text-slate-300" />
+          <div className="p-16 border border-dashed border-hairline-dark bg-surface-card text-white/40 text-center rounded-2xl text-xs font-semibold">
+            <Bot className="h-8 w-8 mx-auto mb-2 text-white/30" />
             No automation rules configured.
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {rules.map(r => (
-              <Card key={r.id} className="bg-white border-slate-200 shadow-sm hover:border-slate-300">
+              <Card key={r.id} className="bg-surface-card border-hairline-dark shadow-sm hover:border-hairline-dark">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-extrabold text-slate-800">{r.name}</h3>
-                      <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded-full border", r.is_active ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-100 text-slate-500 border-slate-200")}>
+                      <h3 className="font-extrabold text-white/80">{r.name}</h3>
+                      <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded-full border", r.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/50 border-hairline-dark")}>
                         {r.is_active ? "Active" : "Inactive"}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-                      <span className="text-slate-400">WHEN</span>
-                      <span className="font-mono bg-slate-100 px-1 rounded">{r.trigger_event}</span>
-                      <span className="text-slate-400">THEN</span>
-                      <span className="font-mono bg-violet-50 text-violet-700 px-1 rounded">{r.action_type}</span>
+                    <div className="flex items-center gap-2 text-xs font-medium text-white/50">
+                      <span className="text-white/40">WHEN</span>
+                      <span className="font-mono bg-white/5 px-1 rounded">{r.trigger_event}</span>
+                      <span className="text-white/40">THEN</span>
+                      <span className="font-mono bg-mauve/10 text-mauve px-1 rounded">{r.action_type}</span>
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <Button variant="ghost" size="sm" onClick={() => startEdit(r)} className="h-7 w-7 p-0 text-slate-500 hover:bg-slate-100 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(r.id)} className="h-7 w-7 p-0 text-rose-500 hover:bg-rose-50 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => startEdit(r)} className="h-7 w-7 p-0 text-white/50 hover:bg-white/5 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(r.id)} className="h-7 w-7 p-0 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
                   </div>
                 </CardContent>
               </Card>
@@ -171,11 +171,11 @@ export function AutomationRules() {
 
       <div>
         {(editingRule || isAdding) ? (
-          <Card className="bg-white border-slate-200 sticky top-6 shadow-sm">
+          <Card className="bg-surface-card border-hairline-dark sticky top-6 shadow-sm">
             <CardHeader className="pb-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-base text-slate-800 font-bold">{isAdding ? "Create Rule" : "Edit Rule"}</CardTitle>
+                  <CardTitle className="text-base text-white/80 font-bold">{isAdding ? "Create Rule" : "Edit Rule"}</CardTitle>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => { setIsAdding(false); setEditingRule(null) }} className="h-7 w-7 p-0 rounded-lg"><X className="h-4 w-4" /></Button>
               </div>
@@ -183,12 +183,12 @@ export function AutomationRules() {
             <CardContent>
               <form onSubmit={handleSave} className="space-y-4">
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Rule Name</Label>
+                  <Label className="text-xs font-bold text-white/50">Rule Name</Label>
                   <Input value={formName} onChange={e => setFormName(e.target.value)} required placeholder="e.g. Downgrade after trial" className="h-8 text-xs font-medium" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Trigger Event</Label>
-                  <select value={formTrigger} onChange={e => setFormTrigger(e.target.value)} className="w-full h-8 px-2 rounded-md border border-slate-200 text-xs font-medium">
+                  <Label className="text-xs font-bold text-white/50">Trigger Event</Label>
+                  <select value={formTrigger} onChange={e => setFormTrigger(e.target.value)} className="w-full h-8 px-2 rounded-md border border-hairline-dark text-xs font-medium">
                     <option value="trial_expired">Trial Expired</option>
                     <option value="subscription_cancelled">Subscription Cancelled</option>
                     <option value="payment_failed">Payment Failed</option>
@@ -196,8 +196,8 @@ export function AutomationRules() {
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Action to Perform</Label>
-                  <select value={formActionType} onChange={e => setFormActionType(e.target.value)} className="w-full h-8 px-2 rounded-md border border-slate-200 text-xs font-medium">
+                  <Label className="text-xs font-bold text-white/50">Action to Perform</Label>
+                  <select value={formActionType} onChange={e => setFormActionType(e.target.value)} className="w-full h-8 px-2 rounded-md border border-hairline-dark text-xs font-medium">
                     <option value="downgrade_plan">Downgrade Plan</option>
                     <option value="send_email">Send Email Notification</option>
                     <option value="extend_trial">Extend Trial</option>
@@ -206,8 +206,8 @@ export function AutomationRules() {
                 
                 {formActionType === "downgrade_plan" && (
                   <div className="space-y-1">
-                    <Label className="text-xs font-bold text-slate-500">Target Plan (Fallback)</Label>
-                    <select value={formTargetPlan} onChange={e => setFormTargetPlan(e.target.value)} className="w-full h-8 px-2 rounded-md border border-slate-200 text-xs font-medium">
+                    <Label className="text-xs font-bold text-white/50">Target Plan (Fallback)</Label>
+                    <select value={formTargetPlan} onChange={e => setFormTargetPlan(e.target.value)} className="w-full h-8 px-2 rounded-md border border-hairline-dark text-xs font-medium">
                       <option value="">Select Plan...</option>
                       {plans.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
@@ -215,15 +215,15 @@ export function AutomationRules() {
                 )}
                 
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Action Payload (JSON)</Label>
-                  <textarea value={formPayload} onChange={e => setFormPayload(e.target.value)} rows={4} className="w-full font-mono rounded-md border border-slate-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500" />
+                  <Label className="text-xs font-bold text-white/50">Action Payload (JSON)</Label>
+                  <textarea value={formPayload} onChange={e => setFormPayload(e.target.value)} rows={4} className="w-full font-mono rounded-md border border-hairline-dark px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-mauve/50" />
                 </div>
                 
-                <div className="flex items-center gap-2 py-2 border-t border-b border-slate-100">
-                  <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-violet-600 h-3.5 w-3.5" />
-                  <span className="text-xs font-bold text-slate-700">Rule Active</span>
+                <div className="flex items-center gap-2 py-2 border-t border-b border-hairline-dark">
+                  <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-mauve h-3.5 w-3.5" />
+                  <span className="text-xs font-bold text-white/70">Rule Active</span>
                 </div>
-                <Button type="submit" disabled={actioning} className="w-full h-8 bg-violet-600 hover:bg-violet-700 font-bold text-xs">
+                <Button type="submit" disabled={actioning} className="w-full h-8 bg-mauve hover:bg-mauve-strong font-bold text-xs">
                   {actioning ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
                   Save Rule
                 </Button>
@@ -231,7 +231,7 @@ export function AutomationRules() {
             </CardContent>
           </Card>
         ) : (
-          <div className="p-8 border border-dashed border-slate-200 bg-slate-50 text-slate-400 text-center rounded-xl text-xs font-semibold">
+          <div className="p-8 border border-dashed border-hairline-dark bg-white/5 text-white/40 text-center rounded-xl text-xs font-semibold">
             Select a rule to edit or create a new one.
           </div>
         )}

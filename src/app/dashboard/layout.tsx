@@ -10,7 +10,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-surface-dark">
       <DashboardSidebar />
       <main className="lg:pl-72">
         {/* pb-24 clears the fixed phone/tablet bottom tab bar (MobileBottomNav)

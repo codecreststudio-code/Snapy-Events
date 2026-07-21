@@ -51,24 +51,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function PostCard({ post }: { post: BlogPost }) {
   return (
-    <Link href={`/blog/${post.slug}`} className="group flex flex-col rounded-2xl border border-slate-100 bg-white overflow-hidden hover:shadow-xl hover:border-slate-200 transition-all duration-300">
-      <div className="aspect-video overflow-hidden bg-slate-100">
+    <Link href={`/blog/${post.slug}`} className="group flex flex-col rounded-2xl border border-hairline-dark bg-surface-card overflow-hidden hover:border-mauve/40 transition-all duration-300">
+      <div className="aspect-video overflow-hidden bg-white/5">
         {post.cover_image_url ? (
           <img src={post.cover_image_url} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <BookOpen className="h-8 w-8 text-slate-300" />
+            <BookOpen className="h-8 w-8 text-white/30" />
           </div>
         )}
       </div>
       <div className="flex-1 p-5">
-        <h3 className="text-sm font-bold text-slate-900 leading-snug mb-2 group-hover:text-violet-700 transition-colors line-clamp-2">{post.title}</h3>
-        <p className="text-xs text-slate-500 font-light leading-relaxed line-clamp-2 mb-4">{post.excerpt}</p>
-        <div className="flex items-center gap-2 pt-3 border-t border-slate-55">
+        <h3 className="text-sm font-bold text-white leading-snug mb-2 group-hover:text-mauve transition-colors line-clamp-2">{post.title}</h3>
+        <p className="text-xs text-white/60 font-light leading-relaxed line-clamp-2 mb-4">{post.excerpt}</p>
+        <div className="flex items-center gap-2 pt-3 border-t border-hairline-dark">
           <img src={post.author?.avatar_url} alt={post.author?.name} className="h-5 w-5 rounded-full object-cover" />
-          <span className="text-[10px] text-slate-400">{post.author?.name}</span>
-          <span className="text-[10px] text-slate-300">•</span>
-          <span className="text-[10px] text-slate-400 flex items-center gap-1">
+          <span className="text-[10px] text-white/50">{post.author?.name}</span>
+          <span className="text-[10px] text-white/30">•</span>
+          <span className="text-[10px] text-white/50 flex items-center gap-1">
             <Clock className="h-3 w-3" />{post.read_time_minutes} min
           </span>
         </div>
@@ -84,19 +84,19 @@ export default async function CategoryPage({ params }: Props) {
   const posts = await getCategoryPosts(cat.id)
 
   return (
-    <div className={`flex min-h-screen flex-col bg-white text-slate-900 ${inter.className}`}>
+    <div className={`flex min-h-screen flex-col bg-surface-dark text-white ${inter.className}`}>
       <PublicNavbar />
       <main className="flex-1">
         {/* Hero */}
-        <section className="border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white py-14 md:py-20">
+        <section className="border-b border-hairline-dark bg-surface-card py-14 md:py-20">
           <div className="container mx-auto max-w-5xl px-6 text-center">
             <div className="text-5xl mb-4">{cat.emoji}</div>
-            <div className="inline-block rounded-full px-3 py-1 text-xs font-bold text-white mb-4" style={{ backgroundColor: cat.color ?? "#7c3aed" }}>
+            <div className="inline-block rounded-full px-3 py-1 text-xs font-bold text-white mb-4" style={{ backgroundColor: cat.color ?? "#B28DAE" }}>
               CATEGORY
             </div>
-            <h1 className={`text-4xl md:text-5xl font-normal tracking-tight text-slate-900 mb-4 ${playfair.className}`}>{cat.name}</h1>
-            <p className="text-slate-500 font-light max-w-xl mx-auto">{cat.description}</p>
-            <div className="mt-4 text-xs text-slate-400">{posts.length} articles</div>
+            <h1 className={`text-4xl md:text-5xl font-light tracking-tight text-white mb-4 ${playfair.className}`}>{cat.name}</h1>
+            <p className="text-white/60 font-light max-w-xl mx-auto">{cat.description}</p>
+            <div className="mt-4 text-xs text-white/50">{posts.length} articles</div>
           </div>
         </section>
 
@@ -108,9 +108,9 @@ export default async function CategoryPage({ params }: Props) {
             </div>
           ) : (
             <div className="py-24 text-center">
-              <BookOpen className="h-10 w-10 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-500">No articles in this category yet.</p>
-              <Link href="/blog" className="mt-4 inline-flex items-center gap-1 text-violet-600 text-sm font-semibold hover:text-violet-700">
+              <BookOpen className="h-10 w-10 text-white/30 mx-auto mb-4" />
+              <p className="text-white/60">No articles in this category yet.</p>
+              <Link href="/blog" className="mt-4 inline-flex items-center gap-1 text-mauve text-sm font-semibold hover:underline">
                 Browse all articles <ArrowRight className="h-4 w-4" />
               </Link>
             </div>

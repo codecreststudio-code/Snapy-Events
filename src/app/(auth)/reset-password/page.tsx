@@ -42,26 +42,26 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/50 px-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-surface-dark px-4">
+      <Card className="glass-panel w-full max-w-md border-hairline-dark">
         <CardHeader className="text-center">
           <Link href="/" className="flex items-center justify-center mb-4">
             <Logo />
           </Link>
-          <CardTitle className="text-2xl">Set New Password</CardTitle>
-          <CardDescription>Enter your new password below</CardDescription>
+          <CardTitle className="text-2xl font-playfair text-white font-light">Set New Password</CardTitle>
+          <CardDescription className="text-white/50">Enter your new password below</CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
-              <div role="alert" className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
+              <div role="alert" className="p-3 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 text-sm">
                 {error}
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="password">New Password</Label>
+              <Label htmlFor="password" className="text-white/70">New Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -71,13 +71,13 @@ export default function ResetPasswordPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="pr-10"
+                  className="pr-10 bg-white/5 border-hairline-dark text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve"
                   minLength={8}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -89,7 +89,7 @@ export default function ResetPasswordPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword" className="text-white/70">Confirm Password</Label>
               <Input
                 id="confirmPassword"
                 type={showPassword ? "text" : "password"}
@@ -99,18 +99,23 @@ export default function ResetPasswordPage() {
                 required
                 disabled={isLoading}
                 minLength={8}
+                className="bg-white/5 border-hairline-dark text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve"
               />
             </div>
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all focus-visible:ring-2 focus-visible:ring-mauve/50"
+              disabled={isLoading}
+            >
               {isLoading ? "Updating..." : "Update Password"}
             </Button>
 
-            <p className="text-sm text-muted-foreground text-center">
+            <p className="text-sm text-white/50 text-center">
               Remember your password?{" "}
-              <Link href="/login" className="text-primary hover:underline">
+              <Link href="/login" className="text-mauve hover:underline">
                 Sign in
               </Link>
             </p>

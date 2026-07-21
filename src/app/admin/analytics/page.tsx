@@ -65,38 +65,38 @@ export default function AdminAnalyticsPage() {
     }).join(" ")
     
     return (
-      <svg className="w-full h-full text-violet-500" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+      <svg className="w-full h-full text-mauve" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
         <path d={`M ${points}`} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        <path d={`M 0,${height} L ${points} L ${width},${height} Z`} fill="rgba(139, 92, 246, 0.1)" stroke="none" />
+        <path d={`M 0,${height} L ${points} L ${width},${height} Z`} fill="rgba(178, 141, 174, 0.15)" stroke="none" />
       </svg>
     )
   }
 
   return (
-    <main className="px-6 py-8 space-y-6 bg-slate-50 min-h-full">
+    <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Platform Analytics</h1>
-          <p className="text-sm text-slate-500 mt-1">Deep-dive into visitor acquisition channels, device usage, and feature retention rates.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Platform Analytics</h1>
+          <p className="text-sm text-white/50 mt-1">Deep-dive into visitor acquisition channels, device usage, and feature retention rates.</p>
         </div>
         <div className="flex items-center gap-2">
           {/* Period Selector */}
-          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm">
+          <div className="flex items-center gap-1 bg-surface-card border border-hairline-dark rounded-lg p-0.5 shadow-sm">
             {PERIODS.map((p) => (
               <button
                 key={p.value}
                 onClick={() => setDays(p.value)}
                 className={cn(
                   "px-3 py-1.5 rounded-md text-xs font-bold transition-all",
-                  days === p.value ? "bg-violet-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-800"
+                  days === p.value ? "bg-mauve text-[#141110] shadow-sm" : "text-white/50 hover:text-white/80"
                 )}
               >
                 {p.label}
               </button>
             ))}
           </div>
-          <Button onClick={() => fetchPlatformAnalytics(days)} disabled={loading} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
-            <RefreshCw className={cn("h-4 w-4 text-slate-500", loading && "animate-spin")} />
+          <Button onClick={() => fetchPlatformAnalytics(days)} disabled={loading} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
+            <RefreshCw className={cn("h-4 w-4 text-white/50", loading && "animate-spin")} />
             <span>Refresh</span>
           </Button>
         </div>
@@ -104,29 +104,29 @@ export default function AdminAnalyticsPage() {
 
       {loading && !data ? (
         <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-mauve" />
         </div>
       ) : (
         <>
           {/* Row 1: Sparkline charts */}
           <div className="grid gap-6 md:grid-cols-2">
-            <Card className="bg-white border-slate-200 p-6 shadow-sm">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Daily Active Users Trend</h3>
+            <Card className="bg-surface-card border-hairline-dark p-6 shadow-sm">
+              <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4">Daily Active Users Trend</h3>
               <div className="h-40 flex items-end">
                 {renderUserTrend()}
               </div>
             </Card>
 
-            <Card className="bg-white border-slate-200 p-6 shadow-sm">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Events Conversion Funnel</h3>
+            <Card className="bg-surface-card border-hairline-dark p-6 shadow-sm">
+              <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4">Events Conversion Funnel</h3>
               <div className="h-40 flex flex-col justify-between space-y-2">
                 {data?.funnel?.map((bar: any, i: number) => (
                   <div key={i} className="space-y-1">
-                    <div className="flex justify-between text-[10px] font-bold text-slate-600">
+                    <div className="flex justify-between text-[10px] font-bold text-white/60">
                       <span>{bar.step} ({bar.val})</span>
                       <span>{bar.percent}</span>
                     </div>
-                    <div className="h-4 rounded-md w-full bg-slate-100 overflow-hidden">
+                    <div className="h-4 rounded-md w-full bg-white/5 overflow-hidden">
                       <div className={cn("h-full rounded-md", bar.size)} />
                     </div>
                   </div>
@@ -138,62 +138,62 @@ export default function AdminAnalyticsPage() {
           {/* Row 2: Demographics, Device shares, Traffic sources */}
           <div className="grid gap-6 md:grid-cols-3">
             {/* Device Shares */}
-            <Card className="bg-white border-slate-200 p-6 shadow-sm">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                <Smartphone className="h-4 w-4 text-slate-400" />
+            <Card className="bg-surface-card border-hairline-dark p-6 shadow-sm">
+              <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                <Smartphone className="h-4 w-4 text-white/40" />
                 <span>Device Types Distribution</span>
               </h3>
               <div className="space-y-4">
                 {data?.deviceDistribution?.length ? data.deviceDistribution.map((item: any, i: number) => (
                   <div key={i} className="flex justify-between items-center text-xs font-semibold">
-                    <span className="text-slate-700">{item.type}</span>
+                    <span className="text-white/70">{item.type}</span>
                     <div className="flex items-center gap-3">
-                      <span className="text-slate-400">{item.count}</span>
-                      <span className="text-violet-600 font-bold w-12 text-right">{item.percent}</span>
+                      <span className="text-white/40">{item.count}</span>
+                      <span className="text-mauve font-bold w-12 text-right">{item.percent}</span>
                     </div>
                   </div>
                 )) : (
-                  <p className="text-xs text-slate-400 font-medium">No device data captured yet.</p>
+                  <p className="text-xs text-white/40 font-medium">No device data captured yet.</p>
                 )}
               </div>
             </Card>
 
             {/* Traffic Sources */}
-            <Card className="bg-white border-slate-200 p-6 shadow-sm">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                <Globe className="h-4 w-4 text-slate-400" />
+            <Card className="bg-surface-card border-hairline-dark p-6 shadow-sm">
+              <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                <Globe className="h-4 w-4 text-white/40" />
                 <span>Acquisition Referrers</span>
               </h3>
               <div className="space-y-4">
                 {data?.referrers?.length ? data.referrers.map((item: any, i: number) => (
                   <div key={i} className="flex justify-between items-center text-xs font-semibold">
-                    <span className="text-slate-700">{item.source}</span>
+                    <span className="text-white/70">{item.source}</span>
                     <div className="flex items-center gap-3">
-                      <span className="text-slate-400">{item.visits}</span>
-                      <span className="text-violet-600 font-bold w-12 text-right">{item.percent}</span>
+                      <span className="text-white/40">{item.visits}</span>
+                      <span className="text-mauve font-bold w-12 text-right">{item.percent}</span>
                     </div>
                   </div>
                 )) : (
-                  <p className="text-xs text-slate-400 font-medium">No traffic source data yet — only QR scans are tracked as a source.</p>
+                  <p className="text-xs text-white/40 font-medium">No traffic source data yet — only QR scans are tracked as a source.</p>
                 )}
               </div>
             </Card>
 
             {/* Top Features */}
-            <Card className="bg-white border-slate-200 p-6 shadow-sm">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                <Zap className="h-4 w-4 text-slate-400" />
+            <Card className="bg-surface-card border-hairline-dark p-6 shadow-sm">
+              <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                <Zap className="h-4 w-4 text-white/40" />
                 <span>Top Features Utilized</span>
               </h3>
               <div className="space-y-4">
                 {data?.features?.map((item: any, i: number) => (
                   <div key={i} className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold">
-                      <span className="text-slate-700">{item.feature}</span>
-                      <span className="text-slate-500 font-bold">{item.matches}</span>
+                      <span className="text-white/70">{item.feature}</span>
+                      <span className="text-white/50 font-bold">{item.matches}</span>
                     </div>
-                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-violet-600 rounded-full" style={{ width: `${Math.max(item.load * 100, 2)}%` }} />
+                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-full bg-mauve rounded-full" style={{ width: `${Math.max(item.load * 100, 2)}%` }} />
                     </div>
                   </div>
                 ))}

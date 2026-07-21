@@ -27,16 +27,16 @@ const faqs = [
 
 function FAQItem({ item, isOpen, onClick }: { item: typeof faqs[0]; isOpen: boolean; onClick: () => void }) {
   return (
-    <div className="bg-white border border-slate-150 rounded-2xl overflow-hidden shadow-sm hover:border-slate-250 transition-all duration-300">
+    <div className="bg-surface-card border border-hairline-dark rounded-2xl overflow-hidden hover:border-mauve/40 transition-all duration-300">
       <button
         onClick={onClick}
         className="w-full flex justify-between items-center p-6 text-left focus:outline-none"
       >
-        <span className="font-bold text-slate-800 text-sm md:text-base">{item.q}</span>
+        <span className="font-bold text-white text-sm md:text-base">{item.q}</span>
         <motion.span
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
-          className="text-slate-400"
+          className="text-white/50"
         >
           <ChevronDown className="h-4.5 w-4.5" />
         </motion.span>
@@ -50,7 +50,7 @@ function FAQItem({ item, isOpen, onClick }: { item: typeof faqs[0]; isOpen: bool
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
           >
-            <div className="px-6 pb-6 pt-1 border-t border-slate-50 text-slate-500 font-light text-xs md:text-sm leading-relaxed">
+            <div className="px-6 pb-6 pt-1 border-t border-hairline-dark text-white/60 font-light text-xs md:text-sm leading-relaxed">
               {item.a}
             </div>
           </motion.div>
@@ -64,13 +64,13 @@ export default function FAQPage() {
   const [openIdx, setOpenIdx] = useState<number | null>(null)
 
   return (
-    <div className={`flex min-h-screen flex-col bg-white text-slate-900 selection:bg-violet-100 ${inter.className}`}>
+    <div className={`flex min-h-screen flex-col bg-surface-dark text-white selection:bg-mauve/30 ${inter.className}`}>
       <PublicNavbar />
-      
-      <main className="flex-1 bg-slate-50/20 overflow-hidden relative py-12 md:py-20">
-        {/* Subtle mesh light glow */}
-        <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-25 blur-3xl">
-          <div className="h-[400px] w-[500px] rounded-full bg-gradient-to-tr from-violet-100 via-fuchsia-50 to-pink-50" />
+
+      <main className="flex-1 bg-surface-dark overflow-hidden relative py-12 md:py-20">
+        {/* Subtle mesh glow */}
+        <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-15 blur-3xl">
+          <div className="h-[400px] w-[500px] rounded-full bg-gradient-to-tr from-mauve via-mauve-strong to-mauve" />
         </div>
 
         <section className="mx-auto max-w-6xl px-6 py-12 md:py-20 text-center space-y-4">
@@ -78,7 +78,7 @@ export default function FAQPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-violet-600 bg-violet-50/80 border border-violet-100/50"
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-mauve bg-mauve/10 border border-mauve/20"
           >
             <span>ANSWERS</span>
           </motion.div>
@@ -87,16 +87,16 @@ export default function FAQPage() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className={`text-4xl font-normal tracking-tight md:text-6xl text-slate-900 leading-tight ${playfair.className}`}
+            className={`text-4xl font-light tracking-tight md:text-6xl text-white leading-tight ${playfair.className}`}
           >
-            Frequently asked <span className="italic font-normal bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">questions</span>
+            Frequently asked <span className="italic font-light bg-gradient-to-r from-mauve to-mauve-strong bg-clip-text text-transparent">questions</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-md text-slate-500 max-w-xl mx-auto font-light leading-relaxed"
+            className="text-md text-white/60 max-w-xl mx-auto font-light leading-relaxed"
           >
             Everything you need to know about Snapsy galleries, uploads, and security details.
           </motion.p>

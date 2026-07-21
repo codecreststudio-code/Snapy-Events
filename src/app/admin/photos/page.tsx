@@ -94,38 +94,38 @@ export default function AdminPhotosPage() {
   })
 
   return (
-    <main className="px-6 py-8 space-y-6 bg-slate-50 min-h-full">
+    <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Photo Moderation Center</h1>
-          <p className="text-sm text-slate-500 mt-1">Review guest uploads, filter flagged content, and perform safety audits.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Photo Moderation Center</h1>
+          <p className="text-sm text-white/50 mt-1">Review guest uploads, filter flagged content, and perform safety audits.</p>
         </div>
-        <Button onClick={fetchPhotos} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
-          <RefreshCw className="h-4 w-4 text-slate-500" />
+        <Button onClick={fetchPhotos} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
+          <RefreshCw className="h-4 w-4 text-white/50" />
           <span>Refresh</span>
         </Button>
       </div>
 
       <div className="flex items-center max-w-sm relative">
-        <Search className="h-4 w-4 absolute left-3 text-slate-400" />
+        <Search className="h-4 w-4 absolute left-3 text-white/40" />
         <Input
           placeholder="Filter by filename or event name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 bg-white border-slate-200 text-slate-800 shadow-sm"
+          className="pl-9 bg-surface-card border-hairline-dark text-white/80 shadow-sm"
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Photos Grid List */}
-        <Card className="bg-white border-slate-200 shadow-sm overflow-hidden lg:col-span-2">
+        <Card className="bg-surface-card border-hairline-dark shadow-sm overflow-hidden lg:col-span-2">
           <CardContent className="p-6">
             {loading ? (
               <div className="p-12 flex justify-center items-center">
-                <Loader2 className="h-8 w-8 animate-spin text-violet-650" />
+                <Loader2 className="h-8 w-8 animate-spin text-mauve" />
               </div>
             ) : filteredPhotos.length === 0 ? (
-              <div className="p-12 text-center text-slate-400 text-sm font-semibold">
+              <div className="p-12 text-center text-white/40 text-sm font-semibold">
                 No recent photos found on the server.
               </div>
             ) : (
@@ -137,14 +137,14 @@ export default function AdminPhotosPage() {
                       key={p.id}
                       onClick={() => setSelectedPhoto(p)}
                       className={cn(
-                        "group border rounded-xl overflow-hidden cursor-pointer bg-slate-50 hover:border-violet-300 transition-all",
-                        selectedPhoto?.id === p.id ? "ring-2 ring-violet-500 border-transparent" : "border-slate-100"
+                        "group border rounded-xl overflow-hidden cursor-pointer bg-white/5 hover:border-mauve/30 transition-all",
+                        selectedPhoto?.id === p.id ? "ring-2 ring-mauve/50 border-transparent" : "border-hairline-dark"
                       )}
                     >
-                      <div className="h-28 bg-slate-200 flex items-center justify-center text-slate-400 relative">
-                        <Eye className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity z-10 text-slate-700" />
-                        <div className="absolute inset-0 bg-slate-900/10 group-hover:bg-slate-900/30 transition-colors" />
-                        <span className="text-[10px] uppercase font-bold text-slate-500 absolute top-2 left-2 px-1.5 py-0.5 rounded bg-white shadow-sm">
+                      <div className="h-28 bg-white/10 flex items-center justify-center text-white/40 relative">
+                        <Eye className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity z-10 text-white/70" />
+                        <div className="absolute inset-0 bg-white/5 group-hover:bg-black/30 transition-colors" />
+                        <span className="text-[10px] uppercase font-bold text-white/50 absolute top-2 left-2 px-1.5 py-0.5 rounded bg-surface-card shadow-sm">
                           {fileSizeMb} MB
                         </span>
                         {!p.is_approved && (
@@ -155,8 +155,8 @@ export default function AdminPhotosPage() {
                         )}
                       </div>
                       <div className="p-3 text-[10px] space-y-1">
-                        <p className="font-bold text-slate-800 truncate">{p.original_filename || "untitled.jpg"}</p>
-                        <p className="text-slate-400 truncate">{p.event?.name || "N/A"}</p>
+                        <p className="font-bold text-white/80 truncate">{p.original_filename || "untitled.jpg"}</p>
+                        <p className="text-white/40 truncate">{p.event?.name || "N/A"}</p>
                       </div>
                     </div>
                   )
@@ -167,55 +167,55 @@ export default function AdminPhotosPage() {
         </Card>
 
         {/* Selected Photo Inspector Drawer */}
-        <Card className="bg-white border-slate-200 shadow-sm p-6 sticky top-6">
+        <Card className="bg-surface-card border-hairline-dark shadow-sm p-6 sticky top-6">
           {selectedPhoto ? (
             <div className="space-y-6">
-              <div className="h-44 bg-slate-100 border border-slate-105 rounded-xl flex flex-col items-center justify-center text-slate-400 relative overflow-hidden">
-                <div className="absolute inset-0 bg-slate-950/5" />
-                <Eye className="h-8 w-8 text-slate-450 z-10" />
-                <span className="text-xs font-semibold z-10 text-slate-500 mt-2">Storage File Preview</span>
-                <span className="text-[10px] font-mono text-slate-400 mt-1 truncate max-w-[200px] z-10">{selectedPhoto.storage_path}</span>
+              <div className="h-44 bg-white/5 border border-hairline-dark rounded-xl flex flex-col items-center justify-center text-white/40 relative overflow-hidden">
+                <div className="absolute inset-0 bg-white/5" />
+                <Eye className="h-8 w-8 text-white/45 z-10" />
+                <span className="text-xs font-semibold z-10 text-white/50 mt-2">Storage File Preview</span>
+                <span className="text-[10px] font-mono text-white/40 mt-1 truncate max-w-[200px] z-10">{selectedPhoto.storage_path}</span>
               </div>
 
-              <div className="border-t border-slate-100 pt-4 space-y-3.5 text-xs">
+              <div className="border-t border-hairline-dark pt-4 space-y-3.5 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Photo ID</span>
-                  <span className="font-mono text-slate-700 font-semibold">{selectedPhoto.id}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Photo ID</span>
+                  <span className="font-mono text-white/70 font-semibold">{selectedPhoto.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Filename</span>
-                  <span className="text-slate-700 font-semibold truncate max-w-[150px]">{selectedPhoto.original_filename || "N/A"}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Filename</span>
+                  <span className="text-white/70 font-semibold truncate max-w-[150px]">{selectedPhoto.original_filename || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">MIME Type</span>
-                  <span className="text-slate-700 font-semibold">{selectedPhoto.mime_type || "N/A"}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">MIME Type</span>
+                  <span className="text-white/70 font-semibold">{selectedPhoto.mime_type || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Event Name</span>
-                  <span className="text-slate-700 font-semibold">{selectedPhoto.event?.name || "N/A"}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Event Name</span>
+                  <span className="text-white/70 font-semibold">{selectedPhoto.event?.name || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Upload Date</span>
-                  <span className="text-slate-700 font-semibold">{new Date(selectedPhoto.created_at).toLocaleString()}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Upload Date</span>
+                  <span className="text-white/70 font-semibold">{new Date(selectedPhoto.created_at).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Status</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Status</span>
                   <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase",
-                    selectedPhoto.is_approved ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-amber-50 text-amber-700 border-amber-100"
+                    selectedPhoto.is_approved ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"
                   )}>
                     {selectedPhoto.is_approved ? "Approved" : "Review Needed"}
                   </span>
                 </div>
               </div>
 
-              <div className="border-t border-slate-100 pt-4 space-y-2">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Moderation Options</h4>
+              <div className="border-t border-hairline-dark pt-4 space-y-2">
+                <h4 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2">Moderation Options</h4>
                 <div className="grid grid-cols-2 gap-2">
                   {!selectedPhoto.is_approved ? (
                     <Button
                       onClick={() => handleApprove(selectedPhoto.id)}
                       disabled={actioningId === selectedPhoto.id}
-                      className="w-full text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white shadow-sm flex items-center justify-center gap-1"
+                      className="w-full text-xs font-bold bg-mauve hover:bg-mauve-strong text-[#141110] shadow-sm flex items-center justify-center gap-1"
                     >
                       <CheckCircle2 className="h-4 w-4" />
                       <span>Approve</span>
@@ -224,7 +224,7 @@ export default function AdminPhotosPage() {
                     <Button
                       disabled
                       variant="outline"
-                      className="w-full text-xs font-bold text-slate-400 border-slate-200 bg-slate-50 cursor-not-allowed flex items-center justify-center gap-1"
+                      className="w-full text-xs font-bold text-white/40 border-hairline-dark bg-white/5 cursor-not-allowed flex items-center justify-center gap-1"
                     >
                       <CheckCircle2 className="h-4 w-4" />
                       <span>Approved</span>
@@ -233,7 +233,7 @@ export default function AdminPhotosPage() {
                   <Button
                     onClick={() => handleDelete(selectedPhoto.id)}
                     disabled={actioningId === selectedPhoto.id}
-                    className="w-full text-xs font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-100 shadow-sm flex items-center justify-center gap-1"
+                    className="w-full text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 shadow-sm flex items-center justify-center gap-1"
                   >
                     <Trash2 className="h-4 w-4" />
                     <span>Delete</span>
@@ -242,8 +242,8 @@ export default function AdminPhotosPage() {
               </div>
             </div>
           ) : (
-            <div className="h-64 flex flex-col justify-center items-center text-center text-slate-400">
-              <ShieldAlert className="h-8 w-8 text-slate-300 mb-2" />
+            <div className="h-64 flex flex-col justify-center items-center text-center text-white/40">
+              <ShieldAlert className="h-8 w-8 text-white/30 mb-2" />
               <span className="text-xs font-semibold">Select any photo thumbnail to inspect server path metadata, view larger sizes, and execute moderation filters.</span>
             </div>
           )}

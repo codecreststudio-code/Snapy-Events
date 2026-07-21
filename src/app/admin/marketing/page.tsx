@@ -179,31 +179,31 @@ export default function AdminMarketingPage() {
   }
 
   return (
-    <main className="px-6 py-8 space-y-6 bg-slate-50 min-h-full">
+    <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Marketing & Customer Retargeting</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage promotional coupons, customer retargeting contacts, subscription statuses, and referral logs.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Marketing & Customer Retargeting</h1>
+          <p className="text-sm text-white/50 mt-1">Manage promotional coupons, customer retargeting contacts, subscription statuses, and referral logs.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={exportLeadsCSV} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
-            <Download className="h-4 w-4 text-emerald-600" />
+          <Button onClick={exportLeadsCSV} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
+            <Download className="h-4 w-4 text-emerald-400" />
             <span>Export CSV</span>
           </Button>
-          <Button onClick={fetchMarketingData} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
-            <RefreshCw className="h-4 w-4 text-slate-500" />
+          <Button onClick={fetchMarketingData} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
+            <RefreshCw className="h-4 w-4 text-white/50" />
             <span>Refresh</span>
           </Button>
         </div>
       </div>
 
       {/* Customer & Retargeting Lead Directory Card */}
-      <Card className="bg-white border-slate-200 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
+      <Card className="bg-surface-card border-hairline-dark overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-hairline-dark flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/5">
           <div className="flex items-center gap-2">
-            <Users className="h-4.5 w-4.5 text-violet-600" />
-            <h3 className="font-bold text-slate-800 text-sm">Customer & Retargeting Contacts</h3>
-            <span className="bg-violet-100 text-violet-750 text-[10px] font-bold px-2 py-0.5 rounded-full border border-violet-200">
+            <Users className="h-4.5 w-4.5 text-mauve" />
+            <h3 className="font-bold text-white/80 text-sm">Customer & Retargeting Contacts</h3>
+            <span className="bg-mauve/10 text-mauve text-[10px] font-bold px-2 py-0.5 rounded-full border border-mauve/20">
               {leads.length} Total
             </span>
           </div>
@@ -214,13 +214,13 @@ export default function AdminMarketingPage() {
                 placeholder="Search name, email, phone..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8 text-xs w-48 sm:w-64 bg-white border-slate-200"
+                className="h-8 text-xs w-48 sm:w-64 bg-surface-card border-hairline-dark"
               />
             </div>
             <select
               value={leadFilter}
               onChange={(e: any) => setLeadFilter(e.target.value)}
-              className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-violet-500 shadow-sm"
+              className="h-8 rounded-lg border border-hairline-dark bg-surface-card px-2.5 text-xs font-bold text-white/70 focus:outline-none focus:ring-1 focus:ring-mauve/50 shadow-sm"
             >
               <option value="all">All Contacts</option>
               <option value="hosts">Hosts Only</option>
@@ -232,15 +232,15 @@ export default function AdminMarketingPage() {
         <CardContent className="p-0">
           {loading ? (
             <div className="p-12 flex justify-center items-center">
-              <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-mauve" />
             </div>
           ) : leads.length === 0 ? (
-            <div className="p-12 text-center text-slate-400 text-xs">No customer check-in leads captured yet.</div>
+            <div className="p-12 text-center text-white/40 text-xs">No customer check-in leads captured yet.</div>
           ) : (
             <div className="overflow-x-auto max-h-[380px] overflow-y-auto">
               <table className="w-full text-left border-collapse text-xs">
-                <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
-                  <tr className="text-slate-400 font-bold uppercase tracking-wider">
+                <thead className="sticky top-0 bg-white/5 border-b border-hairline-dark z-10">
+                  <tr className="text-white/40 font-bold uppercase tracking-wider">
                     <th className="p-3.5">Customer / Lead</th>
                     <th className="p-3.5">Contact Email</th>
                     <th className="p-3.5">Mobile Number</th>
@@ -249,7 +249,7 @@ export default function AdminMarketingPage() {
                     <th className="p-3.5 text-right">Retarget Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-650 font-medium">
+                <tbody className="divide-y divide-white/10 text-white/65 font-medium">
                   {leads
                     .filter((l) => {
                       if (leadFilter === "hosts" && l.type !== "Host") return false
@@ -267,30 +267,30 @@ export default function AdminMarketingPage() {
                     })
                     .slice(0, 100)
                     .map((lead) => (
-                      <tr key={lead.id} className="hover:bg-slate-50/50 transition-colors">
+                      <tr key={lead.id} className="hover:bg-white/5 transition-colors">
                         <td className="p-3.5">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-slate-900">{lead.name}</span>
+                            <span className="font-bold text-white">{lead.name}</span>
                             <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
-                              lead.type === "Host" ? "bg-violet-50 text-violet-750 border-violet-200" : "bg-blue-50 text-blue-750 border-blue-200"
+                              lead.type === "Host" ? "bg-mauve/10 text-mauve border-mauve/20" : "bg-mauve/10 text-mauve border-mauve/20"
                             }`}>
                               {lead.type}
                             </span>
                           </div>
                         </td>
-                        <td className="p-3.5 font-mono text-slate-700">{lead.email}</td>
-                        <td className="p-3.5 font-mono text-slate-700">{lead.mobile}</td>
+                        <td className="p-3.5 font-mono text-white/70">{lead.email}</td>
+                        <td className="p-3.5 font-mono text-white/70">{lead.mobile}</td>
                         <td className="p-3.5">
-                          <span className="font-bold uppercase tracking-wider text-[10px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full">
+                          <span className="font-bold uppercase tracking-wider text-[10px] bg-amber-500/10 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full">
                             {lead.plan}
                           </span>
                         </td>
-                        <td className="p-3.5 text-slate-500">{lead.eventCountOrName}</td>
+                        <td className="p-3.5 text-white/50">{lead.eventCountOrName}</td>
                         <td className="p-3.5 text-right space-x-2">
                           {lead.email !== "—" && (
                             <a
                               href={`mailto:${lead.email}?subject=Exclusive Offer from Snapsy`}
-                              className="inline-flex items-center gap-1 text-[11px] font-bold text-violet-600 hover:text-violet-800 underline"
+                              className="inline-flex items-center gap-1 text-[11px] font-bold text-mauve hover:text-mauve underline"
                             >
                               Email
                             </a>
@@ -300,7 +300,7 @@ export default function AdminMarketingPage() {
                               href={`https://wa.me/${lead.mobile.replace(/\D/g, "")}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-800 underline"
+                              className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 hover:text-emerald-800 underline"
                             >
                               WhatsApp
                             </a>
@@ -318,49 +318,49 @@ export default function AdminMarketingPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Coupons List */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="bg-white border-slate-200 overflow-hidden shadow-sm">
-            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
-                <Percent className="h-4 w-4 text-violet-600" />
+          <Card className="bg-surface-card border-hairline-dark overflow-hidden shadow-sm">
+            <div className="p-4 border-b border-hairline-dark flex justify-between items-center bg-white/5">
+              <h3 className="font-bold text-white/80 text-sm flex items-center gap-1.5">
+                <Percent className="h-4 w-4 text-mauve" />
                 <span>Active Discount Coupons</span>
               </h3>
             </div>
             <CardContent className="p-0">
               {loading ? (
                 <div className="p-12 flex justify-center items-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-violet-650" />
+                  <Loader2 className="h-8 w-8 animate-spin text-mauve" />
                 </div>
               ) : coupons.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 text-xs">No active discount codes found.</div>
+                <div className="p-12 text-center text-white/40 text-xs">No active discount codes found.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/20">
+                      <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-white/5">
                         <th className="p-4">Coupon Code</th>
                         <th className="p-4">Discount</th>
                         <th className="p-4">Times Used</th>
                         <th className="p-4 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-650 font-medium">
+                    <tbody className="divide-y divide-white/10 text-white/65 font-medium">
                       {coupons.map((coupon) => (
-                        <tr key={coupon.id} className="hover:bg-slate-50/30 transition-colors">
+                        <tr key={coupon.id} className="hover:bg-white/5 transition-colors">
                           <td className="p-4">
-                            <span className="font-mono bg-violet-50 text-violet-750 font-bold px-2.5 py-1 rounded border border-violet-100">
+                            <span className="font-mono bg-mauve/10 text-mauve font-bold px-2.5 py-1 rounded border border-mauve/20">
                               {coupon.code}
                             </span>
                           </td>
                           <td className="p-4">
                             {coupon.discount_value} {coupon.discount_type === "percentage" ? "% OFF" : "INR OFF"}
                           </td>
-                          <td className="p-4 text-slate-400">{coupon.used_count} checkouts</td>
+                          <td className="p-4 text-white/40">{coupon.used_count} checkouts</td>
                           <td className="p-4 text-right">
                             <Button
                               onClick={() => handleDeleteCoupon(coupon.id)}
                               disabled={actioning}
                               variant="ghost"
-                              className="h-8 w-8 p-0 text-rose-600 hover:bg-rose-50 rounded-lg"
+                              className="h-8 w-8 p-0 text-red-400 hover:bg-red-500/10 rounded-lg"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -375,44 +375,44 @@ export default function AdminMarketingPage() {
           </Card>
 
           {/* Referral Logs */}
-          <Card className="bg-white border-slate-200 overflow-hidden shadow-sm">
-            <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
-                <Gift className="h-4.5 w-4.5 text-violet-650" />
+          <Card className="bg-surface-card border-hairline-dark overflow-hidden shadow-sm">
+            <div className="p-4 border-b border-hairline-dark bg-white/5">
+              <h3 className="font-bold text-white/80 text-sm flex items-center gap-1.5">
+                <Gift className="h-4.5 w-4.5 text-mauve" />
                 <span>Referral Programs History</span>
               </h3>
             </div>
             <CardContent className="p-0">
               {loading ? (
                 <div className="p-12 flex justify-center items-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+                  <Loader2 className="h-8 w-8 animate-spin text-mauve" />
                 </div>
               ) : referrals.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 text-xs">No referral events logged yet.</div>
+                <div className="p-12 text-center text-white/40 text-xs">No referral events logged yet.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/20">
+                      <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-white/5">
                         <th className="p-4">Referrer User</th>
                         <th className="p-4">Referral Code</th>
                         <th className="p-4">Reward State</th>
                         <th className="p-4 text-right">Date</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
+                    <tbody className="divide-y divide-white/10 text-white/60 font-medium">
                       {referrals.map((ref) => (
-                        <tr key={ref.id} className="hover:bg-slate-50/30 transition-colors">
-                          <td className="p-4 font-bold text-slate-800">{ref.referrer?.full_name || "N/A"}</td>
-                          <td className="p-4 text-slate-700 font-mono font-bold">{ref.referral_code || "—"}</td>
+                        <tr key={ref.id} className="hover:bg-white/5 transition-colors">
+                          <td className="p-4 font-bold text-white/80">{ref.referrer?.full_name || "N/A"}</td>
+                          <td className="p-4 text-white/70 font-mono font-bold">{ref.referral_code || "—"}</td>
                           <td className="p-4">
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                              ref.reward_credited ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-100 text-slate-600 border-slate-200"
+                              ref.reward_credited ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/60 border-hairline-dark"
                             }`}>
                               {ref.reward_credited ? "Reward Credited" : ref.status}
                             </span>
                           </td>
-                          <td className="p-4 text-right text-slate-400 font-semibold">
+                          <td className="p-4 text-right text-white/40 font-semibold">
                             {new Date(ref.created_at).toLocaleDateString()}
                           </td>
                         </tr>
@@ -426,44 +426,44 @@ export default function AdminMarketingPage() {
         </div>
 
         {/* Generate Coupon Form */}
-        <Card className="bg-white border-slate-200 p-6 sticky top-6 shadow-sm">
-          <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5 mb-4">
-            <Megaphone className="h-4.5 w-4.5 text-violet-600" />
+        <Card className="bg-surface-card border-hairline-dark p-6 sticky top-6 shadow-sm">
+          <h3 className="font-bold text-white/80 text-sm flex items-center gap-1.5 mb-4">
+            <Megaphone className="h-4.5 w-4.5 text-mauve" />
             <span>Generate Coupon Code</span>
           </h3>
           <form onSubmit={handleCreateCoupon} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Coupon Code</label>
+              <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block">Coupon Code</label>
               <Input
                 value={newCode}
                 onChange={(e) => setNewCode(e.target.value)}
                 placeholder="e.g. SNAPSYSUMMER50"
                 required
-                className="bg-white border-slate-200 text-slate-800 font-mono font-bold"
+                className="bg-surface-card border-hairline-dark text-white/80 font-mono font-bold"
               />
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Discount Type</label>
+                <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block">Discount Type</label>
                 <select
                   value={discountType}
                   onChange={(e) => setDiscountType(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-500 shadow-sm"
+                  className="w-full rounded-lg border border-hairline-dark bg-surface-card px-3 py-2 text-xs font-bold text-white/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-mauve/50 shadow-sm"
                 >
                   <option value="percentage">Percent OFF</option>
                   <option value="fixed">Fixed INR</option>
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Value</label>
+                <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block">Value</label>
                 <Input
                   type="number"
                   value={discountValue}
                   onChange={(e) => setDiscountValue(parseInt(e.target.value) || 0)}
                   min={1}
                   required
-                  className="bg-white border-slate-200 text-slate-800"
+                  className="bg-surface-card border-hairline-dark text-white/80"
                 />
               </div>
             </div>
@@ -471,7 +471,7 @@ export default function AdminMarketingPage() {
             <Button
               type="submit"
               disabled={actioning}
-              className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold h-10 shadow-sm"
+              className="w-full bg-mauve hover:bg-mauve-strong text-[#141110] font-bold h-10 shadow-sm"
             >
               <span>Activate Promo Code</span>
             </Button>

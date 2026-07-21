@@ -63,7 +63,7 @@ function VoiceCommentPlayer({ url, label }: { url: string; label: string }) {
           if (playing) el.pause()
           else el.play()
         }}
-        className="h-7 w-7 shrink-0 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] flex items-center justify-center hover:bg-[#D4AF37]/30 transition"
+        className="h-7 w-7 shrink-0 rounded-full bg-[#B28DAE]/20 text-[#B28DAE] flex items-center justify-center hover:bg-[#B28DAE]/30 transition"
       >
         {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 ml-0.5" />}
       </button>
@@ -195,9 +195,9 @@ export function MediaLightbox({
         )}
         {isMessage(p) ? (
           <div className="p-8 text-center max-w-md space-y-4">
-            <MessageCircle className="h-12 w-12 text-[#D4AF37] mx-auto" />
+            <MessageCircle className="h-12 w-12 text-[#B28DAE] mx-auto" />
             <p className="text-xl font-serif italic text-white/90">"{p.metadata?.text || p.original_filename}"</p>
-            <p className="text-xs text-[#D4AF37] font-semibold">Wish by {p.uploader_name || "Guest"}</p>
+            <p className="text-xs text-[#B28DAE] font-semibold">Wish by {p.uploader_name || "Guest"}</p>
           </div>
         ) : isVideo(p) && p.url ? (
           <div className="relative max-h-[75vh] w-auto">
@@ -208,7 +208,7 @@ export function MediaLightbox({
           </div>
         ) : isAudio(p) && p.url ? (
           <div className="flex flex-col items-center gap-4 p-8">
-            <Volume2 className="h-16 w-16 text-[#D4AF37]" />
+            <Volume2 className="h-16 w-16 text-[#B28DAE]" />
             <p className="text-white/80 font-medium">{p.uploader_name ? `Voice note from ${p.uploader_name}` : p.original_filename}</p>
             <audio src={p.url} controls autoPlay className="w-80 max-w-full">
               Your browser does not support audio playback.
@@ -229,7 +229,7 @@ export function MediaLightbox({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#3D332A] pb-3">
           <div>
-            <p className="text-xs font-semibold text-[#D4AF37]">{p.uploader_name || "Event Guest"}</p>
+            <p className="text-xs font-semibold text-[#B28DAE]">{p.uploader_name || "Event Guest"}</p>
             <p className="text-[10px] text-white/40">{new Date(p.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
           </div>
           <div className="flex items-center gap-1">
@@ -246,7 +246,7 @@ export function MediaLightbox({
 
         {/* Emoji Reactions Bar */}
         <div className="space-y-2">
-          <p className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold">Reactions</p>
+          <p className="text-[10px] uppercase tracking-widest text-[#B28DAE] font-bold">Reactions</p>
           <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-2">
             {EMOJI_LIST.map((e) => {
               const count = reactions[e.key] || 0
@@ -258,7 +258,7 @@ export function MediaLightbox({
                   title={e.label}
                 >
                   <span className="text-xl">{e.symbol}</span>
-                  <span className="text-[10px] font-bold text-white/70 group-hover:text-[#D4AF37]">{count > 0 ? count : ""}</span>
+                  <span className="text-[10px] font-bold text-white/70 group-hover:text-[#B28DAE]">{count > 0 ? count : ""}</span>
                 </button>
               )
             })}
@@ -267,7 +267,7 @@ export function MediaLightbox({
 
         {/* Comments Feed */}
         <div className="flex-1 overflow-y-auto max-h-48 space-y-2.5 pr-1 no-scrollbar my-2">
-          <p className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold">Wishes & Comments ({comments.length})</p>
+          <p className="text-[10px] uppercase tracking-widest text-[#B28DAE] font-bold">Wishes & Comments ({comments.length})</p>
           {comments.length === 0 ? (
             <p className="text-xs text-white/40 italic">No comments yet. Be the first to leave a wish!</p>
           ) : (
@@ -290,16 +290,16 @@ export function MediaLightbox({
             placeholder="Your Name (optional)"
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
-            className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-8 text-xs focus:border-[#D4AF37]"
+            className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-8 text-xs focus:border-[#B28DAE]"
           />
           <div className="flex gap-2">
             <Input
               placeholder="Write a comment..."
               value={commentInput}
               onChange={(e) => setCommentInput(e.target.value)}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-xs focus:border-[#D4AF37] flex-1"
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-xs focus:border-[#B28DAE] flex-1"
             />
-            <Button type="submit" size="icon" className="bg-[#D4AF37] hover:bg-[#B3922E] text-black h-9 w-9 shrink-0 rounded-lg">
+            <Button type="submit" size="icon" className="bg-[#B28DAE] hover:bg-[#A468A0] text-black h-9 w-9 shrink-0 rounded-lg">
               <Send className="h-4 w-4" />
             </Button>
             {onVoiceComment && (
@@ -308,7 +308,7 @@ export function MediaLightbox({
                 variant="outline"
                 size="icon"
                 onClick={() => setShowRecorder(true)}
-                className="h-9 w-9 shrink-0 rounded-lg border-white/10 text-[#D4AF37] hover:bg-white/10"
+                className="h-9 w-9 shrink-0 rounded-lg border-white/10 text-[#B28DAE] hover:bg-white/10"
                 title="Reply with a voice note"
               >
                 <Mic className="h-4 w-4" />

@@ -40,39 +40,39 @@ export function AdminProfileDropdown({ user }: AdminProfileProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-600 font-bold text-white hover:opacity-90 ring-2 ring-violet-100 transition-opacity">
+        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-mauve font-bold text-[#141110] hover:bg-mauve-strong ring-2 ring-mauve/20 transition-colors">
           {initial}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 bg-white border border-slate-200 shadow-md rounded-xl p-1">
+      <DropdownMenuContent align="end" className="w-64 bg-surface-card-elevated border border-hairline-dark shadow-md rounded-xl p-1">
         <div className="px-3 py-2.5">
-          <p className="text-sm font-bold text-slate-800 truncate">{user.full_name || "Admin User"}</p>
-          <p className="text-xs text-slate-500 truncate mt-0.5">{user.email}</p>
+          <p className="text-sm font-bold text-white truncate">{user.full_name || "Admin User"}</p>
+          <p className="text-xs text-white/50 truncate mt-0.5">{user.email}</p>
         </div>
-        <DropdownMenuSeparator className="bg-slate-100" />
+        <DropdownMenuSeparator className="bg-white/10" />
         <DropdownMenuItem asChild>
-          <a href="/admin/profile" className="flex items-center gap-2.5 text-slate-700 focus:bg-slate-50 rounded-lg px-3 py-2 text-sm cursor-pointer">
-            <User className="h-4 w-4 text-slate-400" />
+          <a href="/admin/profile" className="flex items-center gap-2.5 text-white/70 focus:bg-white/5 rounded-lg px-3 py-2 text-sm cursor-pointer">
+            <User className="h-4 w-4 text-white/40" />
             <span>My Profile</span>
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <a href="/admin/security" className="flex items-center gap-2.5 text-slate-700 focus:bg-slate-50 rounded-lg px-3 py-2 text-sm cursor-pointer">
-            <Shield className="h-4 w-4 text-slate-400" />
+          <a href="/admin/security" className="flex items-center gap-2.5 text-white/70 focus:bg-white/5 rounded-lg px-3 py-2 text-sm cursor-pointer">
+            <Shield className="h-4 w-4 text-white/40" />
             <span>Security & 2FA</span>
           </a>
         </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-slate-100" />
+        <DropdownMenuSeparator className="bg-white/10" />
         <DropdownMenuItem asChild>
-          <a href="/admin/settings" className="flex items-center gap-2.5 text-slate-700 focus:bg-slate-50 rounded-lg px-3 py-2 text-sm cursor-pointer">
-            <Settings className="h-4 w-4 text-slate-400" />
+          <a href="/admin/settings" className="flex items-center gap-2.5 text-white/70 focus:bg-white/5 rounded-lg px-3 py-2 text-sm cursor-pointer">
+            <Settings className="h-4 w-4 text-white/40" />
             <span>Platform Settings</span>
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={signOut}
           disabled={signingOut}
-          className="flex items-center gap-2.5 text-rose-600 focus:bg-rose-50 rounded-lg px-3 py-2 text-sm cursor-pointer mt-1"
+          className="flex items-center gap-2.5 text-red-400 focus:bg-red-500/10 rounded-lg px-3 py-2 text-sm cursor-pointer mt-1"
         >
           <LogOut className="h-4 w-4" />
           <span>{signingOut ? "Signing out..." : "Sign out"}</span>

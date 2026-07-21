@@ -69,32 +69,32 @@ export function AdminNotificationsDropdown() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-9 w-9 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-lg"
+          className="relative h-9 w-9 text-white/60 hover:bg-white/5 hover:text-white rounded-lg"
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-pink-500 text-[10px] font-bold text-white ring-2 ring-white">
+            <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-mauve text-[10px] font-bold text-[#141110] ring-2 ring-surface-card">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 p-0 bg-white border border-slate-200 shadow-lg rounded-xl">
-        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-          <span className="font-bold text-slate-800 text-sm">System Notifications</span>
+      <DropdownMenuContent align="end" className="w-80 p-0 bg-surface-card-elevated border border-hairline-dark shadow-lg rounded-xl">
+        <div className="flex items-center justify-between border-b border-hairline-dark px-4 py-3">
+          <span className="font-bold text-white text-sm">System Notifications</span>
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="text-xs font-semibold text-violet-600 hover:text-violet-700 transition-colors"
+              className="text-xs font-semibold text-mauve hover:text-mauve-strong transition-colors"
             >
               Mark all read
             </button>
           )}
         </div>
-        <div className="max-h-80 overflow-y-auto divide-y divide-slate-50">
+        <div className="max-h-80 overflow-y-auto divide-y divide-white/10">
           {isLoading ? (
             <div className="flex justify-center p-8">
-              <Loader2 className="h-6 w-6 text-slate-300 animate-spin" />
+              <Loader2 className="h-6 w-6 text-white/30 animate-spin" />
             </div>
           ) : notifications.length > 0 ? (
             notifications.map(n => (
@@ -104,29 +104,29 @@ export function AdminNotificationsDropdown() {
                 className={cn(
                   "flex flex-col gap-1 px-4 py-3 text-xs transition-colors",
                   n.link ? "cursor-pointer" : "",
-                  !n.is_read ? "bg-violet-50/40 hover:bg-violet-50" : "hover:bg-slate-50"
+                  !n.is_read ? "bg-mauve/10 hover:bg-mauve/15" : "hover:bg-white/5"
                 )}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <span className={cn("text-slate-700", !n.is_read ? "font-semibold text-slate-900" : "")}>
+                  <span className={cn("text-white/70", !n.is_read ? "font-semibold text-white" : "")}>
                     {n.title}
                   </span>
                   {!n.is_read && (
-                    <button 
+                    <button
                       onClick={(e) => handleMarkRead(n.id, e)}
                       title="Mark as read"
-                      className="h-2 w-2 shrink-0 rounded-full bg-violet-600 mt-1 hover:bg-violet-700" 
+                      className="h-2 w-2 shrink-0 rounded-full bg-mauve mt-1 hover:bg-mauve-strong"
                     />
                   )}
                 </div>
-                <span className="text-[11px] text-slate-600 line-clamp-2">{n.message}</span>
-                <span className="text-[10px] text-slate-400 font-medium">
+                <span className="text-[11px] text-white/60 line-clamp-2">{n.message}</span>
+                <span className="text-[10px] text-white/40 font-medium">
                   {new Date(n.created_at).toLocaleString()}
                 </span>
               </div>
             ))
           ) : (
-            <div className="p-8 text-center text-sm text-slate-500">
+            <div className="p-8 text-center text-sm text-white/50">
               No notifications
             </div>
           )}

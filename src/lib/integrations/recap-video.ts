@@ -312,7 +312,7 @@ const SVG_SERIF_STACK = "Georgia, 'Times New Roman', 'DejaVu Serif', serif"
 
 function buildStatsIntroSvgFrames(eventName: string, stats: RecapStats): string[] {
   const bg = "#141110"
-  const gold = "#D4AF37"
+  const mauve = "#B28DAE"
   const cream = "#F4E9CE"
   // Truncate the raw name BEFORE escaping, not after — escaping first and
   // then slicing to 60 chars can cut an entity reference in half (e.g.
@@ -325,9 +325,9 @@ function buildStatsIntroSvgFrames(eventName: string, stats: RecapStats): string[
 
   const frameOne = `<svg width="${OUTPUT_WIDTH}" height="${OUTPUT_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="${bg}"/>
-    <text x="50%" y="40%" text-anchor="middle" font-family="${SVG_SERIF_STACK}" font-size="76" font-weight="600" fill="${gold}">${safeName}</text>
+    <text x="50%" y="40%" text-anchor="middle" font-family="${SVG_SERIF_STACK}" font-size="76" font-weight="600" fill="${mauve}">${safeName}</text>
     <text x="50%" y="48%" text-anchor="middle" font-family="${SVG_SERIF_STACK}" font-size="32" fill="${cream}" opacity="0.8">A recap of the moments you shared</text>
-    <text x="50%" y="60%" text-anchor="middle" font-family="${SVG_SERIF_STACK}" font-size="44" font-weight="700" fill="${gold}">${stats.guests} guests &#183; ${totalMoments} moments captured</text>
+    <text x="50%" y="60%" text-anchor="middle" font-family="${SVG_SERIF_STACK}" font-size="44" font-weight="700" fill="${mauve}">${stats.guests} guests &#183; ${totalMoments} moments captured</text>
   </svg>`
 
   const rows: Array<[string, number]> = [
@@ -344,7 +344,7 @@ function buildStatsIntroSvgFrames(eventName: string, stats: RecapStats): string[
     .map(([label, value], i) => {
       const y = startY + i * rowHeight
       return `
-        <text x="16%" y="${y}" font-family="${SVG_SERIF_STACK}" font-size="86" font-weight="700" fill="${gold}">${value}</text>
+        <text x="16%" y="${y}" font-family="${SVG_SERIF_STACK}" font-size="86" font-weight="700" fill="${mauve}">${value}</text>
         <text x="16%" y="${y + 44}" font-family="${SVG_SERIF_STACK}" font-size="28" fill="${cream}" opacity="0.75">${label}</text>`
     })
     .join("\n")

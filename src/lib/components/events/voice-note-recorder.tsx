@@ -149,12 +149,12 @@ export function VoiceNoteRecorder({ maxDuration = 30, onCapture, onClose }: Voic
               isRecording
                 ? "bg-red-500/20 border-2 border-red-500 animate-pulse scale-105"
                 : previewUrl
-                ? "bg-[#D4AF37]/20 border-2 border-[#D4AF37]"
+                ? "bg-[#B28DAE]/20 border-2 border-[#B28DAE]"
                 : "bg-white/5 border border-white/10"
             }`}
           >
             {previewUrl ? (
-              <Volume2 className="h-12 w-12 text-[#D4AF37]" />
+              <Volume2 className="h-12 w-12 text-[#B28DAE]" />
             ) : (
               <Mic className={`h-12 w-12 ${isRecording ? "text-red-500" : "text-white/60"}`} />
             )}
@@ -218,7 +218,7 @@ export function VoiceNoteRecorder({ maxDuration = 30, onCapture, onClose }: Voic
                 {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
               </button>
 
-              <Button onClick={handleConfirm} className="bg-[#D4AF37] hover:bg-[#B3922E] text-black font-bold flex items-center gap-1.5 rounded-full px-5 py-2">
+              <Button onClick={handleConfirm} className="bg-[#B28DAE] hover:bg-[#A468A0] text-black font-bold flex items-center gap-1.5 rounded-full px-5 py-2">
                 <Check className="h-4 w-4" />
                 <span className="text-xs">Send</span>
               </Button>

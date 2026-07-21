@@ -95,84 +95,84 @@ export default function AdminStoragePage() {
   })
 
   return (
-    <main className="px-6 py-8 space-y-6 bg-slate-50 min-h-full">
+    <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Storage Analytics</h1>
-          <p className="text-sm text-slate-500 mt-1">Review file uploads, quota consumption, and per-user disk usage.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Storage Analytics</h1>
+          <p className="text-sm text-white/50 mt-1">Review file uploads, quota consumption, and per-user disk usage.</p>
         </div>
-        <Button onClick={() => fetchStorageData(page)} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
-          <RefreshCw className="h-4 w-4 text-slate-500" />
+        <Button onClick={() => fetchStorageData(page)} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
+          <RefreshCw className="h-4 w-4 text-white/50" />
           <span>Refresh</span>
         </Button>
       </div>
 
       {/* Summary KPI Cards */}
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="bg-white border-slate-200 p-6 flex items-center gap-4 shadow-sm">
-          <div className="h-12 w-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600 border border-violet-100">
+        <Card className="bg-surface-card border-hairline-dark p-6 flex items-center gap-4 shadow-sm">
+          <div className="h-12 w-12 rounded-xl bg-mauve/10 flex items-center justify-center text-mauve border border-mauve/20">
             <HardDrive className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Total Storage Used</span>
-            <span className="text-2xl font-bold text-slate-900 mt-1 block">
+            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Total Storage Used</span>
+            <span className="text-2xl font-bold text-white mt-1 block">
               {totalUsedGb < 1 ? `${(totalUsedGb * 1024).toFixed(1)} MB` : `${totalUsedGb.toFixed(2)} GB`}
             </span>
-            <span className="text-[10px] text-slate-400 font-semibold">across {rows.length} users</span>
+            <span className="text-[10px] text-white/40 font-semibold">across {rows.length} users</span>
           </div>
         </Card>
 
-        <Card className="bg-white border-slate-200 p-6 flex items-center gap-4 shadow-sm">
-          <div className="h-12 w-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600 border border-violet-100">
+        <Card className="bg-surface-card border-hairline-dark p-6 flex items-center gap-4 shadow-sm">
+          <div className="h-12 w-12 rounded-xl bg-mauve/10 flex items-center justify-center text-mauve border border-mauve/20">
             <Layers className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Total Photos Stored</span>
-            <span className="text-2xl font-bold text-slate-900 mt-1 block">{totalPhotos.toLocaleString()}</span>
-            <span className="text-[10px] text-slate-400 font-semibold">live in storage buckets</span>
+            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Total Photos Stored</span>
+            <span className="text-2xl font-bold text-white mt-1 block">{totalPhotos.toLocaleString()}</span>
+            <span className="text-[10px] text-white/40 font-semibold">live in storage buckets</span>
           </div>
         </Card>
 
-        <Card className={cn("bg-white border-slate-200 p-6 flex items-center gap-4 shadow-sm", nearCapacity.length > 0 && "border-amber-200 bg-amber-50/30")}>
+        <Card className={cn("bg-surface-card border-hairline-dark p-6 flex items-center gap-4 shadow-sm", nearCapacity.length > 0 && "border-amber-500/30 bg-amber-500/10")}>
           <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center border",
-            nearCapacity.length > 0 ? "bg-amber-50 text-amber-600 border-amber-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"
+            nearCapacity.length > 0 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
           )}>
             <AlertTriangle className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Near Quota (&gt;80%)</span>
-            <span className={cn("text-2xl font-bold mt-1 block", nearCapacity.length > 0 ? "text-amber-700" : "text-slate-900")}>
+            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Near Quota (&gt;80%)</span>
+            <span className={cn("text-2xl font-bold mt-1 block", nearCapacity.length > 0 ? "text-amber-400" : "text-white")}>
               {nearCapacity.length} users
             </span>
-            <span className="text-[10px] text-slate-400 font-semibold">approaching their storage limit</span>
+            <span className="text-[10px] text-white/40 font-semibold">approaching their storage limit</span>
           </div>
         </Card>
       </div>
 
       {/* Storage Table */}
-      <Card className="bg-white border-slate-200 overflow-hidden shadow-sm">
+      <Card className="bg-surface-card border-hairline-dark overflow-hidden shadow-sm">
         <CardContent className="p-0">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
-              <Database className="h-4 w-4 text-violet-600" />
+          <div className="p-4 border-b border-hairline-dark flex items-center justify-between">
+            <h3 className="font-bold text-white/80 text-sm flex items-center gap-1.5">
+              <Database className="h-4 w-4 text-mauve" />
               Per-User Storage Breakdown
             </h3>
-            <span className="text-[10px] text-slate-400 font-semibold">{rows.length} records</span>
+            <span className="text-[10px] text-white/40 font-semibold">{rows.length} records</span>
           </div>
 
           {loading ? (
             <div className="p-16 flex justify-center items-center">
-              <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-mauve" />
             </div>
           ) : rows.length === 0 ? (
-            <div className="p-16 text-slate-400 text-center text-xs font-semibold">
+            <div className="p-16 text-white/40 text-center text-xs font-semibold">
               No storage usage records found. Usage is tracked after the first photo upload.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/50">
+                  <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-white/5">
                     <th className="p-4">User</th>
                     <th className="p-4">Plan</th>
                     <th className="p-4">Photos</th>
@@ -181,7 +181,7 @@ export default function AdminStoragePage() {
                     <th className="p-4 text-right">Usage</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
+                <tbody className="divide-y divide-white/10 text-white/60 font-medium">
                   {rows.map((row) => {
                     const usedGb = bytesToGb(row.total_bytes)
                     const activePlan = getActivePlan(row)
@@ -192,42 +192,42 @@ export default function AdminStoragePage() {
 
                     return (
                       <tr key={row.id} className={cn(
-                        "hover:bg-slate-50/50 transition-colors",
-                        isCritical ? "bg-rose-50/20" : isWarning ? "bg-amber-50/20" : ""
+                        "hover:bg-white/5 transition-colors",
+                        isCritical ? "bg-red-500/10" : isWarning ? "bg-amber-500/10" : ""
                       )}>
                         <td className="p-4">
-                          <div className="font-bold text-slate-800">{row.user?.full_name ?? "—"}</div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">
+                          <div className="font-bold text-white/80">{row.user?.full_name ?? "—"}</div>
+                          <div className="text-[10px] text-white/40 mt-0.5">
                             {row.user?.email || (row.user_id ? row.user_id.slice(0, 8) + "…" : "Unassigned")}
                           </div>
                         </td>
                         <td className="p-4">
                           <span className={cn("px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase",
-                            activePlan === "premium" ? "bg-violet-50 text-violet-700 border-violet-100" :
-                            activePlan === "standard" ? "bg-blue-50 text-blue-700 border-blue-100" :
-                            activePlan === "starter" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
-                            "bg-slate-100 text-slate-500 border-slate-200"
+                            activePlan === "premium" ? "bg-mauve/10 text-mauve border-mauve/20" :
+                            activePlan === "standard" ? "bg-mauve/10 text-mauve border-mauve/20" :
+                            activePlan === "starter" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
+                            "bg-white/5 text-white/50 border-hairline-dark"
                           )}>
                             {activePlan}
                           </span>
                         </td>
-                        <td className="p-4 font-bold text-slate-700">{(row.photo_count || 0).toLocaleString()}</td>
-                        <td className="p-4 font-semibold text-slate-700">
+                        <td className="p-4 font-bold text-white/70">{(row.photo_count || 0).toLocaleString()}</td>
+                        <td className="p-4 font-semibold text-white/70">
                           {usedGb < 1 ? `${(usedGb * 1024).toFixed(0)} MB` : `${usedGb.toFixed(2)} GB`}
                         </td>
-                        <td className="p-4 text-slate-400 font-semibold">{limitGb >= 1000 ? "1 TB" : `${limitGb} GB`}</td>
+                        <td className="p-4 text-white/40 font-semibold">{limitGb >= 1000 ? "1 TB" : `${limitGb} GB`}</td>
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="w-20 h-2 bg-white/5 rounded-full overflow-hidden">
                               <div
                                 className={cn("h-full rounded-full transition-all",
-                                  isCritical ? "bg-rose-500" : isWarning ? "bg-amber-400" : "bg-violet-500"
+                                  isCritical ? "bg-red-500/10" : isWarning ? "bg-amber-400" : "bg-mauve"
                                 )}
                                 style={{ width: `${usagePct}%` }}
                               />
                             </div>
                             <span className={cn("text-[10px] font-bold w-8",
-                              isCritical ? "text-rose-600" : isWarning ? "text-amber-600" : "text-slate-400"
+                              isCritical ? "text-red-400" : isWarning ? "text-amber-400" : "text-white/40"
                             )}>
                               {usagePct.toFixed(0)}%
                             </span>
@@ -243,11 +243,11 @@ export default function AdminStoragePage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="p-4 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-xs text-slate-400 font-semibold">Page {page} of {totalPages}</span>
+            <div className="p-4 border-t border-hairline-dark flex items-center justify-between">
+              <span className="text-xs text-white/40 font-semibold">Page {page} of {totalPages}</span>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="h-7 text-xs border-slate-200">Prev</Button>
-                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="h-7 text-xs border-slate-200">Next</Button>
+                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="h-7 text-xs border-hairline-dark">Prev</Button>
+                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="h-7 text-xs border-hairline-dark">Next</Button>
               </div>
             </div>
           )}

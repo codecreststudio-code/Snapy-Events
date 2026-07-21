@@ -24,15 +24,15 @@ export default function AdminSubscriptionsPage() {
   ]
 
   return (
-    <main className="px-6 py-8 space-y-6 bg-slate-50 min-h-full">
+    <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Subscription Control Center</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage all plans, features, quotas, promotions, and logic dynamically.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Subscription Control Center</h1>
+          <p className="text-sm text-white/50 mt-1">Manage all plans, features, quotas, promotions, and logic dynamically.</p>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+      <div className="flex flex-wrap items-center gap-1 bg-surface-card border border-hairline-dark rounded-xl p-1">
         {tabs.map(tab => (
           <button
             key={tab.id}
@@ -40,8 +40,8 @@ export default function AdminSubscriptionsPage() {
             className={cn(
               "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200",
               activeTab === tab.id
-                ? "bg-violet-600 text-white shadow-sm"
-                : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                ? "bg-mauve text-[#141110]"
+                : "text-white/50 hover:text-white/80 hover:bg-white/5"
             )}
           >
             <tab.icon className="h-3.5 w-3.5" />

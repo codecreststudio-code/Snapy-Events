@@ -1014,9 +1014,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   if (!event) {
     return (
       <div className="min-h-screen bg-[#141110] flex flex-col items-center justify-center p-6 text-center space-y-4">
-        <Camera className="h-12 w-12 text-[#D4AF37]" />
+        <Camera className="h-12 w-12 text-[#B28DAE]" />
         <h2 className="font-playfair text-2xl font-light text-white/90">Experience Capsule Not Found</h2>
-        <Button asChild className="rounded-full bg-[#D4AF37] hover:bg-[#c19f2e] text-[#141110] font-semibold">
+        <Button asChild className="rounded-full bg-[#B28DAE] hover:bg-[#a468a0] text-[#141110] font-semibold">
           <Link href="/dashboard/events">Return to Dashboard</Link>
         </Button>
       </div>
@@ -1216,7 +1216,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   }
 
   return (
-    <div className="min-h-screen bg-[#141110] text-white/90 flex flex-col font-sans selection:bg-[#D4AF37]/30 pb-16">
+    <div className="min-h-screen bg-[#141110] text-white/90 flex flex-col font-sans selection:bg-[#B28DAE]/30 pb-16">
 
       {/* Top Banner Navigation */}
       <header className="px-4 py-4 sm:px-6 bg-[#1C1814] border-b border-[#3D332A] sticky top-0 z-30">
@@ -1226,7 +1226,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               <ArrowLeft className="h-5 w-5 text-white/70" />
             </Link>
             <div className="min-w-0">
-              <span className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold block">Memory Capsule</span>
+              <span className="text-[10px] uppercase tracking-widest text-[#B28DAE] font-bold block">Memory Capsule</span>
               <h1 className="font-playfair text-xl md:text-2xl font-light text-white truncate">{event.name}</h1>
             </div>
           </div>
@@ -1249,11 +1249,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 disabled
                 aria-disabled="true"
                 title={featureAccess?.print_ready_downloads?.reason || "Print-ready downloads require a paid plan"}
-                className="rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37]/70 text-xs flex items-center gap-1.5 cursor-not-allowed opacity-80 hover:bg-[#D4AF37]/10"
+                className="rounded-full border border-[#B28DAE]/40 bg-[#B28DAE]/10 text-[#B28DAE]/70 text-xs flex items-center gap-1.5 cursor-not-allowed opacity-80 hover:bg-[#B28DAE]/10"
               >
                 <Download className="h-3.5 w-3.5" />
                 <span>Download All</span>
-                <span className="text-[9px] font-bold uppercase tracking-wide border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37] rounded-full px-1.5 py-0.5 ml-0.5">
+                <span className="text-[9px] font-bold uppercase tracking-wide border border-[#B28DAE]/40 bg-[#B28DAE]/10 text-[#B28DAE] rounded-full px-1.5 py-0.5 ml-0.5">
                   Upgrade
                 </span>
               </Button>
@@ -1266,7 +1266,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </Button>
             <Button
               onClick={() => setIsDrawerOpen(true)}
-              className="rounded-full bg-[#D4AF37] text-[#141110] hover:bg-[#c19f2e] text-xs font-semibold flex items-center gap-1 border-none cursor-pointer"
+              className="rounded-full bg-[#B28DAE] text-[#141110] hover:bg-[#a468a0] text-xs font-semibold flex items-center gap-1 border-none cursor-pointer"
             >
               <Settings className="h-4 w-4" />
               <span>Settings</span>
@@ -1289,12 +1289,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               { label: "Guests", value: totalGuestsCount, icon: Users },
               { label: "AI Matches", value: totalAiClusters, icon: Sparkles },
             ].map((stat, idx) => (
-              <div key={idx} className="rounded-2xl border border-[#3D332A] bg-[#1C1814] p-3 text-center space-y-1.5 hover:border-[#D4AF37]/40 transition-all">
-                <div className="w-8 h-8 rounded-full bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center mx-auto">
+              <div key={idx} className="rounded-2xl border border-[#3D332A] bg-[#1C1814] p-3 text-center space-y-1.5 hover:border-[#B28DAE]/40 transition-all">
+                <div className="w-8 h-8 rounded-full bg-[#B28DAE]/10 text-[#B28DAE] flex items-center justify-center mx-auto">
                   <stat.icon className="h-4 w-4" />
                 </div>
                 <div className="space-y-0.5">
-                  <p className="text-xl font-bold text-[#D4AF37]">{stat.value}</p>
+                  <p className="text-xl font-bold text-[#B28DAE]">{stat.value}</p>
                   <p className="text-[9px] uppercase tracking-wider text-white/60 font-medium">{stat.label}</p>
                 </div>
               </div>
@@ -1304,12 +1304,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           {/* Capsule countdown indicator circle */}
           <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 flex items-center justify-between relative overflow-hidden">
             <div className="space-y-1">
-              <span className="text-[9px] uppercase tracking-widest text-[#D4AF37] font-bold">Unlocking Capsule</span>
+              <span className="text-[9px] uppercase tracking-widest text-[#B28DAE] font-bold">Unlocking Capsule</span>
               <p className="font-playfair text-xl font-bold text-white tabular-nums">{countdownText || "Calculating..."}</p>
               <p className="text-[10px] text-white/60">Revealing memories automatically</p>
             </div>
-            <div className="w-12 h-12 rounded-full border-4 border-[#D4AF37]/30 border-t-[#D4AF37] flex items-center justify-center animate-spin shrink-0" style={{ animationDuration: "10s" }}>
-              <Clock className="h-5 w-5 text-[#D4AF37] rotate-[-45deg]" />
+            <div className="w-12 h-12 rounded-full border-4 border-[#B28DAE]/30 border-t-[#B28DAE] flex items-center justify-center animate-spin shrink-0" style={{ animationDuration: "10s" }}>
+              <Clock className="h-5 w-5 text-[#B28DAE] rotate-[-45deg]" />
             </div>
           </div>
 
@@ -1337,7 +1337,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   key={tab.id}
                   onClick={() => setActiveMediaTab(tab.id as any)}
                   className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${
-                    activeMediaTab === tab.id ? "bg-[#D4AF37] text-[#141110] font-bold" : "text-white/60 hover:text-white"
+                    activeMediaTab === tab.id ? "bg-[#B28DAE] text-[#141110] font-bold" : "text-white/60 hover:text-white"
                   }`}
                 >
                   {tab.label}
@@ -1373,7 +1373,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     </div>
                   </div>
 
-                  <div className="flex-1 rounded-2xl border border-[#3D332A] bg-[#1C1814] p-4 space-y-3 hover:border-[#D4AF37]/30 transition-all">
+                  <div className="flex-1 rounded-2xl border border-[#3D332A] bg-[#1C1814] p-4 space-y-3 hover:border-[#B28DAE]/30 transition-all">
                     <div className="flex justify-between items-center text-xs">
                       <span className="font-bold text-white/90">{item.guest}</span>
                       <span className="text-white/50">{item.time}</span>
@@ -1398,7 +1398,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                             </div>
                           ))}
                         </div>
-                        <p className="text-[10px] text-[#D4AF37] font-semibold">Uploaded {item.photos?.length || 0} high-resolution prints to Capsule</p>
+                        <p className="text-[10px] text-[#B28DAE] font-semibold">Uploaded {item.photos?.length || 0} high-resolution prints to Capsule</p>
                       </div>
                     )}
 
@@ -1434,7 +1434,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           <p className="text-xs font-semibold text-white/90">{item.title}</p>
                           <button
                             onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
-                            className="text-[10px] font-bold text-[#D4AF37] hover:text-white flex items-center gap-1"
+                            className="text-[10px] font-bold text-[#B28DAE] hover:text-white flex items-center gap-1"
                           >
                             <MessageSquare className="h-3 w-3" /> React & Comment
                           </button>
@@ -1457,7 +1457,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                         </div>
                         <button
                           onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
-                          className="text-[10px] font-bold text-[#D4AF37] hover:text-white flex items-center gap-1"
+                          className="text-[10px] font-bold text-[#B28DAE] hover:text-white flex items-center gap-1"
                         >
                           <MessageSquare className="h-3 w-3" /> React & Comment
                         </button>
@@ -1479,7 +1479,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4 text-center relative overflow-hidden">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
-                <QrCode className="h-4.5 w-4.5 text-[#D4AF37]" />
+                <QrCode className="h-4.5 w-4.5 text-[#B28DAE]" />
                 <h3 className="text-sm font-bold text-white/90">Event QR Code</h3>
               </div>
               <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
@@ -1523,7 +1523,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             <div className="p-3 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between gap-2">
               <div className="text-left">
                 <p className="text-[9px] font-bold uppercase tracking-wider text-white/50">Or Join With Code</p>
-                <p className="inline-block mt-1 text-base font-bold tracking-[0.2em] text-[#D4AF37] font-mono bg-[#141110] border border-[#3D332A] rounded-full px-3 py-1">
+                <p className="inline-block mt-1 text-base font-bold tracking-[0.2em] text-[#B28DAE] font-mono bg-[#141110] border border-[#3D332A] rounded-full px-3 py-1">
                   {event.join_code || "——————"}
                 </p>
               </div>
@@ -1559,7 +1559,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               size="sm"
               onClick={handleShareInvitation}
               disabled={sharing !== null}
-              className="w-full text-xs bg-[#D4AF37] hover:bg-[#c19f2e] text-[#141110] font-semibold flex items-center justify-center gap-1.5 rounded-full"
+              className="w-full text-xs bg-[#B28DAE] hover:bg-[#a468a0] text-[#141110] font-semibold flex items-center justify-center gap-1.5 rounded-full"
             >
               {sharing === "native" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />}
               <span>Share Invitation</span>
@@ -1608,7 +1608,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
-                <Film className="h-4.5 w-4.5 text-[#D4AF37]" />
+                <Film className="h-4.5 w-4.5 text-[#B28DAE]" />
                 <h3 className="font-playfair text-lg font-light text-white">Recap Video</h3>
               </div>
               {recapStatus === "ready" && recapAllowed && (
@@ -1617,7 +1617,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 </span>
               )}
               {!recapAllowed && (
-                <span className="text-[10px] font-bold uppercase tracking-wide border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37] rounded-full px-2 py-0.5 shrink-0">
+                <span className="text-[10px] font-bold uppercase tracking-wide border border-[#B28DAE]/40 bg-[#B28DAE]/10 text-[#B28DAE] rounded-full px-2 py-0.5 shrink-0">
                   Premium feature
                 </span>
               )}
@@ -1636,9 +1636,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                         aria-checked={recapMood === "joyful"}
                         disabled={recapStatus === "rendering"}
                         onClick={() => setRecapMood("joyful")}
-                        className={`rounded-2xl border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] disabled:opacity-50 disabled:cursor-not-allowed ${
+                        className={`rounded-2xl border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE] disabled:opacity-50 disabled:cursor-not-allowed ${
                           recapMood === "joyful"
-                            ? "border-[#D4AF37] bg-[#D4AF37]/10"
+                            ? "border-[#B28DAE] bg-[#B28DAE]/10"
                             : "border-white/15 bg-transparent hover:bg-white/5"
                         }`}
                       >
@@ -1651,9 +1651,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                         aria-checked={recapMood === "sentimental"}
                         disabled={recapStatus === "rendering"}
                         onClick={() => setRecapMood("sentimental")}
-                        className={`rounded-2xl border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] disabled:opacity-50 disabled:cursor-not-allowed ${
+                        className={`rounded-2xl border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE] disabled:opacity-50 disabled:cursor-not-allowed ${
                           recapMood === "sentimental"
-                            ? "border-[#D4AF37] bg-[#D4AF37]/10"
+                            ? "border-[#B28DAE] bg-[#B28DAE]/10"
                             : "border-white/15 bg-transparent hover:bg-white/5"
                         }`}
                       >
@@ -1672,7 +1672,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                         <button
                           type="button"
                           onClick={() => setShowMomentPicker((v) => !v)}
-                          className="text-[11px] font-semibold text-[#D4AF37] hover:text-white flex items-center gap-1"
+                          className="text-[11px] font-semibold text-[#B28DAE] hover:text-white flex items-center gap-1"
                         >
                           <ImageIcon className="h-3 w-3" />
                           <span>
@@ -1702,7 +1702,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                                       disabled={atCap}
                                       title={atCap ? "Up to 16 moments — deselect one to add another" : undefined}
                                       className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
-                                        isSelected ? "border-[#D4AF37]" : "border-transparent hover:border-white/30"
+                                        isSelected ? "border-[#B28DAE]" : "border-transparent hover:border-white/30"
                                       }`}
                                     >
                                       <img
@@ -1711,7 +1711,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                                         className="w-full h-full object-cover"
                                       />
                                       {isSelected && (
-                                        <div className="absolute inset-0 bg-[#D4AF37]/30 flex items-center justify-center">
+                                        <div className="absolute inset-0 bg-[#B28DAE]/30 flex items-center justify-center">
                                           <Check className="h-4 w-4 text-white drop-shadow" />
                                         </div>
                                       )}
@@ -1736,7 +1736,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
                     {recapStatus === "rendering" ? (
                       <div className="flex flex-col items-center justify-center gap-2 py-6 text-center border border-white/10 bg-white/5 rounded-2xl">
-                        <Loader2 className="h-5 w-5 text-[#D4AF37] animate-spin" />
+                        <Loader2 className="h-5 w-5 text-[#B28DAE] animate-spin" />
                         <p className="text-xs font-semibold text-white/80">Composing your recap… this can take a few minutes</p>
                         <p className="text-[10px] text-white/50">You can leave this page — we'll save it here when it's ready.</p>
                       </div>
@@ -1745,7 +1745,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                         size="sm"
                         onClick={handleGenerateRecap}
                         disabled={recapMutation.isPending}
-                        className="w-full text-xs bg-[#D4AF37] hover:bg-[#c19f2e] text-[#141110] font-semibold flex items-center justify-center gap-1.5 rounded-full"
+                        className="w-full text-xs bg-[#B28DAE] hover:bg-[#a468a0] text-[#141110] font-semibold flex items-center justify-center gap-1.5 rounded-full"
                       >
                         <Film className="h-3.5 w-3.5" />
                         <span>Generate Recap</span>
@@ -1775,7 +1775,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       disabled
                       aria-disabled="true"
                       title={featureAccess?.recap_video?.reason || "Recap Video requires a paid plan"}
-                      className="w-full text-xs bg-[#D4AF37]/10 border border-[#D4AF37]/40 text-[#D4AF37]/70 font-semibold flex items-center justify-center gap-1.5 rounded-full cursor-not-allowed pointer-events-none opacity-90"
+                      className="w-full text-xs bg-[#B28DAE]/10 border border-[#B28DAE]/40 text-[#B28DAE]/70 font-semibold flex items-center justify-center gap-1.5 rounded-full cursor-not-allowed pointer-events-none opacity-90"
                     >
                       <Film className="h-3.5 w-3.5" />
                       <span>Generate Recap</span>
@@ -1809,14 +1809,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   <a
                     href={forceDownloadUrl(recapVideo.video_url, `${event.slug || "event"}-recap.mp4`)}
                     download
-                    className="rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]"
+                    className="rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE]"
                   >
                     <Download className="h-3.5 w-3.5" /> Download
                   </a>
                   <button
                     type="button"
                     onClick={handleShareRecapWhatsApp}
-                    className="rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]"
+                    className="rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE]"
                   >
                     <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
                   </button>
@@ -1826,7 +1826,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   <button
                     type="button"
                     onClick={handleCopyRecapLink}
-                    className="flex-1 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]"
+                    className="flex-1 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE]"
                   >
                     {recapCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                     {recapCopied ? "Copied!" : "Copy Link"}
@@ -1835,7 +1835,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     <button
                       type="button"
                       onClick={handleShareRecap}
-                      className="flex-1 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]"
+                      className="flex-1 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE]"
                     >
                       <Share2 className="h-3.5 w-3.5" /> Share
                     </button>
@@ -1845,7 +1845,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 <button
                   type="button"
                   onClick={handleResetRecap}
-                  className="w-full text-[11px] font-semibold text-white/60 hover:text-white flex items-center justify-center gap-1.5 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] rounded-full"
+                  className="w-full text-[11px] font-semibold text-white/60 hover:text-white flex items-center justify-center gap-1.5 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE] rounded-full"
                 >
                   <RefreshCw className="h-3 w-3" /> Regenerate
                 </button>
@@ -1859,7 +1859,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 <Button
                   size="sm"
                   onClick={handleResetRecap}
-                  className="w-full text-xs bg-[#D4AF37] hover:bg-[#c19f2e] text-[#141110] font-semibold rounded-full"
+                  className="w-full text-xs bg-[#B28DAE] hover:bg-[#a468a0] text-[#141110] font-semibold rounded-full"
                 >
                   Try Again
                 </Button>
@@ -1871,11 +1871,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
             <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4.5 w-4.5 text-[#D4AF37]" />
+                <Sparkles className="h-4.5 w-4.5 text-[#B28DAE]" />
                 <h3 className="text-sm font-bold text-white/90">AI Smart Clusters</h3>
               </div>
               {!faceSearchAllowed && (
-                <span className="text-[10px] font-bold uppercase tracking-wide border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37] rounded-full px-2 py-0.5 shrink-0">
+                <span className="text-[10px] font-bold uppercase tracking-wide border border-[#B28DAE]/40 bg-[#B28DAE]/10 text-[#B28DAE] rounded-full px-2 py-0.5 shrink-0">
                   Premium feature
                 </span>
               )}
@@ -1916,7 +1916,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 disabled
                 aria-disabled="true"
                 title={featureAccess?.ai_face_search?.reason || "AI Smart Clusters require a paid plan"}
-                className="w-full text-xs py-5 rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37]/70 flex items-center justify-center gap-1.5 cursor-not-allowed pointer-events-none opacity-90"
+                className="w-full text-xs py-5 rounded-full border border-[#B28DAE]/40 bg-[#B28DAE]/10 text-[#B28DAE]/70 flex items-center justify-center gap-1.5 cursor-not-allowed pointer-events-none opacity-90"
               >
                 <Search className="h-3.5 w-3.5" />
                 <span>Initiate New Face Match</span>
@@ -1927,7 +1927,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           {/* Recent Activity waterfall feed */}
           <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
             <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-              <Activity className="h-4.5 w-4.5 text-[#D4AF37]" />
+              <Activity className="h-4.5 w-4.5 text-[#B28DAE]" />
               <h3 className="text-sm font-bold text-white/90">Recent Guest Activity</h3>
             </div>
 
@@ -1947,15 +1947,15 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
           {/* Quick Actions Shortcuts */}
           <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#D4AF37]">Host Quick Tools</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#B28DAE]">Host Quick Tools</h3>
 
             <div className="grid grid-cols-2 gap-2.5">
-              <Link href={`/dashboard/events/${event.slug}/qr`} className="p-3 border border-white/10 rounded-xl text-center space-y-1 hover:border-[#D4AF37]/50 transition-all bg-white/5">
-                <QrCode className="h-4 w-4 text-[#D4AF37] mx-auto" />
+              <Link href={`/dashboard/events/${event.slug}/qr`} className="p-3 border border-white/10 rounded-xl text-center space-y-1 hover:border-[#B28DAE]/50 transition-all bg-white/5">
+                <QrCode className="h-4 w-4 text-[#B28DAE] mx-auto" />
                 <p className="text-[10px] font-bold text-white/80">QR Manager</p>
               </Link>
-              <Link href={`/dashboard/events/${event.slug}/gallery`} className="p-3 border border-white/10 rounded-xl text-center space-y-1 hover:border-[#D4AF37]/50 transition-all bg-white/5">
-                <Images className="h-4 w-4 text-[#D4AF37] mx-auto" />
+              <Link href={`/dashboard/events/${event.slug}/gallery`} className="p-3 border border-white/10 rounded-xl text-center space-y-1 hover:border-[#B28DAE]/50 transition-all bg-white/5">
+                <Images className="h-4 w-4 text-[#B28DAE] mx-auto" />
                 <p className="text-[10px] font-bold text-white/80">Gallery Toggles</p>
               </Link>
             </div>
@@ -2001,7 +2001,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                         className="h-16 w-16 shrink-0 rounded-xl bg-cover bg-center border border-hairline-dark bg-surface-dark"
                         style={{ backgroundImage: editCoverImage ? `url(${editCoverImage})` : undefined }}
                       />
-                      <label className="flex-1 cursor-pointer rounded-lg border border-dashed border-hairline-dark bg-white/5 px-3 py-2.5 text-center text-xs font-medium text-white/70 hover:border-gold/40 hover:text-white transition-colors">
+                      <label className="flex-1 cursor-pointer rounded-lg border border-dashed border-hairline-dark bg-white/5 px-3 py-2.5 text-center text-xs font-medium text-white/70 hover:border-mauve/40 hover:text-white transition-colors">
                         {uploadingCover ? "Uploading…" : "Change cover photo"}
                         <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} disabled={uploadingCover} />
                       </label>
@@ -2014,7 +2014,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       id="name"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="!bg-white/5 border-white/15 !text-white placeholder:!text-white/30 focus-visible:!ring-[#D4AF37] focus:border-[#D4AF37]"
+                      className="!bg-white/5 border-white/15 !text-white placeholder:!text-white/30 focus-visible:!ring-[#B28DAE] focus:border-[#B28DAE]"
                     />
                   </div>
 
@@ -2025,7 +2025,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       type="datetime-local"
                       value={editEndDate}
                       onChange={(e) => setEditEndDate(e.target.value)}
-                      className="!bg-white/5 border-white/15 !text-white placeholder:!text-white/30 focus-visible:!ring-[#D4AF37] focus:border-[#D4AF37] [color-scheme:dark]"
+                      className="!bg-white/5 border-white/15 !text-white placeholder:!text-white/30 focus-visible:!ring-[#B28DAE] focus:border-[#B28DAE] [color-scheme:dark]"
                     />
                   </div>
 
@@ -2035,7 +2035,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       id="status"
                       value={editStatus}
                       onChange={(e) => setEditStatus(e.target.value as EventStatus)}
-                      className="w-full h-10 rounded-md border border-white/15 bg-white/5 text-white px-3 py-2 text-sm focus:border-[#D4AF37] outline-none [color-scheme:dark]"
+                      className="w-full h-10 rounded-md border border-white/15 bg-white/5 text-white px-3 py-2 text-sm focus:border-[#B28DAE] outline-none [color-scheme:dark]"
                     >
                       <option value="draft">Draft</option>
                       <option value="published">Published (Live)</option>
@@ -2050,7 +2050,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       id="reveal"
                       value={editRevealExperience}
                       onChange={(e) => setEditRevealExperience(e.target.value)}
-                      className="w-full h-10 rounded-md border border-white/15 bg-white/5 text-white px-3 py-2 text-sm focus:border-[#D4AF37] outline-none [color-scheme:dark]"
+                      className="w-full h-10 rounded-md border border-white/15 bg-white/5 text-white px-3 py-2 text-sm focus:border-[#B28DAE] outline-none [color-scheme:dark]"
                     >
                       <option value="immediately">Immediately</option>
                       <option value="during">During Event</option>
@@ -2065,7 +2065,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   </div>
 
                   <div className="rounded-xl border border-hairline-dark bg-white/5 p-4 space-y-2">
-                    <p className="text-[10px] uppercase tracking-wider text-gold font-bold">Capacity</p>
+                    <p className="text-[10px] uppercase tracking-wider text-mauve font-bold">Capacity</p>
                     <div className="flex items-center justify-between text-xs text-white/80">
                       <span>Guests plan</span>
                       <span className="font-semibold text-white">
@@ -2078,7 +2078,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     </div>
                     <Link
                       href="/dashboard/billing"
-                      className="inline-block text-[10px] font-semibold text-gold hover:underline pt-1"
+                      className="inline-block text-[10px] font-semibold text-mauve hover:underline pt-1"
                     >
                       Need more capacity? Manage add-ons in Billing →
                     </Link>
@@ -2110,7 +2110,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                                 setEditAllowedFilters(prev => prev.filter(id => id !== filter.id))
                               }
                             }}
-                            className="rounded border-white/20 bg-white/5 text-[#D4AF37] focus:ring-[#D4AF37]"
+                            className="rounded border-white/20 bg-white/5 text-[#B28DAE] focus:ring-[#B28DAE]"
                           />
                           <Label htmlFor={`filter-${filter.id}`} className="text-xs text-white/80">{filter.name}</Label>
                         </div>
@@ -2120,7 +2120,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
                   {/* Settings toggle display list */}
                   <div className="border border-white/10 rounded-xl p-4 bg-white/5 space-y-4">
-                    <p className="text-[10px] uppercase tracking-wider text-[#D4AF37] font-bold">Capsule Locks & Limits</p>
+                    <p className="text-[10px] uppercase tracking-wider text-[#B28DAE] font-bold">Capsule Locks & Limits</p>
 
                     <div className="flex items-center justify-between text-xs text-white/80">
                       <span>Auto face cluster indexing</span>
@@ -2132,7 +2132,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       <select
                         value={editVideoDuration}
                         onChange={(e) => setEditVideoDuration(Number(e.target.value))}
-                        className="rounded-lg border border-white/15 bg-[#141110] px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-[#D4AF37] [color-scheme:dark]"
+                        className="rounded-lg border border-white/15 bg-[#141110] px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-[#B28DAE] [color-scheme:dark]"
                       >
                         <option value={5}>5 seconds</option>
                         <option value={10}>10 seconds</option>
@@ -2148,7 +2148,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       <select
                         value={editVoiceDuration}
                         onChange={(e) => setEditVoiceDuration(Number(e.target.value))}
-                        className="rounded-lg border border-white/15 bg-[#141110] px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-[#D4AF37] [color-scheme:dark]"
+                        className="rounded-lg border border-white/15 bg-[#141110] px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-[#B28DAE] [color-scheme:dark]"
                       >
                         <option value={5}>5 seconds</option>
                         <option value={10}>10 seconds</option>
@@ -2164,7 +2164,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     <Button type="button" variant="outline" onClick={() => setIsDrawerOpen(false)} className="flex-1 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10">
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={updateMutation.isPending} className="flex-1 bg-[#D4AF37] text-[#141110] font-semibold hover:bg-[#c19f2e] rounded-full border-none">
+                    <Button type="submit" disabled={updateMutation.isPending} className="flex-1 bg-[#B28DAE] text-[#141110] font-semibold hover:bg-[#a468a0] rounded-full border-none">
                       {updateMutation.isPending ? "Saving..." : "Save Settings"}
                     </Button>
                   </div>

@@ -35,20 +35,20 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/50 px-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-surface-dark px-4">
+        <Card className="glass-panel w-full max-w-md border-hairline-dark">
           <CardHeader className="text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 mx-auto mb-4">
-              <Mail className="h-6 w-6 text-green-600" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-mauve/10 mx-auto mb-4">
+              <Mail className="h-6 w-6 text-mauve" />
             </div>
-            <CardTitle className="text-2xl">Check your email</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-playfair text-white font-light">Check your email</CardTitle>
+            <CardDescription className="text-white/50">
               We&apos;ve sent a password reset link to {email}
             </CardDescription>
           </CardHeader>
           <CardFooter className="justify-center">
             <Link href="/login">
-              <Button variant="outline">Back to Sign In</Button>
+              <Button variant="outline" className="border-white/15 text-white hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-mauve/50">Back to Sign In</Button>
             </Link>
           </CardFooter>
         </Card>
@@ -57,14 +57,14 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/50 px-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-surface-dark px-4">
+      <Card className="glass-panel w-full max-w-md border-hairline-dark">
         <CardHeader className="text-center">
           <Link href="/" className="flex items-center justify-center mb-4">
             <Logo />
           </Link>
-          <CardTitle className="text-2xl">Forgot Password</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl font-playfair text-white font-light">Forgot Password</CardTitle>
+          <CardDescription className="text-white/50">
             Enter your email and we&apos;ll send you a reset link
           </CardDescription>
         </CardHeader>
@@ -72,13 +72,13 @@ export default function ForgotPasswordPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
-              <div role="alert" className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
+              <div role="alert" className="p-3 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 text-sm">
                 {error}
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-white/70">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -87,18 +87,23 @@ export default function ForgotPasswordPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
+                className="bg-white/5 border-hairline-dark text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve"
               />
             </div>
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all focus-visible:ring-2 focus-visible:ring-mauve/50"
+              disabled={isLoading}
+            >
               {isLoading ? "Sending..." : "Send Reset Link"}
             </Button>
 
-            <p className="text-sm text-muted-foreground text-center">
+            <p className="text-sm text-white/50 text-center">
               Remember your password?{" "}
-              <Link href="/login" className="text-primary hover:underline">
+              <Link href="/login" className="text-mauve hover:underline">
                 Sign in
               </Link>
             </p>

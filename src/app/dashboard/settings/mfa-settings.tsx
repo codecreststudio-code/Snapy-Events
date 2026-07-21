@@ -88,7 +88,7 @@ export function MfaSettings() {
   }
 
   if (loading) {
-    return <div className="text-sm text-muted-foreground">Loading MFA settings...</div>
+    return <div className="text-sm text-white/50">Loading MFA settings...</div>
   }
 
   const verifiedFactors = factors.filter(f => f.status === "verified")
@@ -98,8 +98,8 @@ export function MfaSettings() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
-          <Label>Two-Factor Authentication</Label>
-          <p className="text-sm text-muted-foreground">
+          <Label className="text-white">Two-Factor Authentication</Label>
+          <p className="text-sm text-white/50">
             {isEnrolled ? "2FA is currently enabled for your account." : "Add an extra layer of security to your account"}
           </p>
         </div>
@@ -110,7 +110,7 @@ export function MfaSettings() {
           </Button>
         ) : (
           !qrCode && (
-            <Button variant="outline" onClick={onEnableMfa} disabled={actionLoading}>
+            <Button variant="outline" onClick={onEnableMfa} disabled={actionLoading} className="border-[#3D332A] bg-transparent text-white/70 hover:bg-white/5 hover:text-white">
               {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Enable 2FA
             </Button>
@@ -119,40 +119,40 @@ export function MfaSettings() {
       </div>
 
       {qrCode && (
-        <Card className="mt-4 border-violet-100 bg-violet-50/50">
+        <Card className="mt-4 rounded-2xl border border-mauve/20 bg-mauve/5">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Complete Enrollment</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-base text-white">Complete Enrollment</CardTitle>
+            <CardDescription className="text-white/50">
               Scan this QR code with your Authenticator App (Google Authenticator, Authy, etc.)
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-6 items-start">
-              <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-100">
+              <div className="p-2 bg-white rounded-lg shadow-sm border border-[#EAE5DF]">
                 <QRCodeSVG value={qrCode} size={150} />
               </div>
               <form onSubmit={onVerifyMfa} className="flex-1 space-y-4 w-full">
                 <div className="grid gap-2">
-                  <Label htmlFor="verify-code">Verification Code</Label>
-                  <Input 
-                    id="verify-code" 
-                    value={verifyCode} 
+                  <Label htmlFor="verify-code" className="text-white/70">Verification Code</Label>
+                  <Input
+                    id="verify-code"
+                    value={verifyCode}
                     onChange={e => setVerifyCode(e.target.value)}
                     placeholder="000000"
                     maxLength={6}
                     required
-                    className="max-w-[200px]"
+                    className="max-w-[200px] bg-white/5 border-[#3D332A] text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve"
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-white/50">
                     Enter the 6-digit code from your app to verify.
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button type="submit" disabled={actionLoading || verifyCode.length < 6}>
+                  <Button type="submit" disabled={actionLoading || verifyCode.length < 6} className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold">
                     {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                     Verify and Enable
                   </Button>
-                  <Button type="button" variant="ghost" onClick={() => setQrCode("")} disabled={actionLoading}>
+                  <Button type="button" variant="ghost" onClick={() => setQrCode("")} disabled={actionLoading} className="text-white/70 hover:bg-white/5 hover:text-white">
                     Cancel
                   </Button>
                 </div>

@@ -133,22 +133,22 @@ function SignupPricingCard({
   const isPopular = plan.id === "standard"
   const isPremium = plan.id === "premium"
 
-  let selectedClasses = "border-slate-200 hover:border-slate-350 hover:shadow-xl"
+  let selectedClasses = "border-hairline-dark hover:border-mauve/40 hover:shadow-xl"
   if (isSelected) {
     if (plan.id === "free") {
-      selectedClasses = "border-slate-900 ring-2 ring-slate-900/10 shadow-[0_15px_40px_rgba(0,0,0,0.05)]"
+      selectedClasses = "border-white/30 ring-2 ring-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.25)]"
     } else if (plan.id === "starter") {
-      selectedClasses = "border-indigo-600 ring-2 ring-indigo-600/15 shadow-[0_15px_40px_rgba(79,70,229,0.1)]"
+      selectedClasses = "border-mauve ring-2 ring-mauve/15 shadow-[0_15px_40px_rgba(178,141,174,0.15)]"
     } else if (plan.id === "standard") {
-      selectedClasses = "border-violet-500 ring-2 ring-violet-500/20 shadow-[0_20px_50px_rgba(139,92,246,0.15)] md:scale-[1.03] z-10"
+      selectedClasses = "border-mauve ring-2 ring-mauve/25 shadow-[0_20px_50px_rgba(178,141,174,0.2)] md:scale-[1.03] z-10"
     } else if (plan.id === "premium") {
-      selectedClasses = "border-orange-500 ring-2 ring-orange-500/20 shadow-[0_20px_50px_rgba(249,115,22,0.15)] md:scale-[1.03] z-10"
+      selectedClasses = "border-mauve-strong ring-2 ring-mauve-strong/25 shadow-[0_20px_50px_rgba(164,104,160,0.2)] md:scale-[1.03] z-10"
     }
   } else {
     if (isPopular) {
-      selectedClasses = "border-slate-200 hover:border-violet-300 hover:shadow-lg"
+      selectedClasses = "border-hairline-dark hover:border-mauve/50 hover:shadow-lg"
     } else if (isPremium) {
-      selectedClasses = "border-slate-200 hover:border-orange-300 hover:shadow-lg"
+      selectedClasses = "border-hairline-dark hover:border-mauve-strong/50 hover:shadow-lg"
     }
   }
 
@@ -159,7 +159,7 @@ function SignupPricingCard({
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className={`relative rounded-3xl border bg-white p-6 cursor-pointer flex flex-col justify-between transition-all duration-300 ${selectedClasses}`}
+      className={`relative rounded-3xl border bg-surface-card p-6 cursor-pointer flex flex-col justify-between transition-all duration-300 ${selectedClasses}`}
     >
       {/* Background Spotlight Glow Wrapper */}
       <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
@@ -169,12 +169,12 @@ function SignupPricingCard({
             style={{
               background: `radial-gradient(320px circle at ${coords.x}px ${coords.y}px, ${
                 isPopular
-                  ? "rgba(139, 92, 246, 0.08)"
+                  ? "rgba(178, 141, 174, 0.12)"
                   : isPremium
-                  ? "rgba(249, 115, 22, 0.08)"
+                  ? "rgba(164, 104, 160, 0.12)"
                   : plan.id === "starter"
-                  ? "rgba(79, 70, 229, 0.06)"
-                  : "rgba(100, 116, 139, 0.05)"
+                  ? "rgba(178, 141, 174, 0.08)"
+                  : "rgba(255, 255, 255, 0.05)"
               }, transparent 80%)`,
             }}
           />
@@ -183,13 +183,13 @@ function SignupPricingCard({
 
       {/* Badges Container */}
       {isPopular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-1.5 text-[9px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-mauve px-4 py-1.5 text-[9px] font-bold text-[#141110] tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
           <Sparkles className="h-3 w-3" />
           POPULAR
         </div>
       )}
       {isPremium && (
-        <div className="absolute -top-3 right-4 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1.5 text-[9px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
+        <div className="absolute -top-3 right-4 rounded-full bg-mauve-strong px-3 py-1.5 text-[9px] font-bold text-[#141110] tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
           <Crown className="h-3.5 w-3.5" />
           BEST VALUE
         </div>
@@ -198,42 +198,42 @@ function SignupPricingCard({
       <div className="relative z-10">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">{plan.name}</h3>
-            <p className="mt-1.5 text-xs text-slate-450 leading-relaxed font-light min-h-[32px]">
+            <h3 className="text-lg font-bold text-white">{plan.name}</h3>
+            <p className="mt-1.5 text-xs text-white/50 leading-relaxed font-light min-h-[32px]">
               {plan.description}
             </p>
           </div>
           {isPopular && (
-            <span className="h-7 w-7 rounded-full bg-violet-50 flex items-center justify-center text-violet-600 shrink-0">
+            <span className="h-7 w-7 rounded-full bg-mauve/10 flex items-center justify-center text-mauve shrink-0">
               <Sparkles className="h-3.5 w-3.5" />
             </span>
           )}
           {isPremium && (
-            <span className="h-7 w-7 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+            <span className="h-7 w-7 rounded-full bg-mauve-strong/10 flex items-center justify-center text-mauve-strong shrink-0">
               <Crown className="h-3.5 w-3.5" />
             </span>
           )}
         </div>
 
         <div className="mt-4 flex items-baseline gap-1">
-          <span className="text-3xl font-extrabold text-slate-900">₹{plan.price}</span>
-          <span className="text-slate-400 text-xs font-light">/ {plan.period}</span>
+          <span className="text-3xl font-extrabold text-white">₹{plan.price}</span>
+          <span className="text-white/40 text-xs font-light">/ {plan.period}</span>
         </div>
 
-        <ul className="mt-5 space-y-3 border-t border-slate-100 pt-5">
+        <ul className="mt-5 space-y-3 border-t border-hairline-dark pt-5">
           {plan.features.map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-600 font-light">
+            <li key={idx} className="flex items-start gap-2.5 text-xs text-white/60 font-light">
               <Check
                 className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
                   isSelected
                     ? plan.id === "free"
-                      ? "text-slate-800"
+                      ? "text-white"
                       : plan.id === "starter"
-                      ? "text-indigo-600"
+                      ? "text-mauve"
                       : isPopular
-                      ? "text-violet-600"
-                      : "text-orange-500"
-                    : "text-slate-400"
+                      ? "text-mauve"
+                      : "text-mauve-strong"
+                    : "text-white/30"
                 }`}
               />
               <span>{feature}</span>
@@ -248,13 +248,13 @@ function SignupPricingCard({
           className={`w-full font-bold py-2.5 rounded-xl transition-all active:scale-[0.98] text-xs border-none ${
             isSelected
               ? plan.id === "free"
-                ? "bg-slate-950 text-white shadow-md"
+                ? "bg-white/10 text-white shadow-md"
                 : plan.id === "starter"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10"
+                ? "bg-mauve text-[#141110] shadow-md shadow-mauve/10"
                 : isPopular
-                ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/20"
-                : "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/20"
-              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                ? "bg-mauve text-[#141110] shadow-lg shadow-mauve/20"
+                : "bg-mauve-strong text-[#141110] shadow-lg shadow-mauve-strong/20"
+              : "bg-white/5 text-white/70 hover:bg-white/10"
           }`}
         >
           {isSelected ? "Selected" : `Choose ${plan.name}`}
@@ -409,63 +409,37 @@ export default function SignupPage() {
   }
 
   const getAccentColor = () => {
-    if (selectedPlan === "starter") return {
-      text: "text-indigo-650",
-      bg: "bg-indigo-50",
-      border: "border-indigo-200",
-      badge: "bg-indigo-600",
-      hover: "hover:border-indigo-300",
-      buttonActive: "bg-indigo-50/80 border-indigo-500 text-indigo-700 shadow-[0_0_10px_rgba(79,70,229,0.05)]",
-      icon: "text-indigo-600"
-    }
-    if (selectedPlan === "standard") return {
-      text: "text-violet-650",
-      bg: "bg-violet-50",
-      border: "border-violet-200",
-      badge: "bg-violet-600",
-      hover: "hover:border-violet-300",
-      buttonActive: "bg-violet-50/80 border-violet-500 text-violet-700 shadow-[0_0_10px_rgba(139,92,246,0.05)]",
-      icon: "text-violet-600"
-    }
     if (selectedPlan === "premium") return {
-      text: "text-orange-600",
-      bg: "bg-orange-50",
-      border: "border-orange-200",
-      badge: "bg-orange-600",
-      hover: "hover:border-orange-300",
-      buttonActive: "bg-orange-50/80 border-orange-500 text-orange-700 shadow-[0_0_10px_rgba(249,115,22,0.05)]",
-      icon: "text-orange-600"
+      text: "text-mauve-strong",
+      bg: "bg-mauve-strong/10",
+      border: "border-mauve-strong/30",
+      badge: "bg-mauve-strong",
+      hover: "hover:border-mauve-strong/50",
+      buttonActive: "bg-mauve-strong/10 border-mauve-strong text-mauve-strong shadow-[0_0_10px_rgba(164,104,160,0.15)]",
+      icon: "text-mauve-strong"
     }
+    // free, starter, and standard all share the primary mauve accent
     return {
-      text: "text-orange-600",
-      bg: "bg-orange-50",
-      border: "border-orange-200",
-      badge: "bg-orange-600",
-      hover: "hover:border-orange-300",
-      buttonActive: "bg-orange-50/80 border-orange-500 text-orange-700 shadow-[0_0_10px_rgba(249,115,22,0.05)]",
-      icon: "text-orange-600"
+      text: "text-mauve",
+      bg: "bg-mauve/10",
+      border: "border-mauve/30",
+      badge: "bg-mauve",
+      hover: "hover:border-mauve/50",
+      buttonActive: "bg-mauve/10 border-mauve text-mauve shadow-[0_0_10px_rgba(178,141,174,0.15)]",
+      icon: "text-mauve"
     }
   }
 
   const getContinueButtonClass = () => {
-    const base = "w-full sm:w-auto font-bold px-8 py-6 rounded-2xl flex items-center justify-center gap-2 text-base transition-all active:scale-[0.98] border-none text-white "
-    if (selectedPlan === "free") {
-      return base + "bg-slate-950 hover:bg-slate-900 shadow-md"
-    } else if (selectedPlan === "starter") {
-      return base + "bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/10"
-    } else if (selectedPlan === "standard") {
-      return base + "bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 shadow-lg shadow-violet-500/20"
-    } else if (selectedPlan === "premium") {
-      return base + "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-orange-500/20"
+    const base = "w-full sm:w-auto font-bold px-8 py-6 rounded-2xl flex items-center justify-center gap-2 text-base transition-all active:scale-[0.98] border-none text-[#141110] "
+    if (selectedPlan === "premium") {
+      return base + "bg-mauve-strong hover:scale-[1.01] shadow-lg shadow-mauve-strong/20"
     }
-    return base + "bg-orange-500 hover:bg-orange-600"
+    return base + "bg-mauve hover:bg-mauve-strong hover:scale-[1.01] shadow-lg shadow-mauve/10"
   }
 
   const getInputFocusClass = () => {
-    if (selectedPlan === "starter") return "focus:border-indigo-500 focus:ring-indigo-500"
-    if (selectedPlan === "standard") return "focus:border-violet-500 focus:ring-violet-500"
-    if (selectedPlan === "premium") return "focus:border-orange-500 focus:ring-orange-500"
-    return "focus:border-slate-900 focus:ring-slate-900"
+    return "focus:border-mauve focus:ring-mauve"
   }
 
   const baseGuestLimitStr = activePlanDetails.features.find(f => f.toLowerCase().includes("guest")) || "10 guests limit"
@@ -474,17 +448,17 @@ export default function SignupPage() {
 
   if (step === 1) {
     return (
-      <div className={`min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-6 lg:px-8 flex flex-col justify-between selection:bg-violet-100 ${inter.className}`}>
+      <div className={`min-h-screen bg-surface-dark text-white py-12 px-4 sm:px-6 lg:px-8 flex flex-col justify-between selection:bg-mauve/30 ${inter.className}`}>
         <div className="max-w-6xl mx-auto w-full">
           {/* Header */}
           <div className="text-center mb-12">
             <Link href="/" className="inline-flex items-center justify-center mb-4">
               <Logo />
             </Link>
-            <h1 className={`text-4xl font-normal tracking-tight sm:text-5xl bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent ${playfair.className}`}>
+            <h1 className={`text-4xl font-light tracking-tight sm:text-5xl text-white font-playfair ${playfair.className}`}>
               Choose Your Perfect Plan
             </h1>
-            <p className="mt-4 text-md text-slate-500 max-w-2xl mx-auto font-light leading-relaxed">
+            <p className="mt-4 text-md text-white/50 max-w-2xl mx-auto font-light leading-relaxed">
               Select a tier that matches your event size. Instantly collect photos, boost limits, and enable premium features.
             </p>
           </div>
@@ -510,11 +484,11 @@ export default function SignupPage() {
 
           {/* Add-ons Panel */}
           {selectedPlan !== "free" && (
-            <div className="bg-white border border-slate-200 rounded-3xl p-8 mb-8 max-w-4xl mx-auto shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+            <div className="glass-panel border border-hairline-dark rounded-3xl p-8 mb-8 max-w-4xl mx-auto">
+              <div className="flex items-center justify-between border-b border-hairline-dark pb-4 mb-6">
                 <div className="flex items-center gap-2.5">
                   <Sparkles className={`h-5 w-5 ${accent.icon} animate-pulse`} />
-                  <h3 className="text-lg font-bold text-slate-900">
+                  <h3 className="text-lg font-bold text-white">
                     Customize Limits with Add-Ons
                   </h3>
                 </div>
@@ -531,9 +505,9 @@ export default function SignupPage() {
                 <div className="space-y-8">
                   {/* Guest Limit Boost */}
                   <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                    <Label className="text-sm font-semibold text-white/70 flex items-center gap-2">
                       <span>🚀 Boost Guest Limit</span>
-                      <span className="text-xs text-slate-400 font-normal">(Base: {baseGuestLimitStr})</span>
+                      <span className="text-xs text-white/40 font-normal">(Base: {baseGuestLimitStr})</span>
                     </Label>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                       {guestBoostsList.map((boost) => (
@@ -544,7 +518,7 @@ export default function SignupPage() {
                           className={`py-3 px-3 rounded-2xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
                             guestBoost === boost.value
                               ? accent.buttonActive
-                              : "bg-white border-slate-200 text-slate-500 hover:border-slate-350 hover:bg-slate-50"
+                              : "bg-white/5 border-hairline-dark text-white/50 hover:border-mauve/30 hover:bg-white/10"
                           }`}
                         >
                           <span>{boost.label}</span>
@@ -558,9 +532,9 @@ export default function SignupPage() {
 
                   {/* Shots Limit Boost */}
                   <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                    <Label className="text-sm font-semibold text-white/70 flex items-center gap-2">
                       <span>📸 Boost Shots Per Guest</span>
-                      <span className="text-xs text-slate-400 font-normal">(Base: {baseShotLimitStr})</span>
+                      <span className="text-xs text-white/40 font-normal">(Base: {baseShotLimitStr})</span>
                     </Label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {shotBoostsList.map((boost) => (
@@ -571,7 +545,7 @@ export default function SignupPage() {
                           className={`py-3 px-3 rounded-2xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
                             shotBoost === boost.value
                               ? accent.buttonActive
-                              : "bg-white border-slate-200 text-slate-500 hover:border-slate-350 hover:bg-slate-50"
+                              : "bg-white/5 border-hairline-dark text-white/50 hover:border-mauve/30 hover:bg-white/10"
                           }`}
                         >
                           <span>{boost.label}</span>
@@ -588,16 +562,16 @@ export default function SignupPage() {
           )}
 
           {/* Pricing Overview & Next button */}
-          <div className="flex flex-col sm:flex-row items-center justify-between bg-white border border-slate-200 rounded-3xl p-8 max-w-4xl mx-auto gap-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-between glass-panel border border-hairline-dark rounded-3xl p-8 max-w-4xl mx-auto gap-6">
             <div className="text-center sm:text-left">
-              <span className="text-xs text-slate-400 uppercase tracking-widest font-semibold">Total Price</span>
+              <span className="text-xs text-white/40 uppercase tracking-widest font-semibold">Total Price</span>
               <div className="flex items-baseline gap-1.5 justify-center sm:justify-start mt-1">
-                <span className="text-3xl font-extrabold text-slate-900">₹{totalPrice}</span>
-                <span className="text-sm text-slate-500 font-light">
+                <span className="text-3xl font-extrabold text-white">₹{totalPrice}</span>
+                <span className="text-sm text-white/50 font-light">
                   {selectedPlan === "free" ? "forever" : "per event"}
                 </span>
               </div>
-              <p className="text-xs text-slate-450 mt-1.5 font-light">
+              <p className="text-xs text-white/40 mt-1.5 font-light">
                 {selectedPlan !== "free" && (
                   <>
                     Base ₹{basePrice}
@@ -623,7 +597,7 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <footer className="text-center text-xs text-slate-400 py-6 mt-12">
+        <footer className="text-center text-xs text-white/40 py-6 mt-12">
           © {new Date().getFullYear()} Snapsy Inc. All rights reserved.
         </footer>
       </div>
@@ -632,14 +606,14 @@ export default function SignupPage() {
 
   // Step 2: Sign Up Details Form
   return (
-    <div className={`min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center px-4 py-12 selection:bg-violet-100 ${inter.className}`}>
-      <Card className="w-full max-w-md bg-white border-slate-200 shadow-xl rounded-3xl overflow-hidden p-2">
+    <div className={`min-h-screen bg-surface-dark text-white flex items-center justify-center px-4 py-12 selection:bg-mauve/30 ${inter.className}`}>
+      <Card className="glass-panel w-full max-w-md border-hairline-dark shadow-xl rounded-3xl overflow-hidden p-2">
         <CardHeader className="text-center space-y-1 pt-6 px-6">
           <Link href="/signup" onClick={() => setStep(1)} className={`inline-flex items-center gap-1.5 mb-3 ${accent.text} hover:opacity-80 text-xs font-semibold mr-auto`}>
             <span>← Change Plan</span>
           </Link>
-          <CardTitle className="text-2xl font-bold text-slate-900">Create your account</CardTitle>
-          <CardDescription className="text-slate-500 text-sm font-light">
+          <CardTitle className="text-2xl font-playfair text-white font-light">Create your account</CardTitle>
+          <CardDescription className="text-white/50 text-sm font-light">
             Sign up for the <strong className={`font-semibold ${accent.text}`}>{activePlanDetails.name}</strong> plan (₹{totalPrice})
           </CardDescription>
         </CardHeader>
@@ -647,13 +621,13 @@ export default function SignupPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4 px-6">
             {error && (
-              <div role="alert" className="p-3 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 text-sm">
+              <div role="alert" className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
                 {error}
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-slate-700 text-xs font-semibold">Full Name</Label>
+              <Label htmlFor="fullName" className="text-white/70 text-xs font-semibold">Full Name</Label>
               <Input
                 id="fullName"
                 type="text"
@@ -662,13 +636,13 @@ export default function SignupPage() {
                 onChange={(e) => setFullName(e.target.value)}
                 required
                 disabled={isLoading}
-                className={`bg-white border-slate-200 text-slate-900 rounded-xl py-5 focus-visible:ring-0 ${getInputFocusClass()}`}
+                className={`bg-white/5 border-hairline-dark text-white placeholder:text-white/40 rounded-xl py-5 focus-visible:ring-0 ${getInputFocusClass()}`}
               />
             </div>
 
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-700 text-xs font-semibold">Email Address</Label>
+              <Label htmlFor="email" className="text-white/70 text-xs font-semibold">Email Address</Label>
               <Input
                 id="email"
                 type="email"
@@ -677,12 +651,12 @@ export default function SignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
-                className={`bg-white border-slate-200 text-slate-900 rounded-xl py-5 focus-visible:ring-0 ${getInputFocusClass()}`}
+                className={`bg-white/5 border-hairline-dark text-white placeholder:text-white/40 rounded-xl py-5 focus-visible:ring-0 ${getInputFocusClass()}`}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-slate-700 text-xs font-semibold">Password</Label>
+              <Label htmlFor="password" className="text-white/70 text-xs font-semibold">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -692,18 +666,18 @@ export default function SignupPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  className={`pr-10 bg-white border-slate-200 text-slate-900 rounded-xl py-5 focus-visible:ring-0 ${getInputFocusClass()}`}
+                  className={`pr-10 bg-white/5 border-hairline-dark text-white placeholder:text-white/40 rounded-xl py-5 focus-visible:ring-0 ${getInputFocusClass()}`}
                   minLength={8}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-650"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="text-[10px] text-slate-400 font-light">
+              <p className="text-[10px] text-white/40 font-light">
                 Must be at least 8 characters with uppercase, lowercase, and numbers
               </p>
             </div>
@@ -712,14 +686,10 @@ export default function SignupPage() {
           <CardFooter className="flex flex-col space-y-4 pb-6 px-6">
             <Button
               type="submit"
-              className={`w-full font-bold py-6 rounded-2xl transition-all active:scale-[0.98] border-none text-white ${
-                selectedPlan === "free"
-                  ? "bg-slate-950 hover:bg-slate-900 shadow-md"
-                  : selectedPlan === "starter"
-                  ? "bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/10"
-                  : selectedPlan === "standard"
-                  ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 shadow-lg shadow-violet-500/20"
-                  : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-orange-500/20"
+              className={`w-full font-bold py-6 rounded-2xl transition-all active:scale-[0.98] border-none text-[#141110] hover:scale-[1.01] active:scale-[0.99] ${
+                selectedPlan === "premium"
+                  ? "bg-mauve-strong shadow-lg shadow-mauve-strong/20"
+                  : "bg-mauve hover:bg-mauve-strong shadow-lg shadow-mauve/10"
               }`}
               disabled={isLoading}
             >
@@ -732,17 +702,17 @@ export default function SignupPage() {
 
             <div className="relative w-full my-2">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-slate-100" />
+                <span className="w-full border-t border-white/10" />
               </div>
               <div className="relative flex justify-center text-[10px] uppercase tracking-wider font-semibold">
-                <span className="bg-white px-3 text-slate-400">Or continue with</span>
+                <span className="bg-surface-card px-3 text-white/40">Or continue with</span>
               </div>
             </div>
 
             <Button
               type="button"
               variant="outline"
-              className="w-full border-slate-200 text-slate-700 hover:bg-slate-50 bg-white hover:text-slate-900 rounded-2xl py-6"
+              className="w-full border-white/15 text-white hover:bg-white/5 rounded-2xl py-6"
               onClick={handleGoogleSignIn}
               disabled={isLoading}
             >
@@ -752,7 +722,7 @@ export default function SignupPage() {
               Sign up with Google
             </Button>
 
-            <p className="text-xs text-slate-400 text-center font-light pt-2">
+            <p className="text-xs text-white/40 text-center font-light pt-2">
               Already have an account?{" "}
               <Link href="/login" className={`hover:underline font-semibold ${accent.text}`}>
                 Sign in

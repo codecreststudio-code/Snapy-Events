@@ -29,9 +29,9 @@ export function AdminSidebar() {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-16 items-center gap-2 border-b px-6 bg-sidebar">
+    <div className="flex h-16 items-center gap-2 border-b border-hairline-dark px-6 bg-surface-card">
       <Link href="/admin" className="flex items-center gap-2">
-        <span className="font-semibold text-lg">Admin Panel</span>
+        <span className="font-playfair font-light text-lg text-white">Admin Panel</span>
       </Link>
     </div>
   )
@@ -39,14 +39,14 @@ export function AdminSidebar() {
 
 export function AdminNavbar() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-hairline-dark bg-surface-dark/95 backdrop-blur supports-[backdrop-filter]:bg-surface-dark/60">
       <div className="container flex h-16 items-center justify-between">
         <nav className="hidden md:flex items-center gap-6">
           {navigation.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+              className="flex items-center gap-2 text-sm font-medium text-white/60 hover:text-white"
             >
               <item.icon className="h-4 w-4" />
               {item.name}
@@ -56,7 +56,7 @@ export function AdminNavbar() {
 
         <div className="flex items-center gap-4">
           <Link href="/">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="rounded-full border-hairline-dark text-white/80 hover:bg-white/5">
               View Site
             </Button>
           </Link>

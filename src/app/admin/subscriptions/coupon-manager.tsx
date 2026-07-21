@@ -139,48 +139,48 @@ export function CouponManager() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       <div className="lg:col-span-2 space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-bold text-slate-800">Coupon Manager</h2>
-          <Button onClick={startAdd} className="h-8 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold gap-1">
+          <h2 className="text-lg font-bold text-white/80">Coupon Manager</h2>
+          <Button onClick={startAdd} className="h-8 bg-mauve hover:bg-mauve-strong text-[#141110] text-xs font-bold gap-1">
             <Plus className="h-3.5 w-3.5" /> New Coupon
           </Button>
         </div>
         
         {loading ? (
-          <div className="p-16 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-violet-600" /></div>
+          <div className="p-16 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-mauve" /></div>
         ) : coupons.length === 0 ? (
-          <div className="p-16 border border-dashed border-slate-200 bg-white text-slate-400 text-center rounded-2xl text-xs font-semibold">
-            <Ticket className="h-8 w-8 mx-auto mb-2 text-slate-300" />
+          <div className="p-16 border border-dashed border-hairline-dark bg-surface-card text-white/40 text-center rounded-2xl text-xs font-semibold">
+            <Ticket className="h-8 w-8 mx-auto mb-2 text-white/30" />
             No coupons configured yet.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {coupons.map(c => (
-              <Card key={c.id} className="bg-white border-slate-200 shadow-sm hover:border-slate-300">
+              <Card key={c.id} className="bg-surface-card border-hairline-dark shadow-sm hover:border-hairline-dark">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h3 className="font-extrabold text-slate-800 flex items-center gap-2">
-                        <span className="font-mono text-violet-600 border border-violet-200 bg-violet-50 px-2 rounded-md">{c.code}</span>
+                      <h3 className="font-extrabold text-white/80 flex items-center gap-2">
+                        <span className="font-mono text-mauve border border-mauve/20 bg-mauve/10 px-2 rounded-md">{c.code}</span>
                       </h3>
-                      <div className="text-xs text-slate-500 font-medium mt-1">{c.name}</div>
+                      <div className="text-xs text-white/50 font-medium mt-1">{c.name}</div>
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => startEdit(c)} className="h-7 w-7 p-0 text-slate-500 hover:bg-slate-100 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(c)} className="h-7 w-7 p-0 text-rose-500 hover:bg-rose-50 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => startEdit(c)} className="h-7 w-7 p-0 text-white/50 hover:bg-white/5 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(c)} className="h-7 w-7 p-0 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
                     </div>
                   </div>
                   <div className="mt-3 flex items-end gap-1">
-                    <span className="text-2xl font-black text-slate-900">
+                    <span className="text-2xl font-black text-white">
                       {c.discount_type === "percentage" ? `${c.discount_value}%` : `₹${c.discount_value}`}
                     </span>
-                    <span className="text-xs text-slate-400 font-bold mb-1">OFF</span>
+                    <span className="text-xs text-white/40 font-bold mb-1">OFF</span>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-slate-100 text-[10px] font-semibold text-slate-500 flex flex-wrap gap-2">
-                    <span className={cn("px-2 py-0.5 rounded-full border", c.is_active ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-100 text-slate-500 border-slate-200")}>
+                  <div className="mt-4 pt-3 border-t border-hairline-dark text-[10px] font-semibold text-white/50 flex flex-wrap gap-2">
+                    <span className={cn("px-2 py-0.5 rounded-full border", c.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/50 border-hairline-dark")}>
                       {c.is_active ? "Active" : "Inactive"}
                     </span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded-full">{c.used_count} uses</span>
-                    {c.max_uses && <span className="bg-slate-100 px-2 py-0.5 rounded-full">Max {c.max_uses}</span>}
+                    <span className="bg-white/5 px-2 py-0.5 rounded-full">{c.used_count} uses</span>
+                    {c.max_uses && <span className="bg-white/5 px-2 py-0.5 rounded-full">Max {c.max_uses}</span>}
                   </div>
                 </CardContent>
               </Card>
@@ -191,11 +191,11 @@ export function CouponManager() {
 
       <div>
         {(editingCoupon || isAdding) ? (
-          <Card className="bg-white border-slate-200 sticky top-6 shadow-sm">
+          <Card className="bg-surface-card border-hairline-dark sticky top-6 shadow-sm">
             <CardHeader className="pb-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-base text-slate-800 font-bold">{isAdding ? "Create Coupon" : "Edit Coupon"}</CardTitle>
+                  <CardTitle className="text-base text-white/80 font-bold">{isAdding ? "Create Coupon" : "Edit Coupon"}</CardTitle>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => { setIsAdding(false); setEditingCoupon(null) }} className="h-7 w-7 p-0 rounded-lg"><X className="h-4 w-4" /></Button>
               </div>
@@ -203,65 +203,65 @@ export function CouponManager() {
             <CardContent>
               <form onSubmit={handleSave} className="space-y-4">
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Coupon Code</Label>
+                  <Label className="text-xs font-bold text-white/50">Coupon Code</Label>
                   <Input value={formCode} onChange={e => setFormCode(e.target.value.toUpperCase())} required placeholder="SUMMER25" className="h-8 text-xs font-mono font-bold uppercase" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Internal Name</Label>
+                  <Label className="text-xs font-bold text-white/50">Internal Name</Label>
                   <Input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Summer Sale 2026" className="h-8 text-xs font-medium" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label className="text-xs font-bold text-slate-500">Discount Type</Label>
-                    <select value={formType} onChange={e => setFormType(e.target.value as any)} className="w-full h-8 px-2 rounded-md border border-slate-200 text-xs font-medium">
+                    <Label className="text-xs font-bold text-white/50">Discount Type</Label>
+                    <select value={formType} onChange={e => setFormType(e.target.value as any)} className="w-full h-8 px-2 rounded-md border border-hairline-dark text-xs font-medium">
                       <option value="percentage">Percentage (%)</option>
                       <option value="fixed">Fixed Amount (₹)</option>
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs font-bold text-slate-500">Value</Label>
+                    <Label className="text-xs font-bold text-white/50">Value</Label>
                     <Input type="number" value={formValue} onChange={e => setFormValue(Number(e.target.value))} required className="h-8 text-xs font-medium" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label className="text-xs font-bold text-slate-500">Max Discount (₹)</Label>
+                    <Label className="text-xs font-bold text-white/50">Max Discount (₹)</Label>
                     <Input type="number" value={formMaxDiscount} onChange={e => setFormMaxDiscount(e.target.value)} placeholder="No limit" className="h-8 text-xs font-medium" />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs font-bold text-slate-500">Min Order Value (₹)</Label>
+                    <Label className="text-xs font-bold text-white/50">Min Order Value (₹)</Label>
                     <Input type="number" value={formMinOrder} onChange={e => setFormMinOrder(e.target.value)} placeholder="0" className="h-8 text-xs font-medium" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label className="text-xs font-bold text-slate-500">Valid From</Label>
+                    <Label className="text-xs font-bold text-white/50">Valid From</Label>
                     <Input type="datetime-local" value={formValidFrom} onChange={e => setFormValidFrom(e.target.value)} className="h-8 text-xs font-medium" />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs font-bold text-slate-500">Valid Until</Label>
+                    <Label className="text-xs font-bold text-white/50">Valid Until</Label>
                     <Input type="datetime-local" value={formValidUntil} onChange={e => setFormValidUntil(e.target.value)} className="h-8 text-xs font-medium" />
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Max Uses (Total)</Label>
+                  <Label className="text-xs font-bold text-white/50">Max Uses (Total)</Label>
                   <Input type="number" value={formMaxUses} onChange={e => setFormMaxUses(e.target.value)} placeholder="Unlimited" className="h-8 text-xs font-medium" />
                 </div>
-                <div className="flex flex-col gap-2 py-2 border-t border-b border-slate-100">
+                <div className="flex flex-col gap-2 py-2 border-t border-b border-hairline-dark">
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-violet-600 h-3.5 w-3.5" />
-                    <span className="text-xs font-bold text-slate-700">Coupon Active</span>
+                    <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-mauve h-3.5 w-3.5" />
+                    <span className="text-xs font-bold text-white/70">Coupon Active</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={formFirstOnly} onChange={e => setFormFirstOnly(e.target.checked)} className="rounded text-violet-600 h-3.5 w-3.5" />
-                    <span className="text-xs font-bold text-slate-700">First Purchase Only</span>
+                    <input type="checkbox" checked={formFirstOnly} onChange={e => setFormFirstOnly(e.target.checked)} className="rounded text-mauve h-3.5 w-3.5" />
+                    <span className="text-xs font-bold text-white/70">First Purchase Only</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={formStackable} onChange={e => setFormStackable(e.target.checked)} className="rounded text-violet-600 h-3.5 w-3.5" />
-                    <span className="text-xs font-bold text-slate-700">Stackable with others</span>
+                    <input type="checkbox" checked={formStackable} onChange={e => setFormStackable(e.target.checked)} className="rounded text-mauve h-3.5 w-3.5" />
+                    <span className="text-xs font-bold text-white/70">Stackable with others</span>
                   </label>
                 </div>
-                <Button type="submit" disabled={actioning} className="w-full h-8 bg-violet-600 hover:bg-violet-700 font-bold text-xs">
+                <Button type="submit" disabled={actioning} className="w-full h-8 bg-mauve hover:bg-mauve-strong font-bold text-xs">
                   {actioning ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
                   Save Coupon
                 </Button>
@@ -269,7 +269,7 @@ export function CouponManager() {
             </CardContent>
           </Card>
         ) : (
-          <div className="p-8 border border-dashed border-slate-200 bg-slate-50 text-slate-400 text-center rounded-xl text-xs font-semibold">
+          <div className="p-8 border border-dashed border-hairline-dark bg-white/5 text-white/40 text-center rounded-xl text-xs font-semibold">
             Select a coupon to edit or create a new one.
           </div>
         )}

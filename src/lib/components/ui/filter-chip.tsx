@@ -10,12 +10,12 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const filterChipVariants = cva(
-  "inline-flex shrink-0 items-center justify-center rounded-full border px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex shrink-0 items-center justify-center rounded-full border px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       active: {
-        true: "border-transparent bg-gold text-surface-dark",
-        false: "border-hairline-dark bg-surface-card text-white/70 hover:border-gold/40 hover:text-white",
+        true: "border-transparent bg-mauve text-surface-dark",
+        false: "border-hairline-dark bg-surface-card text-white/70 hover:border-mauve/40 hover:text-white",
       },
     },
     defaultVariants: { active: false },

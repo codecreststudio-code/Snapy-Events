@@ -24,7 +24,7 @@ export function PublicNavbar() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl shadow-sm shadow-slate-900/5">
+    <header className="sticky top-0 z-50 w-full bg-surface-dark/80 backdrop-blur-xl border-b border-hairline-dark">
       <div className="container relative flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
 
         {/* Left: Logo */}
@@ -36,7 +36,7 @@ export function PublicNavbar() {
 
         {/* Center: Perfectly Centered Desktop Nav */}
         <nav
-          className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-slate-200/60 bg-white/60 px-2 py-1.5 shadow-sm"
+          className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2 py-1.5"
           onMouseLeave={() => setHoveredPath(null)}
         >
           {navLinks.map((item) => {
@@ -48,21 +48,21 @@ export function PublicNavbar() {
                 className="relative px-4 py-2 text-sm font-medium transition-colors rounded-full"
                 onMouseEnter={() => setHoveredPath(item.href)}
               >
-                <span className={cn("relative z-10", isActive || hoveredPath === item.href ? "text-slate-950" : "text-slate-600")}>
+                <span className={cn("relative z-10", isActive || hoveredPath === item.href ? "text-white" : "text-white/70")}>
                   {item.label}
                 </span>
 
                 {isActive && (
                   <motion.div
                     layoutId="navbar-active"
-                    className="absolute inset-0 rounded-full bg-slate-100"
+                    className="absolute inset-0 rounded-full bg-white/10"
                     transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
                   />
                 )}
                 {hoveredPath === item.href && !isActive && (
                   <motion.div
                     layoutId="navbar-hover"
-                    className="absolute inset-0 rounded-full bg-slate-100/60"
+                    className="absolute inset-0 rounded-full bg-white/5"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -77,11 +77,11 @@ export function PublicNavbar() {
         {/* Right: Desktop CTAs */}
         <div className="hidden md:flex flex-1 md:flex-none justify-end items-center gap-3">
           <CurrencyToggle />
-          <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-950 transition-colors">
+          <Link href="/login" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
             Sign in
           </Link>
           <Link href="/signup">
-            <Button className="rounded-full bg-slate-950 px-7 py-2.5 text-white hover:bg-slate-900 shadow-sm shadow-slate-900/10 hover:scale-[1.02] active:scale-[0.98] transition-transform">
+            <Button className="rounded-full bg-mauve px-7 py-2.5 text-[#141110] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -93,7 +93,7 @@ export function PublicNavbar() {
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           whileTap={{ scale: 0.94 }}
-          className="flex md:hidden p-2 rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-slate-300"
+          className="flex md:hidden p-2 rounded-full text-white/70 hover:bg-white/5 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50"
           aria-label="Toggle menu"
         >
           {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -108,7 +108,7 @@ export function PublicNavbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.28, ease: "easeOut" }}
-            className="md:hidden border-t border-slate-200/70 bg-white/95 backdrop-blur-xl overflow-hidden"
+            className="md:hidden border-t border-hairline-dark bg-surface-dark/95 backdrop-blur-xl overflow-hidden"
           >
             <div className="px-4 pt-4 pb-6 space-y-3">
               {navLinks.map((item) => (
@@ -116,21 +116,21 @@ export function PublicNavbar() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
-                  className="block rounded-full px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950 transition"
+                  className="block rounded-full px-4 py-3 text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition"
                 >
                   {item.label}
                 </Link>
               ))}
-              <div className="pt-4 border-t border-slate-200/70 flex flex-col gap-3">
+              <div className="pt-4 border-t border-hairline-dark flex flex-col gap-3">
                 <Link
                   href="/login"
                   onClick={() => setIsOpen(false)}
-                  className="flex justify-center rounded-full border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 transition"
+                  className="flex justify-center rounded-full border border-white/15 px-4 py-3 text-sm font-semibold text-white hover:bg-white/5 transition"
                 >
                   Sign in
                 </Link>
                 <Link href="/signup" onClick={() => setIsOpen(false)}>
-                  <Button className="w-full rounded-full bg-slate-950 text-white hover:bg-slate-900 shadow-sm shadow-slate-900/10">
+                  <Button className="w-full rounded-full bg-mauve text-[#141110] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/10">
                     Get Started
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -241,27 +241,27 @@ export function PublicFooter() {
 
   return (
     <footer
-      className="relative w-full border-t border-violet-950/20 text-white overflow-hidden pt-20 pb-6 px-4 sm:px-6 lg:px-8 bg-slate-950"
-      style={{ background: "radial-gradient(100% 80% at 50% 110%, rgba(139, 92, 246, 0.12) 0%, rgba(12, 8, 32, 0.9) 60%, rgba(3, 2, 10, 1) 100%)" }}
+      className="relative w-full border-t border-hairline-dark text-white overflow-hidden pt-20 pb-6 px-4 sm:px-6 lg:px-8 bg-surface-dark"
+      style={{ background: "radial-gradient(100% 80% at 50% 110%, rgba(178, 141, 174, 0.12) 0%, rgba(20, 17, 16, 0.9) 60%, rgba(10, 8, 8, 1) 100%)" }}
     >
       {/* Background blur decorations */}
       <div className="pointer-events-none absolute top-0 left-0 z-0 h-full w-full overflow-hidden">
-        <div className="bg-violet-600 absolute top-1/4 left-1/4 h-72 w-72 rounded-full opacity-[0.03] blur-3xl" />
-        <div className="bg-fuchsia-600 absolute right-1/4 bottom-1/4 h-80 w-80 rounded-full opacity-[0.03] blur-3xl" />
+        <div className="bg-mauve absolute top-1/4 left-1/4 h-72 w-72 rounded-full opacity-[0.05] blur-3xl" />
+        <div className="bg-mauve-strong absolute right-1/4 bottom-1/4 h-80 w-80 rounded-full opacity-[0.05] blur-3xl" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl">
         {/* Glassmorphic Centered Newsletter Card */}
-        <div className="bg-white/[0.02] border border-white/5 backdrop-blur-md mb-16 rounded-2xl p-8 md:p-12 relative overflow-hidden">
+        <div className="bg-surface-card border border-hairline-dark backdrop-blur-md mb-16 rounded-2xl p-8 md:p-12 relative overflow-hidden">
           {/* Glowing accents */}
-          <div className="absolute -top-24 -left-24 w-48 h-48 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-fuchsia-600/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-24 -left-24 w-48 h-48 bg-mauve/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-mauve-strong/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="max-w-2xl mx-auto text-center relative z-10 flex flex-col items-center">
-            <h3 className="mb-4 text-2xl font-bold md:text-3xl tracking-tight text-white">
+            <h3 className="mb-4 text-2xl font-playfair font-light md:text-3xl tracking-tight text-white">
               Stay ahead with Snapsy.
             </h3>
-            <p className="text-slate-400 mb-8 text-sm leading-relaxed max-w-md font-light">
+            <p className="text-white/60 mb-8 text-sm leading-relaxed max-w-md font-light">
               Join thousands of event organizers who trust Snapsy for seamless photo sharing and event management.
             </p>
             {submitted ? (
@@ -270,11 +270,11 @@ export function PublicFooter() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col items-center gap-2 py-4"
               >
-                <div className="h-10 w-10 rounded-full bg-violet-500/20 flex items-center justify-center border border-violet-500/30">
-                  <span className="text-violet-400 text-lg">✓</span>
+                <div className="h-10 w-10 rounded-full bg-mauve/20 flex items-center justify-center border border-mauve/30">
+                  <span className="text-mauve text-lg">✓</span>
                 </div>
                 <p className="font-semibold text-white text-sm">Thank you for subscribing!</p>
-                <p className="text-xs text-slate-400">You are now on our list.</p>
+                <p className="text-xs text-white/60">You are now on our list.</p>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row w-full max-w-md justify-center">
@@ -284,12 +284,12 @@ export function PublicFooter() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   required
-                  className="w-full border border-white/10 bg-white/5 text-white placeholder-slate-500 focus:ring-violet-500/50 rounded-full px-5 py-3 text-sm focus:ring-2 focus:outline-none transition-all duration-200"
+                  className="w-full border border-white/10 bg-white/5 text-white placeholder-white/40 focus-visible:ring-mauve/50 rounded-full px-5 py-3 text-sm focus:ring-2 focus:outline-none transition-all duration-200"
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-violet-600 hover:bg-violet-500 text-white font-medium rounded-full px-6 py-3 text-sm shadow-lg shadow-violet-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shrink-0 disabled:opacity-50"
+                  className="bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold rounded-full px-6 py-3 text-sm shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 shrink-0 disabled:opacity-50"
                 >
                   {loading ? "Subscribing…" : "Subscribe Now"}
                 </button>

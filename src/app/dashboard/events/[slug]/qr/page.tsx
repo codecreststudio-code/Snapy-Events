@@ -165,7 +165,7 @@ function QRCodeCard({ qr, eventSlug, onDelete }: { qr: QRCode; eventSlug: string
   }
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden rounded-2xl border border-[#3D332A] bg-[#1C1814] hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300">
       <div className="aspect-square bg-white flex flex-col items-center justify-center p-4 relative border-b border-stone-100">
         <div className="p-3 bg-white rounded-2xl shadow-sm border border-[#EAE5DF] relative overflow-hidden flex items-center justify-center">
           <img
@@ -224,11 +224,11 @@ function QRCodeCard({ qr, eventSlug, onDelete }: { qr: QRCode; eventSlug: string
       </div>
 
       <CardContent className="p-4">
-        <h3 className="font-semibold">{qr.name || "QR Code"}</h3>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h3 className="font-semibold text-white">{qr.name || "QR Code"}</h3>
+        <p className="text-sm text-white/50 mt-1">
           {qr.scan_count || 0} scans
         </p>
-        <p className="text-xs text-muted-foreground mt-2 break-all">{scanUrl}</p>
+        <p className="text-xs text-white/40 mt-2 break-all">{scanUrl}</p>
       </CardContent>
     </Card>
   )
@@ -278,7 +278,7 @@ function CreateQRDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
           <Plus className="h-4 w-4" />
           Generate QR Code
         </Button>
@@ -307,7 +307,7 @@ function CreateQRDialog({
               id="qr-gallery"
               value={galleryId}
               onChange={(e) => setGalleryId(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 focus-visible:ring-offset-2"
             >
               <option value="">No specific gallery</option>
               {galleries.map((g) => (
@@ -324,7 +324,7 @@ function CreateQRDialog({
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold">
               {loading ? "Creating..." : "Generate"}
             </Button>
           </DialogFooter>
@@ -390,9 +390,9 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
   if (!event) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
-        <QrCode className="h-12 w-12 text-muted-foreground mb-4" />
-        <h2 className="text-lg font-medium">Event not found</h2>
-        <Button asChild className="mt-4">
+        <QrCode className="h-12 w-12 text-white/30 mb-4" />
+        <h2 className="text-lg font-medium text-white">Event not found</h2>
+        <Button asChild className="mt-4 rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold">
           <Link href="/dashboard/events">Back to Events</Link>
         </Button>
       </div>
@@ -403,62 +403,62 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
   const isExpired = event.end_date && new Date(event.end_date) < new Date()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" asChild>
+        <Button variant="ghost" asChild className="text-white/70 hover:bg-white/5 hover:text-white">
           <Link href={`/dashboard/events/${slug}`}>
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold tracking-tight">QR Codes</h1>
-          <p className="text-muted-foreground">{event.name}</p>
+          <h1 className="font-playfair text-3xl font-light text-white">QR Codes</h1>
+          <p className="text-white/50 text-sm">{event.name}</p>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="p-5">
+        <Card className="rounded-2xl border border-[#3D332A] bg-[#1C1814] p-5 hover:border-mauve/40 transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Total QR Codes</p>
-              <p className="mt-2 text-2xl font-semibold">{qrCodes?.length || 0}</p>
+              <p className="text-sm font-medium text-white/50">Total QR Codes</p>
+              <p className="mt-2 text-2xl font-semibold text-white">{qrCodes?.length || 0}</p>
             </div>
-            <QrCode className="h-8 w-8 text-muted-foreground" />
+            <QrCode className="h-8 w-8 text-mauve" />
           </div>
         </Card>
-        <Card className="p-5">
+        <Card className="rounded-2xl border border-[#3D332A] bg-[#1C1814] p-5 hover:border-emerald-500/30 transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Scans</p>
-              <p className="mt-2 text-2xl font-semibold">{totalScans}</p>
+              <p className="text-sm font-medium text-white/50">Total Scans</p>
+              <p className="mt-2 text-2xl font-semibold text-white">{totalScans}</p>
             </div>
-            <Camera className="h-8 w-8 text-muted-foreground" />
+            <Camera className="h-8 w-8 text-emerald-400" />
           </div>
         </Card>
-        <Card className="p-5">
+        <Card className="rounded-2xl border border-[#3D332A] bg-[#1C1814] p-5 hover:border-mauve/40 transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Active Codes</p>
-              <p className="mt-2 text-2xl font-semibold">
+              <p className="text-sm font-medium text-white/50">Active Codes</p>
+              <p className="mt-2 text-2xl font-semibold text-white">
                 {qrCodes?.filter((qr) => qr.is_active).length || 0}
               </p>
             </div>
-            <Link2 className="h-8 w-8 text-muted-foreground" />
+            <Link2 className="h-8 w-8 text-mauve" />
           </div>
         </Card>
       </div>
 
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-medium">Generated QR Codes</h2>
-          <p className="text-sm text-muted-foreground">Click on a QR code to generate the image</p>
+          <h2 className="text-lg font-medium text-white">Generated QR Codes</h2>
+          <p className="text-sm text-white/50">Click on a QR code to generate the image</p>
         </div>
         {isExpired ? (
-          <div className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-900 px-4 py-3 rounded-xl max-w-md">
-            <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-300 px-4 py-3 rounded-xl max-w-md">
+            <AlertTriangle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-bold text-red-900">Event Expired</p>
-              <p className="text-xs text-red-700 mt-0.5">
+              <p className="text-sm font-bold text-red-300">Event Expired</p>
+              <p className="text-xs text-red-400/80 mt-0.5">
                 QR generation is disabled. Guests can no longer upload media.
               </p>
             </div>
@@ -489,11 +489,11 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
           ))}
         </div>
       ) : (
-        <Card>
+        <Card className="rounded-2xl border border-dashed border-[#3D332A] bg-white/[0.02]">
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <QrCode className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="font-medium mb-2">No QR codes yet</h3>
-            <p className="text-sm text-muted-foreground mb-4 text-center max-w-md">
+            <QrCode className="h-12 w-12 text-white/30 mb-4" />
+            <h3 className="font-medium mb-2 text-white">No QR codes yet</h3>
+            <p className="text-sm text-white/50 mb-4 text-center max-w-md">
               Generate QR codes to make it easy for guests to access your event and upload photos.
             </p>
           </CardContent>

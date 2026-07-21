@@ -268,57 +268,57 @@ export function PlanBuilder() {
       <div className="lg:col-span-5 space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-lg font-bold text-slate-800">Plan Builder</h2>
-            <p className="text-xs text-slate-500">Configured event plans & subscription tiers</p>
+            <h2 className="text-lg font-bold text-white/80">Plan Builder</h2>
+            <p className="text-xs text-white/50">Configured event plans & subscription tiers</p>
           </div>
-          <Button onClick={startAdd} className="h-8 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold gap-1">
+          <Button onClick={startAdd} className="h-8 bg-mauve hover:bg-mauve-strong text-[#141110] text-xs font-bold gap-1">
             <Plus className="h-3.5 w-3.5" /> New Plan
           </Button>
         </div>
         
         {loading ? (
-          <div className="p-16 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-violet-600" /></div>
+          <div className="p-16 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-mauve" /></div>
         ) : plans.length === 0 ? (
-          <div className="p-16 border border-dashed border-slate-200 bg-white text-slate-400 text-center rounded-2xl text-xs font-semibold">
+          <div className="p-16 border border-dashed border-hairline-dark bg-surface-card text-white/40 text-center rounded-2xl text-xs font-semibold">
             No plans found. Create one to get started.
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {plans.map(p => (
-              <Card key={p.id} className={cn("bg-white border-slate-200 shadow-sm transition-all hover:border-violet-300", editingPlan?.id === p.id && "ring-2 ring-violet-500 border-violet-500")}>
+              <Card key={p.id} className={cn("bg-surface-card border-hairline-dark shadow-sm transition-all hover:border-mauve/30", editingPlan?.id === p.id && "ring-2 ring-mauve/50 border-mauve")}>
                 <CardContent className="p-5">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h3 className="font-extrabold text-slate-800 text-base flex items-center gap-2">
+                      <h3 className="font-extrabold text-white/80 text-base flex items-center gap-2">
                         {p.name}
-                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-white/5 text-white/60 border border-hairline-dark">
                           {p.id}
                         </span>
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", p.is_active ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-100 text-slate-500 border-slate-200")}>
+                        <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", p.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/50 border-hairline-dark")}>
                           {p.is_active ? "Active" : "Inactive"}
                         </span>
-                        {p.best_value && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-violet-50 text-violet-700 border-violet-100">Best Value</span>}
-                        <span className="text-[10px] font-semibold text-slate-500">
+                        {p.best_value && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-mauve/10 text-mauve border-mauve/20">Best Value</span>}
+                        <span className="text-[10px] font-semibold text-white/50">
                           {p.billing_interval === "event" ? "Per Event" : p.billing_interval}
                         </span>
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => startEdit(p)} className="h-7 w-7 p-0 text-slate-500 hover:bg-slate-100 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(p.id)} className="h-7 w-7 p-0 text-rose-500 hover:bg-rose-50 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => startEdit(p)} className="h-7 w-7 p-0 text-white/50 hover:bg-white/5 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(p.id)} className="h-7 w-7 p-0 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
                     </div>
                   </div>
-                  <p className="text-xs text-slate-500 font-medium line-clamp-2 min-h-[32px]">{p.description}</p>
-                  <div className="mt-4 flex items-end justify-between border-t border-slate-100 pt-3">
+                  <p className="text-xs text-white/50 font-medium line-clamp-2 min-h-[32px]">{p.description}</p>
+                  <div className="mt-4 flex items-end justify-between border-t border-hairline-dark pt-3">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-black text-slate-900">₹{p.price_inr}</span>
-                      <span className="text-xs text-slate-400 font-bold mb-1">
+                      <span className="text-2xl font-black text-white">₹{p.price_inr}</span>
+                      <span className="text-xs text-white/40 font-bold mb-1">
                         / {p.billing_interval === "event" ? "event" : p.billing_interval}
                       </span>
                     </div>
-                    <span className="text-xs font-semibold text-slate-500 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">
+                    <span className="text-xs font-semibold text-white/50 bg-white/5 px-2.5 py-1 rounded-md border border-hairline-dark">
                       {p.features.length} Features
                     </span>
                   </div>
@@ -332,12 +332,12 @@ export function PlanBuilder() {
       {/* Right Column: Interactive Visual Plan Editor */}
       <div className="lg:col-span-7">
         {(editingPlan || isAdding) ? (
-          <Card className="bg-white border-slate-200 sticky top-6 shadow-sm">
-            <CardHeader className="pb-4 border-b border-slate-100">
+          <Card className="bg-surface-card border-hairline-dark sticky top-6 shadow-sm">
+            <CardHeader className="pb-4 border-b border-hairline-dark">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-base text-slate-800 font-bold flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-violet-600" />
+                  <CardTitle className="text-base text-white/80 font-bold flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-mauve" />
                     {isAdding ? "Create New Plan" : `Edit Plan: ${formName}`}
                   </CardTitle>
                   <CardDescription className="text-xs">Configure plan pricing, quota limits, and feature toggles</CardDescription>
@@ -348,13 +348,13 @@ export function PlanBuilder() {
               </div>
 
               {/* Editor Mode Selector: Visual Toggles vs Raw JSON */}
-              <div className="flex items-center gap-2 mt-4 bg-slate-100 p-1 rounded-lg">
+              <div className="flex items-center gap-2 mt-4 bg-white/5 p-1 rounded-lg">
                 <button
                   type="button"
                   onClick={() => setEditorMode("visual")}
                   className={cn(
                     "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-bold transition-all",
-                    editorMode === "visual" ? "bg-white text-violet-700 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                    editorMode === "visual" ? "bg-surface-card text-mauve shadow-sm" : "text-white/50 hover:text-white/70"
                   )}
                 >
                   <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -365,7 +365,7 @@ export function PlanBuilder() {
                   onClick={() => setEditorMode("json")}
                   className={cn(
                     "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-bold transition-all",
-                    editorMode === "json" ? "bg-white text-violet-700 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                    editorMode === "json" ? "bg-surface-card text-mauve shadow-sm" : "text-white/50 hover:text-white/70"
                   )}
                 >
                   <Code className="h-3.5 w-3.5" />
@@ -378,35 +378,35 @@ export function PlanBuilder() {
               <form onSubmit={handleSave} className="space-y-6">
                 {/* Section 1: Core Metadata */}
                 <div className="space-y-4">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Basic Information</h4>
+                  <h4 className="text-xs font-bold text-white/40 uppercase tracking-wider">1. Basic Information</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <Label className="text-xs font-bold text-slate-600">Plan Slug ID</Label>
+                      <Label className="text-xs font-bold text-white/60">Plan Slug ID</Label>
                       <Input value={formId} onChange={e => setFormId(e.target.value.toLowerCase().replace(/\s+/g, "_"))} disabled={!isAdding} required placeholder="e.g. starter" className="h-8 text-xs font-medium" />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs font-bold text-slate-600">Plan Name</Label>
+                      <Label className="text-xs font-bold text-white/60">Plan Name</Label>
                       <Input value={formName} onChange={e => setFormName(e.target.value)} required placeholder="e.g. Starter Plan" className="h-8 text-xs font-medium" />
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <Label className="text-xs font-bold text-slate-600">Description</Label>
+                    <Label className="text-xs font-bold text-white/60">Description</Label>
                     <Input value={formDesc} onChange={e => setFormDesc(e.target.value)} placeholder="Short marketing description" className="h-8 text-xs font-medium" />
                   </div>
 
                   <div className="grid grid-cols-3 gap-3">
                     <div className="space-y-1">
-                      <Label className="text-xs font-bold text-slate-600">Price (INR ₹)</Label>
+                      <Label className="text-xs font-bold text-white/60">Price (INR ₹)</Label>
                       <Input type="number" value={formPriceInr} onChange={e => setFormPriceInr(Number(e.target.value))} required className="h-8 text-xs font-medium" />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs font-bold text-slate-600">Price (USD $)</Label>
+                      <Label className="text-xs font-bold text-white/60">Price (USD $)</Label>
                       <Input type="number" value={formPriceUsd} onChange={e => setFormPriceUsd(Number(e.target.value))} required className="h-8 text-xs font-medium" />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs font-bold text-slate-600">Pricing Unit / Interval</Label>
-                      <select value={formInterval} onChange={e => setFormInterval(e.target.value as any)} className="w-full h-8 px-2 rounded-md border border-slate-200 text-xs font-bold bg-white text-slate-800">
+                      <Label className="text-xs font-bold text-white/60">Pricing Unit / Interval</Label>
+                      <select value={formInterval} onChange={e => setFormInterval(e.target.value as any)} className="w-full h-8 px-2 rounded-md border border-hairline-dark text-xs font-bold bg-surface-card text-white/80">
                         <option value="event">Per Event (One-Time)</option>
                         <option value="monthly">Monthly Subscription</option>
                         <option value="yearly">Yearly Subscription</option>
@@ -414,54 +414,54 @@ export function PlanBuilder() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-6 py-2 px-3 bg-slate-50 rounded-lg border border-slate-100">
+                  <div className="flex items-center gap-6 py-2 px-3 bg-white/5 rounded-lg border border-hairline-dark">
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-violet-600 focus:ring-violet-600 h-4 w-4" />
-                      <span className="text-xs font-bold text-slate-700">Active Tier</span>
+                      <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-mauve focus:ring-mauve h-4 w-4" />
+                      <span className="text-xs font-bold text-white/70">Active Tier</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={formBestValue} onChange={e => setFormBestValue(e.target.checked)} className="rounded text-violet-600 focus:ring-violet-600 h-4 w-4" />
-                      <span className="text-xs font-bold text-slate-700">Highlight as "Best Value"</span>
+                      <input type="checkbox" checked={formBestValue} onChange={e => setFormBestValue(e.target.checked)} className="rounded text-mauve focus:ring-mauve h-4 w-4" />
+                      <span className="text-xs font-bold text-white/70">Highlight as "Best Value"</span>
                     </label>
                   </div>
                 </div>
 
                 {/* Section 2: Visual Feature Toggles & Limits vs Raw JSON */}
                 {editorMode === "visual" ? (
-                  <div className="space-y-6 border-t border-slate-100 pt-5">
+                  <div className="space-y-6 border-t border-hairline-dark pt-5">
                     {/* Quota & Capacity Controls */}
                     <div className="space-y-3">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Event Quotas & Capacity Limits</h4>
+                      <h4 className="text-xs font-bold text-white/40 uppercase tracking-wider">2. Event Quotas & Capacity Limits</h4>
                       
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                          <Label className="text-xs font-bold text-slate-700">👥 Guests Limit per Event</Label>
+                        <div className="p-3 bg-white/5 border border-hairline-dark rounded-xl space-y-1">
+                          <Label className="text-xs font-bold text-white/70">👥 Guests Limit per Event</Label>
                           <div className="flex items-center gap-2">
-                            <Input type="number" value={limitGuests} onChange={e => setLimitGuests(Number(e.target.value))} className="h-8 text-xs font-bold bg-white" />
-                            <button type="button" onClick={() => setLimitGuests(-1)} className={cn("px-2 py-1 text-[10px] font-bold rounded border", limitGuests === -1 ? "bg-violet-600 text-white border-violet-600" : "bg-white text-slate-600")}>
+                            <Input type="number" value={limitGuests} onChange={e => setLimitGuests(Number(e.target.value))} className="h-8 text-xs font-bold bg-surface-card" />
+                            <button type="button" onClick={() => setLimitGuests(-1)} className={cn("px-2 py-1 text-[10px] font-bold rounded border", limitGuests === -1 ? "bg-mauve text-white border-mauve" : "bg-surface-card text-white/60")}>
                               ∞ Unlimited
                             </button>
                           </div>
                         </div>
 
-                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                          <Label className="text-xs font-bold text-slate-700">📸 Shots Limit per Guest</Label>
+                        <div className="p-3 bg-white/5 border border-hairline-dark rounded-xl space-y-1">
+                          <Label className="text-xs font-bold text-white/70">📸 Shots Limit per Guest</Label>
                           <div className="flex items-center gap-2">
-                            <Input type="number" value={limitShots} onChange={e => setLimitShots(Number(e.target.value))} className="h-8 text-xs font-bold bg-white" />
-                            <button type="button" onClick={() => setLimitShots(-1)} className={cn("px-2 py-1 text-[10px] font-bold rounded border", limitShots === -1 ? "bg-violet-600 text-white border-violet-600" : "bg-white text-slate-600")}>
+                            <Input type="number" value={limitShots} onChange={e => setLimitShots(Number(e.target.value))} className="h-8 text-xs font-bold bg-surface-card" />
+                            <button type="button" onClick={() => setLimitShots(-1)} className={cn("px-2 py-1 text-[10px] font-bold rounded border", limitShots === -1 ? "bg-mauve text-white border-mauve" : "bg-surface-card text-white/60")}>
                               ∞ Unlimited
                             </button>
                           </div>
                         </div>
 
-                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                          <Label className="text-xs font-bold text-slate-700">💾 Storage Quota (GB)</Label>
-                          <Input type="number" value={limitStorageGb} onChange={e => setLimitStorageGb(Number(e.target.value))} className="h-8 text-xs font-bold bg-white" />
+                        <div className="p-3 bg-white/5 border border-hairline-dark rounded-xl space-y-1">
+                          <Label className="text-xs font-bold text-white/70">💾 Storage Quota (GB)</Label>
+                          <Input type="number" value={limitStorageGb} onChange={e => setLimitStorageGb(Number(e.target.value))} className="h-8 text-xs font-bold bg-surface-card" />
                         </div>
 
-                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                          <Label className="text-xs font-bold text-slate-700">🤖 AI Face Searches Limit</Label>
-                          <Input type="number" value={limitAiSearches} onChange={e => setLimitAiSearches(Number(e.target.value))} className="h-8 text-xs font-bold bg-white" />
+                        <div className="p-3 bg-white/5 border border-hairline-dark rounded-xl space-y-1">
+                          <Label className="text-xs font-bold text-white/70">🤖 AI Face Searches Limit</Label>
+                          <Input type="number" value={limitAiSearches} onChange={e => setLimitAiSearches(Number(e.target.value))} className="h-8 text-xs font-bold bg-surface-card" />
                         </div>
                       </div>
                     </div>
@@ -469,8 +469,8 @@ export function PlanBuilder() {
                     {/* Feature Toggle Switch Matrix */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">3. Feature Access Toggles</h4>
-                        <button type="button" onClick={handleAutoGenerateFeatures} className="text-xs font-bold text-violet-600 hover:underline flex items-center gap-1">
+                        <h4 className="text-xs font-bold text-white/40 uppercase tracking-wider">3. Feature Access Toggles</h4>
+                        <button type="button" onClick={handleAutoGenerateFeatures} className="text-xs font-bold text-mauve hover:underline flex items-center gap-1">
                           <Sparkles className="h-3 w-3" /> Auto-Generate Bullet Points
                         </button>
                       </div>
@@ -484,18 +484,18 @@ export function PlanBuilder() {
                               onClick={() => setToggles(prev => ({ ...prev, [f.key]: !prev[f.key] }))}
                               className={cn(
                                 "p-2.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-2",
-                                enabled ? "bg-violet-50/60 border-violet-200 text-slate-900" : "bg-white border-slate-200 text-slate-400 opacity-70 hover:opacity-100"
+                                enabled ? "bg-mauve/15 border-mauve/20 text-white" : "bg-surface-card border-hairline-dark text-white/40 opacity-70 hover:opacity-100"
                               )}
                             >
                               <div className="flex items-center gap-2 overflow-hidden">
                                 <span className="text-sm">{f.icon}</span>
                                 <div className="truncate">
                                   <p className="text-xs font-bold truncate">{f.label}</p>
-                                  <p className="text-[10px] text-slate-500 font-normal truncate">{f.desc}</p>
+                                  <p className="text-[10px] text-white/50 font-normal truncate">{f.desc}</p>
                                 </div>
                               </div>
-                              <div className={cn("w-8 h-4 rounded-full transition-all p-0.5 flex items-center", enabled ? "bg-violet-600 justify-end" : "bg-slate-300 justify-start")}>
-                                <div className="w-3 h-3 rounded-full bg-white shadow-sm" />
+                              <div className={cn("w-8 h-4 rounded-full transition-all p-0.5 flex items-center", enabled ? "bg-mauve justify-end" : "bg-white/30 justify-start")}>
+                                <div className="w-3 h-3 rounded-full bg-surface-card shadow-sm" />
                               </div>
                             </div>
                           )
@@ -504,22 +504,22 @@ export function PlanBuilder() {
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-3 border-t border-slate-100 pt-5">
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Advanced Raw JSON Object</h4>
+                  <div className="space-y-3 border-t border-hairline-dark pt-5">
+                    <h4 className="text-xs font-bold text-white/40 uppercase tracking-wider">2. Advanced Raw JSON Object</h4>
                     <textarea
                       value={formLimitsJson}
                       onChange={e => setFormLimitsJson(e.target.value)}
                       rows={8}
-                      className="w-full font-mono rounded-md border border-slate-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 bg-slate-900 text-emerald-400"
+                      className="w-full font-mono rounded-md border border-hairline-dark px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-mauve/50 bg-surface-dark text-emerald-400"
                     />
                   </div>
                 )}
 
                 {/* Section 3: Human-Readable Features Bullet List */}
-                <div className="space-y-2 border-t border-slate-100 pt-5">
+                <div className="space-y-2 border-t border-hairline-dark pt-5">
                   <div className="flex justify-between items-center">
-                    <Label className="text-xs font-bold text-slate-600">Public Pricing Features (one bullet per line)</Label>
-                    <button type="button" onClick={handleAutoGenerateFeatures} className="text-[11px] font-semibold text-violet-600 hover:underline">
+                    <Label className="text-xs font-bold text-white/60">Public Pricing Features (one bullet per line)</Label>
+                    <button type="button" onClick={handleAutoGenerateFeatures} className="text-[11px] font-semibold text-mauve hover:underline">
                       Sync from Toggles
                     </button>
                   </div>
@@ -528,11 +528,11 @@ export function PlanBuilder() {
                     onChange={e => setFormFeatures(e.target.value)}
                     rows={4}
                     placeholder="10 guests limit&#10;10 shots per guest&#10;AI Face Search matching"
-                    className="w-full rounded-md border border-slate-200 px-3 py-2 text-xs font-medium resize-none focus:outline-none focus:ring-1 focus:ring-violet-500"
+                    className="w-full rounded-md border border-hairline-dark px-3 py-2 text-xs font-medium resize-none focus:outline-none focus:ring-1 focus:ring-mauve/50"
                   />
                 </div>
 
-                <Button type="submit" disabled={actioning} className="w-full h-9 bg-violet-600 hover:bg-violet-700 font-bold text-xs text-white shadow-sm">
+                <Button type="submit" disabled={actioning} className="w-full h-9 bg-mauve hover:bg-mauve-strong font-bold text-xs text-[#141110] shadow-sm">
                   {actioning ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
                   Save Plan Changes
                 </Button>
@@ -540,7 +540,7 @@ export function PlanBuilder() {
             </CardContent>
           </Card>
         ) : (
-          <div className="p-16 border border-dashed border-slate-200 bg-slate-50 text-slate-400 text-center rounded-2xl text-xs font-semibold">
+          <div className="p-16 border border-dashed border-hairline-dark bg-white/5 text-white/40 text-center rounded-2xl text-xs font-semibold">
             Select a plan on the left to edit or click "New Plan" to create one.
           </div>
         )}

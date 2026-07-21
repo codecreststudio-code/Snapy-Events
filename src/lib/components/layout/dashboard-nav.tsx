@@ -62,8 +62,8 @@ export function DashboardNav({ auth }: Props) {
 
   return (
     <>
-      <aside className="hidden w-64 shrink-0 border-r bg-card md:flex md:flex-col">
-        <div className="flex h-16 items-center border-b px-4">
+      <aside className="hidden w-64 shrink-0 border-r border-[#3D332A] bg-[#141110] md:flex md:flex-col">
+        <div className="flex h-16 items-center border-b border-[#3D332A] px-4">
           <Link href="/dashboard" aria-label="Dashboard">
             <Logo />
           </Link>
@@ -78,8 +78,8 @@ export function DashboardNav({ auth }: Props) {
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    ? "bg-mauve/10 text-mauve"
+                    : "text-white/50 hover:bg-white/5 hover:text-white",
                 )}
               >
                 <item.icon className="h-4 w-4" />
@@ -88,22 +88,22 @@ export function DashboardNav({ auth }: Props) {
             )
           })}
         </nav>
-        <div className="border-t p-3">
-          <div className="rounded-lg bg-gradient-to-br from-rose-500/10 to-violet-500/10 p-3">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Sparkles className="h-4 w-4 text-primary" />
+        <div className="border-t border-[#3D332A] p-3">
+          <div className="rounded-lg border border-mauve/20 bg-mauve/5 p-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-white">
+              <Sparkles className="h-4 w-4 text-mauve" />
               Upgrade to Premium
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-white/50">
               Unlock AI face search, white-label and unlimited events.
             </p>
-            <Button asChild size="sm" className="mt-3 w-full">
+            <Button asChild size="sm" className="mt-3 w-full rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold">
               <Link href="/dashboard/billing">Upgrade</Link>
             </Button>
           </div>
         </div>
       </aside>
-      <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6">
+      <header className="flex h-16 items-center justify-between border-b border-[#3D332A] bg-[#141110] px-4 md:px-6">
         <div className="md:hidden">
           <Link href="/dashboard" aria-label="Dashboard home">
             <Logo />
@@ -112,15 +112,15 @@ export function DashboardNav({ auth }: Props) {
         <div className="ml-auto flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2 px-2">
+              <Button variant="ghost" className="gap-2 px-2 text-white hover:bg-white/5 hover:text-white">
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback>{auth.user ? getInitials(auth.user.full_name ?? auth.user.email) : "?"}</AvatarFallback>
+                  <AvatarFallback className="bg-mauve/10 text-mauve">{auth.user ? getInitials(auth.user.full_name ?? auth.user.email) : "?"}</AvatarFallback>
                 </Avatar>
                 <div className="hidden text-left md:block">
-                  <div className="text-sm font-medium">{auth.user?.full_name ?? "Account"}</div>
-                  <div className="text-xs text-muted-foreground">{auth.user?.full_name ?? "Personal"}</div>
+                  <div className="text-sm font-medium text-white">{auth.user?.full_name ?? "Account"}</div>
+                  <div className="text-xs text-white/50">{auth.user?.full_name ?? "Personal"}</div>
                 </div>
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                <ChevronDown className="h-4 w-4 text-white/50" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">

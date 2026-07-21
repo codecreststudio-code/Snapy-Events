@@ -30,44 +30,21 @@
   --ring: 221.2 83.2% 53.3%;
   --radius: 0.5rem;
 
-  /* Claude Design Tokens (from DESIGN-claude.md) */
-  --claude-primary: #cc785c;
-  --claude-primary-active: #a9583e;
-  --claude-primary-disabled: #e6dfd8;
-  --claude-ink: #141413;
-  --claude-body: #3d3d3a;
-  --claude-body-strong: #252523;
-  --claude-muted: #6c6a64;
-  --claude-muted-soft: #8e8b82;
-  --claude-hairline: #e6dfd8;
-  --claude-hairline-soft: #ebe6df;
-  --claude-canvas: #faf9f5;
-  --claude-surface-soft: #f5f0e8;
-  --claude-surface-card: #efe9de;
-  --claude-surface-cream-strong: #e8e0d2;
-  --claude-surface-dark: #181715;
-  --claude-surface-dark-elevated: #252320;
-  --claude-surface-dark-soft: #1f1e1b;
-  --claude-on-primary: #ffffff;
-  --claude-on-dark: #faf9f5;
-  --claude-on-dark-soft: #a09d96;
-  --claude-accent-teal: #5db8a6;
-  --claude-accent-amber: #e8a55a;
-  --claude-success: #5db872;
-  --claude-warning: #d4a017;
-  --claude-error: #c64545;
-
   /* ─── Snapy event-surface tokens ────────────────────────────────────────
-     The dark gold/cream identity used across every guest- and host-facing
+     The dark mauve/lavender identity used across every guest- and host-facing
      event page (hero, wizard, gallery, dashboard event view) was, until now,
      hardcoded as raw hex via Tailwind arbitrary values (bg-[#141110], etc.)
      repeated across ~15 files with no single source of truth. Registering
      them here as real tokens means new components can use bg-surface-dark /
-     text-gold / border-hairline-dark instead of retyping hex, and the whole
+     text-mauve / border-hairline-dark instead of retyping hex, and the whole
      palette can be retuned from one place. Existing arbitrary-value usages
-     keep working unchanged — this is additive, not a breaking rename. */
-  --snapy-gold: #d4af37;
-  --snapy-gold-strong: #b3922e;
+     keep working unchanged — this is additive, not a breaking rename.
+
+     Accent values sampled from the Brandkit grainy dark-gradient textures:
+     base dark ~#1A1719 (kept surface-dark close to its prior #141110),
+     accent/glow ~#B28DAE, saturated hover/strong variant ~#A468A0. */
+  --snapy-mauve: #b28dae;
+  --snapy-mauve-strong: #a468a0;
   --snapy-surface-dark: #141110;
   --snapy-surface-card: #1c1814;
   --snapy-surface-card-elevated: #241f19;
@@ -129,31 +106,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  --color-claude-primary: var(--claude-primary);
-  --color-claude-primary-active: var(--claude-primary-active);
-  --color-claude-primary-disabled: var(--claude-primary-disabled);
-  --color-claude-ink: var(--claude-ink);
-  --color-claude-body: var(--claude-body);
-  --color-claude-body-strong: var(--claude-body-strong);
-  --color-claude-muted: var(--claude-muted);
-  --color-claude-muted-soft: var(--claude-muted-soft);
-  --color-claude-hairline: var(--claude-hairline);
-  --color-claude-hairline-soft: var(--claude-hairline-soft);
-  --color-claude-canvas: var(--claude-canvas);
-  --color-claude-surface-soft: var(--claude-surface-soft);
-  --color-claude-surface-card: var(--claude-surface-card);
-  --color-claude-surface-cream-strong: var(--claude-surface-cream-strong);
-  --color-claude-surface-dark: var(--claude-surface-dark);
-  --color-claude-surface-dark-elevated: var(--claude-surface-dark-elevated);
-  --color-claude-surface-dark-soft: var(--claude-surface-dark-soft);
-  --color-claude-on-primary: var(--claude-on-primary);
-  --color-claude-on-dark: var(--claude-on-dark);
-  --color-claude-on-dark-soft: var(--claude-on-dark-soft);
-  --color-claude-accent-teal: var(--claude-accent-teal);
-  --color-claude-accent-amber: var(--claude-accent-amber);
-
-  --color-gold: var(--snapy-gold);
-  --color-gold-strong: var(--snapy-gold-strong);
+  --color-mauve: var(--snapy-mauve);
+  --color-mauve-strong: var(--snapy-mauve-strong);
   --color-surface-dark: var(--snapy-surface-dark);
   --color-surface-card: var(--snapy-surface-card);
   --color-surface-card-elevated: var(--snapy-surface-card-elevated);
@@ -227,7 +181,7 @@ body {
   background-color: color-mix(in srgb, var(--snapy-surface-card) 72%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid color-mix(in srgb, var(--snapy-gold) 14%, var(--snapy-hairline-dark));
+  border: 1px solid color-mix(in srgb, var(--snapy-mauve) 14%, var(--snapy-hairline-dark));
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 

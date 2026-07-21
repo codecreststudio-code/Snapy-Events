@@ -181,45 +181,45 @@ export default function AdminUsersPage() {
   })
 
   return (
-    <main className="px-6 py-8 space-y-6 bg-slate-50 min-h-full">
+    <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">User Management</h1>
-          <p className="text-sm text-slate-500 mt-1">Monitor registered photographers, reset passwords, change tiers, or delete accounts.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">User Management</h1>
+          <p className="text-sm text-white/50 mt-1">Monitor registered photographers, reset passwords, change tiers, or delete accounts.</p>
         </div>
-        <Button onClick={fetchUsers} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
-          <RefreshCw className="h-4 w-4 text-slate-500" />
+        <Button onClick={fetchUsers} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-white/5 hover:bg-white/10 font-semibold">
+          <RefreshCw className="h-4 w-4 text-white/50" />
           <span>Refresh</span>
         </Button>
       </div>
 
       <div className="flex items-center max-w-sm relative">
-        <Search className="h-4 w-4 absolute left-3 text-slate-400" />
+        <Search className="h-4 w-4 absolute left-3 text-white/40" />
         <Input
           placeholder="Search by name, email, or studio..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 bg-white border-slate-200 text-slate-800 shadow-sm"
+          className="pl-9 bg-white/5 border-hairline-dark text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve"
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Main List Table */}
-        <Card className="bg-white border-slate-200 shadow-sm overflow-hidden lg:col-span-2">
+        <Card className="bg-surface-card border-hairline-dark overflow-hidden lg:col-span-2">
           <CardContent className="p-0">
             {loading ? (
               <div className="p-16 flex justify-center items-center">
-                <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+                <Loader2 className="h-8 w-8 animate-spin text-mauve" />
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="p-16 text-center text-slate-400 text-sm">
+              <div className="p-16 text-center text-white/40 text-sm">
                 No users registered matching search criteria.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/50">
+                    <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-surface-card-elevated">
                       <th className="p-4">User Info</th>
                       <th className="p-4">Joined Date</th>
                       <th className="p-4">Role</th>
@@ -228,29 +228,29 @@ export default function AdminUsersPage() {
                       <th className="p-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
+                    <tbody className="divide-y divide-white/10 text-white/60 font-medium">
                       {filteredUsers.map((u) => (
-                        <tr 
-                          key={u.id} 
+                        <tr
+                          key={u.id}
                           className={cn(
-                            "hover:bg-slate-50/50 transition-colors cursor-pointer",
-                            selectedUser?.id === u.id ? "bg-violet-50/20" : ""
+                            "hover:bg-white/5 transition-colors cursor-pointer",
+                            selectedUser?.id === u.id ? "bg-mauve/10" : ""
                           )}
                           onClick={() => setSelectedUser(u)}
                         >
                           <td className="p-4">
-                            <div className="font-bold text-slate-800 text-sm">{u.full_name || "N/A"}</div>
-                            <div className="text-[10px] text-slate-400 mt-0.5">{u.email}</div>
+                            <div className="font-bold text-white/80 text-sm">{u.full_name || "N/A"}</div>
+                            <div className="text-[10px] text-white/40 mt-0.5">{u.email}</div>
                           </td>
                           <td className="p-4">
-                            <div className="text-slate-700 font-semibold">{new Date(u.created_at).toLocaleDateString()}</div>
+                            <div className="text-white/70 font-semibold">{new Date(u.created_at).toLocaleDateString()}</div>
                           </td>
                           <td className="p-4" onClick={(e) => e.stopPropagation()}>
                             <select
                               value={u.role || "member"}
                               onChange={(e) => handleRoleChange(u.id, e.target.value)}
                               disabled={actioningId === u.id}
-                              className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-violet-500 font-semibold shadow-sm capitalize"
+                              className="bg-white/5 border border-hairline-dark rounded-lg px-2.5 py-1 text-xs text-white/70 focus:outline-none focus:ring-1 focus:ring-mauve/50 font-semibold capitalize"
                             >
                               <option value="owner">Owner</option>
                               <option value="admin">Admin</option>
@@ -263,7 +263,7 @@ export default function AdminUsersPage() {
                             value={getActivePlan(u)}
                             onChange={(e) => handlePlanChange(u.id, e.target.value)}
                             disabled={actioningId === u.id}
-                            className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-violet-500 font-semibold shadow-sm"
+                            className="bg-white/5 border border-hairline-dark rounded-lg px-2.5 py-1 text-xs text-white/70 focus:outline-none focus:ring-1 focus:ring-mauve/50 font-semibold"
                           >
                             <option value="free">Free</option>
                             <option value="starter">Starter</option>
@@ -274,8 +274,8 @@ export default function AdminUsersPage() {
                         <td className="p-4">
                           <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border",
                             u.is_active !== false
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                              : "bg-rose-50 text-rose-700 border-rose-100"
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                              : "bg-red-500/10 text-red-400 border-red-500/20"
                           )}>
                             {u.is_active !== false ? "Active" : "Suspended"}
                           </span>
@@ -286,7 +286,7 @@ export default function AdminUsersPage() {
                             disabled={actioningId === u.id}
                             variant="ghost"
                             size="sm"
-                            className={cn("h-8 w-8 p-0 rounded-lg", u.is_active !== false ? "text-amber-600 hover:bg-amber-50" : "text-emerald-600 hover:bg-emerald-50")}
+                            className={cn("h-8 w-8 p-0 rounded-lg", u.is_active !== false ? "text-amber-400 hover:bg-amber-500/10" : "text-emerald-400 hover:bg-emerald-500/10")}
                             title={u.is_active !== false ? "Suspend Account" : "Activate Account"}
                           >
                             {u.is_active !== false ? <UserMinus className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
@@ -296,7 +296,7 @@ export default function AdminUsersPage() {
                             disabled={actioningId === u.id}
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 text-slate-500 hover:bg-slate-100 rounded-lg"
+                            className="h-8 w-8 p-0 text-white/50 hover:bg-white/10 rounded-lg"
                             title="Reset Password"
                           >
                             <Key className="h-4 w-4" />
@@ -306,7 +306,7 @@ export default function AdminUsersPage() {
                             disabled={actioningId === u.id}
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 text-rose-600 hover:bg-rose-50 rounded-lg"
+                            className="h-8 w-8 p-0 text-red-400 hover:bg-red-500/10 rounded-lg"
                             title="Delete User"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -322,69 +322,69 @@ export default function AdminUsersPage() {
         </Card>
 
         {/* Selected User Details Panel */}
-        <Card className="bg-white border-slate-200 shadow-sm p-6 sticky top-6">
+        <Card className="bg-surface-card border-hairline-dark p-6 sticky top-6">
           {selectedUser ? (
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full bg-violet-100 text-violet-700 font-bold flex items-center justify-center text-lg">
+                <div className="h-12 w-12 rounded-full bg-mauve/10 text-mauve font-bold flex items-center justify-center text-lg">
                   {selectedUser.full_name?.charAt(0) || "U"}
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-800 text-base">{selectedUser.full_name || "N/A"}</h3>
-                  <span className="text-xs text-slate-400 block mt-0.5">{selectedUser.email}</span>
+                  <h3 className="font-bold text-white/80 text-base">{selectedUser.full_name || "N/A"}</h3>
+                  <span className="text-xs text-white/40 block mt-0.5">{selectedUser.email}</span>
                 </div>
               </div>
 
-              <div className="border-t border-slate-100 pt-4 space-y-3 text-xs">
+              <div className="border-t border-hairline-dark pt-4 space-y-3 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">User ID</span>
-                  <span className="font-mono text-slate-700 font-semibold">{selectedUser.id}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">User ID</span>
+                  <span className="font-mono text-white/70 font-semibold">{selectedUser.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Role</span>
-                  <span className="text-slate-700 capitalize font-semibold">{selectedUser.role}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Role</span>
+                  <span className="text-white/70 capitalize font-semibold">{selectedUser.role}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Plan Tier</span>
-                  <span className="text-violet-600 font-bold uppercase">{getActivePlan(selectedUser)}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Plan Tier</span>
+                  <span className="text-mauve font-bold uppercase">{getActivePlan(selectedUser)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Join Date</span>
-                  <span className="text-slate-700 font-semibold">{new Date(selectedUser.created_at).toLocaleString()}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Join Date</span>
+                  <span className="text-white/70 font-semibold">{new Date(selectedUser.created_at).toLocaleString()}</span>
                 </div>
               </div>
 
 
 
-              <div className="border-t border-slate-100 pt-4 space-y-2">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Account Actions</h4>
+              <div className="border-t border-hairline-dark pt-4 space-y-2">
+                <h4 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2">Account Actions</h4>
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     onClick={() => handleStatusChange(selectedUser.id, selectedUser.is_active !== false)}
                     variant="outline"
-                    className="w-full text-xs font-bold text-slate-700 border-slate-200 hover:bg-slate-50"
+                    className="w-full text-xs font-bold text-white/70 border-hairline-dark hover:bg-white/5"
                   >
                     {selectedUser.is_active !== false ? "Suspend Account" : "Activate Account"}
                   </Button>
                   <Button
                     onClick={() => handleResetPassword(selectedUser.id)}
                     variant="outline"
-                    className="w-full text-xs font-bold text-slate-700 border-slate-200 hover:bg-slate-50"
+                    className="w-full text-xs font-bold text-white/70 border-hairline-dark hover:bg-white/5"
                   >
                     Reset Password
                   </Button>
                 </div>
                 <Button
                   onClick={() => handleDeleteUser(selectedUser.id)}
-                  className="w-full text-xs font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-100 shadow-sm"
+                  className="w-full text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20"
                 >
                   Permanently Delete User
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="h-64 flex flex-col justify-center items-center text-center text-slate-400">
-              <Mail className="h-8 w-8 text-slate-300 mb-2" />
+            <div className="h-64 flex flex-col justify-center items-center text-center text-white/40">
+              <Mail className="h-8 w-8 text-white/30 mb-2" />
               <span className="text-xs font-semibold">Select a user to view full profile details and execute account operations.</span>
             </div>
           )}

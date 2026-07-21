@@ -45,15 +45,15 @@ export function AdminThemeToggle({ initialTheme = "light" }: { initialTheme?: st
       size="icon"
       onClick={toggleTheme}
       disabled={isUpdating}
-      className="h-9 w-9 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors"
+      className="h-9 w-9 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors"
       title={`Current Theme: ${theme}`}
     >
       {theme === "light" ? (
-        <Sun className="h-5 w-5 text-amber-500" />
+        <Sun className="h-5 w-5 text-amber-400" />
       ) : theme === "dark" ? (
-        <Moon className="h-5 w-5 text-indigo-500" />
+        <Moon className="h-5 w-5 text-mauve" />
       ) : (
-        <Laptop className="h-5 w-5 text-slate-500" />
+        <Laptop className="h-5 w-5 text-white/50" />
       )}
     </Button>
   )

@@ -28,7 +28,7 @@ type DailyRevenue = { date: string; amount: number }
 function RevenueChart({ data, days }: { data: DailyRevenue[]; days: number }) {
   if (!data || data.length === 0) {
     return (
-      <div className="h-48 flex items-center justify-center text-slate-300 text-xs font-semibold">
+      <div className="h-48 flex items-center justify-center text-white/30 text-xs font-semibold">
         No revenue data in this period
       </div>
     )
@@ -57,15 +57,15 @@ function RevenueChart({ data, days }: { data: DailyRevenue[]; days: number }) {
         <svg className="w-full h-full" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
           <defs>
             <linearGradient id="revGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="rgba(139, 92, 246, 0.25)" />
-              <stop offset="100%" stopColor="rgba(139, 92, 246, 0)" />
+              <stop offset="0%" stopColor="rgba(178, 141, 174, 0.3)" />
+              <stop offset="100%" stopColor="rgba(178, 141, 174, 0)" />
             </linearGradient>
           </defs>
           <polygon points={fillPath} fill="url(#revGrad)" />
           <polyline
             points={polyline}
             fill="none"
-            stroke="rgb(139, 92, 246)"
+            stroke="rgb(178, 141, 174)"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -76,12 +76,12 @@ function RevenueChart({ data, days }: { data: DailyRevenue[]; days: number }) {
             const x = (i / (data.length - 1)) * width
             const y = height - (d.amount / maxAmount) * (height - 2) - 1
             return (
-              <circle key={i} cx={x} cy={y} r="0.8" fill="rgb(139, 92, 246)" />
+              <circle key={i} cx={x} cy={y} r="0.8" fill="rgb(178, 141, 174)" />
             )
           })}
         </svg>
       </div>
-      <div className="flex justify-between text-[10px] text-slate-400 font-bold uppercase mt-2 px-1">
+      <div className="flex justify-between text-[10px] text-white/40 font-bold uppercase mt-2 px-1">
         {labels.map((l) => (
           <span key={l.date}>{new Date(l.date + "T00:00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</span>
         ))}
@@ -145,22 +145,22 @@ export default function AdminRevenuePage() {
   ]
 
   return (
-    <main className="px-6 py-8 space-y-6 bg-slate-50 min-h-full">
+    <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Revenue Analytics</h1>
-          <p className="text-sm text-slate-500 mt-1">Track transaction history, ticket sizes, and payment integrations.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Revenue Analytics</h1>
+          <p className="text-sm text-white/50 mt-1">Track transaction history, ticket sizes, and payment integrations.</p>
         </div>
         <div className="flex items-center gap-2">
           {/* Period Selector */}
-          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm">
+          <div className="flex items-center gap-1 bg-surface-card border border-hairline-dark rounded-lg p-0.5 shadow-sm">
             {PERIODS.map((p) => (
               <button
                 key={p.value}
                 onClick={() => setDays(p.value)}
                 className={cn(
                   "px-3 py-1.5 rounded-md text-xs font-bold transition-all",
-                  days === p.value ? "bg-violet-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-800"
+                  days === p.value ? "bg-mauve text-[#141110] shadow-sm" : "text-white/50 hover:text-white/80"
                 )}
               >
                 {p.label}
@@ -171,9 +171,9 @@ export default function AdminRevenuePage() {
             onClick={() => fetchRevenueData(days)}
             disabled={loading}
             variant="outline"
-            className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm"
+            className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm"
           >
-            <RefreshCw className={cn("h-4 w-4 text-slate-500", loading && "animate-spin")} />
+            <RefreshCw className={cn("h-4 w-4 text-white/50", loading && "animate-spin")} />
             <span>Refresh</span>
           </Button>
         </div>
@@ -181,56 +181,56 @@ export default function AdminRevenuePage() {
 
       {/* KPI Cards */}
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="bg-white border-slate-200 p-6 flex items-center gap-4 shadow-sm">
-          <div className="h-12 w-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600 border border-violet-100">
+        <Card className="bg-surface-card border-hairline-dark p-6 flex items-center gap-4 shadow-sm">
+          <div className="h-12 w-12 rounded-xl bg-mauve/10 flex items-center justify-center text-mauve border border-mauve/20">
             <DollarSign className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Total Revenue</span>
-            <span className="text-2xl font-bold text-slate-900 mt-1 block">
+            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Total Revenue</span>
+            <span className="text-2xl font-bold text-white mt-1 block">
               {loading ? "…" : `₹${stats.totalRevenue.toLocaleString("en-IN", { minimumFractionDigits: 0 })}`}
             </span>
-            <span className="text-[10px] text-slate-400 font-semibold">last {days} days</span>
+            <span className="text-[10px] text-white/40 font-semibold">last {days} days</span>
           </div>
         </Card>
 
-        <Card className="bg-white border-slate-200 p-6 flex items-center gap-4 shadow-sm">
-          <div className="h-12 w-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600 border border-violet-100">
+        <Card className="bg-surface-card border-hairline-dark p-6 flex items-center gap-4 shadow-sm">
+          <div className="h-12 w-12 rounded-xl bg-mauve/10 flex items-center justify-center text-mauve border border-mauve/20">
             <TrendingUp className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Avg. Ticket Size</span>
-            <span className="text-2xl font-bold text-slate-900 mt-1 block">
+            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Avg. Ticket Size</span>
+            <span className="text-2xl font-bold text-white mt-1 block">
               {loading ? "…" : `₹${averageTicket.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`}
             </span>
-            <span className="text-[10px] text-slate-400 font-semibold">{stats.transactionCount} paid orders</span>
+            <span className="text-[10px] text-white/40 font-semibold">{stats.transactionCount} paid orders</span>
           </div>
         </Card>
 
-        <Card className="bg-white border-slate-200 p-6 flex items-center gap-4 shadow-sm">
-          <div className="h-12 w-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600 border border-violet-100">
+        <Card className="bg-surface-card border-hairline-dark p-6 flex items-center gap-4 shadow-sm">
+          <div className="h-12 w-12 rounded-xl bg-mauve/10 flex items-center justify-center text-mauve border border-mauve/20">
             <ShoppingBag className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Active Subscriptions</span>
-            <span className="text-2xl font-bold text-slate-900 mt-1 block">
+            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Active Subscriptions</span>
+            <span className="text-2xl font-bold text-white mt-1 block">
               {loading ? "…" : stats.activeSubscriptions}
             </span>
-            <span className="text-[10px] text-slate-400 font-semibold">of {stats.totalUsers} registered users</span>
+            <span className="text-[10px] text-white/40 font-semibold">of {stats.totalUsers} registered users</span>
           </div>
         </Card>
       </div>
 
       {/* Dynamic Revenue Chart */}
-      <Card className="bg-white border-slate-200 p-6 shadow-sm">
+      <Card className="bg-surface-card border-hairline-dark p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-violet-600" />
+          <h3 className="text-base font-bold text-white/80 flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-mauve" />
             <span>Revenue Trend — Last {days} Days</span>
           </h3>
-          <div className="flex items-center gap-4 text-xs text-slate-400 font-semibold">
+          <div className="flex items-center gap-4 text-xs text-white/40 font-semibold">
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-rose-400 inline-block" />{stats.failedCount} failed
+              <span className="h-2 w-2 rounded-full bg-red-400 inline-block" />{stats.failedCount} failed
             </span>
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-amber-400 inline-block" />{stats.refundedCount} refunded
@@ -239,7 +239,7 @@ export default function AdminRevenuePage() {
         </div>
         {loading ? (
           <div className="h-48 flex items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-violet-500" />
+            <Loader2 className="h-6 w-6 animate-spin text-mauve" />
           </div>
         ) : (
           <RevenueChart data={dailyRevenue} days={days} />
@@ -247,22 +247,22 @@ export default function AdminRevenuePage() {
       </Card>
 
       {/* Transaction Logs Table */}
-      <Card className="bg-white border-slate-200 overflow-hidden shadow-sm">
+      <Card className="bg-surface-card border-hairline-dark overflow-hidden shadow-sm">
         <CardContent className="p-0">
-          <div className="p-4 border-b border-slate-100">
-            <h3 className="font-bold text-slate-800 text-sm">Transaction History ({days}-day window)</h3>
+          <div className="p-4 border-b border-hairline-dark">
+            <h3 className="font-bold text-white/80 text-sm">Transaction History ({days}-day window)</h3>
           </div>
           {loading ? (
             <div className="p-16 flex justify-center items-center">
-              <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-mauve" />
             </div>
           ) : txs.length === 0 ? (
-            <div className="p-16 text-slate-400 text-center text-xs font-semibold">No payment transactions found in this period.</div>
+            <div className="p-16 text-white/40 text-center text-xs font-semibold">No payment transactions found in this period.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/50">
+                  <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-white/5">
                     <th className="p-4">Payment ID</th>
                     <th className="p-4">User</th>
                     <th className="p-4">Amount</th>
@@ -271,25 +271,25 @@ export default function AdminRevenuePage() {
                     <th className="p-4 text-right">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
+                <tbody className="divide-y divide-white/10 text-white/60 font-medium">
                   {txs.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-slate-50/50 transition-colors">
+                    <tr key={tx.id} className="hover:bg-white/5 transition-colors">
                       <td className="p-4">
-                        <div className="font-mono text-slate-800 font-bold">{tx.razorpay_payment_id || "N/A"}</div>
-                        <div className="text-[10px] text-slate-400 mt-0.5">Order: {tx.razorpay_order_id || "N/A"}</div>
+                        <div className="font-mono text-white/80 font-bold">{tx.razorpay_payment_id || "N/A"}</div>
+                        <div className="text-[10px] text-white/40 mt-0.5">Order: {tx.razorpay_order_id || "N/A"}</div>
                       </td>
-                      <td className="p-4 font-semibold text-slate-700">{tx.user?.full_name || "N/A"}</td>
-                      <td className="p-4 font-extrabold text-slate-800 text-sm">₹{(tx.amount / 100).toLocaleString("en-IN")}</td>
-                      <td className="p-4 uppercase text-slate-400 font-bold text-[10px]">{tx.payment_method || "N/A"}</td>
-                      <td className="p-4 text-slate-400 font-semibold">
+                      <td className="p-4 font-semibold text-white/70">{tx.user?.full_name || "N/A"}</td>
+                      <td className="p-4 font-extrabold text-white/80 text-sm">₹{(tx.amount / 100).toLocaleString("en-IN")}</td>
+                      <td className="p-4 uppercase text-white/40 font-bold text-[10px]">{tx.payment_method || "N/A"}</td>
+                      <td className="p-4 text-white/40 font-semibold">
                         {new Date(tx.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                       </td>
                       <td className="p-4 text-right">
                         <span className={cn(
                           "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border",
-                          tx.status === "success" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
-                          tx.status === "refunded" ? "bg-amber-50 text-amber-700 border-amber-100" :
-                          "bg-rose-50 text-rose-700 border-rose-100"
+                          tx.status === "success" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
+                          tx.status === "refunded" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+                          "bg-red-500/10 text-red-400 border-red-500/20"
                         )}>
                           {tx.status}
                         </span>

@@ -107,20 +107,20 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
-      className={`relative rounded-3xl border bg-white p-8 cursor-pointer flex flex-col justify-between transition-shadow duration-300 ${
+      className={`relative rounded-3xl border bg-surface-card p-8 cursor-pointer flex flex-col justify-between transition-shadow duration-300 ${
         plan.popular
-          ? "border-violet-500 ring-2 ring-violet-500/20 shadow-[0_20px_50px_rgba(139,92,246,0.15)] md:scale-105 z-10"
-          : "border-slate-200 hover:border-slate-300 hover:shadow-xl"
+          ? "border-mauve ring-2 ring-mauve/20 shadow-[0_20px_50px_rgba(178,141,174,0.15)] md:scale-105 z-10"
+          : "border-hairline-dark hover:border-mauve/40 hover:shadow-xl"
       }`}
     >
       {plan.popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-1 text-[10px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-mauve px-4 py-1 text-[10px] font-bold text-[#141110] tracking-widest uppercase shadow-md flex items-center gap-1">
           <Sparkles className="h-3 w-3" />
           POPULAR
         </div>
       )}
       {plan.bestValue && (
-        <div className="absolute -top-3 right-4 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1 text-[10px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1">
+        <div className="absolute -top-3 right-4 rounded-full bg-mauve-strong px-3 py-1 text-[10px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1">
           <Crown className="h-3 w-3" />
           BEST VALUE
         </div>
@@ -129,27 +129,27 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       <div>
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
-            <p className="mt-2 text-xs text-slate-450 leading-relaxed font-light min-h-[32px]">
+            <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+            <p className="mt-2 text-xs text-white/60 leading-relaxed font-light min-h-[32px]">
               {plan.description}
             </p>
           </div>
           {plan.popular && (
-            <span className="h-8 w-8 rounded-full bg-violet-50 flex items-center justify-center text-violet-600">
+            <span className="h-8 w-8 rounded-full bg-mauve/20 flex items-center justify-center text-mauve">
               <Sparkles className="h-4 w-4" />
             </span>
           )}
         </div>
 
         <div className="mt-6 flex items-baseline gap-1">
-          <span className="text-4xl font-extrabold text-slate-900">{symbol}{displayPrice}</span>
-          <span className="text-slate-400 text-xs font-light">/ {plan.period}</span>
+          <span className="text-4xl font-extrabold text-white">{symbol}{displayPrice}</span>
+          <span className="text-white/50 text-xs font-light">/ {plan.period}</span>
         </div>
 
-        <ul className="mt-6 space-y-4 border-t border-slate-100 pt-6">
+        <ul className="mt-6 space-y-4 border-t border-hairline-dark pt-6">
           {plan.features.map((feature) => (
-            <li key={feature} className="flex items-start gap-3 text-xs text-slate-600 font-light">
-              <Check className={`h-4 w-4 flex-shrink-0 ${plan.popular ? "text-violet-600" : "text-slate-400"}`} />
+            <li key={feature} className="flex items-start gap-3 text-xs text-white/70 font-light">
+              <Check className={`h-4 w-4 flex-shrink-0 ${plan.popular ? "text-mauve" : "text-white/40"}`} />
               <span>{feature}</span>
             </li>
           ))}
@@ -159,10 +159,10 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       <div className="mt-8 pt-4">
         <Link href={`/signup?plan=${plan.id}`}>
           <Button
-            className={`w-full font-bold py-5 rounded-full transition-transform active:scale-[0.98] ${
+            className={`w-full font-bold py-5 rounded-full transition-all active:scale-[0.99] ${
               plan.popular
-                ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white shadow-lg shadow-violet-500/20 border-none"
-                : "bg-slate-100 text-slate-800 hover:bg-slate-200 border-none"
+                ? "bg-mauve hover:bg-mauve-strong text-[#141110] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
+                : "border border-white/15 text-white hover:bg-white/5"
             }`}
           >
             {plan.cta}
@@ -209,12 +209,12 @@ export default function PricingPage() {
   }, [])
 
   return (
-    <div className={`flex min-h-screen flex-col bg-white text-slate-900 selection:bg-violet-100 ${inter.className}`}>
+    <div className={`flex min-h-screen flex-col bg-surface-dark text-white selection:bg-mauve/30 ${inter.className}`}>
       <PublicNavbar />
-      
-      <main className="flex-1 bg-slate-50/30 overflow-hidden relative py-12 md:py-20">
-        <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-25 blur-3xl">
-          <div className="h-[400px] w-[500px] rounded-full bg-gradient-to-tr from-violet-100 via-fuchsia-50 to-pink-50" />
+
+      <main className="flex-1 bg-surface-dark overflow-hidden relative py-12 md:py-20">
+        <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-15 blur-3xl">
+          <div className="h-[400px] w-[500px] rounded-full bg-gradient-to-tr from-mauve via-mauve-strong to-mauve" />
         </div>
 
         <section className="mx-auto max-w-6xl px-6 py-12 md:py-20 text-center space-y-4">
@@ -222,7 +222,7 @@ export default function PricingPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-violet-600 bg-violet-50/80 border border-violet-100/50"
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-mauve bg-mauve/10 border border-mauve/20"
           >
             <span>PRICING PLANS</span>
           </motion.div>
@@ -231,16 +231,16 @@ export default function PricingPage() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className={`text-4xl font-normal tracking-tight md:text-6xl text-slate-900 leading-tight ${playfair.className}`}
+            className={`text-4xl font-light tracking-tight md:text-6xl text-white leading-tight ${playfair.className}`}
           >
-            Simple, transparent <span className="italic font-normal bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">pricing</span>
+            Simple, transparent <span className="italic font-light bg-gradient-to-r from-mauve to-mauve-strong bg-clip-text text-transparent">pricing</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-md text-slate-500 max-w-xl mx-auto font-light leading-relaxed"
+            className="text-md text-white/60 max-w-xl mx-auto font-light leading-relaxed"
           >
             Choose the plan that matches your event volume. Upgrade or adjust bounds at any time.
           </motion.p>

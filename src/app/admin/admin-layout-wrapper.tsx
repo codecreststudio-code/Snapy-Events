@@ -36,16 +36,16 @@ export function AdminLayoutWrapper({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900">
+    <div className="flex h-screen overflow-hidden bg-surface-dark text-white">
       <AdminNav />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <AdminTopNav 
+        <AdminTopNav
           user={user}
           isAdmin={isAdmin}
           isOwner={isOwner}
           initialTheme={initialTheme}
         />
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-surface-dark">
           {children}
         </div>
       </div>

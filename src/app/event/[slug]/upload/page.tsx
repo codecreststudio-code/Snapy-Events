@@ -552,7 +552,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
   if (eventLoading || galleriesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#141110]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#D4AF37]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#B28DAE]" />
       </div>
     )
   }
@@ -564,7 +564,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         <p className="text-white/60 mb-4">
           The event you're looking for doesn't exist or uploads are disabled.
         </p>
-        <Button asChild className="rounded-full bg-[#D4AF37] hover:bg-[#c4a233] text-[#141110] font-bold">
+        <Button asChild className="rounded-full bg-[#B28DAE] hover:bg-[#a468a0] text-[#141110] font-bold">
           <Link href="/">Go Home</Link>
         </Button>
       </div>
@@ -650,7 +650,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
                 disabled={isUploading}
-                className="bg-[#141110] border-[#3D332A] text-white focus:border-[#D4AF37] focus:ring-[#D4AF37] focus-visible:ring-[#D4AF37]"
+                className="bg-[#141110] border-[#3D332A] text-white focus:border-[#B28DAE] focus:ring-[#B28DAE] focus-visible:ring-[#B28DAE]"
               />
             </div>
             <div className="space-y-2">
@@ -662,7 +662,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 value={guestEmail}
                 onChange={(e) => setGuestEmail(e.target.value)}
                 disabled={isUploading}
-                className="bg-[#141110] border-[#3D332A] text-white focus:border-[#D4AF37] focus:ring-[#D4AF37] focus-visible:ring-[#D4AF37]"
+                className="bg-[#141110] border-[#3D332A] text-white focus:border-[#B28DAE] focus:ring-[#B28DAE] focus-visible:ring-[#B28DAE]"
               />
             </div>
           </div>
@@ -681,7 +681,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
               <select
                 value={selectedGallery}
                 onChange={(e) => setSelectedGallery(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-[#3D332A] bg-[#141110] px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#D4AF37]"
+                className="flex h-10 w-full rounded-md border border-[#3D332A] bg-[#141110] px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#B28DAE]"
               >
                 <option value="">Choose a gallery...</option>
                 {uploadGalleries.map((gallery) => (
@@ -727,11 +727,11 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Card 1: Take Photo / Video */}
                 <div
-                  className="border-2 border-dashed border-[#3D332A] bg-[#1C1814]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all cursor-pointer group"
+                  className="border-2 border-dashed border-[#3D332A] bg-[#1C1814]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#B28DAE] hover:bg-[#B28DAE]/5 transition-all cursor-pointer group"
                   onClick={() => setShowCamera(true)}
                 >
-                  <div className="p-4 rounded-full bg-[#1C1814] group-hover:bg-[#D4AF37]/20 transition-colors border border-transparent group-hover:border-[#D4AF37]/30">
-                    <CameraIcon className="h-8 w-8 text-white/50 group-hover:text-[#D4AF37]" />
+                  <div className="p-4 rounded-full bg-[#1C1814] group-hover:bg-[#B28DAE]/20 transition-colors border border-transparent group-hover:border-[#B28DAE]/30">
+                    <CameraIcon className="h-8 w-8 text-white/50 group-hover:text-[#B28DAE]" />
                   </div>
                   <div className="text-center">
                     <p className="font-medium text-white">
@@ -748,11 +748,11 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 {/* Card 2: Record Voice Note */}
                 {allowVoice && (
                   <div
-                    className="border-2 border-dashed border-[#3D332A] bg-[#1C1814]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all cursor-pointer group"
+                    className="border-2 border-dashed border-[#3D332A] bg-[#1C1814]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#B28DAE] hover:bg-[#B28DAE]/5 transition-all cursor-pointer group"
                     onClick={() => setShowVoiceRecorder(true)}
                   >
-                    <div className="p-4 rounded-full bg-[#1C1814] group-hover:bg-[#D4AF37]/20 transition-colors border border-transparent group-hover:border-[#D4AF37]/30">
-                      <MicIcon className="h-8 w-8 text-white/50 group-hover:text-[#D4AF37]" />
+                    <div className="p-4 rounded-full bg-[#1C1814] group-hover:bg-[#B28DAE]/20 transition-colors border border-transparent group-hover:border-[#B28DAE]/30">
+                      <MicIcon className="h-8 w-8 text-white/50 group-hover:text-[#B28DAE]" />
                     </div>
                     <div className="text-center">
                       <p className="font-medium text-white">Record Voice Note</p>
@@ -765,18 +765,18 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
                 {/* Card 4: Upload Media */}
                 <div
-                  className="border-2 border-dashed border-[#3D332A] bg-[#1C1814]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all cursor-pointer group"
+                  className="border-2 border-dashed border-[#3D332A] bg-[#1C1814]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#B28DAE] hover:bg-[#B28DAE]/5 transition-all cursor-pointer group"
                   onClick={() => fileInputRef.current?.click()}
                   onDragOver={(e) => {
                     e.preventDefault()
-                    e.currentTarget.classList.add("border-[#D4AF37]", "bg-[#D4AF37]/5")
+                    e.currentTarget.classList.add("border-[#B28DAE]", "bg-[#B28DAE]/5")
                   }}
                   onDragLeave={(e) => {
-                    e.currentTarget.classList.remove("border-[#D4AF37]", "bg-[#D4AF37]/5")
+                    e.currentTarget.classList.remove("border-[#B28DAE]", "bg-[#B28DAE]/5")
                   }}
                   onDrop={(e) => {
                     e.preventDefault()
-                    e.currentTarget.classList.remove("border-[#D4AF37]", "bg-[#D4AF37]/5")
+                    e.currentTarget.classList.remove("border-[#B28DAE]", "bg-[#B28DAE]/5")
                     handleFileSelect(e.dataTransfer.files)
                   }}
                 >
@@ -798,8 +798,8 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                     )
                   })()}
 
-                  <div className="p-4 rounded-full bg-[#1C1814] group-hover:bg-[#D4AF37]/20 transition-colors border border-transparent group-hover:border-[#D4AF37]/30">
-                    <ImageIcon className="h-8 w-8 text-white/50 group-hover:text-[#D4AF37]" />
+                  <div className="p-4 rounded-full bg-[#1C1814] group-hover:bg-[#B28DAE]/20 transition-colors border border-transparent group-hover:border-[#B28DAE]/30">
+                    <ImageIcon className="h-8 w-8 text-white/50 group-hover:text-[#B28DAE]" />
                   </div>
                   <div className="text-center">
                     <p className="font-medium text-white">Upload Media</p>
@@ -864,8 +864,8 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                     </>
                   )}
                   {kind === "audio" && (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#D4AF37]/20 to-[#3D332A]/60 p-2">
-                      <Volume2 className="h-8 w-8 text-[#D4AF37]" />
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#B28DAE]/20 to-[#3D332A]/60 p-2">
+                      <Volume2 className="h-8 w-8 text-[#B28DAE]" />
                       <span className="text-[10px] text-white/70 text-center line-clamp-2 px-1">{file.file.name}</span>
                     </div>
                   )}
@@ -912,7 +912,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
               <Button
                 onClick={uploadFiles}
                 disabled={isUploading || files.length === 0}
-                className="rounded-full bg-[#D4AF37] hover:bg-[#c4a233] text-[#141110] font-bold px-6 py-5 shadow-[0_0_15px_rgba(212,175,55,0.25)]"
+                className="rounded-full bg-[#B28DAE] hover:bg-[#a468a0] text-[#141110] font-bold px-6 py-5 shadow-[0_0_15px_rgba(178,141,174,0.25)]"
               >
 
                 {isUploading ? (
@@ -957,7 +957,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 )}
                 {kind === "audio" && (
                   <div className="flex flex-col items-center gap-4 p-8">
-                    <Volume2 className="h-16 w-16 text-[#D4AF37]" />
+                    <Volume2 className="h-16 w-16 text-[#B28DAE]" />
                     <p className="text-white/80 text-sm">{previewFile.file.name}</p>
                     <audio src={previewFile.preview} controls autoPlay className="w-80 max-w-full">
                       Your browser does not support audio playback.

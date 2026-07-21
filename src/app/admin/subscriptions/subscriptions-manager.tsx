@@ -26,10 +26,10 @@ type SubscriptionItem = {
 
 function StatusBadge({ status }: { status: string }) {
   const cfg: Record<string, { icon: React.ElementType; cls: string }> = {
-    active:   { icon: CheckCircle2, cls: "bg-emerald-50 text-emerald-700 border-emerald-100" },
-    past_due: { icon: AlertCircle,  cls: "bg-amber-50 text-amber-700 border-amber-100" },
-    canceled: { icon: XCircle,      cls: "bg-rose-50 text-rose-700 border-rose-100" },
-    paused:   { icon: Clock,        cls: "bg-slate-100 text-slate-600 border-slate-200" },
+    active:   { icon: CheckCircle2, cls: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+    past_due: { icon: AlertCircle,  cls: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+    canceled: { icon: XCircle,      cls: "bg-red-500/10 text-red-400 border-red-500/20" },
+    paused:   { icon: Clock,        cls: "bg-white/5 text-white/60 border-hairline-dark" },
   }
   const { icon: Icon, cls } = cfg[status] ?? cfg.paused
   return (
@@ -116,12 +116,12 @@ export function SubscriptionsManager() {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-        <Filter className="h-4 w-4 text-slate-400 shrink-0" />
+      <div className="flex flex-wrap items-center gap-3 bg-surface-card border border-hairline-dark rounded-xl p-4 shadow-sm">
+        <Filter className="h-4 w-4 text-white/40 shrink-0" />
         <select
           value={filterStatus}
           onChange={e => { setSubsPage(1); setFilterStatus(e.target.value) }}
-          className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm focus:outline-none focus:ring-1 focus:ring-violet-500"
+          className="bg-surface-card border border-hairline-dark rounded-lg px-3 py-1.5 text-xs font-semibold text-white/60 shadow-sm focus:outline-none focus:ring-1 focus:ring-mauve/50"
         >
           <option value="">All Statuses</option>
           <option value="active">Active</option>
@@ -132,30 +132,30 @@ export function SubscriptionsManager() {
         <select
           value={filterPlan}
           onChange={e => { setSubsPage(1); setFilterPlan(e.target.value) }}
-          className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm focus:outline-none focus:ring-1 focus:ring-violet-500"
+          className="bg-surface-card border border-hairline-dark rounded-lg px-3 py-1.5 text-xs font-semibold text-white/60 shadow-sm focus:outline-none focus:ring-1 focus:ring-mauve/50"
         >
           <option value="">All Plans</option>
           {plans.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
-        <Button variant="ghost" size="sm" onClick={() => { setFilterStatus(""); setFilterPlan(""); setSubsPage(1) }} className="h-8 gap-1 text-slate-500 text-xs">
+        <Button variant="ghost" size="sm" onClick={() => { setFilterStatus(""); setFilterPlan(""); setSubsPage(1) }} className="h-8 gap-1 text-white/50 text-xs">
           <RotateCcw className="h-3.5 w-3.5" /> Reset
         </Button>
-        <div className="ml-auto text-xs text-slate-400 font-semibold">
+        <div className="ml-auto text-xs text-white/40 font-semibold">
           {subsTotal} subscription{subsTotal !== 1 ? "s" : ""} found
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <Card className="bg-white border-slate-200 shadow-sm overflow-hidden lg:col-span-2">
+        <Card className="bg-surface-card border-hairline-dark shadow-sm overflow-hidden lg:col-span-2">
           <CardContent className="p-0">
             {loading ? (
-              <div className="p-16 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-violet-600" /></div>
+              <div className="p-16 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-mauve" /></div>
             ) : subs.length === 0 ? (
-              <div className="p-16 text-center text-slate-400 text-xs font-semibold">No subscriptions found.</div>
+              <div className="p-16 text-center text-white/40 text-xs font-semibold">No subscriptions found.</div>
             ) : (
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/50">
+                  <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-white/5">
                     <th className="p-4">User</th>
                     <th className="p-4">Plan</th>
                     <th className="p-4">Status</th>
@@ -163,23 +163,23 @@ export function SubscriptionsManager() {
                     <th className="p-4 text-right">Edit</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 font-medium text-slate-600">
+                <tbody className="divide-y divide-white/10 font-medium text-white/60">
                   {subs.map(sub => (
-                    <tr key={sub.id} onClick={() => startEditSub(sub)} className={cn("hover:bg-slate-50/60 transition-colors cursor-pointer", editingSub?.id === sub.id && "bg-violet-50/40")}>
+                    <tr key={sub.id} onClick={() => startEditSub(sub)} className={cn("hover:bg-white/5 transition-colors cursor-pointer", editingSub?.id === sub.id && "bg-mauve/10")}>
                       <td className="p-4">
-                        <div className="font-bold text-slate-800">{sub.user?.full_name || sub.user?.email || "—"}</div>
-                        <div className="text-[10px] text-slate-400 mt-0.5 font-semibold">{sub.user_id.slice(0, 8)}…</div>
+                        <div className="font-bold text-white/80">{sub.user?.full_name || sub.user?.email || "—"}</div>
+                        <div className="text-[10px] text-white/40 mt-0.5 font-semibold">{sub.user_id.slice(0, 8)}…</div>
                       </td>
-                      <td className="p-4 font-bold text-violet-600 uppercase">{sub.plan?.name ?? sub.plan_id}</td>
+                      <td className="p-4 font-bold text-mauve uppercase">{sub.plan?.name ?? sub.plan_id}</td>
                       <td className="p-4">
                         <StatusBadge status={sub.status} />
-                        {sub.cancel_at_period_end && <span className="ml-1 text-[9px] font-bold text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-100">Cancels at end</span>}
+                        {sub.cancel_at_period_end && <span className="ml-1 text-[9px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full border border-amber-500/20">Cancels at end</span>}
                       </td>
-                      <td className="p-4 text-slate-400">
+                      <td className="p-4 text-white/40">
                         {sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "Per Event"}
                       </td>
                       <td className="p-4 text-right">
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/40 hover:text-mauve hover:bg-mauve/10 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
                       </td>
                     </tr>
                   ))}
@@ -189,11 +189,11 @@ export function SubscriptionsManager() {
           </CardContent>
 
           {subsTotalPages > 1 && (
-            <div className="p-4 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-xs text-slate-400 font-semibold">Page {subsPage} of {subsTotalPages}</span>
+            <div className="p-4 border-t border-hairline-dark flex items-center justify-between">
+              <span className="text-xs text-white/40 font-semibold">Page {subsPage} of {subsTotalPages}</span>
               <div className="flex items-center gap-1">
-                <Button variant="outline" size="sm" disabled={subsPage <= 1} onClick={() => setSubsPage(p => p - 1)} className="h-7 w-7 p-0 border-slate-200"><ChevronLeft className="h-3.5 w-3.5" /></Button>
-                <Button variant="outline" size="sm" disabled={subsPage >= subsTotalPages} onClick={() => setSubsPage(p => p + 1)} className="h-7 w-7 p-0 border-slate-200"><ChevronRight className="h-3.5 w-3.5" /></Button>
+                <Button variant="outline" size="sm" disabled={subsPage <= 1} onClick={() => setSubsPage(p => p - 1)} className="h-7 w-7 p-0 border-hairline-dark"><ChevronLeft className="h-3.5 w-3.5" /></Button>
+                <Button variant="outline" size="sm" disabled={subsPage >= subsTotalPages} onClick={() => setSubsPage(p => p + 1)} className="h-7 w-7 p-0 border-hairline-dark"><ChevronRight className="h-3.5 w-3.5" /></Button>
               </div>
             </div>
           )}
@@ -201,52 +201,52 @@ export function SubscriptionsManager() {
 
         {/* Edit Panel */}
         {editingSub ? (
-          <Card className="bg-white border-slate-200 p-6 sticky top-6 shadow-sm">
+          <Card className="bg-surface-card border-hairline-dark p-6 sticky top-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h4 className="font-bold text-slate-800 text-sm">Edit Subscription</h4>
-                <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{editingSub.user?.full_name}</p>
+                <h4 className="font-bold text-white/80 text-sm">Edit Subscription</h4>
+                <p className="text-[10px] text-white/40 font-semibold mt-0.5">{editingSub.user?.full_name}</p>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setEditingSub(null)} className="h-7 w-7 p-0 hover:bg-slate-100 rounded-lg"><X className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={() => setEditingSub(null)} className="h-7 w-7 p-0 hover:bg-white/5 rounded-lg"><X className="h-4 w-4" /></Button>
             </div>
             <form onSubmit={handleSaveSub} className="space-y-4">
               <div className="space-y-1">
-                <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">Plan Tier</Label>
-                <select value={subNewPlan} onChange={e => setSubNewPlan(e.target.value)} className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700">
+                <Label className="text-white/50 text-xs font-bold uppercase tracking-wider">Plan Tier</Label>
+                <select value={subNewPlan} onChange={e => setSubNewPlan(e.target.value)} className="w-full bg-surface-card border border-hairline-dark rounded-lg px-3 py-2 text-xs font-semibold text-white/70">
                   {plans.map(p => <option key={p.id} value={p.id}>{p.name} (₹{p.price_inr})</option>)}
                 </select>
               </div>
               <div className="space-y-1">
-                <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">Status</Label>
-                <select value={subNewStatus} onChange={e => setSubNewStatus(e.target.value)} className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700">
+                <Label className="text-white/50 text-xs font-bold uppercase tracking-wider">Status</Label>
+                <select value={subNewStatus} onChange={e => setSubNewStatus(e.target.value)} className="w-full bg-surface-card border border-hairline-dark rounded-lg px-3 py-2 text-xs font-semibold text-white/70">
                   <option value="active">Active</option>
                   <option value="past_due">Past Due</option>
                   <option value="canceled">Canceled</option>
                   <option value="paused">Paused</option>
                 </select>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-100 rounded-lg">
+              <div className="flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
                 <input type="checkbox" id="cancelAtEnd" checked={subCancelAtEnd} onChange={e => setSubCancelAtEnd(e.target.checked)} className="h-4 w-4 accent-amber-600" />
-                <Label htmlFor="cancelAtEnd" className="text-xs font-semibold text-amber-700 cursor-pointer">Cancel at period end</Label>
+                <Label htmlFor="cancelAtEnd" className="text-xs font-semibold text-amber-400 cursor-pointer">Cancel at period end</Label>
               </div>
-              <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 space-y-1 text-xs font-semibold">
-                <div className="flex justify-between text-slate-400"><span>Subscription ID</span><span className="font-mono text-slate-600">{editingSub.id.slice(0, 8)}…</span></div>
-                <div className="flex justify-between text-slate-400"><span>Created</span><span>{new Date(editingSub.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></div>
+              <div className="bg-white/5 border border-hairline-dark rounded-lg p-3 space-y-1 text-xs font-semibold">
+                <div className="flex justify-between text-white/40"><span>Subscription ID</span><span className="font-mono text-white/60">{editingSub.id.slice(0, 8)}…</span></div>
+                <div className="flex justify-between text-white/40"><span>Created</span><span>{new Date(editingSub.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></div>
                 {editingSub.razorpay_subscription_id && (
-                  <div className="flex justify-between text-slate-400"><span>Razorpay ID</span><span className="font-mono text-[10px] text-slate-500">{editingSub.razorpay_subscription_id}</span></div>
+                  <div className="flex justify-between text-white/40"><span>Razorpay ID</span><span className="font-mono text-[10px] text-white/50">{editingSub.razorpay_subscription_id}</span></div>
                 )}
               </div>
               <div className="flex gap-3 pt-1">
-                <Button type="submit" disabled={subActioning} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs h-9">
+                <Button type="submit" disabled={subActioning} className="flex-1 bg-mauve hover:bg-mauve-strong text-[#141110] font-bold text-xs h-9">
                   <Save className="h-3.5 w-3.5 mr-1.5" />{subActioning ? "Saving…" : "Save Changes"}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => setEditingSub(null)} className="border-slate-200 font-bold text-xs h-9">Cancel</Button>
+                <Button type="button" variant="outline" onClick={() => setEditingSub(null)} className="border-hairline-dark font-bold text-xs h-9">Cancel</Button>
               </div>
             </form>
           </Card>
         ) : (
-          <div className="p-6 bg-slate-50 border border-slate-200 border-dashed text-slate-400 text-center rounded-2xl h-64 flex flex-col justify-center items-center text-xs font-semibold">
-            <Building2 className="h-8 w-8 mb-3 text-slate-300" />
+          <div className="p-6 bg-white/5 border border-hairline-dark border-dashed text-white/40 text-center rounded-2xl h-64 flex flex-col justify-center items-center text-xs font-semibold">
+            <Building2 className="h-8 w-8 mb-3 text-white/30" />
             <span>Click a subscription row to edit its plan or status.</span>
           </div>
         )}

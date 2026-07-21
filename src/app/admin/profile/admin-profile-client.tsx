@@ -152,39 +152,39 @@ export function AdminProfileClient({ user, profile }: { user: any, profile: any 
   }
 
   return (
-    <main className="px-6 py-8 space-y-6 max-w-5xl bg-slate-50 min-h-full">
+    <main className="px-6 py-8 space-y-6 max-w-5xl bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Admin Profile Settings</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage your identity, security credentials, and two-factor authentication.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Admin Profile Settings</h1>
+          <p className="text-sm text-white/50 mt-1">Manage your identity, security credentials, and two-factor authentication.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Profile Info */}
-        <Card className="bg-white border-slate-200 shadow-sm">
+        <Card className="bg-surface-card border-hairline-dark shadow-sm">
           <CardHeader>
-            <CardTitle className="text-slate-800 flex items-center gap-2 text-base font-bold">
-              <User className="h-5 w-5 text-violet-650" />
+            <CardTitle className="text-white/80 flex items-center gap-2 text-base font-bold">
+              <User className="h-5 w-5 text-mauve" />
               <span>Personal Information</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleUpdateProfile} className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">Email Address</Label>
-                <Input value={user.email} disabled className="bg-slate-50 border-slate-200 text-slate-500 shadow-sm" />
-                <p className="text-[10px] text-slate-400">Email cannot be changed directly from the admin panel.</p>
+                <Label className="text-white/50 text-xs font-bold uppercase tracking-wider">Email Address</Label>
+                <Input value={user.email} disabled className="bg-white/5 border-hairline-dark text-white/50 shadow-sm" />
+                <p className="text-[10px] text-white/40">Email cannot be changed directly from the admin panel.</p>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">Full Name</Label>
+                <Label className="text-white/50 text-xs font-bold uppercase tracking-wider">Full Name</Label>
                 <Input 
                   value={fullName} 
                   onChange={e => setFullName(e.target.value)}
-                  className="bg-white border-slate-200 text-slate-800 shadow-sm focus:border-violet-600 focus:ring-violet-600" 
+                  className="bg-surface-card border-hairline-dark text-white/80 shadow-sm focus:border-mauve focus:ring-mauve" 
                 />
               </div>
-              <Button type="submit" disabled={loadingProfile} className="bg-slate-900 hover:bg-slate-800 w-full mt-2">
+              <Button type="submit" disabled={loadingProfile} className="bg-surface-dark hover:bg-surface-card-elevated w-full mt-2">
                 {loadingProfile ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Update Profile
               </Button>
@@ -193,34 +193,34 @@ export function AdminProfileClient({ user, profile }: { user: any, profile: any 
         </Card>
 
         {/* Change Password */}
-        <Card className="bg-white border-slate-200 shadow-sm">
+        <Card className="bg-surface-card border-hairline-dark shadow-sm">
           <CardHeader>
-            <CardTitle className="text-slate-800 flex items-center gap-2 text-base font-bold">
-              <Lock className="h-5 w-5 text-violet-650" />
+            <CardTitle className="text-white/80 flex items-center gap-2 text-base font-bold">
+              <Lock className="h-5 w-5 text-mauve" />
               <span>Security & Password</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleUpdatePassword} className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">New Password</Label>
+                <Label className="text-white/50 text-xs font-bold uppercase tracking-wider">New Password</Label>
                 <Input 
                   type="password"
                   value={password} 
                   onChange={e => setPassword(e.target.value)}
-                  className="bg-white border-slate-200 text-slate-800 shadow-sm focus:border-violet-600 focus:ring-violet-600" 
+                  className="bg-surface-card border-hairline-dark text-white/80 shadow-sm focus:border-mauve focus:ring-mauve" 
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">Confirm Password</Label>
+                <Label className="text-white/50 text-xs font-bold uppercase tracking-wider">Confirm Password</Label>
                 <Input 
                   type="password"
                   value={confirmPassword} 
                   onChange={e => setConfirmPassword(e.target.value)}
-                  className="bg-white border-slate-200 text-slate-800 shadow-sm focus:border-violet-600 focus:ring-violet-600" 
+                  className="bg-surface-card border-hairline-dark text-white/80 shadow-sm focus:border-mauve focus:ring-mauve" 
                 />
               </div>
-              <Button type="submit" disabled={loadingPassword} className="bg-slate-900 hover:bg-slate-800 w-full mt-2">
+              <Button type="submit" disabled={loadingPassword} className="bg-surface-dark hover:bg-surface-card-elevated w-full mt-2">
                 {loadingPassword ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Change Password
               </Button>
@@ -229,33 +229,33 @@ export function AdminProfileClient({ user, profile }: { user: any, profile: any 
         </Card>
 
         {/* 2FA Card */}
-        <Card className="bg-white border-slate-200 shadow-sm md:col-span-2">
+        <Card className="bg-surface-card border-hairline-dark shadow-sm md:col-span-2">
           <CardHeader>
-            <CardTitle className="text-slate-800 flex items-center gap-2 text-base font-bold">
-              <Shield className="h-5 w-5 text-violet-650" />
+            <CardTitle className="text-white/80 flex items-center gap-2 text-base font-bold">
+              <Shield className="h-5 w-5 text-mauve" />
               <span>Two-Factor Authentication (2FA)</span>
             </CardTitle>
-            <CardDescription className="text-slate-500">
+            <CardDescription className="text-white/50">
               Add an additional layer of security to your admin account by requiring an authenticator code (TOTP) upon login.
             </CardDescription>
           </CardHeader>
           <CardContent>
             {mfaStatus === "loading" ? (
-              <div className="flex items-center gap-2 text-sm text-slate-500">
+              <div className="flex items-center gap-2 text-sm text-white/50">
                 <Loader2 className="h-4 w-4 animate-spin" /> Checking security status...
               </div>
             ) : mfaStatus === "enrolled" ? (
-              <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50 flex items-center justify-between">
+              <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-500/10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-100 rounded-full text-emerald-600">
+                  <div className="p-2 bg-emerald-500/10 rounded-full text-emerald-400">
                     <ShieldCheck className="h-6 w-6" />
                   </div>
                   <div>
                     <h4 className="font-bold text-emerald-900">2FA is Currently Enabled</h4>
-                    <p className="text-sm text-emerald-700">Your account is secured with a TOTP Authenticator.</p>
+                    <p className="text-sm text-emerald-400">Your account is secured with a TOTP Authenticator.</p>
                   </div>
                 </div>
-                <Button variant="outline" onClick={handleUnenrollMfa} disabled={loadingMfa} className="text-rose-600 border-rose-200 hover:bg-rose-50">
+                <Button variant="outline" onClick={handleUnenrollMfa} disabled={loadingMfa} className="text-red-400 border-red-500/20 hover:bg-red-500/10">
                   {loadingMfa ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Disable 2FA"}
                 </Button>
               </div>
@@ -263,28 +263,28 @@ export function AdminProfileClient({ user, profile }: { user: any, profile: any 
               <div className="space-y-4">
                 {!qrCodeUrl ? (
                   <div>
-                    <p className="text-sm text-slate-600 mb-4">2FA is currently disabled. We highly recommend enabling it for administrative accounts.</p>
-                    <Button onClick={handleEnrollMfa} disabled={loadingMfa} className="bg-violet-600 hover:bg-violet-700">
+                    <p className="text-sm text-white/60 mb-4">2FA is currently disabled. We highly recommend enabling it for administrative accounts.</p>
+                    <Button onClick={handleEnrollMfa} disabled={loadingMfa} className="bg-mauve hover:bg-mauve-strong">
                       {loadingMfa ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                       Setup Authenticator App
                     </Button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-slate-50 p-6 rounded-xl border border-slate-200">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-white/5 p-6 rounded-xl border border-hairline-dark">
                     <div className="space-y-4 text-center">
-                      <p className="text-sm font-semibold text-slate-800">1. Scan this QR Code with your Authenticator App</p>
-                      <div className="bg-white p-4 rounded-xl border border-slate-200 inline-block">
+                      <p className="text-sm font-semibold text-white/80">1. Scan this QR Code with your Authenticator App</p>
+                      <div className="bg-surface-card p-4 rounded-xl border border-hairline-dark inline-block">
                         <img src={qrCodeUrl} alt="QR Code for 2FA" className="w-48 h-48" />
                       </div>
                     </div>
                     <div className="space-y-4">
-                      <p className="text-sm font-semibold text-slate-800">2. Verify the 6-digit code</p>
+                      <p className="text-sm font-semibold text-white/80">2. Verify the 6-digit code</p>
                       <form onSubmit={handleVerifyMfa} className="space-y-3">
                         <Input 
                           placeholder="e.g. 123456" 
                           value={totpCode}
                           onChange={(e) => setTotpCode(e.target.value)}
-                          className="text-center text-lg tracking-widest bg-white"
+                          className="text-center text-lg tracking-widest bg-surface-card"
                           maxLength={6}
                         />
                         <div className="flex gap-2">

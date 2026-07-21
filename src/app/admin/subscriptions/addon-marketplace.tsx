@@ -135,49 +135,49 @@ export function AddonMarketplace() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       <div className="lg:col-span-2 space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-bold text-slate-800">Add-on Marketplace</h2>
-          <Button onClick={startAdd} className="h-8 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold gap-1">
+          <h2 className="text-lg font-bold text-white/80">Add-on Marketplace</h2>
+          <Button onClick={startAdd} className="h-8 bg-mauve hover:bg-mauve-strong text-[#141110] text-xs font-bold gap-1">
             <Plus className="h-3.5 w-3.5" /> New Add-on
           </Button>
         </div>
         
         {loading ? (
-          <div className="p-16 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-violet-600" /></div>
+          <div className="p-16 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-mauve" /></div>
         ) : addons.length === 0 ? (
-          <div className="p-16 border border-dashed border-slate-200 bg-white text-slate-400 text-center rounded-2xl text-xs font-semibold">
-            <Package className="h-8 w-8 mx-auto mb-2 text-slate-300" />
+          <div className="p-16 border border-dashed border-hairline-dark bg-surface-card text-white/40 text-center rounded-2xl text-xs font-semibold">
+            <Package className="h-8 w-8 mx-auto mb-2 text-white/30" />
             No add-ons configured yet.
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {addons.map(a => (
-              <Card key={a.id} className="bg-white border-slate-200 shadow-sm hover:border-slate-300">
+              <Card key={a.id} className="bg-surface-card border-hairline-dark shadow-sm hover:border-hairline-dark">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h3 className="font-extrabold text-slate-800">{a.name}</h3>
-                      <div className="text-xs text-slate-500 font-medium line-clamp-2 mt-1">{a.description}</div>
+                      <h3 className="font-extrabold text-white/80">{a.name}</h3>
+                      <div className="text-xs text-white/50 font-medium line-clamp-2 mt-1">{a.description}</div>
                     </div>
                     <div className="flex gap-1 shrink-0">
-                      <Button variant="ghost" size="sm" onClick={() => startEdit(a)} className="h-7 w-7 p-0 text-slate-500 hover:bg-slate-100 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(a.id)} className="h-7 w-7 p-0 text-rose-500 hover:bg-rose-50 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => startEdit(a)} className="h-7 w-7 p-0 text-white/50 hover:bg-white/5 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(a.id)} className="h-7 w-7 p-0 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
                     </div>
                   </div>
                   <div className="mt-3 flex items-end gap-1">
-                    <span className="text-2xl font-black text-slate-900">₹{a.price_inr}</span>
-                    <span className="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider bg-slate-100 px-1.5 py-0.5 rounded-md">{a.billing_type.replace("_", " ")}</span>
+                    <span className="text-2xl font-black text-white">₹{a.price_inr}</span>
+                    <span className="text-xs text-white/40 font-bold mb-1 uppercase tracking-wider bg-white/5 px-1.5 py-0.5 rounded-md">{a.billing_type.replace("_", " ")}</span>
                   </div>
-                  <div className="mt-3 pt-2 border-t border-slate-100 flex flex-wrap gap-1.5 items-center">
-                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", a.is_active ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-100 text-slate-500 border-slate-200")}>
+                  <div className="mt-3 pt-2 border-t border-hairline-dark flex flex-wrap gap-1.5 items-center">
+                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", a.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/50 border-hairline-dark")}>
                       {a.is_active ? "Active" : "Inactive"}
                     </span>
                     {a.category && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-violet-50 text-violet-700 border-violet-100">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-mauve/10 text-mauve border-mauve/20">
                         {CATEGORY_LABELS[a.category]}
                       </span>
                     )}
                     {a.category && a.value !== null && a.value !== undefined && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-slate-50 text-slate-600 border-slate-200">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-white/5 text-white/60 border-hairline-dark">
                         {a.value === -1 ? "Unlimited" : `value: ${a.value}`}
                       </span>
                     )}
@@ -191,11 +191,11 @@ export function AddonMarketplace() {
 
       <div>
         {(editingAddon || isAdding) ? (
-          <Card className="bg-white border-slate-200 sticky top-6 shadow-sm">
+          <Card className="bg-surface-card border-hairline-dark sticky top-6 shadow-sm">
             <CardHeader className="pb-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-base text-slate-800 font-bold">{isAdding ? "Create Add-on" : "Edit Add-on"}</CardTitle>
+                  <CardTitle className="text-base text-white/80 font-bold">{isAdding ? "Create Add-on" : "Edit Add-on"}</CardTitle>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => { setIsAdding(false); setEditingAddon(null) }} className="h-7 w-7 p-0 rounded-lg"><X className="h-4 w-4" /></Button>
               </div>
@@ -203,34 +203,34 @@ export function AddonMarketplace() {
             <CardContent>
               <form onSubmit={handleSave} className="space-y-4">
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Name</Label>
+                  <Label className="text-xs font-bold text-white/50">Name</Label>
                   <Input value={formName} onChange={e => setFormName(e.target.value)} required placeholder="e.g. Extra 50 Guests" className="h-8 text-xs font-medium" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Description</Label>
+                  <Label className="text-xs font-bold text-white/50">Description</Label>
                   <Input value={formDesc} onChange={e => setFormDesc(e.target.value)} className="h-8 text-xs font-medium" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label className="text-xs font-bold text-slate-500">Price (INR)</Label>
+                    <Label className="text-xs font-bold text-white/50">Price (INR)</Label>
                     <Input type="number" value={formPriceInr} onChange={e => setFormPriceInr(Number(e.target.value))} required className="h-8 text-xs font-medium" />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs font-bold text-slate-500">Price (USD)</Label>
+                    <Label className="text-xs font-bold text-white/50">Price (USD)</Label>
                     <Input type="number" value={formPriceUsd} onChange={e => setFormPriceUsd(Number(e.target.value))} required className="h-8 text-xs font-medium" />
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Billing Type</Label>
-                  <select value={formBilling} onChange={e => setFormBilling(e.target.value as any)} className="w-full h-8 px-2 rounded-md border border-slate-200 text-xs font-medium">
+                  <Label className="text-xs font-bold text-white/50">Billing Type</Label>
+                  <select value={formBilling} onChange={e => setFormBilling(e.target.value as any)} className="w-full h-8 px-2 rounded-md border border-hairline-dark text-xs font-medium">
                     <option value="one_time">One-time Purchase</option>
                     <option value="monthly">Recurring Monthly</option>
                     <option value="yearly">Recurring Yearly</option>
                     <option value="lifetime">Lifetime</option>
                   </select>
                 </div>
-                <div className="space-y-1 pt-2 border-t border-slate-100">
-                  <Label className="text-xs font-bold text-slate-500">Category</Label>
+                <div className="space-y-1 pt-2 border-t border-hairline-dark">
+                  <Label className="text-xs font-bold text-white/50">Category</Label>
                   <select
                     value={formCategory}
                     onChange={e => {
@@ -238,7 +238,7 @@ export function AddonMarketplace() {
                       setFormCategory(next)
                       if (next !== "photo_limit_boost") setFormUnlimited(false)
                     }}
-                    className="w-full h-8 px-2 rounded-md border border-slate-200 text-xs font-medium"
+                    className="w-full h-8 px-2 rounded-md border border-hairline-dark text-xs font-medium"
                   >
                     <option value="">None (legacy / uncategorized)</option>
                     <option value="guest_boost">Guest Boost</option>
@@ -247,19 +247,19 @@ export function AddonMarketplace() {
                     <option value="video_addon">Video Add-on</option>
                     <option value="voice_addon">Voice Add-on</option>
                   </select>
-                  <p className="text-[10px] text-slate-400 font-medium pt-0.5">
+                  <p className="text-[10px] text-white/40 font-medium pt-0.5">
                     Drives where this add-on shows up in the event wizard and Billing page (guest limit, shot limit, photo limit tier, video unlock, voice unlock).
                   </p>
                 </div>
                 {formCategory && formCategory !== "video_addon" && formCategory !== "voice_addon" && (
                   <div className="space-y-1">
-                    <Label className="text-xs font-bold text-slate-500">
+                    <Label className="text-xs font-bold text-white/50">
                       {formCategory === "photo_limit_boost" ? "Photo Limit Tier" : "Tier Value"}
                     </Label>
                     {formCategory === "photo_limit_boost" && (
                       <div className="flex items-center gap-2 pb-1">
-                        <input type="checkbox" checked={formUnlimited} onChange={e => setFormUnlimited(e.target.checked)} className="rounded text-violet-600 h-3.5 w-3.5" />
-                        <span className="text-xs font-medium text-slate-600">Unlimited (value = -1)</span>
+                        <input type="checkbox" checked={formUnlimited} onChange={e => setFormUnlimited(e.target.checked)} className="rounded text-mauve h-3.5 w-3.5" />
+                        <span className="text-xs font-medium text-white/60">Unlimited (value = -1)</span>
                       </div>
                     )}
                     <Input
@@ -272,11 +272,11 @@ export function AddonMarketplace() {
                     />
                   </div>
                 )}
-                <div className="flex items-center gap-2 py-2 border-t border-b border-slate-100">
-                  <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-violet-600 h-3.5 w-3.5" />
-                  <span className="text-xs font-bold text-slate-700">Add-on Active</span>
+                <div className="flex items-center gap-2 py-2 border-t border-b border-hairline-dark">
+                  <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-mauve h-3.5 w-3.5" />
+                  <span className="text-xs font-bold text-white/70">Add-on Active</span>
                 </div>
-                <Button type="submit" disabled={actioning} className="w-full h-8 bg-violet-600 hover:bg-violet-700 font-bold text-xs">
+                <Button type="submit" disabled={actioning} className="w-full h-8 bg-mauve hover:bg-mauve-strong font-bold text-xs">
                   {actioning ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
                   Save Add-on
                 </Button>
@@ -284,7 +284,7 @@ export function AddonMarketplace() {
             </CardContent>
           </Card>
         ) : (
-          <div className="p-8 border border-dashed border-slate-200 bg-slate-50 text-slate-400 text-center rounded-xl text-xs font-semibold">
+          <div className="p-8 border border-dashed border-hairline-dark bg-white/5 text-white/40 text-center rounded-xl text-xs font-semibold">
             Select an add-on to edit or create a new one.
           </div>
         )}

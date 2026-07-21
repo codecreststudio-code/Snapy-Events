@@ -24,10 +24,10 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: GridPhoto; watermarkEnable
 
   if (isMessage(p)) {
     return (
-      <div className="aspect-square bg-gradient-to-br from-[#D4AF37]/10 to-[#3D332A]/40 p-4 flex flex-col justify-between border border-[#D4AF37]/20 rounded-lg">
+      <div className="aspect-square bg-gradient-to-br from-[#B28DAE]/10 to-[#3D332A]/40 p-4 flex flex-col justify-between border border-[#B28DAE]/20 rounded-lg">
         <div className="flex items-center gap-2 min-w-0">
-          <MessageCircle className="h-4 w-4 shrink-0 text-[#D4AF37]" />
-          <span className="min-w-0 truncate text-xs font-semibold text-[#D4AF37]">{p.uploader_name || "Guest Wish"}</span>
+          <MessageCircle className="h-4 w-4 shrink-0 text-[#B28DAE]" />
+          <span className="min-w-0 truncate text-xs font-semibold text-[#B28DAE]">{p.uploader_name || "Guest Wish"}</span>
         </div>
         <p className="font-playfair text-xs italic text-white/80 line-clamp-3 my-auto">"{p.metadata?.text || p.original_filename}"</p>
         <span className="text-[10px] text-white/40">Written Note</span>
@@ -56,8 +56,8 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: GridPhoto; watermarkEnable
 
   if (isAudio(p)) {
     return (
-      <div className="aspect-square bg-gradient-to-br from-[#D4AF37]/20 to-[#3D332A]/60 flex flex-col items-center justify-center p-3 gap-2 relative">
-        <Volume2 className="h-10 w-10 text-[#D4AF37]" />
+      <div className="aspect-square bg-gradient-to-br from-[#B28DAE]/20 to-[#3D332A]/60 flex flex-col items-center justify-center p-3 gap-2 relative">
+        <Volume2 className="h-10 w-10 text-[#B28DAE]" />
         <span className="text-xs text-white/80 font-medium line-clamp-1">{p.uploader_name || "Voice Note"}</span>
       </div>
     )
@@ -81,7 +81,7 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: GridPhoto; watermarkEnable
       )}
     </div>
   ) : (
-    <div className="aspect-square bg-gradient-to-br from-[#D4AF37]/20 to-[#3D332A]/60" />
+    <div className="aspect-square bg-gradient-to-br from-[#B28DAE]/20 to-[#3D332A]/60" />
   )
 }
 
@@ -238,7 +238,7 @@ export function MediaGrid({
             <button
               key={p.id}
               onClick={() => setActive(p)}
-              className="mb-4 block w-full break-inside-avoid overflow-hidden rounded-xl border border-[#3D332A] bg-[#1C1814] shadow-sm hover:border-[#D4AF37]/40 hover:shadow-md transition-all text-left cursor-pointer"
+              className="mb-4 block w-full break-inside-avoid overflow-hidden rounded-xl border border-[#3D332A] bg-[#1C1814] shadow-sm hover:border-[#B28DAE]/40 hover:shadow-md transition-all text-left cursor-pointer"
             >
               <MediaThumbnail p={p} watermarkEnabled={watermarkEnabled} />
             </button>

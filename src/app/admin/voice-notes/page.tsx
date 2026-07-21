@@ -82,38 +82,38 @@ export default function AdminVoiceNotesPage() {
   })
 
   return (
-    <main className="px-6 py-8 space-y-6 bg-slate-50 min-h-full">
+    <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Voice Note Management</h1>
-          <p className="text-sm text-slate-500 mt-1">Review guest voice note uploads, inspect waveforms, and audit audio greetings.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Voice Note Management</h1>
+          <p className="text-sm text-white/50 mt-1">Review guest voice note uploads, inspect waveforms, and audit audio greetings.</p>
         </div>
-        <Button onClick={fetchVoices} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
-          <RefreshCw className="h-4 w-4 text-slate-500" />
+        <Button onClick={fetchVoices} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
+          <RefreshCw className="h-4 w-4 text-white/50" />
           <span>Refresh</span>
         </Button>
       </div>
 
       <div className="flex items-center max-w-sm relative">
-        <Search className="h-4 w-4 absolute left-3 text-slate-400" />
+        <Search className="h-4 w-4 absolute left-3 text-white/40" />
         <Input
           placeholder="Filter by filename, event, or uploader..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 bg-white border-slate-200 text-slate-800 shadow-sm"
+          className="pl-9 bg-surface-card border-hairline-dark text-white/80 shadow-sm"
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Voice Notes List */}
-        <Card className="bg-white border-slate-200 shadow-sm overflow-hidden lg:col-span-2">
+        <Card className="bg-surface-card border-hairline-dark shadow-sm overflow-hidden lg:col-span-2">
           <CardContent className="p-6">
             {loading ? (
               <div className="p-12 flex justify-center items-center">
-                <Loader2 className="h-8 w-8 animate-spin text-violet-650" />
+                <Loader2 className="h-8 w-8 animate-spin text-mauve" />
               </div>
             ) : filteredVoices.length === 0 ? (
-              <div className="p-12 text-center text-slate-400 text-sm font-semibold">
+              <div className="p-12 text-center text-white/40 text-sm font-semibold">
                 No voice notes found in the database.
               </div>
             ) : (
@@ -127,8 +127,8 @@ export default function AdminVoiceNotesPage() {
                       key={v.id}
                       onClick={() => setSelectedVoice(v)}
                       className={cn(
-                        "p-4 border rounded-xl cursor-pointer hover:bg-slate-50/50 hover:border-violet-300 transition-all flex items-center justify-between gap-4",
-                        selectedVoice?.id === v.id ? "ring-2 ring-violet-500 border-transparent bg-violet-50/10" : "border-slate-100 bg-white"
+                        "p-4 border rounded-xl cursor-pointer hover:bg-white/5 hover:border-mauve/30 transition-all flex items-center justify-between gap-4",
+                        selectedVoice?.id === v.id ? "ring-2 ring-mauve/50 border-transparent bg-mauve/5" : "border-hairline-dark bg-surface-card"
                       )}
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -137,14 +137,14 @@ export default function AdminVoiceNotesPage() {
                             e.stopPropagation()
                             setPlayingVoiceId(isPlaying ? null : v.id)
                           }}
-                          className="h-10 w-10 rounded-full bg-violet-50 hover:bg-violet-100 flex items-center justify-center text-violet-600 border border-violet-100 shrink-0 shadow-sm"
+                          className="h-10 w-10 rounded-full bg-mauve/10 hover:bg-mauve/10 flex items-center justify-center text-mauve border border-mauve/20 shrink-0 shadow-sm"
                         >
                           {isPlaying ? <Pause className="h-4.5 w-4.5" /> : <Play className="h-4.5 w-4.5 fill-violet-600 ml-0.5" />}
                         </button>
                         
                         <div className="flex-1 min-w-0 space-y-1">
-                          <p className="font-bold text-slate-800 text-sm truncate">{v.original_filename || "audio-greeting.wav"}</p>
-                          <p className="text-slate-400 text-[10px] truncate">Event: {v.event?.name || "N/A"}</p>
+                          <p className="font-bold text-white/80 text-sm truncate">{v.original_filename || "audio-greeting.wav"}</p>
+                          <p className="text-white/40 text-[10px] truncate">Event: {v.event?.name || "N/A"}</p>
                         </div>
                       </div>
 
@@ -153,7 +153,7 @@ export default function AdminVoiceNotesPage() {
                           {Array.from({ length: 15 }).map((_, idx) => (
                             <div
                               key={idx}
-                              className="w-[2px] bg-violet-600 rounded-full"
+                              className="w-[2px] bg-mauve rounded-full"
                               style={{
                                 height: isPlaying 
                                   ? `${Math.max(10, Math.sin(idx + Date.now()/200) * 100)}%` 
@@ -163,9 +163,9 @@ export default function AdminVoiceNotesPage() {
                           ))}
                         </div>
                         
-                        <div className="text-right text-[10px] font-semibold text-slate-500">
+                        <div className="text-right text-[10px] font-semibold text-white/50">
                           <span className="block">{duration}s</span>
-                          <span className="block text-slate-400 font-normal">{fileSizeKb} KB</span>
+                          <span className="block text-white/40 font-normal">{fileSizeKb} KB</span>
                         </div>
                       </div>
                     </div>
@@ -177,54 +177,54 @@ export default function AdminVoiceNotesPage() {
         </Card>
 
         {/* Selected Inspector Panel */}
-        <Card className="bg-white border-slate-200 shadow-sm p-6 sticky top-6">
+        <Card className="bg-surface-card border-hairline-dark shadow-sm p-6 sticky top-6">
           {selectedVoice ? (
             <div className="space-y-6">
-              <div className="h-32 bg-slate-50 border border-slate-200 rounded-xl flex flex-col items-center justify-center text-slate-500 relative overflow-hidden">
-                <Mic className="h-8 w-8 text-slate-400" />
-                <span className="text-xs font-semibold text-slate-650 mt-2">Voice Recording Inspector</span>
-                <span className="text-[10px] font-mono text-slate-400 mt-1 truncate max-w-[220px]">{selectedVoice.storage_path}</span>
+              <div className="h-32 bg-white/5 border border-hairline-dark rounded-xl flex flex-col items-center justify-center text-white/50 relative overflow-hidden">
+                <Mic className="h-8 w-8 text-white/40" />
+                <span className="text-xs font-semibold text-white/65 mt-2">Voice Recording Inspector</span>
+                <span className="text-[10px] font-mono text-white/40 mt-1 truncate max-w-[220px]">{selectedVoice.storage_path}</span>
               </div>
 
-              <div className="border-t border-slate-100 pt-4 space-y-3.5 text-xs">
+              <div className="border-t border-hairline-dark pt-4 space-y-3.5 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Voice ID</span>
-                  <span className="font-mono text-slate-700 font-semibold">{selectedVoice.id}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Voice ID</span>
+                  <span className="font-mono text-white/70 font-semibold">{selectedVoice.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Filename</span>
-                  <span className="text-slate-700 font-semibold truncate max-w-[150px]">{selectedVoice.original_filename || "N/A"}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Filename</span>
+                  <span className="text-white/70 font-semibold truncate max-w-[150px]">{selectedVoice.original_filename || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Event Name</span>
-                  <span className="text-slate-700 font-semibold">{selectedVoice.event?.name || "N/A"}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Event Name</span>
+                  <span className="text-white/70 font-semibold">{selectedVoice.event?.name || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Uploader Email</span>
-                  <span className="text-slate-700 font-semibold">{selectedVoice.uploader?.email || "N/A"}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Uploader Email</span>
+                  <span className="text-white/70 font-semibold">{selectedVoice.uploader?.email || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Duration</span>
-                  <span className="text-slate-700 font-semibold">{selectedVoice.metadata?.duration || "15"} seconds</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Duration</span>
+                  <span className="text-white/70 font-semibold">{selectedVoice.metadata?.duration || "15"} seconds</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Size</span>
-                  <span className="text-slate-700 font-semibold">
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Size</span>
+                  <span className="text-white/70 font-semibold">
                     {(selectedVoice.file_size ? selectedVoice.file_size / 1024 : 0).toFixed(1)} KB
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider">Upload Date</span>
-                  <span className="text-slate-700 font-semibold">{new Date(selectedVoice.created_at).toLocaleString()}</span>
+                  <span className="text-white/40 font-bold uppercase tracking-wider">Upload Date</span>
+                  <span className="text-white/70 font-semibold">{new Date(selectedVoice.created_at).toLocaleString()}</span>
                 </div>
               </div>
 
-              <div className="border-t border-slate-100 pt-4 space-y-2">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Controls</h4>
+              <div className="border-t border-hairline-dark pt-4 space-y-2">
+                <h4 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2">Controls</h4>
                 <Button
                   onClick={() => handleDelete(selectedVoice.id)}
                   disabled={actioningId === selectedVoice.id}
-                  className="w-full text-xs font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-100 shadow-sm flex items-center justify-center gap-1.5"
+                  className="w-full text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 shadow-sm flex items-center justify-center gap-1.5"
                 >
                   <Trash2 className="h-4 w-4" />
                   <span>Delete Voice Note</span>
@@ -232,8 +232,8 @@ export default function AdminVoiceNotesPage() {
               </div>
             </div>
           ) : (
-            <div className="h-64 flex flex-col justify-center items-center text-center text-slate-400">
-              <Volume2 className="h-8 w-8 text-slate-300 mb-2" />
+            <div className="h-64 flex flex-col justify-center items-center text-center text-white/40">
+              <Volume2 className="h-8 w-8 text-white/30 mb-2" />
               <span className="text-xs font-semibold">Select any audio greeting card to review waveform details, play recording, and perform moderation.</span>
             </div>
           )}

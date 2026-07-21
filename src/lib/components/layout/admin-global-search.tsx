@@ -58,79 +58,79 @@ export function AdminGlobalSearch() {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'module': return <LayoutDashboard className="h-4 w-4 text-violet-500" />
+      case 'module': return <LayoutDashboard className="h-4 w-4 text-mauve" />
       case 'organization': return <Building2 className="h-4 w-4 text-blue-500" />
       case 'user': return <Users className="h-4 w-4 text-emerald-500" />
       case 'event': return <Calendar className="h-4 w-4 text-amber-500" />
       case 'gallery': return <Image className="h-4 w-4 text-pink-500" />
       case 'subscription': return <CreditCard className="h-4 w-4 text-indigo-500" />
       case 'ticket': return <Ticket className="h-4 w-4 text-rose-500" />
-      default: return <FileText className="h-4 w-4 text-slate-500" />
+      default: return <FileText className="h-4 w-4 text-white/50" />
     }
   }
 
   return (
     <div className="flex flex-1 items-center max-w-md relative" ref={wrapperRef}>
-      <Search className="absolute left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+      <Search className="absolute left-3 h-4 w-4 text-white/40 pointer-events-none" />
       <Input
         type="search"
         placeholder="Search everything... (modules, users, events)"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onFocus={() => { if (query.trim().length >= 2) setIsOpen(true) }}
-        className="pl-9 pr-8 py-1.5 w-full bg-slate-50 border-slate-200 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus-visible:ring-violet-500 focus-visible:border-violet-500 focus-visible:bg-white transition-colors"
+        className="pl-9 pr-8 py-1.5 w-full bg-white/5 border-hairline-dark rounded-lg text-sm text-white placeholder:text-white/40 focus-visible:ring-mauve/50 focus-visible:border-mauve transition-colors"
       />
       {isSearching && (
-        <Loader2 className="absolute right-3 h-4 w-4 text-slate-400 animate-spin pointer-events-none" />
+        <Loader2 className="absolute right-3 h-4 w-4 text-white/40 animate-spin pointer-events-none" />
       )}
       {!isSearching && (
-        <div className="absolute right-3 hidden md:flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono font-medium text-slate-400 bg-slate-100 rounded border border-slate-200 pointer-events-none">
+        <div className="absolute right-3 hidden md:flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono font-medium text-white/40 bg-white/5 rounded border border-hairline-dark pointer-events-none">
           <span>⌘</span>
           <span>K</span>
         </div>
       )}
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-surface-card-elevated border border-hairline-dark rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto">
           {results.length > 0 ? (
             <div className="py-2">
               {groupedResults.module.length > 0 && (
                 <div className="mb-2">
-                  <div className="px-3 pb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Navigation Modules</div>
+                  <div className="px-3 pb-1.5 text-[10px] font-bold text-white/40 uppercase tracking-wider">Navigation Modules</div>
                   {groupedResults.module.map((result) => (
                     <div
                       key={result.id}
                       onClick={() => { router.push(result.link); setIsOpen(false); setQuery(""); }}
-                      className="px-3 py-2 mx-1 rounded-lg hover:bg-slate-50 cursor-pointer flex items-center gap-3 transition-colors"
+                      className="px-3 py-2 mx-1 rounded-lg hover:bg-white/5 cursor-pointer flex items-center gap-3 transition-colors"
                     >
-                      <div className="shrink-0 p-1.5 bg-violet-50 rounded-md">
+                      <div className="shrink-0 p-1.5 bg-mauve/10 rounded-md">
                         {getTypeIcon(result.type)}
                       </div>
                       <div className="flex flex-col flex-1 overflow-hidden">
-                        <span className="text-sm font-semibold text-slate-900 truncate">{result.title}</span>
-                        <span className="text-[11px] text-slate-500 truncate">{result.subtitle}</span>
+                        <span className="text-sm font-semibold text-white truncate">{result.title}</span>
+                        <span className="text-[11px] text-white/50 truncate">{result.subtitle}</span>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-              
+
               {groupedResults.database.length > 0 && (
                 <div>
-                  <div className="px-3 pb-1.5 pt-2 border-t border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Database Records</div>
+                  <div className="px-3 pb-1.5 pt-2 border-t border-hairline-dark text-[10px] font-bold text-white/40 uppercase tracking-wider">Database Records</div>
                   {groupedResults.database.map((result) => (
                     <div
                       key={result.id}
                       onClick={() => { router.push(result.link); setIsOpen(false); setQuery(""); }}
-                      className="px-3 py-2 mx-1 rounded-lg hover:bg-slate-50 cursor-pointer flex items-center gap-3 transition-colors"
+                      className="px-3 py-2 mx-1 rounded-lg hover:bg-white/5 cursor-pointer flex items-center gap-3 transition-colors"
                     >
-                      <div className="shrink-0 p-1.5 bg-slate-50 rounded-md border border-slate-100">
+                      <div className="shrink-0 p-1.5 bg-white/5 rounded-md border border-hairline-dark">
                         {getTypeIcon(result.type)}
                       </div>
                       <div className="flex flex-col flex-1 overflow-hidden">
-                        <span className="text-sm font-medium text-slate-800 truncate">{result.title}</span>
-                        <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                          <span className="capitalize font-medium text-slate-600">{result.type}</span>
+                        <span className="text-sm font-medium text-white/80 truncate">{result.title}</span>
+                        <div className="flex items-center gap-1.5 text-[11px] text-white/50">
+                          <span className="capitalize font-medium text-white/60">{result.type}</span>
                           <span>&bull;</span>
                           <span className="truncate">{result.subtitle}</span>
                         </div>
@@ -142,9 +142,9 @@ export function AdminGlobalSearch() {
             </div>
           ) : query.trim().length >= 2 && !isSearching ? (
             <div className="p-6 flex flex-col items-center justify-center text-center gap-2">
-              <Search className="h-8 w-8 text-slate-200" />
-              <p className="text-sm text-slate-500 font-medium">No results found for &quot;{query}&quot;</p>
-              <p className="text-xs text-slate-400">Try searching for a different keyword or module name.</p>
+              <Search className="h-8 w-8 text-white/20" />
+              <p className="text-sm text-white/50 font-medium">No results found for &quot;{query}&quot;</p>
+              <p className="text-xs text-white/40">Try searching for a different keyword or module name.</p>
             </div>
           ) : null}
         </div>

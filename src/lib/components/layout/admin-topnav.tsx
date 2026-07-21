@@ -31,12 +31,12 @@ export function AdminTopNav({
     getAppVersion().then(setVersion)
   }, [])
   return (
-    <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm">
+    <header className="flex h-16 items-center justify-between border-b border-hairline-dark bg-surface-card px-6">
       <AdminGlobalSearch />
 
       <div className="flex items-center gap-4">
         {/* Platform Version */}
-        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-violet-50 text-violet-600 border border-violet-100">
+        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-mauve/10 text-mauve border border-mauve/20">
           <Sparkles className="h-3 w-3" />
           <span>{version}</span>
         </div>

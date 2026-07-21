@@ -55,8 +55,8 @@ export default function AdminSystemHealthPage() {
     : "Unhealthy"
 
   const dbStatusColor = dbHealthy
-    ? dbLatency < 50 ? "text-emerald-600" : dbLatency < 150 ? "text-emerald-500" : "text-amber-500"
-    : "text-rose-600"
+    ? dbLatency < 50 ? "text-emerald-400" : dbLatency < 150 ? "text-emerald-500" : "text-amber-500"
+    : "text-red-400"
 
   const nodeRows = [
     {
@@ -83,28 +83,28 @@ export default function AdminSystemHealthPage() {
   ]
 
   return (
-    <main className="px-6 py-8 space-y-6 bg-slate-50 min-h-full">
+    <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">System Health</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">System Health</h1>
+          <p className="text-sm text-white/50 mt-1">
             Live database status, API latency, and infrastructure health checks.
             {lastRefreshed && (
-              <span className="ml-2 text-slate-400 text-xs">
+              <span className="ml-2 text-white/40 text-xs">
                 Last checked: {lastRefreshed.toLocaleTimeString()}
               </span>
             )}
           </p>
         </div>
-        <Button onClick={fetchHealth} disabled={loading} variant="outline" className="h-9 gap-1.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-semibold shadow-sm">
-          <RefreshCw className={cn("h-4 w-4 text-slate-500", loading && "animate-spin")} />
+        <Button onClick={fetchHealth} disabled={loading} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
+          <RefreshCw className={cn("h-4 w-4 text-white/50", loading && "animate-spin")} />
           <span>Refresh</span>
         </Button>
       </div>
 
       {/* DB Health Alert Banner */}
       {health && !health.db_healthy && (
-        <div className="flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-sm font-semibold">
+        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm font-semibold">
           <XCircle className="h-5 w-5 shrink-0" />
           <span>Database connection issue detected: {health.db_error || "Unknown error"}</span>
         </div>
@@ -112,16 +112,16 @@ export default function AdminSystemHealthPage() {
 
       {/* System Stats */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-white border-slate-200 p-6 flex items-center gap-4 shadow-sm">
+        <Card className="bg-surface-card border-hairline-dark p-6 flex items-center gap-4 shadow-sm">
           <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center border",
-            dbHealthy ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100"
+            dbHealthy ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"
           )}>
             <Database className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">DB Latency</span>
-            <span className="text-2xl font-bold text-slate-900 mt-1 block">
-              {loading ? <Loader2 className="h-5 w-5 animate-spin text-violet-500" /> : `${dbLatency}ms`}
+            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">DB Latency</span>
+            <span className="text-2xl font-bold text-white mt-1 block">
+              {loading ? <Loader2 className="h-5 w-5 animate-spin text-mauve" /> : `${dbLatency}ms`}
             </span>
             <span className={cn("text-[10px] font-bold block mt-0.5", dbStatusColor)}>
               ● {dbStatusLabel}
@@ -129,89 +129,89 @@ export default function AdminSystemHealthPage() {
           </div>
         </Card>
 
-        <Card className="bg-white border-slate-200 p-6 flex items-center gap-4 shadow-sm">
-          <div className="h-12 w-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600 border border-violet-100">
+        <Card className="bg-surface-card border-hairline-dark p-6 flex items-center gap-4 shadow-sm">
+          <div className="h-12 w-12 rounded-xl bg-mauve/10 flex items-center justify-center text-mauve border border-mauve/20">
             <Activity className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Subscriptions</span>
-            <span className="text-2xl font-bold text-slate-900 mt-1 block">
+            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Subscriptions</span>
+            <span className="text-2xl font-bold text-white mt-1 block">
               {loading ? "…" : health?.record_counts.subscriptions.toLocaleString() ?? "—"}
             </span>
-            <span className="text-[10px] text-emerald-600 font-bold block mt-0.5">● Live count</span>
+            <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">● Live count</span>
           </div>
         </Card>
 
-        <Card className="bg-white border-slate-200 p-6 flex items-center gap-4 shadow-sm">
-          <div className="h-12 w-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600 border border-violet-100">
+        <Card className="bg-surface-card border-hairline-dark p-6 flex items-center gap-4 shadow-sm">
+          <div className="h-12 w-12 rounded-xl bg-mauve/10 flex items-center justify-center text-mauve border border-mauve/20">
             <Zap className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Total Events</span>
-            <span className="text-2xl font-bold text-slate-900 mt-1 block">
+            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Total Events</span>
+            <span className="text-2xl font-bold text-white mt-1 block">
               {loading ? "…" : health?.record_counts.events.toLocaleString() ?? "—"}
             </span>
-            <span className="text-[10px] text-emerald-600 font-bold block mt-0.5">● Live count</span>
+            <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">● Live count</span>
           </div>
         </Card>
 
-        <Card className="bg-white border-slate-200 p-6 flex items-center gap-4 shadow-sm">
-          <div className="h-12 w-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600 border border-violet-100">
+        <Card className="bg-surface-card border-hairline-dark p-6 flex items-center gap-4 shadow-sm">
+          <div className="h-12 w-12 rounded-xl bg-mauve/10 flex items-center justify-center text-mauve border border-mauve/20">
             <HardDrive className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Transactions</span>
-            <span className="text-2xl font-bold text-slate-900 mt-1 block">
+            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Transactions</span>
+            <span className="text-2xl font-bold text-white mt-1 block">
               {loading ? "…" : health?.record_counts.transactions.toLocaleString() ?? "—"}
             </span>
-            <span className="text-[10px] text-emerald-600 font-bold block mt-0.5">● Live count</span>
+            <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">● Live count</span>
           </div>
         </Card>
       </div>
 
       {/* DB Latency Indicator */}
-      <Card className="bg-white border-slate-200 p-6 shadow-sm">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
+      <Card className="bg-surface-card border-hairline-dark p-6 shadow-sm">
+        <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4">
           Database Response Latency — Live Measurement
         </h3>
         {loading ? (
           <div className="h-24 flex items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-violet-500" />
+            <Loader2 className="h-6 w-6 animate-spin text-mauve" />
           </div>
         ) : (
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-slate-600 w-24">DB Query</span>
-              <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+              <span className="text-xs font-bold text-white/60 w-24">DB Query</span>
+              <div className="flex-1 h-3 bg-white/5 rounded-full overflow-hidden">
                 <div
                   className={cn(
                     "h-full rounded-full transition-all",
-                    dbLatency < 50 ? "bg-emerald-500" : dbLatency < 150 ? "bg-amber-400" : "bg-rose-500"
+                    dbLatency < 50 ? "bg-emerald-500" : dbLatency < 150 ? "bg-amber-400" : "bg-red-500/10"
                   )}
                   style={{ width: `${Math.min(100, (dbLatency / 500) * 100)}%` }}
                 />
               </div>
-              <span className="text-xs font-bold text-slate-700 w-16 text-right">{dbLatency}ms</span>
+              <span className="text-xs font-bold text-white/70 w-16 text-right">{dbLatency}ms</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-slate-600 w-24">API Health</span>
-              <div className="flex-1 h-3 bg-emerald-100 rounded-full overflow-hidden">
+              <span className="text-xs font-bold text-white/60 w-24">API Health</span>
+              <div className="flex-1 h-3 bg-emerald-500/10 rounded-full overflow-hidden">
                 <div className="h-full bg-emerald-500 rounded-full" style={{ width: "100%" }} />
               </div>
-              <span className="text-xs font-bold text-emerald-600 w-16 text-right">Healthy</span>
+              <span className="text-xs font-bold text-emerald-400 w-16 text-right">Healthy</span>
             </div>
           </div>
         )}
       </Card>
 
       {/* Service Status Table */}
-      <Card className="bg-white border-slate-200 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-          <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+      <Card className="bg-surface-card border-hairline-dark overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-hairline-dark bg-white/5">
+          <h3 className="font-bold text-white/80 text-sm flex items-center gap-1.5">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
             <span>Infrastructure Health Check Matrix</span>
             {health?.checked_at && (
-              <span className="ml-auto text-[10px] text-slate-400 font-semibold">
+              <span className="ml-auto text-[10px] text-white/40 font-semibold">
                 as of {new Date(health.checked_at).toLocaleTimeString()}
               </span>
             )}
@@ -221,25 +221,25 @@ export default function AdminSystemHealthPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider bg-slate-50/20">
+                <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-white/5">
                   <th className="p-4">Service</th>
                   <th className="p-4">Region</th>
                   <th className="p-4">Latency</th>
                   <th className="p-4 text-right">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
+              <tbody className="divide-y divide-white/10 text-white/60 font-medium">
                 {nodeRows.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/30 transition-colors">
-                    <td className="p-4 font-mono font-bold text-slate-800">{row.name}</td>
-                    <td className="p-4 text-slate-400 font-semibold">{row.region}</td>
-                    <td className="p-4 text-slate-700 font-semibold">{loading ? "…" : row.delay}</td>
+                  <tr key={idx} className="hover:bg-white/5 transition-colors">
+                    <td className="p-4 font-mono font-bold text-white/80">{row.name}</td>
+                    <td className="p-4 text-white/40 font-semibold">{row.region}</td>
+                    <td className="p-4 text-white/70 font-semibold">{loading ? "…" : row.delay}</td>
                     <td className="p-4 text-right">
                       <span className={cn(
                         "px-2 py-0.5 rounded-full text-[10px] font-bold border",
                         row.healthy
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                          : "bg-rose-50 text-rose-700 border-rose-100"
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          : "bg-red-500/10 text-red-400 border-red-500/20"
                       )}>
                         {loading ? "Checking…" : row.state}
                       </span>

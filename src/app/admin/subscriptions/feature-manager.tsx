@@ -111,46 +111,46 @@ export function FeatureManager() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       <div className="lg:col-span-2 space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-bold text-slate-800">Feature Manager</h2>
-          <Button onClick={startAdd} className="h-8 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold gap-1">
+          <h2 className="text-lg font-bold text-white/80">Feature Manager</h2>
+          <Button onClick={startAdd} className="h-8 bg-mauve hover:bg-mauve-strong text-[#141110] text-xs font-bold gap-1">
             <Plus className="h-3.5 w-3.5" /> New Feature
           </Button>
         </div>
         
         {loading ? (
-          <div className="p-16 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-violet-600" /></div>
+          <div className="p-16 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-mauve" /></div>
         ) : features.length === 0 ? (
-          <div className="p-16 border border-dashed border-slate-200 bg-white text-slate-400 text-center rounded-2xl text-xs font-semibold">
+          <div className="p-16 border border-dashed border-hairline-dark bg-surface-card text-white/40 text-center rounded-2xl text-xs font-semibold">
             No features configured yet.
           </div>
         ) : (
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <div className="bg-surface-card border border-hairline-dark rounded-xl overflow-hidden shadow-sm">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-bold uppercase tracking-wider">
+                <tr className="border-b border-hairline-dark bg-white/5 text-white/50 font-bold uppercase tracking-wider">
                   <th className="p-3">Feature</th>
                   <th className="p-3">Type</th>
                   <th className="p-3">Status</th>
                   <th className="p-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              <tbody className="divide-y divide-white/10 font-medium text-white/70">
                 {features.map(f => (
-                  <tr key={f.id} className="hover:bg-slate-50/50 transition-colors">
+                  <tr key={f.id} className="hover:bg-white/5 transition-colors">
                     <td className="p-3">
-                      <div className="font-bold text-slate-800">{f.name}</div>
-                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">{f.id}</div>
+                      <div className="font-bold text-white/80">{f.name}</div>
+                      <div className="text-[10px] text-white/40 font-mono mt-0.5">{f.id}</div>
                     </td>
-                    <td className="p-3 uppercase text-[10px] tracking-wider font-bold text-slate-500">{f.type}</td>
+                    <td className="p-3 uppercase text-[10px] tracking-wider font-bold text-white/50">{f.type}</td>
                     <td className="p-3">
-                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", f.is_active ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-100 text-slate-500 border-slate-200")}>
+                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", f.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/50 border-hairline-dark")}>
                         {f.is_active ? "Active" : "Inactive"}
                       </span>
-                      {f.is_beta && <span className="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-amber-50 text-amber-700 border-amber-100">Beta</span>}
+                      {f.is_beta && <span className="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-amber-500/10 text-amber-400 border-amber-500/20">Beta</span>}
                     </td>
                     <td className="p-3 text-right flex justify-end gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => startEdit(f)} className="h-7 w-7 p-0 text-slate-500 hover:bg-slate-100 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(f.id)} className="h-7 w-7 p-0 text-rose-500 hover:bg-rose-50 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => startEdit(f)} className="h-7 w-7 p-0 text-white/50 hover:bg-white/5 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(f.id)} className="h-7 w-7 p-0 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
                     </td>
                   </tr>
                 ))}
@@ -162,11 +162,11 @@ export function FeatureManager() {
 
       <div>
         {(editingFeature || isAdding) ? (
-          <Card className="bg-white border-slate-200 sticky top-6 shadow-sm">
+          <Card className="bg-surface-card border-hairline-dark sticky top-6 shadow-sm">
             <CardHeader className="pb-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-base text-slate-800 font-bold">{isAdding ? "Create Feature" : "Edit Feature"}</CardTitle>
+                  <CardTitle className="text-base text-white/80 font-bold">{isAdding ? "Create Feature" : "Edit Feature"}</CardTitle>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => { setIsAdding(false); setEditingFeature(null) }} className="h-7 w-7 p-0 rounded-lg"><X className="h-4 w-4" /></Button>
               </div>
@@ -174,36 +174,36 @@ export function FeatureManager() {
             <CardContent>
               <form onSubmit={handleSave} className="space-y-4">
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Feature ID / Slug</Label>
+                  <Label className="text-xs font-bold text-white/50">Feature ID / Slug</Label>
                   <Input value={formId} onChange={e => setFormId(e.target.value)} disabled={!isAdding} required className="h-8 text-xs font-medium" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Name</Label>
+                  <Label className="text-xs font-bold text-white/50">Name</Label>
                   <Input value={formName} onChange={e => setFormName(e.target.value)} required className="h-8 text-xs font-medium" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Description</Label>
+                  <Label className="text-xs font-bold text-white/50">Description</Label>
                   <Input value={formDesc} onChange={e => setFormDesc(e.target.value)} className="h-8 text-xs font-medium" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-500">Type</Label>
-                  <select value={formType} onChange={e => setFormType(e.target.value as any)} className="w-full h-8 px-2 rounded-md border border-slate-200 text-xs font-medium">
+                  <Label className="text-xs font-bold text-white/50">Type</Label>
+                  <select value={formType} onChange={e => setFormType(e.target.value as any)} className="w-full h-8 px-2 rounded-md border border-hairline-dark text-xs font-medium">
                     <option value="boolean">Boolean (Toggle)</option>
                     <option value="quota">Quota (Number limit)</option>
                     <option value="string">String (Text config)</option>
                   </select>
                 </div>
-                <div className="flex items-center gap-4 py-2 border-t border-b border-slate-100">
+                <div className="flex items-center gap-4 py-2 border-t border-b border-hairline-dark">
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-violet-600 focus:ring-violet-600 h-3.5 w-3.5" />
-                    <span className="text-xs font-bold text-slate-700">Active</span>
+                    <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-mauve focus:ring-mauve h-3.5 w-3.5" />
+                    <span className="text-xs font-bold text-white/70">Active</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={formBeta} onChange={e => setFormBeta(e.target.checked)} className="rounded text-violet-600 focus:ring-violet-600 h-3.5 w-3.5" />
-                    <span className="text-xs font-bold text-slate-700">Beta</span>
+                    <input type="checkbox" checked={formBeta} onChange={e => setFormBeta(e.target.checked)} className="rounded text-mauve focus:ring-mauve h-3.5 w-3.5" />
+                    <span className="text-xs font-bold text-white/70">Beta</span>
                   </label>
                 </div>
-                <Button type="submit" disabled={actioning} className="w-full h-8 bg-violet-600 hover:bg-violet-700 font-bold text-xs">
+                <Button type="submit" disabled={actioning} className="w-full h-8 bg-mauve hover:bg-mauve-strong font-bold text-xs">
                   {actioning ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
                   Save Feature
                 </Button>
@@ -211,7 +211,7 @@ export function FeatureManager() {
             </CardContent>
           </Card>
         ) : (
-          <div className="p-8 border border-dashed border-slate-200 bg-slate-50 text-slate-400 text-center rounded-xl text-xs font-semibold">
+          <div className="p-8 border border-dashed border-hairline-dark bg-white/5 text-white/40 text-center rounded-xl text-xs font-semibold">
             Select a feature to edit or create a new one.
           </div>
         )}

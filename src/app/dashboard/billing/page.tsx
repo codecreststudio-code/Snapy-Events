@@ -203,12 +203,12 @@ function PricingCard({
   const isPopular = plan.id === "standard"
   const isPremium = plan.id === "premium"
 
-  let selectedClasses = "border-slate-200 hover:border-slate-350 hover:shadow-xl"
+  let selectedClasses = "border-[#3D332A] hover:border-mauve/40 hover:shadow-xl"
   if (isSelected) {
     if (plan.id === "free") {
-      selectedClasses = "border-slate-900 ring-2 ring-slate-900/10 shadow-[0_15px_40px_rgba(0,0,0,0.05)]"
+      selectedClasses = "border-mauve ring-2 ring-mauve/15 shadow-[0_15px_40px_rgba(178,141,174,0.1)]"
     } else if (plan.id === "starter") {
-      selectedClasses = "border-indigo-600 ring-2 ring-indigo-600/15 shadow-[0_15px_40px_rgba(79,70,229,0.1)]"
+      selectedClasses = "border-indigo-500 ring-2 ring-indigo-500/15 shadow-[0_15px_40px_rgba(99,102,241,0.15)]"
     } else if (plan.id === "standard") {
       selectedClasses = "border-violet-500 ring-2 ring-violet-500/20 shadow-[0_20px_50px_rgba(139,92,246,0.15)] md:scale-[1.03] z-10"
     } else if (plan.id === "premium") {
@@ -216,9 +216,9 @@ function PricingCard({
     }
   } else {
     if (isPopular) {
-      selectedClasses = "border-slate-200 hover:border-violet-300 hover:shadow-lg"
+      selectedClasses = "border-[#3D332A] hover:border-violet-400/50 hover:shadow-lg"
     } else if (isPremium) {
-      selectedClasses = "border-slate-200 hover:border-orange-300 hover:shadow-lg"
+      selectedClasses = "border-[#3D332A] hover:border-orange-400/50 hover:shadow-lg"
     }
   }
 
@@ -232,7 +232,7 @@ function PricingCard({
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className={`relative rounded-3xl border bg-white p-6 cursor-pointer flex flex-col justify-between transition-all duration-300 ${selectedClasses}`}
+      className={`relative rounded-3xl border bg-[#1C1814] p-6 cursor-pointer flex flex-col justify-between transition-all duration-300 ${selectedClasses}`}
     >
       {/* Background Spotlight Glow Wrapper */}
       <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
@@ -271,42 +271,42 @@ function PricingCard({
       <div className="relative z-10">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">{plan.name}</h3>
-            <p className="mt-1.5 text-xs text-slate-450 leading-relaxed font-light min-h-[32px]">
+            <h3 className="text-lg font-bold text-white">{plan.name}</h3>
+            <p className="mt-1.5 text-xs text-white/50 leading-relaxed font-light min-h-[32px]">
               {plan.description}
             </p>
           </div>
           {isPopular && (
-            <span className="h-7 w-7 rounded-full bg-violet-50 flex items-center justify-center text-violet-600 shrink-0">
+            <span className="h-7 w-7 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-400 shrink-0">
               <Sparkles className="h-3.5 w-3.5" />
             </span>
           )}
           {isPremium && (
-            <span className="h-7 w-7 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+            <span className="h-7 w-7 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 shrink-0">
               <Crown className="h-3.5 w-3.5" />
             </span>
           )}
         </div>
 
         <div className="mt-4 flex items-baseline gap-1">
-          <span className="text-3xl font-extrabold text-slate-900">{symbol}{displayPrice}</span>
-          <span className="text-slate-400 text-xs font-light">/ event</span>
+          <span className="text-3xl font-extrabold text-white">{symbol}{displayPrice}</span>
+          <span className="text-white/40 text-xs font-light">/ event</span>
         </div>
 
-        <ul className="mt-5 space-y-3 border-t border-slate-100 pt-5">
+        <ul className="mt-5 space-y-3 border-t border-white/10 pt-5">
           {plan.features.map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-600 font-light">
+            <li key={idx} className="flex items-start gap-2.5 text-xs text-white/70 font-light">
               <Check
                 className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
                   isSelected
                     ? plan.id === "free"
-                      ? "text-slate-800"
+                      ? "text-mauve"
                       : plan.id === "starter"
-                      ? "text-indigo-600"
+                      ? "text-indigo-400"
                       : isPopular
-                      ? "text-violet-600"
-                      : "text-orange-500"
-                    : "text-slate-400"
+                      ? "text-violet-400"
+                      : "text-orange-400"
+                    : "text-white/30"
                 }`}
               />
               <span>{feature}</span>
@@ -321,13 +321,13 @@ function PricingCard({
           className={`w-full font-bold py-2.5 rounded-xl transition-all active:scale-[0.98] text-xs border-none ${
             isSelected
               ? plan.id === "free"
-                ? "bg-slate-950 text-white shadow-md"
+                ? "bg-mauve text-[#141110] shadow-md shadow-mauve/10"
                 : plan.id === "starter"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10"
+                ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/10"
                 : isPopular
                 ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/20"
                 : "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/20"
-              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              : "bg-white/5 text-white/70 hover:bg-white/10"
           }`}
         >
           {isSelected ? "Selected" : `Choose ${plan.name}`}
@@ -461,40 +461,40 @@ export default function BillingPage() {
 
   const getAccentColor = () => {
     if (selectedPlan === "starter") return {
-      text: "text-indigo-650",
-      bg: "bg-indigo-50",
-      border: "border-indigo-200",
-      badge: "bg-indigo-600",
-      hover: "hover:border-indigo-300",
-      buttonActive: "bg-indigo-50/80 border-indigo-500 text-indigo-700 shadow-[0_0_10px_rgba(79,70,229,0.05)]",
-      icon: "text-indigo-600"
+      text: "text-indigo-400",
+      bg: "bg-indigo-500/10",
+      border: "border-indigo-500/30",
+      badge: "bg-indigo-500",
+      hover: "hover:border-indigo-400/50",
+      buttonActive: "bg-indigo-500/10 border-indigo-500 text-indigo-300 shadow-[0_0_10px_rgba(99,102,241,0.1)]",
+      icon: "text-indigo-400"
     }
     if (selectedPlan === "standard") return {
-      text: "text-violet-650",
-      bg: "bg-violet-50",
-      border: "border-violet-200",
-      badge: "bg-violet-600",
-      hover: "hover:border-violet-300",
-      buttonActive: "bg-violet-50/80 border-violet-500 text-violet-700 shadow-[0_0_10px_rgba(139,92,246,0.05)]",
-      icon: "text-violet-600"
+      text: "text-violet-400",
+      bg: "bg-violet-500/10",
+      border: "border-violet-500/30",
+      badge: "bg-violet-500",
+      hover: "hover:border-violet-400/50",
+      buttonActive: "bg-violet-500/10 border-violet-500 text-violet-300 shadow-[0_0_10px_rgba(139,92,246,0.1)]",
+      icon: "text-violet-400"
     }
     if (selectedPlan === "premium") return {
-      text: "text-orange-600",
-      bg: "bg-orange-50",
-      border: "border-orange-200",
-      badge: "bg-orange-600",
-      hover: "hover:border-orange-300",
-      buttonActive: "bg-orange-50/80 border-orange-500 text-orange-700 shadow-[0_0_10px_rgba(249,115,22,0.05)]",
-      icon: "text-orange-600"
+      text: "text-orange-400",
+      bg: "bg-orange-500/10",
+      border: "border-orange-500/30",
+      badge: "bg-orange-500",
+      hover: "hover:border-orange-400/50",
+      buttonActive: "bg-orange-500/10 border-orange-500 text-orange-300 shadow-[0_0_10px_rgba(249,115,22,0.1)]",
+      icon: "text-orange-400"
     }
     return {
-      text: "text-slate-600",
-      bg: "bg-slate-50",
-      border: "border-slate-200",
-      badge: "bg-slate-600",
-      hover: "hover:border-slate-300",
-      buttonActive: "bg-slate-50/80 border-slate-500 text-slate-700 shadow-[0_0_10px_rgba(100,116,139,0.05)]",
-      icon: "text-slate-600"
+      text: "text-mauve",
+      bg: "bg-mauve/10",
+      border: "border-mauve/30",
+      badge: "bg-mauve",
+      hover: "hover:border-mauve/50",
+      buttonActive: "bg-mauve/10 border-mauve text-mauve shadow-[0_0_10px_rgba(178,141,174,0.1)]",
+      icon: "text-mauve"
     }
   }
 
@@ -522,12 +522,12 @@ export default function BillingPage() {
   const getContinueButtonClass = () => {
     const base = "w-full sm:w-auto font-bold px-8 py-6 rounded-2xl flex items-center justify-center gap-2 text-base transition-all active:scale-[0.98] border-none "
     if (isFreeNoOp) {
-      return base + "bg-slate-100 text-slate-500 cursor-not-allowed shadow-none"
+      return base + "bg-white/5 text-white/40 cursor-not-allowed shadow-none"
     }
     if (selectedPlan === "free") {
       return base + "bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/10"
     } else if (selectedPlan === "starter") {
-      return base + "bg-indigo-650 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/10"
+      return base + "bg-indigo-500 hover:bg-indigo-600 text-white shadow-md shadow-indigo-500/10"
     } else if (selectedPlan === "standard") {
       return base + "bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white shadow-lg shadow-violet-500/20"
     } else if (selectedPlan === "premium") {
@@ -575,12 +575,12 @@ export default function BillingPage() {
   }
 
   return (
-    <div className={`space-y-8 pb-16 selection:bg-violet-100 ${inter.className}`}>
+    <div className={`space-y-8 pb-16 selection:bg-mauve/20 ${inter.className}`}>
       {/* Title Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#3D332A] pb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Billing</h1>
-          <p className="text-muted-foreground">Manage your workspace subscription and limits</p>
+          <h1 className="font-playfair text-3xl font-light text-white">Billing</h1>
+          <p className="text-white/50 mt-1 text-sm">Manage your workspace subscription and limits</p>
         </div>
         <CurrencyToggle />
       </div>
@@ -589,28 +589,28 @@ export default function BillingPage() {
           pay-per-event, so this is never an ongoing/free/already-active
           entitlement for the next event a host creates. */}
       {subscription && (
-        <Card className="border-slate-200 shadow-sm overflow-hidden">
-          <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
-            <CardTitle className="text-lg font-bold text-slate-800">Last Purchased Plan</CardTitle>
-            <CardDescription>
+        <Card className="rounded-2xl border border-[#3D332A] bg-[#1C1814] shadow-sm overflow-hidden">
+          <CardHeader className="bg-white/[0.02] border-b border-[#3D332A] pb-4">
+            <CardTitle className="text-lg font-bold text-white">Last Purchased Plan</CardTitle>
+            <CardDescription className="text-white/50">
               Reference only. Snapsy bills per event, so this reflects your most recent purchase — not an ongoing subscription or a discount on your next event.
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
             <div>
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Plan Tier</p>
-              <p className="text-lg font-bold text-slate-800 capitalize mt-1">{subscription.plan_id}</p>
+              <p className="text-xs font-medium text-white/40 uppercase tracking-wider">Plan Tier</p>
+              <p className="text-lg font-bold text-white capitalize mt-1">{subscription.plan_id}</p>
             </div>
           </CardContent>
         </Card>
       )}
 
       {/* Main Pricing Header */}
-      <div className="text-center py-6 border-t border-slate-100 pt-8">
-        <h2 className={`text-3xl font-normal tracking-tight sm:text-4xl bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent ${playfair.className}`}>
+      <div className="text-center py-6 border-t border-[#3D332A] pt-8">
+        <h2 className={`text-3xl font-normal tracking-tight sm:text-4xl text-white font-light ${playfair.className}`}>
           Choose Your Perfect Plan
         </h2>
-        <p className="mt-3 text-sm text-slate-500 max-w-xl mx-auto font-light leading-relaxed">
+        <p className="mt-3 text-sm text-white/50 max-w-xl mx-auto font-light leading-relaxed">
           Select a tier that matches your event size. Instantly collect photos, boost limits, and enable premium features.
         </p>
       </div>
@@ -629,11 +629,11 @@ export default function BillingPage() {
 
       {/* Add-ons Customization Panel */}
       {selectedPlan !== "free" && (
-        <div className="bg-white border border-slate-200 rounded-3xl p-8 max-w-4xl mx-auto shadow-sm transition-all duration-300">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+        <div className="rounded-2xl border border-[#3D332A] bg-[#1C1814] p-8 max-w-4xl mx-auto shadow-sm transition-all duration-300">
+          <div className="flex items-center justify-between border-b border-[#3D332A] pb-4 mb-6">
             <div className="flex items-center gap-2.5">
               <Sparkles className={`h-5 w-5 ${accent.icon} animate-pulse`} />
-              <h3 className="text-lg font-bold text-slate-900">
+              <h3 className="text-lg font-bold text-white">
                 Customize Limits with Add-Ons
               </h3>
             </div>
@@ -650,9 +650,9 @@ export default function BillingPage() {
             <div className="space-y-8">
               {/* Guest Limit Boost */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <Label className="text-sm font-semibold text-white/70 flex items-center gap-2">
                   <span>🚀 Boost Guest Limit</span>
-                  <span className="text-xs text-slate-400 font-normal">(Base: {baseGuestLimitStr})</span>
+                  <span className="text-xs text-white/40 font-normal">(Base: {baseGuestLimitStr})</span>
                 </Label>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {guestBoostsList.map((boost) => (
@@ -663,7 +663,7 @@ export default function BillingPage() {
                       className={`py-3 px-3 rounded-2xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
                         guestBoost === boost.value
                           ? accent.buttonActive
-                          : "bg-white border-slate-200 text-slate-500 hover:border-slate-350 hover:bg-slate-50"
+                          : "bg-white/[0.03] border-[#3D332A] text-white/50 hover:border-mauve/30 hover:bg-white/5"
                       }`}
                     >
                       <span>{boost.label}</span>
@@ -677,9 +677,9 @@ export default function BillingPage() {
 
               {/* Shots Limit Boost */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <Label className="text-sm font-semibold text-white/70 flex items-center gap-2">
                   <span>📸 Boost Shots Per Guest</span>
-                  <span className="text-xs text-slate-400 font-normal">(Base: {baseShotLimitStr})</span>
+                  <span className="text-xs text-white/40 font-normal">(Base: {baseShotLimitStr})</span>
                 </Label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {shotBoostsList.map((boost) => (
@@ -690,7 +690,7 @@ export default function BillingPage() {
                       className={`py-3 px-3 rounded-2xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
                         shotBoost === boost.value
                           ? accent.buttonActive
-                          : "bg-white border-slate-200 text-slate-500 hover:border-slate-350 hover:bg-slate-50"
+                          : "bg-white/[0.03] border-[#3D332A] text-white/50 hover:border-mauve/30 hover:bg-white/5"
                       }`}
                     >
                       <span>{boost.label}</span>
@@ -707,23 +707,23 @@ export default function BillingPage() {
       )}
 
       {/* Pricing Overview & Main Action Card */}
-      <div className="flex flex-col sm:flex-row items-center justify-between bg-white border border-slate-200 rounded-3xl p-8 max-w-4xl mx-auto gap-6 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-center justify-between rounded-2xl border border-[#3D332A] bg-[#1C1814] p-8 max-w-4xl mx-auto gap-6 shadow-sm">
         <div className="text-center sm:text-left">
-          <span className="text-xs text-slate-400 uppercase tracking-widest font-semibold">Total Price</span>
+          <span className="text-xs text-white/40 uppercase tracking-widest font-semibold">Total Price</span>
           <div className="flex items-baseline gap-1.5 justify-center sm:justify-start mt-1">
-            <span className="text-3xl font-extrabold text-slate-900">
+            <span className="text-3xl font-extrabold text-white">
               {symbol}{getPrice(totalPrice, Math.round(totalPrice / 80))}
             </span>
-            <span className="text-sm text-slate-500 font-light">
+            <span className="text-sm text-white/50 font-light">
               {selectedPlan === "free" ? "forever" : "per event"}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1.5 font-light">
+          <p className="text-xs text-white/40 mt-1.5 font-light">
             {selectedPlan === "free" ? (
               isFreeNoOp ? (
-                <span className="text-slate-500">You&apos;re currently on the Free plan.</span>
+                <span className="text-white/50">You&apos;re currently on the Free plan.</span>
               ) : (
-                <span className="text-slate-500">No charge — downgrading resets any paid add-ons.</span>
+                <span className="text-white/50">No charge — downgrading resets any paid add-ons.</span>
               )
             ) : (
               <>
@@ -731,14 +731,14 @@ export default function BillingPage() {
                 {guestBoost > 0 && ` + Guest Boost ${symbol}${getPrice(guestAddOnPrice, Math.round(guestAddOnPrice / 80))}`}
                 {shotBoost > 0 && ` + Shots Boost ${symbol}${getPrice(shotAddOnPrice, Math.round(shotAddOnPrice / 80))}`}
                 {isSamePlan && (
-                  <span className="block text-[11px] text-slate-400 mt-1">
+                  <span className="block text-[11px] text-white/40 mt-1">
                     You&apos;ve purchased the {activePlanDetails.name} plan before — this will be a new, full-price purchase for a new event.
                   </span>
                 )}
               </>
             )}
           </p>
-          <p className="text-[11px] text-slate-400 mt-2 font-light">
+          <p className="text-[11px] text-white/40 mt-2 font-light">
             Plans are purchased per event — pricing above is a preview. Checkout always happens from Create Event.
           </p>
         </div>

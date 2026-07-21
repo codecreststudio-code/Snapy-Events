@@ -198,7 +198,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
               <Button
                 asChild
                 size="sm"
-                className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-[#D4AF37]"
+                className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-[#B28DAE]"
               >
                 <Link href={`/event/${event.slug}/upload`}>
                   <Upload className="h-4 w-4" />
@@ -227,7 +227,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                 className="mx-auto mb-4 h-10"
               />
             )}
-            <p className="text-sm uppercase tracking-widest text-[#D4AF37]">
+            <p className="text-sm uppercase tracking-widest text-[#B28DAE]">
               {event.user?.name ?? "Event"}
             </p>
             <h1 className="font-playfair mt-2 text-4xl font-medium tracking-tight text-white sm:text-5xl">
@@ -257,7 +257,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                 <Button
                   asChild
                   size="lg"
-                  className="rounded-full bg-[#D4AF37] px-6 text-[#141110] hover:bg-[#c4a233]"
+                  className="rounded-full bg-[#B28DAE] px-6 text-[#141110] hover:bg-[#a468a0]"
                 >
                   <Link href={`/event/${event.slug}/upload`}>
                     <Camera className="mr-2 h-4 w-4" />
@@ -295,7 +295,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
           {!checkedIn ? (
             <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-[#3D332A] bg-[#1C1814] px-4 py-16 text-center">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/5">
-                <Lock className="h-8 w-8 text-[#D4AF37]" />
+                <Lock className="h-8 w-8 text-[#B28DAE]" />
               </div>
               <h3 className="font-playfair mt-4 text-lg font-medium text-white">Check In to Continue</h3>
               <p className="mt-2 max-w-md text-sm text-white/60">
@@ -323,7 +323,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
           ) : (
             <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-[#3D332A] bg-[#1C1814] px-4 py-16 text-center">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/5">
-                <Lock className="h-8 w-8 text-[#D4AF37]" />
+                <Lock className="h-8 w-8 text-[#B28DAE]" />
               </div>
               <h3 className="font-playfair mt-4 text-lg font-medium text-white">Photos Coming Soon</h3>
               <p className="mt-2 max-w-md text-sm text-white/60">

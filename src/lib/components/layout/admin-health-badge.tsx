@@ -20,8 +20,8 @@ export function AdminHealthBadge() {
 
   if (!health) {
     return (
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 text-slate-400 border border-slate-100 animate-pulse">
-        <div className="h-2 w-2 rounded-full bg-slate-300" />
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 text-white/40 border border-hairline-dark animate-pulse">
+        <div className="h-2 w-2 rounded-full bg-white/30" />
         <span className="text-xs font-semibold">Checking...</span>
       </div>
     )
@@ -29,13 +29,13 @@ export function AdminHealthBadge() {
 
   const isHealthy = health.status === "healthy"
   const isDegraded = health.status === "degraded"
-  
+
   return (
-    <div 
+    <div
       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors ${
-        isHealthy ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
-        isDegraded ? "bg-amber-50 text-amber-700 border-amber-100" :
-        "bg-rose-50 text-rose-700 border-rose-100"
+        isHealthy ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
+        isDegraded ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+        "bg-red-500/10 text-red-400 border-red-500/20"
       }`}
       title={`Latency: ${health.latencyMs}ms`}
     >

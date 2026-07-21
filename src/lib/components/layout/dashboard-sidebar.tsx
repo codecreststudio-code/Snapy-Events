@@ -54,13 +54,13 @@ export function DashboardSidebar() {
     <>
       {/* Desktop sidebar (lg+). Phone/tablet get MobileBottomNav instead —
           see below — rather than a hamburger + slide-in copy of this panel. */}
-      <div className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r bg-sidebar lg:flex">
-        <div className="flex h-16 items-center gap-2 border-b px-6">
+      <div className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-[#3D332A] bg-[#141110] lg:flex">
+        <div className="flex h-16 items-center gap-2 border-b border-[#3D332A] px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Camera className="h-5 w-5 text-primary-foreground" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-mauve">
+              <Camera className="h-5 w-5 text-[#141110]" />
             </div>
-            <span className="font-semibold text-lg">Snapsy</span>
+            <span className="font-playfair font-semibold text-lg text-white">Snapsy</span>
           </Link>
         </div>
 
@@ -75,8 +75,8 @@ export function DashboardSidebar() {
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                      ? "bg-mauve/10 text-mauve"
+                      : "text-white/50 hover:bg-white/5 hover:text-white"
                   )}
                 >
                   <item.icon className="h-5 w-5" />
@@ -87,7 +87,7 @@ export function DashboardSidebar() {
           </nav>
 
           <div className="mt-6 px-4">
-            <div className="h-px bg-border" />
+            <div className="h-px bg-[#3D332A]" />
           </div>
 
           <nav className="px-4 mt-6 space-y-1">
@@ -100,8 +100,8 @@ export function DashboardSidebar() {
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                      ? "bg-mauve/10 text-mauve"
+                      : "text-white/50 hover:bg-white/5 hover:text-white"
                   )}
                 >
                   <item.icon className="h-5 w-5" />
@@ -112,27 +112,27 @@ export function DashboardSidebar() {
           </nav>
         </div>
 
-        <div className="border-t p-4">
+        <div className="border-t border-[#3D332A] p-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start gap-3 h-auto py-2">
+              <Button variant="ghost" className="w-full justify-start gap-3 h-auto py-2 text-white hover:bg-white/5 hover:text-white">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={profile?.avatar_url || undefined} />
-                  <AvatarFallback>
-                    {profile?.full_name?.substring(0, 2).toUpperCase() || 
-                     user?.email?.substring(0, 2).toUpperCase() || 
+                  <AvatarFallback className="bg-mauve/10 text-mauve">
+                    {profile?.full_name?.substring(0, 2).toUpperCase() ||
+                     user?.email?.substring(0, 2).toUpperCase() ||
                      "US"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start text-sm overflow-hidden">
-                  <span className="font-medium truncate max-w-[150px]">
+                  <span className="font-medium truncate max-w-[150px] text-white">
                     {profile?.full_name || user?.email?.split("@")[0] || "User"}
                   </span>
-                  <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+                  <span className="text-xs text-white/50 truncate max-w-[150px]">
                     {user?.email || ""}
                   </span>
                 </div>
-                <ChevronDown className="h-4 w-4 ml-auto flex-shrink-0" />
+                <ChevronDown className="h-4 w-4 ml-auto flex-shrink-0 text-white/50" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -141,7 +141,7 @@ export function DashboardSidebar() {
               {profile?.is_admin && (
                 <>
                   <DropdownMenuItem asChild>
-                    <Link href="/admin" className="font-semibold text-violet-600 hover:text-violet-700">
+                    <Link href="/admin" className="font-semibold text-mauve hover:text-mauve-strong">
                       Admin Portal
                     </Link>
                   </DropdownMenuItem>

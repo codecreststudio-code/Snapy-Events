@@ -270,7 +270,7 @@ function CheckoutForm() {
           email: user?.email || "",
         },
         theme: {
-          color: "#f97316", // orange theme color
+          color: "#B28DAE", // mauve brand theme color
         },
         handler: async (response: any) => {
           setInitiating(true)
@@ -368,23 +368,23 @@ function CheckoutForm() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+      <div className="min-h-screen bg-surface-dark text-white flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-mauve" />
       </div>
     )
   }
 
   if (!eventId) {
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-surface-dark text-white flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center space-y-4">
-          <AlertCircle className="h-10 w-10 text-orange-500 mx-auto" />
-          <h1 className="text-lg font-bold text-slate-900">Missing event</h1>
-          <p className="text-sm text-slate-500">
+          <AlertCircle className="h-10 w-10 text-mauve mx-auto" />
+          <h1 className="text-lg font-bold text-white">Missing event</h1>
+          <p className="text-sm text-white/60">
             This checkout link is missing its event. Please start checkout from your event creation wizard or dashboard.
           </p>
           <Link href="/dashboard">
-            <Button className="mt-2 bg-orange-500 text-white hover:bg-orange-600 font-bold rounded-xl border-none">
+            <Button className="mt-2 bg-mauve hover:bg-mauve-strong text-[#141110] font-bold rounded-xl border-none">
               Back to Dashboard
             </Button>
           </Link>
@@ -394,7 +394,7 @@ function CheckoutForm() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-surface-dark text-white flex flex-col justify-between py-12 px-4 sm:px-6 lg:px-8">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
       <div className="max-w-4xl mx-auto w-full flex flex-col items-center">
@@ -405,13 +405,13 @@ function CheckoutForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8 w-full">
           {/* Order Details Receipt */}
-          <Card className="md:col-span-3 bg-white border-slate-200 p-6 flex flex-col justify-between shadow-sm">
+          <Card className="md:col-span-3 bg-surface-card border-hairline-dark p-6 flex flex-col justify-between">
             <div>
               <CardHeader className="p-0 mb-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-xl font-bold text-slate-900">Review your subscription</CardTitle>
-                    <CardDescription className="text-slate-500 text-sm">
+                    <CardTitle className="text-xl font-bold text-white">Review your subscription</CardTitle>
+                    <CardDescription className="text-white/60 text-sm">
                       Complete payment to activate limits and features.
                     </CardDescription>
                   </div>
@@ -421,76 +421,76 @@ function CheckoutForm() {
 
               <div className="space-y-4">
                 {/* Plan Base */}
-                <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                   <div className="space-y-0.5">
-                    <span className="font-semibold text-slate-800">{PLAN_NAMES[plan] || plan}</span>
-                    <p className="text-xs text-slate-400">
+                    <span className="font-semibold text-white">{PLAN_NAMES[plan] || plan}</span>
+                    <p className="text-xs text-white/50">
                       Base event plan features
                     </p>
                   </div>
-                  <span className="font-bold text-slate-800">
+                  <span className="font-bold text-white">
                     {symbol}{basePrice}
                   </span>
                 </div>
 
                 {/* Guest Boost */}
                 {guests > 0 && (
-                  <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                  <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                     <div className="space-y-0.5">
-                      <span className="font-semibold text-slate-800">Guest Quota Boost</span>
-                      <p className="text-xs text-slate-400">+{guests} guests invite limit</p>
+                      <span className="font-semibold text-white">Guest Quota Boost</span>
+                      <p className="text-xs text-white/50">+{guests} guests invite limit</p>
                     </div>
-                    <span className="font-bold text-slate-800">{symbol}{guestAddonPrice}</span>
+                    <span className="font-bold text-white">{symbol}{guestAddonPrice}</span>
                   </div>
                 )}
 
                 {/* Shots Boost */}
                 {shots > 0 && (
-                  <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                  <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                     <div className="space-y-0.5">
-                      <span className="font-semibold text-slate-800">Shots Quota Boost</span>
-                      <p className="text-xs text-slate-400">+{shots} shots limit per guest</p>
+                      <span className="font-semibold text-white">Shots Quota Boost</span>
+                      <p className="text-xs text-white/50">+{shots} shots limit per guest</p>
                     </div>
-                    <span className="font-bold text-slate-800">{symbol}{shotAddonPrice}</span>
+                    <span className="font-bold text-white">{symbol}{shotAddonPrice}</span>
                   </div>
                 )}
 
                 {/* Photo limit above plan (incl. Unlimited) */}
                 {photoAddonInr > 0 && (
-                  <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                  <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                     <div className="space-y-0.5">
-                      <span className="font-semibold text-slate-800">Photo Cap Upgrade</span>
-                      <p className="text-xs text-slate-400">{photoLimit === -1 ? "Unlimited" : photoLimit} photos per guest</p>
+                      <span className="font-semibold text-white">Photo Cap Upgrade</span>
+                      <p className="text-xs text-white/50">{photoLimit === -1 ? "Unlimited" : photoLimit} photos per guest</p>
                     </div>
-                    <span className="font-bold text-slate-800">{symbol}{getPrice(photoAddonInr, Math.round(photoAddonInr / 80) || 1)}</span>
+                    <span className="font-bold text-white">{symbol}{getPrice(photoAddonInr, Math.round(photoAddonInr / 80) || 1)}</span>
                   </div>
                 )}
 
                 {/* Videos unlock */}
                 {videoAddonInr > 0 && (
-                  <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                  <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                     <div className="space-y-0.5">
-                      <span className="font-semibold text-slate-800">Videos Add-on</span>
-                      <p className="text-xs text-slate-400">Not included in {PLAN_NAMES[plan] || plan}</p>
+                      <span className="font-semibold text-white">Videos Add-on</span>
+                      <p className="text-xs text-white/50">Not included in {PLAN_NAMES[plan] || plan}</p>
                     </div>
-                    <span className="font-bold text-slate-800">{symbol}{getPrice(videoAddonInr, Math.round(videoAddonInr / 80) || 1)}</span>
+                    <span className="font-bold text-white">{symbol}{getPrice(videoAddonInr, Math.round(videoAddonInr / 80) || 1)}</span>
                   </div>
                 )}
 
                 {/* Voice Notes unlock */}
                 {voiceAddonInr > 0 && (
-                  <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                  <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                     <div className="space-y-0.5">
-                      <span className="font-semibold text-slate-800">Voice Notes Add-on</span>
-                      <p className="text-xs text-slate-400">Premium-only feature</p>
+                      <span className="font-semibold text-white">Voice Notes Add-on</span>
+                      <p className="text-xs text-white/50">Premium-only feature</p>
                     </div>
-                    <span className="font-bold text-slate-800">{symbol}{getPrice(voiceAddonInr, Math.round(voiceAddonInr / 80) || 1)}</span>
+                    <span className="font-bold text-white">{symbol}{getPrice(voiceAddonInr, Math.round(voiceAddonInr / 80) || 1)}</span>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="mt-8 border-t border-slate-100 pt-6">
+            <div className="mt-8 border-t border-hairline-dark pt-6">
               {/* Coupon Section */}
               <div className="flex items-start gap-2 mb-4">
                 <div className="flex-1">
@@ -500,16 +500,16 @@ function CheckoutForm() {
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                     placeholder="Have a coupon code?"
                     disabled={initiating || !!appliedCoupon}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-semibold focus:outline-none focus:border-orange-500 disabled:opacity-50"
+                    className="w-full text-xs bg-white/5 border border-white/15 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-mauve disabled:opacity-50"
                   />
-                  {couponError && <p className="text-rose-500 text-[10px] mt-1 font-semibold">{couponError}</p>}
+                  {couponError && <p className="text-red-400 text-[10px] mt-1 font-semibold">{couponError}</p>}
                 </div>
                 {!appliedCoupon ? (
-                  <Button onClick={handleApplyCoupon} disabled={!couponCode || couponLoading || initiating} variant="outline" size="sm" className="text-xs h-8">
+                  <Button onClick={handleApplyCoupon} disabled={!couponCode || couponLoading || initiating} variant="outline" size="sm" className="text-xs h-8 border-white/15 bg-transparent text-white hover:bg-white/5">
                     {couponLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Apply"}
                   </Button>
                 ) : (
-                  <Button onClick={() => { setAppliedCoupon(null); setCouponCode(""); setCouponError("") }} disabled={initiating} variant="outline" size="sm" className="text-xs h-8 text-rose-500 hover:text-rose-600">
+                  <Button onClick={() => { setAppliedCoupon(null); setCouponCode(""); setCouponError("") }} disabled={initiating} variant="outline" size="sm" className="text-xs h-8 border-white/15 bg-transparent text-red-400 hover:text-red-300 hover:bg-white/5">
                     Remove
                   </Button>
                 )}
@@ -518,19 +518,19 @@ function CheckoutForm() {
               {/* Total Summary */}
               {appliedCoupon && (
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold text-emerald-600 flex items-center gap-1">
+                  <span className="text-sm font-semibold text-emerald-400 flex items-center gap-1">
                     <Check className="h-3.5 w-3.5" /> Discount Applied
                   </span>
-                  <span className="text-sm font-bold text-emerald-600">-{symbol}{Math.floor(discountAmount)}</span>
+                  <span className="text-sm font-bold text-emerald-400">-{symbol}{Math.floor(discountAmount)}</span>
                 </div>
               )}
-              <div className="flex items-center justify-between mb-6 pt-2 border-t border-slate-100/50">
-                <span className="text-base font-medium text-slate-650">Total Price ({currency})</span>
-                <span className="text-3xl font-extrabold text-slate-900">{symbol}{Math.floor(totalPrice)}</span>
+              <div className="flex items-center justify-between mb-6 pt-2 border-t border-hairline-dark">
+                <span className="text-base font-medium text-white/70">Total Price ({currency})</span>
+                <span className="text-3xl font-extrabold text-white">{symbol}{Math.floor(totalPrice)}</span>
               </div>
 
               {error && (
-                <div className="p-3 mb-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-xs flex items-start gap-2">
+                <div className="p-3 mb-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-start gap-2">
                   <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
@@ -539,7 +539,7 @@ function CheckoutForm() {
               <Button
                 onClick={totalPrice > 0 ? handlePayment : handleFreeActivation}
                 disabled={initiating}
-                className="w-full bg-orange-500 text-white hover:bg-orange-600 font-bold py-6 rounded-xl shadow-[0_0_20px_rgba(249,115,22,0.2)] flex items-center justify-center gap-2 border-none"
+                className="w-full bg-mauve hover:bg-mauve-strong text-[#141110] font-bold py-6 rounded-xl shadow-lg shadow-mauve/10 flex items-center justify-center gap-2 border-none hover:scale-[1.01] active:scale-[0.99] transition-all"
               >
                 {initiating ? (
                   <>
@@ -563,35 +563,35 @@ function CheckoutForm() {
 
           {/* Secure Details Badge & Features */}
           <div className="md:col-span-2 space-y-6 flex flex-col justify-center">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
-              <div className="flex items-center gap-2.5 text-orange-500">
+            <div className="bg-surface-card border border-hairline-dark rounded-2xl p-6 space-y-4">
+              <div className="flex items-center gap-2.5 text-mauve">
                 <ShieldCheck className="h-6 w-6 shrink-0" />
-                <span className="font-bold text-slate-800">Secure Payments</span>
+                <span className="font-bold text-white">Secure Payments</span>
               </div>
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <p className="text-xs text-white/60 leading-relaxed">
                 Transactions are securely processed using Razorpay. Snapsy does not store card numbers or other payment credentials.
               </p>
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-sm font-bold text-slate-700">Included in your plan:</h4>
-              <ul className="space-y-2.5 text-xs text-slate-500">
+              <h4 className="text-sm font-bold text-white/80">Included in your plan:</h4>
+              <ul className="space-y-2.5 text-xs text-white/60">
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-orange-500 shrink-0" />
+                  <Check className="h-4 w-4 text-mauve shrink-0" />
                   <span>Instant event photo collection web app</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-orange-500 shrink-0" />
+                  <Check className="h-4 w-4 text-mauve shrink-0" />
                   <span>QR codes for guest scanning and direct uploads</span>
                 </li>
                 {plan !== "starter" && (
                   <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-orange-500 shrink-0" />
+                    <Check className="h-4 w-4 text-mauve shrink-0" />
                     <span>AI Face Search matching engine</span>
                   </li>
                 )}
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-orange-500 shrink-0" />
+                  <Check className="h-4 w-4 text-mauve shrink-0" />
                   <span>High quality storage limits</span>
                 </li>
               </ul>
@@ -600,7 +600,7 @@ function CheckoutForm() {
         </div>
       </div>
 
-      <footer className="text-center text-xs text-slate-400 py-6 mt-12">
+      <footer className="text-center text-xs text-white/50 py-6 mt-12">
         © {new Date().getFullYear()} Snapsy Inc. All rights reserved.
       </footer>
     </div>
@@ -610,8 +610,8 @@ function CheckoutForm() {
 export default function CheckoutPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+      <div className="min-h-screen bg-surface-dark text-white flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-mauve" />
       </div>
     }>
       <CheckoutForm />

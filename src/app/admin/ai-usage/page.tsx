@@ -66,10 +66,10 @@ export default function AdminAiUsagePage() {
   }, [])
 
   return (
-    <main className="px-6 py-8 space-y-6">
+    <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex items-center justify-between">
         <PageHeader title="AI Usage Analytics" description="Monitor face embeddings processing and guest search requests." />
-        <Button onClick={fetchAiStats} variant="outline" className="border-slate-800 flex items-center gap-1.5">
+        <Button onClick={fetchAiStats} variant="outline" className="border-hairline-dark flex items-center gap-1.5">
           <RefreshCw className="h-4 w-4" />
           <span>Refresh</span>
         </Button>
@@ -82,58 +82,58 @@ export default function AdminAiUsagePage() {
       ) : (
         <>
           <div className="grid gap-6 md:grid-cols-3">
-            <Card className="bg-slate-900 border-slate-800 p-6 flex items-center gap-4">
+            <Card className="bg-surface-card border-hairline-dark p-6 flex items-center gap-4">
               <div className="h-12 w-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
                 <Search className="h-6 w-6" />
               </div>
               <div>
-                <span className="text-xs text-slate-500 font-medium block">Total Face Searches</span>
-                <span className="text-2xl font-bold text-slate-100">{stats.totalSearches.toLocaleString()}</span>
+                <span className="text-xs text-white/50 font-medium block">Total Face Searches</span>
+                <span className="text-2xl font-bold text-white">{stats.totalSearches.toLocaleString()}</span>
               </div>
             </Card>
 
-            <Card className="bg-slate-900 border-slate-800 p-6 flex items-center gap-4">
+            <Card className="bg-surface-card border-hairline-dark p-6 flex items-center gap-4">
               <div className="h-12 w-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
                 <Image className="h-6 w-6" />
               </div>
               <div>
-                <span className="text-xs text-slate-500 font-medium block">Vectorized Faces</span>
-                <span className="text-2xl font-bold text-slate-100">{stats.activeEmbeddings.toLocaleString()}</span>
+                <span className="text-xs text-white/50 font-medium block">Vectorized Faces</span>
+                <span className="text-2xl font-bold text-white">{stats.activeEmbeddings.toLocaleString()}</span>
               </div>
             </Card>
 
-            <Card className="bg-slate-900 border-slate-800 p-6 flex items-center gap-4">
+            <Card className="bg-surface-card border-hairline-dark p-6 flex items-center gap-4">
               <div className="h-12 w-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
                 <Cpu className="h-6 w-6" />
               </div>
               <div>
-                <span className="text-xs text-slate-500 font-medium block">GPU Vector Index Queue</span>
-                <span className="text-lg font-bold text-slate-100">{stats.queueStatus}</span>
+                <span className="text-xs text-white/50 font-medium block">GPU Vector Index Queue</span>
+                <span className="text-lg font-bold text-white">{stats.queueStatus}</span>
               </div>
             </Card>
           </div>
 
-          <Card className="bg-slate-900 border-slate-800 overflow-hidden">
+          <Card className="bg-surface-card border-hairline-dark overflow-hidden">
             <CardContent className="p-0">
-              <div className="p-4 border-b border-slate-800">
-                <h3 className="font-bold text-slate-100">Recent Guest Search Requests</h3>
+              <div className="p-4 border-b border-hairline-dark">
+                <h3 className="font-bold text-white">Recent Guest Search Requests</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-slate-800 text-slate-400 font-medium">
+                    <tr className="border-b border-hairline-dark text-white/40 font-medium">
                       <th className="p-4">Search ID</th>
                       <th className="p-4">Trigger Time</th>
                       <th className="p-4">Processing Latency</th>
                       <th className="p-4">Matching Results</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                  <tbody className="divide-y divide-white/10 text-white/60">
                     {stats.recentSearches.map((log) => (
-                      <tr key={log.id} className="hover:bg-slate-800/20 transition-colors">
-                        <td className="p-4 font-mono text-slate-300">{log.id}</td>
-                        <td className="p-4 text-slate-400">{new Date(log.timestamp).toLocaleString()}</td>
-                        <td className="p-4 font-semibold text-slate-200">{log.durationMs} ms</td>
+                      <tr key={log.id} className="hover:bg-white/5 transition-colors">
+                        <td className="p-4 font-mono text-white/50">{log.id}</td>
+                        <td className="p-4 text-white/40">{new Date(log.timestamp).toLocaleString()}</td>
+                        <td className="p-4 font-semibold text-white/70">{log.durationMs} ms</td>
                         <td className="p-4 font-bold text-orange-400">{log.resultCount} photos</td>
                       </tr>
                     ))}

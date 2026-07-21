@@ -84,7 +84,7 @@ export function AdminMfaForm() {
         />
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700" disabled={pending || code.length < 6 || !factorId}>
+      <Button type="submit" className="w-full bg-mauve hover:bg-mauve-strong" disabled={pending || code.length < 6 || !factorId}>
         {pending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
         {pending ? "Verifying…" : "Verify Code"}
       </Button>
@@ -93,7 +93,7 @@ export function AdminMfaForm() {
         <Button variant="ghost" type="button" onClick={async () => {
           await supabase.auth.signOut()
           router.push("/admin/login")
-        }} className="text-xs text-slate-500 hover:text-slate-700">
+        }} className="text-xs text-white/50 hover:text-white/70">
           Sign in as a different user
         </Button>
       </div>

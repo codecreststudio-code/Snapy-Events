@@ -1529,12 +1529,12 @@ export function NewEventForm() {
             >
 
               {/* Celebratory Badge */}
-              <div className="absolute -top-9 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-[#D4AF37] flex items-center justify-center shadow-lg border-4 border-[#1C1814]">
+              <div className="absolute -top-9 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-[#B28DAE] flex items-center justify-center shadow-lg border-4 border-[#1C1814]">
                 <Sparkles className="h-8 w-8 text-[#141110]" />
               </div>
 
               <div className="text-center pt-8 space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37]">Setup Complete</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#B28DAE]">Setup Complete</span>
                 <h2 className={`font-playfair text-3xl sm:text-4xl font-medium text-white/90`}>
                   Your memory capsule is ready.
                 </h2>
@@ -1572,7 +1572,7 @@ export function NewEventForm() {
 
                 <div className="text-center space-y-0.5">
                   <p className="text-sm font-semibold text-white/90">{name}</p>
-                  <p className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold">Plan: {guestCountPlan.toUpperCase()}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-[#B28DAE] font-bold">Plan: {guestCountPlan.toUpperCase()}</p>
                 </div>
 
                 {/* Copyable join/invite pill */}
@@ -1581,7 +1581,7 @@ export function NewEventForm() {
                   className="w-full max-w-xs flex items-center justify-between gap-2 rounded-full border border-white/15 bg-transparent px-4 py-2 text-white/80 hover:bg-white/10 transition-all cursor-pointer"
                 >
                   <span className="truncate text-xs font-mono">{createdEvent?.slug}</span>
-                  <Copy className="h-3.5 w-3.5 shrink-0 text-[#D4AF37]" />
+                  <Copy className="h-3.5 w-3.5 shrink-0 text-[#B28DAE]" />
                 </button>
 
                 {/* Share/Download Actions */}
@@ -1625,7 +1625,7 @@ export function NewEventForm() {
                 </Button>
                 <Button
                   onClick={handleLaunch}
-                  className="flex-1 rounded-full bg-[#D4AF37] text-[#141110] hover:bg-[#c6a230] font-bold py-5 border-none shadow-[0_4px_14px_rgba(212,175,55,0.25)]"
+                  className="flex-1 rounded-full bg-[#B28DAE] text-[#141110] hover:bg-[#A468A0] font-bold py-5 border-none shadow-[0_4px_14px_rgba(178,141,174,0.25)]"
                 >
                   Launch Event
                 </Button>
