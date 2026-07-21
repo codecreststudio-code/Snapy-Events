@@ -1,63 +1,18 @@
-import { z } from "zod"
-import { defineRoute, ok, fail } from "@/lib/api/handler"
-import { createClient } from "@/lib/supabase/server"
-import { detectAndStoreFaces } from "@/lib/integrations/face"
-import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
-import { logger } from "@/lib/logger"
+// src/app/api/ai/faces/batch-process/route.ts
+//
+// AI Smart Clusters (the "Initiate New Face Match" batch re-scan button on
+// the host dashboard) has been removed at the host's request. It's not
+// needed for correctness: face detection already runs automatically on
+// every upload via detectAndStoreFaces() in src/app/api/photos/upload/route.ts,
+// which is what actually populates the `faces` table that guest-facing face
+// search (/api/ai/faces/search) reads from. This route file can't be
+// deleted from this environment (the mounted folder blocks unlink/rename on
+// some files), so it's gutted to a 410 Gone stub.
 
-const body = z.object({ event_id: z.string().uuid(), photo_ids: z.array(z.string().uuid()).min(1).max(500) })
+import { defineRoute, fail } from "@/lib/api/handler"
 
 export const POST = defineRoute({
   method: "POST",
-  body,
   requireAuth: true,
-  audit: "ai.face.batch",
-  handler: async ({ body }) => {
-    // Was gated on auth.user.settings["ai_face_search"], a field nothing in
-    // the codebase ever populates — every batch run was unconditionally
-    // FORBIDDEN. Use the same event-scoped plan gate as /detect and /search.
-    const gate = await checkEventFeatureAccess(body.event_id, "ai_face_search")
-    if (!gate.allowed) {
-      return fail("FORBIDDEN", gate.reason || "AI Face Search is disabled for this event", 403)
-    }
-
-    const supabase = await createClient()
-    const { data: photos } = await supabase.from("photos").select("id, storage_path").in("id", body.photo_ids)
-
-    // batchProcessFaces() used to run detection per photo and only ever
-    // return counts — it never wrote a single row to `faces`, so batch runs
-    // silently produced nothing to cluster. detectAndStoreFaces persists
-    // each detected face AND assigns/creates its face_clusters row.
-    let processed = 0
-    let facesDetected = 0
-    const errors: { photoId: string; error: string }[] = []
-
-    for (const photo of photos ?? []) {
-      try {
-        const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${photo.storage_path}`
-        const result = await detectAndStoreFaces(supabase, {
-          eventId: body.event_id,
-          photoId: photo.id,
-          imageUrl: url,
-        })
-        processed++
-        facesDetected += result.facesDetected
-      } catch (e) {
-        // Previously swallowed into an array nobody read: the route still
-        // returned 200 with processed=0/facesDetected=0 and the client only
-        // ever showed "Scanned 0 photo(s), found 0 face(s)" with no hint
-        // why — indistinguishable from "ran fine, nobody has a face in
-        // frame." Log server-side so a real failure (model load, storage
-        // fetch, RLS) shows up in Vercel logs instead of vanishing.
-        logger.error("[ai/faces/batch-process] detectAndStoreFaces failed", {
-          eventId: body.event_id,
-          photoId: photo.id,
-          error: String(e),
-        })
-        errors.push({ photoId: photo.id, error: String(e) })
-      }
-    }
-
-    return ok({ processed, facesDetected, errors })
-  },
+  handler: async () => fail("REMOVED", "AI Smart Clusters has been removed from Snapsy.", 410),
 }).POST

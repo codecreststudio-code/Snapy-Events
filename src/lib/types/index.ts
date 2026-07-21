@@ -67,26 +67,6 @@ export interface EventSettings {
   enable_countdown: boolean
   countdown_date?: string
   custom_css?: string
-  // Populated server-side by the recap generation pipeline
-  // (POST /api/events/[id]/recap/generate — see src/lib/integrations/recap-video.ts).
-  // Not present until a host has triggered generation at least once for this
-  // event. Mirrored in ExtEventSettings in
-  // src/app/dashboard/events/[slug]/page.tsx, which is the shape the
-  // dashboard UI actually reads/writes against.
-  recap_video?: {
-    status: "idle" | "rendering" | "ready" | "failed"
-    mood?: "joyful" | "sentimental"
-    video_url?: string
-    generated_at?: string
-    error?: string
-    stats?: {
-      guests: number
-      photos: number
-      videos: number
-      voiceNotes: number
-      messages: number
-    }
-  }
 }
 
 export interface Gallery {

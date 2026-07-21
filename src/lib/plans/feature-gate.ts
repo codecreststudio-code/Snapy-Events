@@ -132,7 +132,7 @@ export async function checkEventFeatureAccess(
     // Default Fallback Rules based on Plan Tier
     // NOTE: video_uploads and voice_notes are controlled by event content_types settings (checked above).
     // Only block premium AI features when host has no paid plan.
-    if (["ai_face_search", "live_photo_wall", "print_ready_downloads", "whatsapp_alerts", "priority_support", "recap_video"].includes(featureKey)) {
+    if (["ai_face_search", "live_photo_wall", "print_ready_downloads", "whatsapp_alerts", "priority_support"].includes(featureKey)) {
       const isPaid = planId !== "free"
       return {
         allowed: isPaid,

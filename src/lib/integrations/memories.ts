@@ -120,3 +120,84 @@ export function isMemoriesEnabled(settings: Record<string, unknown> | null | und
   const value = (settings as Record<string, unknown>).memories_enabled
   return value !== false
 }
+
+// --- Guest Awards ---------------------------------------------------------
+//
+// Pulled out of src/app/api/events/[id]/memories/awards/route.ts so the
+// event-completion automation (memories-automation.ts) can compute the exact
+// same award set without duplicating the derivation logic, and so both stay
+// in sync if the scoring rules ever change.
+
+export interface GuestAwardRow {
+  guest_name: string
+  photo_count: number
+  video_count: number
+  voice_note_count: number
+  reaction_total: number
+  night_owl_uploads: number
+  first_upload_at: string | null
+  last_upload_at: string | null
+}
+
+export interface GuestAward {
+  key: string
+  emoji: string
+  title: string
+  guestName: string
+  value: number
+}
+
+export async function getGuestAwardRows(supabase: SupabaseClient, eventId: string): Promise<GuestAwardRow[]> {
+  const { data, error } = await supabase.rpc("get_guest_awards", { p_event_id: eventId })
+  if (error) {
+    logger.error("memories: get_guest_awards failed", { eventId, error: error.message })
+    return []
+  }
+  return (data as GuestAwardRow[] | null) ?? []
+}
+
+export function deriveGuestAwards(rows: GuestAwardRow[]): { awards: GuestAward[]; guestCount: number } {
+  if (rows.length === 0) return { awards: [], guestCount: 0 }
+
+  const awards: GuestAward[] = []
+
+  const topPhotographer = [...rows].sort((a, b) => b.photo_count - a.photo_count)[0]
+  if (topPhotographer.photo_count > 0) {
+    awards.push({ key: "top_photographer", emoji: "🏆", title: "Top Photographer", guestName: topPhotographer.guest_name, value: topPhotographer.photo_count })
+  }
+
+  const topVideographer = [...rows].sort((a, b) => b.video_count - a.video_count)[0]
+  if (topVideographer.video_count > 0) {
+    awards.push({ key: "top_videographer", emoji: "🎥", title: "Top Videographer", guestName: topVideographer.guest_name, value: topVideographer.video_count })
+  }
+
+  const mostLoved = [...rows].sort((a, b) => b.reaction_total - a.reaction_total)[0]
+  if (mostLoved.reaction_total > 0) {
+    awards.push({ key: "most_loved", emoji: "❤️", title: "Most Loved", guestName: mostLoved.guest_name, value: mostLoved.reaction_total })
+  }
+
+  const mostActive = [...rows].sort(
+    (a, b) => b.photo_count + b.video_count + b.voice_note_count - (a.photo_count + a.video_count + a.voice_note_count),
+  )[0]
+  awards.push({
+    key: "most_active",
+    emoji: "🔥",
+    title: "Most Active",
+    guestName: mostActive.guest_name,
+    value: mostActive.photo_count + mostActive.video_count + mostActive.voice_note_count,
+  })
+
+  const firstUpload = rows
+    .filter((r) => r.first_upload_at)
+    .sort((a, b) => new Date(a.first_upload_at!).getTime() - new Date(b.first_upload_at!).getTime())[0]
+  if (firstUpload) {
+    awards.push({ key: "first_upload", emoji: "📷", title: "First Upload", guestName: firstUpload.guest_name, value: 1 })
+  }
+
+  const nightOwl = [...rows].sort((a, b) => b.night_owl_uploads - a.night_owl_uploads)[0]
+  if (nightOwl.night_owl_uploads > 0) {
+    awards.push({ key: "night_owl", emoji: "😊", title: "Night Owl", guestName: nightOwl.guest_name, value: nightOwl.night_owl_uploads })
+  }
+
+  return { awards, guestCount: rows.length }
+}

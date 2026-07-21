@@ -20,6 +20,7 @@ import { useWatermarkEnabled } from "@/lib/hooks"
 import { toDatetimeLocalValue } from "@/lib/utils"
 import { WatermarkOverlay } from "@/lib/components/media/watermark-overlay"
 import { MediaLightbox, type LightboxMedia } from "@/lib/components/media/media-lightbox"
+import { SlideshowPlayer } from "@/lib/components/media/slideshow-player"
 import { SLIDESHOW_TRACKS } from "@/lib/integrations/slideshow-music"
 import {
   ArrowLeft,
@@ -106,24 +107,6 @@ interface ExtEventSettings extends EventSettings {
     welcome_message: string
     countdown_enabled: boolean
   }
-  // Populated server-side by the recap generation pipeline
-  // (POST /api/events/[id]/recap/generate). Not present until a host has
-  // triggered generation at least once for this event.
-  recap_video?: {
-    status: "idle" | "rendering" | "ready" | "failed"
-    mood?: "joyful" | "sentimental"
-    video_url?: string
-    generated_at?: string
-    started_at?: string
-    error?: string
-    stats?: {
-      guests: number
-      photos: number
-      videos: number
-      voiceNotes: number
-      messages: number
-    }
-  }
 }
 
 // Cross-origin links to Supabase Storage need the server to actually send
@@ -193,19 +176,18 @@ async function getLiveWallMessages(eventId: string) {
   return data || []
 }
 
-// Fetch advisory plan-gate results for the three paid-plan-only actions on
-// this page (Recap Video, AI Smart Clusters, Download All) in a single round
-// trip — see src/app/api/events/[id]/feature-access/route.ts. Used purely
-// for proactive UX (disable + "upgrade" tag before the host clicks); the
-// underlying action routes still enforce their own gate server-side.
+// Fetch advisory plan-gate result for Download All — see
+// src/app/api/events/[id]/feature-access/route.ts. Used purely for
+// proactive UX (disable + "upgrade" tag before the host clicks); the
+// underlying action route still enforces its own gate server-side.
+// (Recap Video and AI Smart Clusters used to be checked here too — both
+// removed along with their cards.)
 interface FeatureAccessResult {
   allowed: boolean
   planId: string
   reason?: string
 }
 interface FeatureAccessResponse {
-  recap_video: FeatureAccessResult
-  ai_face_search: FeatureAccessResult
   print_ready_downloads: FeatureAccessResult
 }
 async function getFeatureAccess(eventId: string): Promise<FeatureAccessResponse> {
@@ -216,8 +198,6 @@ async function getFeatureAccess(eventId: string): Promise<FeatureAccessResponse>
     // only. If the check itself errors, the host still hits the real action
     // routes' own server-side gate on click, so nothing bypasses enforcement.
     return {
-      recap_video: { allowed: true, planId: "free" },
-      ai_face_search: { allowed: true, planId: "free" },
       print_ready_downloads: { allowed: true, planId: "free" },
     }
   }
@@ -280,10 +260,6 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [countdownText, setCountdownText] = useState("")
   const [copied, setCopied] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
-  // Explicit copy-link intent for the recap video card (separate from
-  // handleShareRecap's native-Share-API path below) — part of splitting the
-  // single generic "Share" button into explicit share-target intents.
-  const [recapCopied, setRecapCopied] = useState(false)
   const [regeneratingCode, setRegeneratingCode] = useState(false)
   const [activeLightboxMedia, setActiveLightboxMedia] = useState<LightboxMedia | null>(null)
   const [isDownloadingZip, setIsDownloadingZip] = useState(false)
@@ -652,19 +628,17 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     refetchInterval: 10000,
   })
 
-  // Advisory plan-gate check for Recap Video / AI Smart Clusters / Download
-  // All — fetched once per event load so the UI can show a calm disabled
-  // state with an "upgrade" tag instead of letting the host click into a
-  // 403 from the actual action route. Not refetched on an interval since
-  // plan tier doesn't change mid-session; invalidated implicitly on next
-  // event load / navigation.
+  // Advisory plan-gate check for Download All — fetched once per event load
+  // so the UI can show a calm disabled state with an "upgrade" tag instead
+  // of letting the host click into a 403 from the actual action route. Not
+  // refetched on an interval since plan tier doesn't change mid-session;
+  // invalidated implicitly on next event load / navigation. (Recap Video and
+  // AI Smart Clusters used to be checked here too — both removed.)
   const { data: featureAccess } = useQuery({
     queryKey: ["feature-access", event?.id],
     queryFn: () => getFeatureAccess(event!.id),
     enabled: !!event?.id,
   })
-  const recapAllowed = featureAccess?.recap_video?.allowed ?? true
-  const faceSearchAllowed = featureAccess?.ai_face_search?.allowed ?? true
   const downloadAllAllowed = featureAccess?.print_ready_downloads?.allowed ?? true
 
   // Supabase Realtime live stream listener for instant push updates
@@ -731,189 +705,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     }
   })
 
-  // --- Recap Video (highlight reel) ---
-  // The generate call is a long-running synchronous request (up to ~300s,
-  // same pattern as /api/events/[id]/download-zip) — no job-queue/polling
-  // endpoint. We await the full response, then invalidate the event query
-  // (same queryKey pattern as updateMutation above) so the server-persisted
-  // settings.recap_video survives a hard refresh, not just local state.
-  const recapVideo = (event?.settings as ExtEventSettings | undefined)?.recap_video
-  // A "rendering" marker left over from a render the server never finished
-  // (killed mid-flight by a platform timeout, cold-deploy recycle, etc. —
-  // see the matching staleness check in recap/generate/route.ts) shouldn't
-  // show an infinite spinner on every future page load with no way to
-  // retry. Anything older than the route's own 300s maxDuration plus a
-  // comfortable buffer is treated as abandoned rather than in-progress.
-  const RECAP_RENDERING_STALE_MS = 10 * 60 * 1000
-  const recapRenderingStartedAt = recapVideo?.started_at ? Date.parse(recapVideo.started_at) : NaN
-  const recapIsStaleRendering =
-    recapVideo?.status === "rendering" &&
-    (!Number.isFinite(recapRenderingStartedAt) || Date.now() - recapRenderingStartedAt > RECAP_RENDERING_STALE_MS)
-  const recapServerStatus: "idle" | "rendering" | "ready" | "failed" = recapIsStaleRendering
-    ? "failed"
-    : recapVideo?.status || "idle"
-
-  const [recapMood, setRecapMood] = useState<"joyful" | "sentimental">("joyful")
-  // Forces the mood-selector view back open after "Regenerate" / "Try Again"
-  // even though the server-persisted status is still "ready"/"failed".
-  const [recapViewOverride, setRecapViewOverride] = useState(false)
-  // "Select your moments" picker (once.film's manual moment-picker step,
-  // previously missing here — the recap always used auto-selected photos
-  // with no way for the host to choose). Collapsed by default since most
-  // hosts are happy with auto-selection; opening it and picking at least
-  // one photo overrides the heuristic for that generation.
-  const [showMomentPicker, setShowMomentPicker] = useState(false)
-  const [selectedMomentIds, setSelectedMomentIds] = useState<string[]>([])
-
-  useEffect(() => {
-    if (recapVideo?.mood) setRecapMood(recapVideo.mood)
-  }, [recapVideo?.mood])
-
-  const recapMutation = useMutation({
-    mutationFn: async ({ mood, photoIds }: { mood: "joyful" | "sentimental"; photoIds: string[] }) => {
-      if (!event?.id) throw new Error("Missing event id")
-      const res = await fetch(`/api/events/${event.id}/recap/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(photoIds.length > 0 ? { mood, photo_ids: photoIds } : { mood }),
-      })
-      const json = await res.json().catch(() => null)
-      if (!res.ok || !json?.success) {
-        throw new Error(json?.error?.message || `Recap generation failed (${res.status})`)
-      }
-      return json.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["event", slug] })
-      setRecapViewOverride(false)
-      toast({ title: "Recap video ready!", description: "Your highlight reel has been generated." })
-    },
-    onError: (error: Error) => {
-      // The backend also persists a "failed" status onto settings.recap_video
-      // server-side — invalidate so a refresh reflects that too, not just
-      // this in-memory mutation error.
-      queryClient.invalidateQueries({ queryKey: ["event", slug] })
-      toast({ title: "Couldn't generate recap", description: error.message, variant: "destructive" })
-    },
-  })
-
-  // "Initiate New Face Match" used to be a plain <Button> with no onClick at
-  // all — clicking it did nothing. Detection also never ran automatically,
-  // so this is the host's only manual way to (re)process this event's
-  // photos. Feeds all current photo IDs to the batch-process route, which
-  // now actually persists detected faces and assigns them into
-  // face_clusters (see src/lib/integrations/face.ts detectAndStoreFaces).
-  const faceMatchMutation = useMutation({
-    mutationFn: async () => {
-      if (!event?.id) throw new Error("Missing event id")
-      const photoIds = photos
-        .filter((p: any) => !p.mime_type?.startsWith("video/") && !p.mime_type?.startsWith("audio/"))
-        .map((p: any) => p.id)
-        .slice(0, 500)
-      if (photoIds.length === 0) throw new Error("No photos to scan yet.")
-      const res = await fetch(`/api/ai/faces/batch-process`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ event_id: event.id, photo_ids: photoIds }),
-      })
-      const json = await res.json().catch(() => null)
-      if (!res.ok || !json?.success) {
-        throw new Error(json?.error?.message || `Face match failed (${res.status})`)
-      }
-      return json.data
-    },
-    onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ["face-clusters", event?.id] })
-      queryClient.invalidateQueries({ queryKey: ["event-photos", event?.id] })
-      const errorCount = Array.isArray(data?.errors) ? data.errors.length : 0
-      // A 200 with processed=0 used to look identical to "ran fine, no
-      // faces in these photos" — surface the first real error instead of
-      // hiding it, so a genuine failure (model/storage/etc.) is visible
-      // here rather than only in server logs.
-      if (errorCount > 0 && (data?.processed ?? 0) === 0) {
-        toast({
-          title: "Face match ran into errors",
-          description: `${errorCount} photo(s) failed to process. First error: ${data.errors[0]?.error ?? "unknown"}`,
-          variant: "destructive",
-        })
-      } else {
-        toast({
-          title: "Face match complete",
-          description: `Scanned ${data?.processed ?? 0} photo(s), found ${data?.facesDetected ?? 0} face(s).${errorCount > 0 ? ` (${errorCount} failed)` : ""}`,
-        })
-      }
-    },
-    onError: (error: Error) => {
-      toast({ title: "Couldn't run face match", description: error.message, variant: "destructive" })
-    },
-  })
-
-  // Effective status shown by the card: in-flight mutation and the
-  // Regenerate/Try Again override both take priority over whatever the
-  // server currently has persisted.
-  const recapStatus: "idle" | "rendering" | "ready" | "failed" = recapMutation.isPending
-    ? "rendering"
-    : recapViewOverride
-      ? "idle"
-      : recapMutation.isError
-        ? "failed"
-        : recapServerStatus
-
-  const recapErrorMessage =
-    recapMutation.error?.message ||
-    recapVideo?.error ||
-    "Something went wrong generating your recap. Please try again."
-
-  const handleGenerateRecap = () => {
-    recapMutation.mutate({ mood: recapMood, photoIds: selectedMomentIds })
-  }
-
-  const handleResetRecap = () => {
-    recapMutation.reset()
-    setRecapViewOverride(true)
-    setSelectedMomentIds([])
-    setShowMomentPicker(false)
-  }
-
-  function toggleMomentSelected(photoId: string) {
-    setSelectedMomentIds((prev) =>
-      prev.includes(photoId) ? prev.filter((id) => id !== photoId) : [...prev, photoId]
-    )
-  }
-
-  // Recap sharing used to be a single generic button that silently tried
-  // navigator.share and fell back to an unlabeled clipboard copy — the host
-  // had no way to specifically choose WhatsApp or grab a copyable link on
-  // desktop. Split into explicit share-target intents instead: a native
-  // Share-sheet button (only rendered where the Web Share API actually
-  // exists), plus always-available WhatsApp and Copy Link buttons that work
-  // identically to the invitation card's WhatsApp/Copy buttons above.
-  const handleShareRecap = () => {
-    if (!recapVideo?.video_url) return
-    const shareData = { title: `${event?.name || "Event"} — Recap Video`, url: recapVideo.video_url }
-    // Scoped to a local `nav` const (rather than narrowing the global `navigator`
-    // via `"share" in navigator`) — the `in`-based narrowing previously collapsed
-    // the else-if branch's `navigator` type to `never` under this codebase's lib
-    // config, which failed the production type-check.
-    const nav = typeof navigator !== "undefined" ? navigator : undefined
-    if (nav && typeof (nav as any).share === "function") {
-      ;(nav as any).share(shareData).catch(() => {})
-    }
-  }
-
-  const handleShareRecapWhatsApp = () => {
-    if (!recapVideo?.video_url) return
-    const text = `Check out the recap video for ${event?.name || "our event"}! ${recapVideo.video_url}`
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank")
-  }
-
-  const handleCopyRecapLink = () => {
-    if (!recapVideo?.video_url) return
-    navigator.clipboard?.writeText(recapVideo.video_url)
-    setRecapCopied(true)
-    toast({ title: "Link copied", description: "Recap video link copied to clipboard." })
-    setTimeout(() => setRecapCopied(false), 2000)
-  }
+  // Recap Video and AI Smart Clusters (host-triggered face-cluster batch
+  // re-scan) were both removed at the host's request — Recap Video never
+  // rendered reliably in production, and AI Smart Clusters' underlying face
+  // detection already runs automatically on upload (see
+  // detectAndStoreFaces() in photos/upload/route.ts), so the manual button
+  // added nothing guest-facing face search doesn't already get for free.
 
   // --- Snapsy Memories: Guest Awards, Event Summary, Auto Collage, Slideshow, Stories ---
   // Pure Next.js + Supabase, no ffmpeg/AI services — see
@@ -1755,333 +1552,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </div>
           </div>
 
-          {/* Recap Video card — auto-composed highlight reel with an
-              animated stats intro, generated via the long-running
-              POST /api/events/[id]/recap/generate route (same up-to-~300s
-              synchronous pattern as the download-zip route: the client
-              awaits the full response with a loading state, no polling). */}
-          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <div className="flex items-center gap-2">
-                <Film className="h-4.5 w-4.5 text-[#B28DAE]" />
-                <h3 className="font-playfair text-lg font-light text-white">Recap Video</h3>
-              </div>
-              {recapStatus === "ready" && recapAllowed && (
-                <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20 capitalize">
-                  {recapVideo?.mood}
-                </span>
-              )}
-              {!recapAllowed && (
-                <span className="text-[10px] font-bold uppercase tracking-wide border border-[#B28DAE]/40 bg-[#B28DAE]/10 text-[#B28DAE] rounded-full px-2 py-0.5 shrink-0">
-                  Premium feature
-                </span>
-              )}
-            </div>
-
-            {(recapStatus === "idle" || recapStatus === "rendering") && (
-              <div className="space-y-4">
-                <p className="text-xs text-white/60">Turn your event into a highlight reel — an auto-composed video with an animated stats intro built from your photos, videos, and messages.</p>
-
-                {recapAllowed ? (
-                  <>
-                    <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Recap mood">
-                      <button
-                        type="button"
-                        role="radio"
-                        aria-checked={recapMood === "joyful"}
-                        disabled={recapStatus === "rendering"}
-                        onClick={() => setRecapMood("joyful")}
-                        className={`rounded-2xl border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE] disabled:opacity-50 disabled:cursor-not-allowed ${
-                          recapMood === "joyful"
-                            ? "border-[#B28DAE] bg-[#B28DAE]/10"
-                            : "border-white/15 bg-transparent hover:bg-white/5"
-                        }`}
-                      >
-                        <p className="text-xs font-bold text-white/90">Joyful</p>
-                        <p className="text-[10px] text-white/50 mt-0.5">Upbeat and vibrant</p>
-                      </button>
-                      <button
-                        type="button"
-                        role="radio"
-                        aria-checked={recapMood === "sentimental"}
-                        disabled={recapStatus === "rendering"}
-                        onClick={() => setRecapMood("sentimental")}
-                        className={`rounded-2xl border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE] disabled:opacity-50 disabled:cursor-not-allowed ${
-                          recapMood === "sentimental"
-                            ? "border-[#B28DAE] bg-[#B28DAE]/10"
-                            : "border-white/15 bg-transparent hover:bg-white/5"
-                        }`}
-                      >
-                        <p className="text-xs font-bold text-white/90">Sentimental</p>
-                        <p className="text-[10px] text-white/50 mt-0.5">Warm and reflective</p>
-                      </button>
-                    </div>
-
-                    {/* "Select your moments" — optional manual override of the
-                        auto-selected highlight photos (once.film's moment-picker
-                        step, previously missing here entirely). Collapsed by
-                        default; picking at least one photo here takes priority
-                        over the top-reacted/timeline-sampled heuristic. */}
-                    {recapStatus !== "rendering" && (
-                      <div className="space-y-2">
-                        <button
-                          type="button"
-                          onClick={() => setShowMomentPicker((v) => !v)}
-                          className="text-[11px] font-semibold text-[#B28DAE] hover:text-white flex items-center gap-1"
-                        >
-                          <ImageIcon className="h-3 w-3" />
-                          <span>
-                            {selectedMomentIds.length > 0
-                              ? `${selectedMomentIds.length} moment${selectedMomentIds.length === 1 ? "" : "s"} selected — change selection`
-                              : "Select your moments (optional)"}
-                          </span>
-                        </button>
-
-                        {showMomentPicker && (
-                          <div className="rounded-2xl border border-white/10 bg-white/5 p-3 space-y-2">
-                            <p className="text-[10px] text-white/50">
-                              Pick up to {16} photos to use instead of auto-selecting. Leave empty and Snapy will choose your best moments automatically.
-                            </p>
-                            {justPhotos.length === 0 ? (
-                              <p className="text-xs text-white/40 text-center py-4">No photos yet.</p>
-                            ) : (
-                              <div className="grid grid-cols-4 gap-1.5 max-h-64 overflow-y-auto pr-1">
-                                {justPhotos.slice(0, 200).map((p: any) => {
-                                  const isSelected = selectedMomentIds.includes(p.id)
-                                  const atCap = !isSelected && selectedMomentIds.length >= 16
-                                  return (
-                                    <button
-                                      key={p.id}
-                                      type="button"
-                                      onClick={() => toggleMomentSelected(p.id)}
-                                      disabled={atCap}
-                                      title={atCap ? "Up to 16 moments — deselect one to add another" : undefined}
-                                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
-                                        isSelected ? "border-[#B28DAE]" : "border-transparent hover:border-white/30"
-                                      }`}
-                                    >
-                                      <img
-                                        src={getImageUrl(p.thumbnail_path || p.storage_path)}
-                                        alt="Event moment"
-                                        className="w-full h-full object-cover"
-                                      />
-                                      {isSelected && (
-                                        <div className="absolute inset-0 bg-[#B28DAE]/30 flex items-center justify-center">
-                                          <Check className="h-4 w-4 text-white drop-shadow" />
-                                        </div>
-                                      )}
-                                    </button>
-                                  )
-                                })}
-                              </div>
-                            )}
-                            {selectedMomentIds.length > 0 && (
-                              <button
-                                type="button"
-                                onClick={() => setSelectedMomentIds([])}
-                                className="text-[10px] font-semibold text-white/60 hover:text-white"
-                              >
-                                Clear selection
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {recapStatus === "rendering" ? (
-                      <div className="flex flex-col items-center justify-center gap-2 py-6 text-center border border-white/10 bg-white/5 rounded-2xl">
-                        <Loader2 className="h-5 w-5 text-[#B28DAE] animate-spin" />
-                        <p className="text-xs font-semibold text-white/80">Composing your recap… this can take a few minutes</p>
-                        <p className="text-[10px] text-white/50">You can leave this page — we'll save it here when it's ready.</p>
-                      </div>
-                    ) : (
-                      <Button
-                        size="sm"
-                        onClick={handleGenerateRecap}
-                        disabled={recapMutation.isPending}
-                        className="w-full text-xs bg-[#B28DAE] hover:bg-[#a468a0] text-[#141110] font-semibold flex items-center justify-center gap-1.5 rounded-full"
-                      >
-                        <Film className="h-3.5 w-3.5" />
-                        <span>Generate Recap</span>
-                      </Button>
-                    )}
-                  </>
-                ) : (
-                  // Locked state — this event's plan doesn't include Recap Video.
-                  // Shown up front instead of letting the host click "Generate
-                  // Recap" and land on a 403 after the fact.
-                  <div className="space-y-3">
-                    <div
-                      className="grid grid-cols-2 gap-2 opacity-40 pointer-events-none select-none"
-                      aria-hidden="true"
-                    >
-                      <div className="rounded-2xl border border-white/15 bg-transparent p-3 text-left">
-                        <p className="text-xs font-bold text-white/70">Joyful</p>
-                        <p className="text-[10px] text-white/40 mt-0.5">Upbeat and vibrant</p>
-                      </div>
-                      <div className="rounded-2xl border border-white/15 bg-transparent p-3 text-left">
-                        <p className="text-xs font-bold text-white/70">Sentimental</p>
-                        <p className="text-[10px] text-white/40 mt-0.5">Warm and reflective</p>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      disabled
-                      aria-disabled="true"
-                      title={featureAccess?.recap_video?.reason || "Recap Video requires a paid plan"}
-                      className="w-full text-xs bg-[#B28DAE]/10 border border-[#B28DAE]/40 text-[#B28DAE]/70 font-semibold flex items-center justify-center gap-1.5 rounded-full cursor-not-allowed pointer-events-none opacity-90"
-                    >
-                      <Film className="h-3.5 w-3.5" />
-                      <span>Generate Recap</span>
-                    </Button>
-                    <p className="text-[10px] text-white/40 text-center">Upgrade your plan to unlock recap videos for this event.</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {recapStatus === "ready" && recapVideo?.video_url && (
-              <div className="space-y-3">
-                <video
-                  src={recapVideo.video_url}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  poster={event?.cover_image_url || undefined}
-                  className="w-full aspect-video rounded-2xl border border-white/10 bg-black"
-                >
-                  Your browser does not support video playback.
-                </video>
-
-                <p className="text-[10px] text-white/50 text-center">
-                  {recapVideo.stats
-                    ? `${recapVideo.stats.guests} guests · ${recapVideo.stats.photos} photos · ${recapVideo.stats.videos} videos · ${recapVideo.stats.voiceNotes} voice notes`
-                    : `${totalGuestsCount} guests · ${totalPhotosCount} photos · ${totalVideosCount} videos · ${totalVoicesCount} voice notes`}
-                </p>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <a
-                    href={forceDownloadUrl(recapVideo.video_url, `${event.slug || "event"}-recap.mp4`)}
-                    download
-                    className="rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE]"
-                  >
-                    <Download className="h-3.5 w-3.5" /> Download
-                  </a>
-                  <button
-                    type="button"
-                    onClick={handleShareRecapWhatsApp}
-                    className="rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE]"
-                  >
-                    <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
-                  </button>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handleCopyRecapLink}
-                    className="flex-1 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE]"
-                  >
-                    {recapCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                    {recapCopied ? "Copied!" : "Copy Link"}
-                  </button>
-                  {typeof navigator !== "undefined" && typeof (navigator as any).share === "function" && (
-                    <button
-                      type="button"
-                      onClick={handleShareRecap}
-                      className="flex-1 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE]"
-                    >
-                      <Share2 className="h-3.5 w-3.5" /> Share
-                    </button>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleResetRecap}
-                  className="w-full text-[11px] font-semibold text-white/60 hover:text-white flex items-center justify-center gap-1.5 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE] rounded-full"
-                >
-                  <RefreshCw className="h-3 w-3" /> Regenerate
-                </button>
-              </div>
-            )}
-
-            {recapStatus === "failed" && (
-              <div className="space-y-3 text-center py-2">
-                <AlertCircle className="h-6 w-6 text-red-400 mx-auto" />
-                <p className="text-xs text-white/70">{recapErrorMessage}</p>
-                <Button
-                  size="sm"
-                  onClick={handleResetRecap}
-                  className="w-full text-xs bg-[#B28DAE] hover:bg-[#a468a0] text-[#141110] font-semibold rounded-full"
-                >
-                  Try Again
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {/* AI Matches clustered panel */}
-          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
-            <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4.5 w-4.5 text-[#B28DAE]" />
-                <h3 className="text-sm font-bold text-white/90">AI Smart Clusters</h3>
-              </div>
-              {!faceSearchAllowed && (
-                <span className="text-[10px] font-bold uppercase tracking-wide border border-[#B28DAE]/40 bg-[#B28DAE]/10 text-[#B28DAE] rounded-full px-2 py-0.5 shrink-0">
-                  Premium feature
-                </span>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              {dynamicAiMatches.length > 0 ? dynamicAiMatches.map((cluster) => (
-                <div key={cluster.id} className="flex items-center justify-between text-xs p-2 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <img src={cluster.cover} alt="Cluster Cover" className="w-10 h-10 rounded-lg object-cover border border-white/10 shrink-0" />
-                    <div>
-                      <p className="font-semibold text-white/90">{cluster.label}</p>
-                      <p className="text-[10px] text-white/50">{cluster.photoCount} match files</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-white/30" />
-                </div>
-              )) : (
-                <p className="text-xs text-white/50 text-center py-4">
-                  {faceSearchAllowed ? "No smart clusters found yet." : "AI face clustering isn't included on this event's plan."}
-                </p>
-              )}
-            </div>
-
-            {faceSearchAllowed ? (
-              <Button
-                variant="outline"
-                className="w-full text-xs py-5 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
-                disabled={faceMatchMutation.isPending}
-                onClick={() => faceMatchMutation.mutate()}
-              >
-                <Search className={`h-3.5 w-3.5 ${faceMatchMutation.isPending ? "animate-spin" : ""}`} />
-                <span>{faceMatchMutation.isPending ? "Scanning photos..." : "Initiate New Face Match"}</span>
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                disabled
-                aria-disabled="true"
-                title={featureAccess?.ai_face_search?.reason || "AI Smart Clusters require a paid plan"}
-                className="w-full text-xs py-5 rounded-full border border-[#B28DAE]/40 bg-[#B28DAE]/10 text-[#B28DAE]/70 flex items-center justify-center gap-1.5 cursor-not-allowed pointer-events-none opacity-90"
-              >
-                <Search className="h-3.5 w-3.5" />
-                <span>Initiate New Face Match</span>
-              </Button>
-            )}
-          </div>
-
           {/* ✨ Snapsy Memories — Guest Awards, Event Summary, Auto Collage, Slideshow, Stories.
-              Pure Next.js + Supabase, no ffmpeg/AI services (Highlight Movie above reuses the
-              existing Recap Video pipeline instead of duplicating it). Gated behind the host's
+              Pure Next.js + Supabase, no ffmpeg/AI services. Gated behind the host's
               memories_enabled toggle in Edit Capsule Settings — this whole section disappears
               when the host turns it off, matching that toggle's description. */}
           {memoriesEnabled && (
@@ -2270,33 +1742,29 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               <span>{slideshowMutation.isPending ? "Building slideshow…" : "Generate Slideshow"}</span>
             </Button>
             {memoriesSlideshow?.slideshow && memoriesSlideshow.photos.length > 0 && (
-              <Button
-                variant="outline"
-                className="w-full text-xs py-3 rounded-full border border-white/15 bg-white/5 text-white/80 hover:bg-white/10"
-                onClick={() => setShowSlideshowPlayer(true)}
-              >
-                ▶ Watch Slideshow ({memoriesSlideshow.photos.length} photos)
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  className="w-full text-xs py-3 rounded-full border border-white/15 bg-white/5 text-white/80 hover:bg-white/10"
+                  onClick={() => setShowSlideshowPlayer(true)}
+                >
+                  ▶ Watch Slideshow ({memoriesSlideshow.photos.length} photos)
+                </Button>
+                {/* Share — merged in from the old standalone "Share Movie" card
+                    once Recap Video was removed; points guests at the same
+                    slideshow via a public link + QR instead of a video file. */}
+                {event?.slug && (
+                  <Link
+                    href={`/movie/${event.slug}`}
+                    target="_blank"
+                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-white/15 bg-transparent text-white text-xs font-semibold py-3 hover:bg-white/10 transition-colors"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" /> Share Slideshow
+                  </Link>
+                )}
+              </>
             )}
           </div>
-
-          {/* Share Movie — only once the Highlight Movie (Recap Video) is ready */}
-          {recapVideo?.status === "ready" && event?.slug && (
-            <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-3">
-              <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-                <Share2 className="h-4.5 w-4.5 text-[#B28DAE]" />
-                <h3 className="text-sm font-bold text-white/90">Share Movie</h3>
-              </div>
-              <p className="text-xs text-white/50">Give guests a link with the highlight movie, QR code, and download button.</p>
-              <Link
-                href={`/movie/${event.slug}`}
-                target="_blank"
-                className="w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-[#B28DAE] text-[#141110] font-semibold py-2.5 text-xs hover:bg-[#a468a0] transition-colors"
-              >
-                <ExternalLink className="h-3.5 w-3.5" /> Open Share Page
-              </Link>
-            </div>
-          )}
           </>
           )}
 
@@ -2636,102 +2104,6 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         />
       )}
 
-    </div>
-  )
-}
-
-// Live in-browser slideshow player — pure CSS fade/zoom transitions cycling
-// through the top-scored photos, no video export/encoding step at all. This
-// is what lets "AI Slideshow" render identically well on every device
-// without ever touching MediaRecorder/ffmpeg: it's just a web page.
-function SlideshowPlayer({
-  photos,
-  intervalSeconds,
-  musicTrackUrl,
-  onClose,
-}: {
-  photos: { id: string; storage_path: string; thumbnail_path: string | null }[]
-  intervalSeconds: number
-  musicTrackUrl?: string | null
-  onClose: () => void
-}) {
-  const [index, setIndex] = useState(0)
-  const [muted, setMuted] = useState(false)
-  // If the track file 404s (audio asset not uploaded yet), fall back to a
-  // silent slideshow instead of showing a broken mute button.
-  const [musicUnavailable, setMusicUnavailable] = useState(false)
-  const audioRef = useRef<HTMLAudioElement>(null)
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex((i) => (i + 1) % photos.length)
-    }, Math.max(1500, intervalSeconds * 1000))
-    return () => clearInterval(timer)
-  }, [photos.length, intervalSeconds])
-
-  // Opening the player is itself a user gesture (clicking "Watch Slideshow"),
-  // which satisfies browser autoplay-with-sound policies — but some mobile
-  // browsers still need an explicit play() call rather than the `autoPlay`
-  // attribute alone, so trigger it here and swallow the rare rejected-promise
-  // case (e.g. a browser that blocks it anyway) rather than throwing.
-  useEffect(() => {
-    if (!musicTrackUrl) return
-    audioRef.current?.play().catch(() => {
-      /* autoplay blocked — host can still tap unmute/replay manually */
-    })
-    return () => {
-      audioRef.current?.pause()
-    }
-  }, [musicTrackUrl])
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const photoUrl = (path: string) => `${supabaseUrl}/storage/v1/object/public/photos/${path}`
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black flex items-center justify-center" onClick={onClose}>
-      {musicTrackUrl && !musicUnavailable && (
-        <audio
-          ref={audioRef}
-          src={musicTrackUrl}
-          loop
-          muted={muted}
-          onError={() => setMusicUnavailable(true)}
-        />
-      )}
-      <button onClick={onClose} className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20">
-        <X className="h-5 w-5 text-white" />
-      </button>
-      {musicTrackUrl && !musicUnavailable && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            setMuted((m) => !m)
-          }}
-          className="absolute top-4 right-16 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-xs text-white"
-          title={muted ? "Unmute music" : "Mute music"}
-        >
-          {muted ? "🔇" : "🎵"}
-        </button>
-      )}
-      {photos.map((photo, i) => (
-        <img
-          key={photo.id}
-          src={photoUrl(photo.storage_path)}
-          alt=""
-          className="absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 ease-in-out"
-          style={{
-            opacity: i === index ? 1 : 0,
-            transform: i === index ? "scale(1.04)" : "scale(1)",
-            transitionProperty: "opacity, transform",
-            transitionDuration: `${Math.max(1500, intervalSeconds * 1000)}ms`,
-          }}
-        />
-      ))}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5">
-        {photos.map((p, i) => (
-          <div key={p.id} className={`h-1 rounded-full transition-all ${i === index ? "w-6 bg-[#B28DAE]" : "w-1.5 bg-white/30"}`} />
-        ))}
-      </div>
     </div>
   )
 }

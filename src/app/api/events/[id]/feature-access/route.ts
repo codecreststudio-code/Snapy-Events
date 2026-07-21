@@ -2,15 +2,22 @@
 //
 // Advisory, read-only precheck for plan-gated event features. Lets the host
 // dashboard (src/app/dashboard/events/[slug]/page.tsx) know up front whether
-// Recap Video / AI Smart Clusters / Download All are allowed on this event's
-// plan, so it can render a calm disabled state with an "upgrade" tag instead
-// of letting the host click into a 403 from the actual action route.
+// Download All is allowed on this event's plan, so it can render a calm
+// disabled state with an "upgrade" tag instead of letting the host click
+// into a 403 from the actual action route.
 //
-// This does NOT replace server-side enforcement — recap/generate,
-// ai/faces/batch-process, and download-zip each still run their own
-// checkEventFeatureAccess() gate independently (defense in depth). This
-// route only exists so the client can ask "would this be allowed?" without
-// triggering the real (potentially expensive/long-running) action first.
+// Recap Video and AI Smart Clusters used to be gated here too, but both
+// features were removed from the dashboard entirely (Recap Video kept
+// failing in production and wasn't wanted; AI Smart Clusters' underlying
+// face detection already runs automatically on upload via
+// detectAndStoreFaces() in photos/upload/route.ts, so the manual "batch
+// re-scan" button added nothing guests couldn't already get from
+// /api/ai/faces/search).
+//
+// This does NOT replace server-side enforcement — download-zip still runs
+// its own checkEventFeatureAccess() gate independently (defense in depth).
+// This route only exists so the client can ask "would this be allowed?"
+// without triggering the real (potentially expensive) action first.
 
 import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
@@ -19,7 +26,7 @@ import { checkEventFeatureAccess, type FeatureGateResult } from "@/lib/plans/fea
 
 const paramsSchema = z.object({ id: z.string().uuid() })
 
-const GATED_FEATURES = ["recap_video", "ai_face_search", "print_ready_downloads"] as const
+const GATED_FEATURES = ["print_ready_downloads"] as const
 
 export const GET = defineRoute<unknown, unknown, { id: string }>({
   method: "GET",

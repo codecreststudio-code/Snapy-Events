@@ -8,17 +8,21 @@
       "maxDuration": 300,
       "memory": 1024
     },
-    "src/app/api/events/[id]/recap/generate/route.ts": {
-      "maxDuration": 300
-    },
     "src/app/api/photos/upload/route.ts": {
       "maxDuration": 120
+    },
+    "src/app/api/cron/memories-finalize/route.ts": {
+      "maxDuration": 300
     }
   },
   "crons": [
     {
       "path": "/api/cron/stories",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/memories-finalize",
+      "schedule": "0 */6 * * *"
     }
   ]
 }

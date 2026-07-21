@@ -2,25 +2,30 @@
 
 // src/app/movie/[slug]/page.tsx
 //
-// Public "Shareable Movie" page — snapsy-events.vercel.app/movie/[slug].
-// Reuses the event's own friendly slug (same convention as every other
-// guest-facing route in this app, e.g. src/app/event/[slug]/...) rather than
-// inventing a separate random share ID. Shows the highlight movie (the
-// existing Recap Video feature, reframed under the Snapsy Memories name),
-// a QR code of this same page, a download link, and share buttons.
+// Public "Share" page — snapsy-events.vercel.app/movie/[slug]. Used to show
+// the Recap Video; that feature was removed, and Share was folded into the
+// Slideshow card instead of staying its own thing. The path still says
+// "movie" (this environment can't rename/delete files on the mounted repo
+// folder), but it now shows the event's live in-browser slideshow, a QR
+// code of this same page, and share buttons.
 
 import { useEffect, useState, use as usePromise } from "react"
 import { QRCodeSVG } from "qrcode.react"
-import { Download, Share2, Film } from "lucide-react"
+import { Share2, Film } from "lucide-react"
+import { SlideshowPlayer } from "@/lib/components/media/slideshow-player"
 
 interface MovieData {
   eventName: string
   slug: string
   coverImageUrl: string | null
-  movie: { videoUrl: string; mood?: string; generatedAt?: string } | null
+  slideshow: {
+    intervalSeconds: number
+    musicTrackUrl: string | null
+    photos: { id: string; storage_path: string; thumbnail_path: string | null }[]
+  } | null
 }
 
-export default function ShareableMoviePage({ params }: { params: Promise<{ slug: string }> }) {
+export default function SharePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = usePromise(params)
   const [data, setData] = useState<MovieData | null>(null)
   const [status, setStatus] = useState<"loading" | "ready" | "not_found">("loading")
@@ -58,8 +63,9 @@ export default function ShareableMoviePage({ params }: { params: Promise<{ slug:
     )
   }
 
-  const shareText = encodeURIComponent(`Check out the highlight movie from ${data.eventName}! 🎬`)
+  const shareText = encodeURIComponent(`Check out the highlights from ${data.eventName}! ✨`)
   const encodedUrl = encodeURIComponent(pageUrl)
+  const hasSlideshow = !!data.slideshow && data.slideshow.photos.length > 0
 
   return (
     <div className="min-h-screen bg-surface-dark text-white">
@@ -69,41 +75,30 @@ export default function ShareableMoviePage({ params }: { params: Promise<{ slug:
           <h1 className="font-playfair text-2xl font-medium">{data.eventName}</h1>
         </div>
 
-        {data.movie ? (
+        {hasSlideshow ? (
           <>
-            <div className="rounded-2xl overflow-hidden border border-hairline-dark bg-surface-card">
-              <video
-                src={data.movie.videoUrl}
-                poster={data.coverImageUrl || undefined}
-                controls
-                playsInline
-                className="w-full aspect-[9/16] bg-black"
+            <div className="rounded-2xl overflow-hidden border border-hairline-dark bg-surface-card aspect-[9/16] relative">
+              <SlideshowPlayer
+                photos={data.slideshow!.photos}
+                intervalSeconds={data.slideshow!.intervalSeconds}
+                musicTrackUrl={data.slideshow!.musicTrackUrl}
               />
             </div>
 
-            <div className="flex gap-3">
-              <a
-                href={data.movie.videoUrl}
-                download
-                className="flex-1 flex items-center justify-center gap-2 rounded-full bg-mauve text-[#141110] font-semibold py-3 text-sm hover:bg-mauve-strong transition-colors"
+            {typeof navigator !== "undefined" && "share" in navigator && (
+              <button
+                onClick={() =>
+                  (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({
+                    title: data.eventName,
+                    text: `Check out the highlights from ${data.eventName}!`,
+                    url: pageUrl,
+                  })
+                }
+                className="w-full flex items-center justify-center gap-2 rounded-full bg-mauve text-[#141110] font-semibold py-3 text-sm hover:bg-mauve-strong transition-colors"
               >
-                <Download className="h-4 w-4" /> Download
-              </a>
-              {typeof navigator !== "undefined" && "share" in navigator && (
-                <button
-                  onClick={() =>
-                    (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({
-                      title: data.eventName,
-                      text: `Check out the highlight movie from ${data.eventName}!`,
-                      url: pageUrl,
-                    })
-                  }
-                  className="flex-1 flex items-center justify-center gap-2 rounded-full border border-hairline-dark bg-white/5 font-semibold py-3 text-sm hover:bg-white/10 transition-colors"
-                >
-                  <Share2 className="h-4 w-4" /> Share
-                </button>
-              )}
-            </div>
+                <Share2 className="h-4 w-4" /> Share
+              </button>
+            )}
 
             <div className="grid grid-cols-4 gap-2 text-center text-xs">
               <a href={`https://wa.me/?text=${shareText}%20${encodedUrl}`} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-hairline-dark bg-white/5 py-3 hover:bg-white/10 transition-colors">WhatsApp</a>
@@ -128,7 +123,7 @@ export default function ShareableMoviePage({ params }: { params: Promise<{ slug:
         ) : (
           <div className="rounded-2xl border border-hairline-dark bg-surface-card p-8 text-center space-y-2">
             <Film className="h-8 w-8 text-white/30 mx-auto" />
-            <p className="text-white/70 text-sm font-medium">The highlight movie isn&apos;t ready yet.</p>
+            <p className="text-white/70 text-sm font-medium">No slideshow is ready yet.</p>
             <p className="text-white/40 text-xs">Check back soon — the host is still putting it together.</p>
           </div>
         )}
