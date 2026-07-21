@@ -112,6 +112,12 @@ export const API_RATE_LIMITS = {
   UPLOAD_PHOTOS: Number(process.env.RATE_LIMIT_UPLOAD_PHOTOS) || 30, // 30 uploads per min
   COUPON_VALIDATE: Number(process.env.RATE_LIMIT_COUPON_VALIDATE) || 20, // 20 checks per min — this is an unauthenticated code-guessing surface
   JOIN_CODE: Number(process.env.RATE_LIMIT_JOIN_CODE) || 15, // 15 checks per min — 6-char code is an unauthenticated guessing surface too
+  // Check-in itself (logGuestAccess) is a second, separate guessing surface
+  // once an event requires a join code — a wrong-code submission there is
+  // the actual gate, not just the /api/events/join lookup. Tighter window
+  // (10/10min rather than 15/min) since this is the last line of defense
+  // against brute-forcing a 6-char code, keyed by event+IP in guest.ts.
+  GUEST_CHECKIN: Number(process.env.RATE_LIMIT_GUEST_CHECKIN) || 10, // 10 attempts per 10 min per event+IP
   PHOTO_REACT: Number(process.env.RATE_LIMIT_PHOTO_REACT) || 60, // 60 reactions/comments per min — generous since a live event can have bursts of guests reacting at once
 
   // 3. Authenticated User Routes

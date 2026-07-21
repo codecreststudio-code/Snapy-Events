@@ -76,6 +76,12 @@ interface ExtEventSettings extends EventSettings {
   // Host opt-out for Snapsy Memories' automatic generation (Memory Stories
   // cron, etc.) — see isMemoriesEnabled() in src/lib/integrations/memories.ts.
   memories_enabled?: boolean
+  // Host-controlled hardening: when true, GuestCaptureModal requires the
+  // event's join_code before check-in succeeds — enforced server-side in
+  // src/app/actions/guest.ts's logGuestAccess, not just this flag. Missing
+  // key defaults to false/off so existing events don't suddenly start
+  // requiring a code guests were never given.
+  require_join_code?: boolean
   photo_limit?: number
   video_duration_limit?: number
   voice_note_duration_limit?: number
@@ -857,6 +863,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   // src/lib/integrations/memories.ts. Missing key defaults to enabled, same
   // as every other settings toggle here.
   const [editMemoriesEnabled, setEditMemoriesEnabled] = useState<boolean>(true)
+  const [editRequireJoinCode, setEditRequireJoinCode] = useState<boolean>(false)
 
   useEffect(() => {
     if (event) {
@@ -869,6 +876,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       setEditCoverImage(event.cover_image_url || "")
       setEditRevealExperience((event.settings as ExtEventSettings)?.reveal_experience || "immediately")
       setEditMemoriesEnabled((event.settings as ExtEventSettings)?.memories_enabled !== false)
+      setEditRequireJoinCode((event.settings as ExtEventSettings)?.require_join_code === true)
     }
   }, [event, isDrawerOpen])
 
@@ -1162,6 +1170,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         photo_reveal_mode: isInstantReveal ? "instant" : "delayed",
         reveal_type: isInstantReveal ? "instant" : "delayed",
         memories_enabled: editMemoriesEnabled,
+        require_join_code: editRequireJoinCode,
         ...(isoEndDate ? { countdown_date: isoEndDate } : {}),
       }
     })
@@ -2013,6 +2022,27 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           type="checkbox"
                           checked={editMemoriesEnabled}
                           onChange={(e) => setEditMemoriesEnabled(e.target.checked)}
+                          className="rounded border-white/20 bg-white/5 text-[#B28DAE] focus:ring-[#B28DAE] h-4 w-4"
+                        />
+                      </label>
+                    </div>
+
+                    {/* Hardens the "Or Join With Code" box above: without this
+                        on, the code is just a shortcut to the same public
+                        slug URL — anyone with the link skips it entirely.
+                        With it on, guests must enter the exact code shown
+                        above before check-in succeeds (enforced server-side
+                        in src/app/actions/guest.ts, not just this toggle). */}
+                    <div className="flex items-center justify-between text-xs text-white/80 pt-1 border-t border-white/10">
+                      <div>
+                        <span className="block">🔒 Require join code to enter</span>
+                        <span className="block text-[10px] text-white/40">Guests must enter the code above before they can check in</span>
+                      </div>
+                      <label className="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editRequireJoinCode}
+                          onChange={(e) => setEditRequireJoinCode(e.target.checked)}
                           className="rounded border-white/20 bg-white/5 text-[#B28DAE] focus:ring-[#B28DAE] h-4 w-4"
                         />
                       </label>

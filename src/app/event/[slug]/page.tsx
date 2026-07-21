@@ -28,6 +28,10 @@ interface EventData {
     allow_guest_uploads: boolean
     enable_countdown: boolean
     countdown_date?: string
+    // Host toggle (Event Settings -> Capsule Locks & Limits) — when true,
+    // GuestCaptureModal requires the event's join_code before check-in can
+    // succeed (enforced server-side in src/app/actions/guest.ts).
+    require_join_code?: boolean
   }
   user: {
     name: string
@@ -178,7 +182,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
 
   return (
     <div className="flex min-h-screen flex-col bg-[#141110] text-white/90">
-      <GuestCaptureModal eventId={event.id} eventName={event.name} />
+      <GuestCaptureModal eventId={event.id} eventName={event.name} requireJoinCode={!!settings.require_join_code} />
 
       <header className="sticky top-0 z-50 w-full border-b border-[#3D332A] bg-[#141110]/95 backdrop-blur supports-[backdrop-filter]:bg-[#141110]/80">
         <div className="container flex h-16 items-center justify-between px-4 sm:px-6">
@@ -299,7 +303,9 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
               </div>
               <h3 className="font-playfair mt-4 text-lg font-medium text-white">Check In to Continue</h3>
               <p className="mt-2 max-w-md text-sm text-white/60">
-                This event is private to invited guests. Complete the check-in above to view galleries and share your own photos.
+                {settings.require_join_code
+                  ? "This event is private to invited guests. Complete check-in above with the event code your host shared with you to view galleries and share your own photos."
+                  : "This event is private to invited guests. Complete the check-in above to view galleries and share your own photos."}
               </p>
             </div>
           ) : visibleGalleries.length > 0 ? (
