@@ -226,9 +226,16 @@ interface HighlightPhoto {
 }
 
 async function selectHighlightPhotos(supabase: SupabaseClient, eventId: string): Promise<HighlightPhoto[]> {
-  const [topReactedRes, sampledRes] = await Promise.all([
+  const [topReactedRes, sampledRes, scoredRes] = await Promise.all([
     supabase.rpc("get_top_reacted_photos", { p_event_id: eventId, p_limit: TOP_REACTED_COUNT }),
     supabase.rpc("get_timeline_sampled_photos", { p_event_id: eventId, p_sample_count: TIMELINE_SAMPLE_COUNT }),
+    // Snapsy Memories weighted score (reactions*5 + comments*4 +
+    // host_favorite*10 + recency*1, see 0028_snapsy_memories.sql) — added
+    // on top of the two existing selection sources rather than replacing
+    // them, so a host's is_featured picks and heavily-commented photos are
+    // more likely to make the reel without touching the proven selection
+    // logic above.
+    supabase.rpc("get_scored_highlight_photos", { p_event_id: eventId, p_limit: TOP_REACTED_COUNT }),
   ])
 
   if (topReactedRes.error) {
@@ -237,13 +244,17 @@ async function selectHighlightPhotos(supabase: SupabaseClient, eventId: string):
   if (sampledRes.error) {
     logger.error("recap-video: timeline-sampled photos query failed", { eventId, error: sampledRes.error.message })
   }
+  if (scoredRes.error) {
+    logger.error("recap-video: scored highlight photos query failed", { eventId, error: scoredRes.error.message })
+  }
 
   const topReacted = (topReactedRes.data as HighlightPhotoRow[] | null) ?? []
   const sampled = (sampledRes.data as HighlightPhotoRow[] | null) ?? []
+  const scored = (scoredRes.data as HighlightPhotoRow[] | null) ?? []
 
   const seen = new Set<string>()
   const combined: HighlightPhotoRow[] = []
-  for (const row of [...topReacted, ...sampled]) {
+  for (const row of [...scored, ...topReacted, ...sampled]) {
     if (!row?.id || seen.has(row.id)) continue
     seen.add(row.id)
     combined.push(row)

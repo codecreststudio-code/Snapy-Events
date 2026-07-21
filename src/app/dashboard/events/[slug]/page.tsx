@@ -51,7 +51,12 @@ import {
   Loader2,
   RefreshCw,
   Film,
-  AlertCircle
+  AlertCircle,
+  Trophy,
+  LayoutGrid,
+  PlayCircle,
+  Gift,
+  FileDown
 } from "lucide-react"
 
 const TEMPLATE_COVERS = [
@@ -66,6 +71,9 @@ interface ExtEventSettings extends EventSettings {
   allowed_filters?: string[]
   cover_gradient?: string | null
   reveal_experience?: string
+  // Host opt-out for Snapsy Memories' automatic generation (Memory Stories
+  // cron, etc.) — see isMemoriesEnabled() in src/lib/integrations/memories.ts.
+  memories_enabled?: boolean
   photo_limit?: number
   video_duration_limit?: number
   voice_note_duration_limit?: number
@@ -906,6 +914,123 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     setTimeout(() => setRecapCopied(false), 2000)
   }
 
+  // --- Snapsy Memories: Guest Awards, Event Summary, Auto Collage, Slideshow, Stories ---
+  // Pure Next.js + Supabase, no ffmpeg/AI services — see
+  // src/lib/integrations/memories.ts and supabase/migrations/0028_snapsy_memories.sql.
+  const { data: memoriesAwards } = useQuery({
+    queryKey: ["memories-awards", event?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/events/${event!.id}/memories/awards`)
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) throw new Error(json?.error?.message || "Failed to load guest awards")
+      return json.data as { awards: { key: string; emoji: string; title: string; guestName: string; value: number }[]; guestCount: number }
+    },
+    enabled: !!event?.id,
+  })
+
+  const { data: memoriesSummary } = useQuery({
+    queryKey: ["memories-summary", event?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/events/${event!.id}/memories/summary`)
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) throw new Error(json?.error?.message || "Failed to load event summary")
+      return json.data as {
+        photos: number
+        videos: number
+        voiceNotes: number
+        guests: number
+        totalReactions: number
+        totalComments: number
+        storageFormatted: string
+        peakUploadTimeFormatted: string
+        mostActiveUploader: string | null
+      }
+    },
+    enabled: !!event?.id,
+  })
+
+  const { data: memoriesCollages, refetch: refetchCollages } = useQuery({
+    queryKey: ["memories-collages", event?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/events/${event!.id}/memories/collage`)
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) return { collages: [] }
+      return json.data as { collages: { id: string; layout: string; image_url: string; width: number; height: number; created_at: string }[] }
+    },
+    enabled: !!event?.id,
+  })
+
+  const { data: memoriesSlideshow, refetch: refetchSlideshow } = useQuery({
+    queryKey: ["memories-slideshow", event?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/events/${event!.id}/memories/slideshow`)
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) return { slideshow: null, photos: [] }
+      return json.data as {
+        slideshow: { id: string; transition: string; interval_seconds: number } | null
+        photos: { id: string; storage_path: string; thumbnail_path: string | null }[]
+      }
+    },
+    enabled: !!event?.id,
+  })
+
+  const { data: memoriesStories } = useQuery({
+    queryKey: ["memories-stories", event?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/events/${event!.id}/memories/stories`)
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) return { stories: [] }
+      return json.data as { stories: { id: string; milestone_days: number; title: string; viewed_at: string | null; created_at: string }[] }
+    },
+    enabled: !!event?.id,
+  })
+
+  const [collageLayout, setCollageLayout] = useState<"grid-2" | "grid-4" | "grid-9" | "polaroid">("grid-4")
+  const collageMutation = useMutation({
+    mutationFn: async (layout: typeof collageLayout) => {
+      const res = await fetch(`/api/events/${event!.id}/memories/collage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ layout }),
+      })
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) throw new Error(json?.error?.message || "Failed to generate collage")
+      return json.data
+    },
+    onSuccess: () => {
+      refetchCollages()
+      toast({ title: "Collage ready!", description: "Your photo collage has been generated." })
+    },
+    onError: (error: Error) => {
+      toast({ title: "Couldn't generate collage", description: error.message, variant: "destructive" })
+    },
+  })
+
+  const [slideshowDuration, setSlideshowDuration] = useState<30 | 60 | 180>(60)
+  const [showSlideshowPlayer, setShowSlideshowPlayer] = useState(false)
+  const slideshowMutation = useMutation({
+    mutationFn: async (duration: typeof slideshowDuration) => {
+      const res = await fetch(`/api/events/${event!.id}/memories/slideshow`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ duration_seconds: duration, transition: "fade", show_brand: true }),
+      })
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) throw new Error(json?.error?.message || "Failed to build slideshow")
+      return json.data
+    },
+    onSuccess: () => {
+      refetchSlideshow()
+      setShowSlideshowPlayer(true)
+      toast({ title: "Slideshow ready!", description: "Tap play to watch your slideshow." })
+    },
+    onError: (error: Error) => {
+      toast({ title: "Couldn't build slideshow", description: error.message, variant: "destructive" })
+    },
+  })
+
+  const unviewedStory = memoriesStories?.stories?.find((s) => !s.viewed_at)
+
   // Local Form state for settings edits
   const [editName, setEditName] = useState("")
   const [editStatus, setEditStatus] = useState<EventStatus>("published")
@@ -921,6 +1046,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [editCoverImage, setEditCoverImage] = useState<string>("")
   const [uploadingCover, setUploadingCover] = useState(false)
   const [editRevealExperience, setEditRevealExperience] = useState<string>("immediately")
+  // Host opt-out for Snapsy Memories' automatic generation (Memory Stories'
+  // daily cron, etc.) — see isMemoriesEnabled() in
+  // src/lib/integrations/memories.ts. Missing key defaults to enabled, same
+  // as every other settings toggle here.
+  const [editMemoriesEnabled, setEditMemoriesEnabled] = useState<boolean>(true)
 
   useEffect(() => {
     if (event) {
@@ -932,6 +1062,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       setEditVoiceDuration((event.settings as ExtEventSettings)?.voice_note_duration_limit || 10)
       setEditCoverImage(event.cover_image_url || "")
       setEditRevealExperience((event.settings as ExtEventSettings)?.reveal_experience || "immediately")
+      setEditMemoriesEnabled((event.settings as ExtEventSettings)?.memories_enabled !== false)
     }
   }, [event, isDrawerOpen])
 
@@ -1224,6 +1355,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         reveal_experience: editRevealExperience,
         photo_reveal_mode: isInstantReveal ? "instant" : "delayed",
         reveal_type: isInstantReveal ? "instant" : "delayed",
+        memories_enabled: editMemoriesEnabled,
         ...(isoEndDate ? { countdown_date: isoEndDate } : {}),
       }
     })
@@ -1938,6 +2070,192 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             )}
           </div>
 
+          {/* ✨ Snapsy Memories — Guest Awards, Event Summary, Auto Collage, Slideshow, Stories.
+              Pure Next.js + Supabase, no ffmpeg/AI services (Highlight Movie above reuses the
+              existing Recap Video pipeline instead of duplicating it). */}
+          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-3">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#B28DAE] font-bold">✨ Snapsy Memories</p>
+          </div>
+
+          {unviewedStory && (
+            <div className="rounded-3xl border border-[#B28DAE]/30 bg-gradient-to-br from-[#B28DAE]/10 to-transparent p-5 flex items-center gap-3">
+              <Gift className="h-5 w-5 text-[#B28DAE] shrink-0" />
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-white/90 truncate">{unviewedStory.title}</p>
+                <p className="text-[10px] text-white/50">A memory story just unlocked for this event</p>
+              </div>
+            </div>
+          )}
+
+          {/* Guest Awards */}
+          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+              <Trophy className="h-4.5 w-4.5 text-[#B28DAE]" />
+              <h3 className="text-sm font-bold text-white/90">Guest Awards</h3>
+            </div>
+            {memoriesAwards && memoriesAwards.awards.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2">
+                {memoriesAwards.awards.map((award) => (
+                  <div key={award.key} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                    <p className="text-lg leading-none mb-1">{award.emoji}</p>
+                    <p className="text-[10px] text-white/50 uppercase tracking-wide">{award.title}</p>
+                    <p className="text-xs font-semibold text-white/90 truncate">{award.guestName}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-white/50 text-center py-4">Awards will appear once guests start uploading.</p>
+            )}
+          </div>
+
+          {/* Event Summary */}
+          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
+            <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2">
+              <div className="flex items-center gap-2">
+                <Images className="h-4.5 w-4.5 text-[#B28DAE]" />
+                <h3 className="text-sm font-bold text-white/90">Event Summary</h3>
+              </div>
+              <a
+                href={event?.id ? `/api/events/${event.id}/memories/summary/pdf` : "#"}
+                className="text-[10px] font-semibold text-[#B28DAE] hover:underline flex items-center gap-1"
+              >
+                <FileDown className="h-3 w-3" /> PDF
+              </a>
+            </div>
+            {memoriesSummary ? (
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                  <p className="text-xl font-bold text-white">{memoriesSummary.photos}</p>
+                  <p className="text-[10px] text-white/50 uppercase">Photos</p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                  <p className="text-xl font-bold text-white">{memoriesSummary.videos}</p>
+                  <p className="text-[10px] text-white/50 uppercase">Videos</p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                  <p className="text-xl font-bold text-white">{memoriesSummary.guests}</p>
+                  <p className="text-[10px] text-white/50 uppercase">Guests</p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                  <p className="text-xl font-bold text-white">{memoriesSummary.storageFormatted}</p>
+                  <p className="text-[10px] text-white/50 uppercase">Storage</p>
+                </div>
+                {memoriesSummary.mostActiveUploader && (
+                  <div className="col-span-2 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-3">
+                    <span className="text-white/60">Most Active</span>
+                    <span className="font-semibold text-white">{memoriesSummary.mostActiveUploader}</span>
+                  </div>
+                )}
+                <div className="col-span-2 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-3">
+                  <span className="text-white/60">Peak Upload Time</span>
+                  <span className="font-semibold text-white">{memoriesSummary.peakUploadTimeFormatted}</span>
+                </div>
+              </div>
+            ) : (
+              <Skeleton className="h-24 w-full rounded-xl" />
+            )}
+          </div>
+
+          {/* Auto Collage */}
+          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+              <LayoutGrid className="h-4.5 w-4.5 text-[#B28DAE]" />
+              <h3 className="text-sm font-bold text-white/90">Auto Collage</h3>
+            </div>
+            <div className="grid grid-cols-4 gap-1.5">
+              {(["grid-2", "grid-4", "grid-9", "polaroid"] as const).map((layout) => (
+                <button
+                  key={layout}
+                  onClick={() => setCollageLayout(layout)}
+                  className={`rounded-lg border py-2 text-[10px] font-semibold transition-colors ${
+                    collageLayout === layout
+                      ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
+                      : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                  }`}
+                >
+                  {layout === "grid-2" ? "2-Grid" : layout === "grid-4" ? "4-Grid" : layout === "grid-9" ? "9-Grid" : "Polaroid"}
+                </button>
+              ))}
+            </div>
+            <Button
+              variant="outline"
+              className="w-full text-xs py-5 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
+              disabled={collageMutation.isPending}
+              onClick={() => collageMutation.mutate(collageLayout)}
+            >
+              <LayoutGrid className={`h-3.5 w-3.5 ${collageMutation.isPending ? "animate-pulse" : ""}`} />
+              <span>{collageMutation.isPending ? "Composing collage…" : "Generate Collage"}</span>
+            </Button>
+            {memoriesCollages && memoriesCollages.collages.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                {memoriesCollages.collages.slice(0, 3).map((c) => (
+                  <a key={c.id} href={c.image_url} target="_blank" rel="noopener noreferrer" className="block rounded-lg overflow-hidden border border-white/10 aspect-square bg-black/20">
+                    <img src={c.image_url} alt={`${c.layout} collage`} className="w-full h-full object-cover" />
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Slideshow — live in-browser player, no video export/encoding cost */}
+          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+              <PlayCircle className="h-4.5 w-4.5 text-[#B28DAE]" />
+              <h3 className="text-sm font-bold text-white/90">Slideshow</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {([30, 60, 180] as const).map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setSlideshowDuration(d)}
+                  className={`rounded-lg border py-2 text-[10px] font-semibold transition-colors ${
+                    slideshowDuration === d
+                      ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
+                      : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                  }`}
+                >
+                  {d < 60 ? `${d} sec` : `${d / 60} min`}
+                </button>
+              ))}
+            </div>
+            <Button
+              variant="outline"
+              className="w-full text-xs py-5 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
+              disabled={slideshowMutation.isPending}
+              onClick={() => slideshowMutation.mutate(slideshowDuration)}
+            >
+              <PlayCircle className={`h-3.5 w-3.5 ${slideshowMutation.isPending ? "animate-pulse" : ""}`} />
+              <span>{slideshowMutation.isPending ? "Building slideshow…" : "Generate Slideshow"}</span>
+            </Button>
+            {memoriesSlideshow?.slideshow && memoriesSlideshow.photos.length > 0 && (
+              <Button
+                variant="outline"
+                className="w-full text-xs py-3 rounded-full border border-white/15 bg-white/5 text-white/80 hover:bg-white/10"
+                onClick={() => setShowSlideshowPlayer(true)}
+              >
+                ▶ Watch Slideshow ({memoriesSlideshow.photos.length} photos)
+              </Button>
+            )}
+          </div>
+
+          {/* Share Movie — only once the Highlight Movie (Recap Video) is ready */}
+          {recapVideo?.status === "ready" && event?.slug && (
+            <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-3">
+              <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+                <Share2 className="h-4.5 w-4.5 text-[#B28DAE]" />
+                <h3 className="text-sm font-bold text-white/90">Share Movie</h3>
+              </div>
+              <p className="text-xs text-white/50">Give guests a link with the highlight movie, QR code, and download button.</p>
+              <Link
+                href={`/movie/${event.slug}`}
+                target="_blank"
+                className="w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-[#B28DAE] text-[#141110] font-semibold py-2.5 text-xs hover:bg-[#a468a0] transition-colors"
+              >
+                <ExternalLink className="h-3.5 w-3.5" /> Open Share Page
+              </Link>
+            </div>
+          )}
+
           {/* Recent Activity waterfall feed */}
           <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
             <div className="flex items-center gap-2 border-b border-white/10 pb-2">
@@ -2172,6 +2490,21 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                         <option value={60}>60 seconds</option>
                       </select>
                     </div>
+
+                    <div className="flex items-center justify-between text-xs text-white/80 pt-1 border-t border-white/10">
+                      <div>
+                        <span className="block">✨ Snapsy Memories</span>
+                        <span className="block text-[10px] text-white/40">Auto highlight movie, stories, collages &amp; awards</span>
+                      </div>
+                      <label className="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editMemoriesEnabled}
+                          onChange={(e) => setEditMemoriesEnabled(e.target.checked)}
+                          className="rounded border-white/20 bg-white/5 text-[#B28DAE] focus:ring-[#B28DAE] h-4 w-4"
+                        />
+                      </label>
+                    </div>
                   </div>
 
                   <div className="pt-4 flex gap-3 border-t border-white/10">
@@ -2250,6 +2583,67 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         </div>
       )}
 
+      {showSlideshowPlayer && memoriesSlideshow?.photos && memoriesSlideshow.photos.length > 0 && (
+        <SlideshowPlayer
+          photos={memoriesSlideshow.photos}
+          intervalSeconds={memoriesSlideshow.slideshow?.interval_seconds || 4}
+          onClose={() => setShowSlideshowPlayer(false)}
+        />
+      )}
+
+    </div>
+  )
+}
+
+// Live in-browser slideshow player — pure CSS fade/zoom transitions cycling
+// through the top-scored photos, no video export/encoding step at all. This
+// is what lets "AI Slideshow" render identically well on every device
+// without ever touching MediaRecorder/ffmpeg: it's just a web page.
+function SlideshowPlayer({
+  photos,
+  intervalSeconds,
+  onClose,
+}: {
+  photos: { id: string; storage_path: string; thumbnail_path: string | null }[]
+  intervalSeconds: number
+  onClose: () => void
+}) {
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((i) => (i + 1) % photos.length)
+    }, Math.max(1500, intervalSeconds * 1000))
+    return () => clearInterval(timer)
+  }, [photos.length, intervalSeconds])
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const photoUrl = (path: string) => `${supabaseUrl}/storage/v1/object/public/photos/${path}`
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black flex items-center justify-center" onClick={onClose}>
+      <button onClick={onClose} className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20">
+        <X className="h-5 w-5 text-white" />
+      </button>
+      {photos.map((photo, i) => (
+        <img
+          key={photo.id}
+          src={photoUrl(photo.storage_path)}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 ease-in-out"
+          style={{
+            opacity: i === index ? 1 : 0,
+            transform: i === index ? "scale(1.04)" : "scale(1)",
+            transitionProperty: "opacity, transform",
+            transitionDuration: `${Math.max(1500, intervalSeconds * 1000)}ms`,
+          }}
+        />
+      ))}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5">
+        {photos.map((p, i) => (
+          <div key={p.id} className={`h-1 rounded-full transition-all ${i === index ? "w-6 bg-[#B28DAE]" : "w-1.5 bg-white/30"}`} />
+        ))}
+      </div>
     </div>
   )
 }
