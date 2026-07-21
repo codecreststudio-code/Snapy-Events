@@ -270,6 +270,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [countdownText, setCountdownText] = useState("")
   const [copied, setCopied] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
+  // Explicit copy-link intent for the recap video card (separate from
+  // handleShareRecap's native-Share-API path below) — part of splitting the
+  // single generic "Share" button into explicit share-target intents.
+  const [recapCopied, setRecapCopied] = useState(false)
   const [regeneratingCode, setRegeneratingCode] = useState(false)
   const [activeLightboxMedia, setActiveLightboxMedia] = useState<LightboxMedia | null>(null)
   const [isDownloadingZip, setIsDownloadingZip] = useState(false)
@@ -854,6 +858,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     )
   }
 
+  // Recap sharing used to be a single generic button that silently tried
+  // navigator.share and fell back to an unlabeled clipboard copy — the host
+  // had no way to specifically choose WhatsApp or grab a copyable link on
+  // desktop. Split into explicit share-target intents instead: a native
+  // Share-sheet button (only rendered where the Web Share API actually
+  // exists), plus always-available WhatsApp and Copy Link buttons that work
+  // identically to the invitation card's WhatsApp/Copy buttons above.
   const handleShareRecap = () => {
     if (!recapVideo?.video_url) return
     const shareData = { title: `${event?.name || "Event"} — Recap Video`, url: recapVideo.video_url }
@@ -864,10 +875,21 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     const nav = typeof navigator !== "undefined" ? navigator : undefined
     if (nav && typeof (nav as any).share === "function") {
       ;(nav as any).share(shareData).catch(() => {})
-    } else if (nav) {
-      nav.clipboard?.writeText(recapVideo.video_url)
-      toast({ title: "Link copied", description: "Recap video link copied to clipboard." })
     }
+  }
+
+  const handleShareRecapWhatsApp = () => {
+    if (!recapVideo?.video_url) return
+    const text = `Check out the recap video for ${event?.name || "our event"}! ${recapVideo.video_url}`
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank")
+  }
+
+  const handleCopyRecapLink = () => {
+    if (!recapVideo?.video_url) return
+    navigator.clipboard?.writeText(recapVideo.video_url)
+    setRecapCopied(true)
+    toast({ title: "Link copied", description: "Recap video link copied to clipboard." })
+    setTimeout(() => setRecapCopied(false), 2000)
   }
 
   // Local Form state for settings edits
@@ -1793,11 +1815,31 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   </a>
                   <button
                     type="button"
-                    onClick={handleShareRecap}
+                    onClick={handleShareRecapWhatsApp}
                     className="rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]"
                   >
-                    <Share2 className="h-3.5 w-3.5" /> Share
+                    <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
                   </button>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCopyRecapLink}
+                    className="flex-1 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]"
+                  >
+                    {recapCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                    {recapCopied ? "Copied!" : "Copy Link"}
+                  </button>
+                  {typeof navigator !== "undefined" && typeof (navigator as any).share === "function" && (
+                    <button
+                      type="button"
+                      onClick={handleShareRecap}
+                      className="flex-1 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]"
+                    >
+                      <Share2 className="h-3.5 w-3.5" /> Share
+                    </button>
+                  )}
                 </div>
 
                 <button
