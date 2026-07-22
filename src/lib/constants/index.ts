@@ -125,6 +125,7 @@ export const API_RATE_LIMITS = {
   USER_DEFAULT: Number(process.env.RATE_LIMIT_USER_DEFAULT) || 120, // 120 requests per min
   MEDIA_UPLOAD: Number(process.env.RATE_LIMIT_MEDIA_UPLOAD) || 30, // 30 uploads per min
   RECAP_GENERATE: Number(process.env.RATE_LIMIT_RECAP_GENERATE) || 1, // 1 render per 3 mins — ~300s ffmpeg render, a host rarely needs this more than once every few minutes
+  MOVIE_UPLOAD: Number(process.env.RATE_LIMIT_MOVIE_UPLOAD) || 3, // 3 uploads per 5 mins — client renders the video, this route just stores the finished file
 
   // 4. Admin Routes (Strict high-security limit)
   ADMIN_STRICT: Number(process.env.RATE_LIMIT_ADMIN_STRICT) || 30, // 30 admin requests per min

@@ -21,7 +21,8 @@ import { toDatetimeLocalValue } from "@/lib/utils"
 import { WatermarkOverlay } from "@/lib/components/media/watermark-overlay"
 import { MediaLightbox, type LightboxMedia } from "@/lib/components/media/media-lightbox"
 import { MemoryViewer, type MemoryViewerItem } from "@/lib/components/media/memory-viewer"
-import { SLIDESHOW_TRACKS } from "@/lib/integrations/slideshow-music"
+import { SLIDESHOW_TRACKS, resolveTrackUrl } from "@/lib/integrations/slideshow-music"
+import { renderMovie, MovieRenderError } from "@/lib/movie/movie-renderer"
 import {
   ArrowLeft,
   Calendar,
@@ -903,6 +904,111 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     storyUrl: `/api/photos/${p.id}/story`,
     reactions: p.reactions,
   }))
+
+  // --- Movie — client-rendered 9:16 video (canvas Ken Burns + crossfade +
+  // MediaRecorder, src/lib/movie/movie-renderer.ts). See that file's header
+  // comment for why this deliberately avoids server-side ffmpeg (the old
+  // Recap Video feature's failure mode). Independent of Slideshow — its own
+  // duration/music picker and its own photo selection (memories/movie/photos
+  // route) rather than reusing/overwriting the `slideshows` table.
+  const { data: memoriesMovies, refetch: refetchMovies } = useQuery({
+    queryKey: ["memories-movies", event?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/events/${event!.id}/memories/movie`)
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) return { movies: [] }
+      return json.data as {
+        movies: { id: string; video_url: string; mime_type: string; duration_seconds: number | null; music_track: string | null; width: number; height: number; metadata?: { reactions?: Record<string, number> }; created_at: string }[]
+      }
+    },
+    enabled: !!event?.id,
+  })
+
+  const [movieDuration, setMovieDuration] = useState<30 | 60 | 180>(30)
+  const [movieMusicTrack, setMovieMusicTrack] = useState<string | null>(SLIDESHOW_TRACKS[0]?.id ?? null)
+  const [movieRendering, setMovieRendering] = useState(false)
+  const [movieProgress, setMovieProgress] = useState(0)
+  const [showMovieViewer, setShowMovieViewer] = useState(false)
+
+  const movieReactMutation = useMutation({
+    mutationFn: async ({ movieId, emoji }: { movieId: string; emoji: string }) => {
+      const res = await fetch(`/api/events/${event!.id}/memories/movie/${movieId}/react`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emoji }),
+      })
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) throw new Error("Failed to save reaction")
+      return { movieId, reactions: json.data.reactions as Record<string, number> }
+    },
+    onSuccess: ({ movieId, reactions }) => {
+      queryClient.setQueryData(["memories-movies", event?.id], (old: typeof memoriesMovies) => {
+        if (!old) return old
+        return { movies: old.movies.map((m) => (m.id === movieId ? { ...m, metadata: { ...m.metadata, reactions } } : m)) }
+      })
+    },
+    onError: () => {
+      toast({ title: "Couldn't save reaction", variant: "destructive" })
+    },
+  })
+
+  async function handleGenerateMovie() {
+    if (!event?.id) return
+    setMovieRendering(true)
+    setMovieProgress(0)
+    try {
+      const photosRes = await fetch(`/api/events/${event.id}/memories/movie/photos?duration_seconds=${movieDuration}`)
+      const photosJson = await photosRes.json().catch(() => null)
+      if (!photosRes.ok || !photosJson?.success) {
+        throw new MovieRenderError(photosJson?.error?.message || "No approved photos are available yet to build a movie")
+      }
+      const photos = (photosJson.data.photos as { id: string; storage_path: string }[]).map((p) => ({
+        id: p.id,
+        url: supabasePhotoUrl(p.storage_path),
+      }))
+
+      const rendered = await renderMovie({
+        photos,
+        durationSeconds: movieDuration,
+        musicUrl: resolveTrackUrl(movieMusicTrack),
+        eventName: event.name,
+        onProgress: setMovieProgress,
+      })
+
+      const fd = new FormData()
+      const ext = rendered.mimeType === "video/mp4" ? "mp4" : "webm"
+      fd.set("file", rendered.blob, `movie.${ext}`)
+      fd.set("duration_seconds", String(Math.round(rendered.durationSeconds)))
+      if (movieMusicTrack) fd.set("music_track", movieMusicTrack)
+      fd.set("width", String(rendered.width))
+      fd.set("height", String(rendered.height))
+
+      const uploadRes = await fetch(`/api/events/${event.id}/memories/movie`, { method: "POST", body: fd })
+      const uploadJson = await uploadRes.json().catch(() => null)
+      if (!uploadRes.ok || !uploadJson?.success) {
+        throw new MovieRenderError(uploadJson?.error?.message || "Movie was rendered but could not be saved")
+      }
+
+      await refetchMovies()
+      setShowMovieViewer(true)
+      toast({ title: "Movie ready!", description: "Tap play to watch your movie." })
+    } catch (err) {
+      const message = err instanceof MovieRenderError ? err.message : err instanceof Error ? err.message : "Couldn't build the movie"
+      toast({ title: "Couldn't build movie", description: message, variant: "destructive" })
+    } finally {
+      setMovieRendering(false)
+    }
+  }
+
+  const movieViewerItems: MemoryViewerItem[] = (memoriesMovies?.movies ?? []).map((m) => ({
+    id: m.id,
+    url: m.video_url,
+    downloadUrl: m.video_url,
+    reactions: m.metadata?.reactions,
+    kind: "video",
+    mimeType: m.mime_type,
+  }))
+  const latestMovie = memoriesMovies?.movies?.[0]
 
   const unviewedStory = memoriesStories?.stories?.find((s) => !s.viewed_at)
 
@@ -1865,6 +1971,100 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               </>
             )}
           </div>
+
+          {/* Movie — real 9:16 video, rendered entirely in-browser (canvas
+              Ken Burns + crossfades + MediaRecorder) and uploaded once
+              finished. No server-side ffmpeg — see movie-renderer.ts. */}
+          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+              <Film className="h-4.5 w-4.5 text-[#B28DAE]" />
+              <h3 className="text-sm font-bold text-white/90">Movie</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {([30, 60, 180] as const).map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setMovieDuration(d)}
+                  disabled={movieRendering}
+                  className={`rounded-lg border py-2 text-[10px] font-semibold transition-colors disabled:opacity-50 ${
+                    movieDuration === d
+                      ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
+                      : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                  }`}
+                >
+                  {d < 60 ? `${d} sec` : `${d / 60} min`}
+                </button>
+              ))}
+            </div>
+            <div className="space-y-1.5">
+              <p className="text-[10px] uppercase tracking-wide text-white/40 font-semibold">Background music</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  onClick={() => setMovieMusicTrack(null)}
+                  disabled={movieRendering}
+                  className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left disabled:opacity-50 ${
+                    movieMusicTrack === null
+                      ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
+                      : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                  }`}
+                >
+                  🔇 None
+                </button>
+                {SLIDESHOW_TRACKS.map((track) => (
+                  <button
+                    key={track.id}
+                    onClick={() => setMovieMusicTrack(track.id)}
+                    title={track.mood}
+                    disabled={movieRendering}
+                    className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left disabled:opacity-50 ${
+                      movieMusicTrack === track.id
+                        ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
+                        : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                    }`}
+                  >
+                    🎵 {track.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              className="w-full text-xs py-5 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
+              disabled={movieRendering}
+              onClick={handleGenerateMovie}
+            >
+              <Film className={`h-3.5 w-3.5 ${movieRendering ? "animate-pulse" : ""}`} />
+              <span>{movieRendering ? `Rendering… ${Math.round(movieProgress * 100)}%` : "Generate Movie"}</span>
+            </Button>
+            {movieRendering && (
+              <div className="space-y-1.5">
+                <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                  <div className="h-full bg-[#B28DAE] transition-all duration-300" style={{ width: `${Math.round(movieProgress * 100)}%` }} />
+                </div>
+                <p className="text-[10px] text-white/40 text-center">Keep this tab open — your movie is recording in real time.</p>
+              </div>
+            )}
+            {latestMovie && !movieRendering && (
+              <>
+                <Button
+                  variant="outline"
+                  className="w-full text-xs py-3 rounded-full border border-white/15 bg-white/5 text-white/80 hover:bg-white/10"
+                  onClick={() => setShowMovieViewer(true)}
+                >
+                  ▶ Watch Movie {latestMovie.duration_seconds ? `(${latestMovie.duration_seconds}s)` : ""}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-white/15 bg-transparent text-white text-xs font-semibold py-3 hover:bg-white/10 transition-colors"
+                  onClick={async () => {
+                    setShowMovieViewer(true)
+                  }}
+                >
+                  <Share2 className="h-3.5 w-3.5" /> Share Movie
+                </Button>
+              </>
+            )}
+          </div>
           </>
           )}
 
@@ -2238,6 +2438,16 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           watermarkPreview={watermarkEnabled}
           onClose={() => setCollageViewerIndex(null)}
           onReact={(collageId, emoji) => collageReactMutation.mutate({ collageId, emoji })}
+        />
+      )}
+
+      {showMovieViewer && movieViewerItems.length > 0 && (
+        <MemoryViewer
+          items={movieViewerItems}
+          title={event?.name}
+          shareText={event?.name ? `Check out our movie from ${event.name}!` : undefined}
+          onClose={() => setShowMovieViewer(false)}
+          onReact={(movieId, emoji) => movieReactMutation.mutate({ movieId, emoji })}
         />
       )}
 

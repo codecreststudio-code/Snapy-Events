@@ -36,6 +36,14 @@ export type MemoryViewerItem = {
   storyUrl?: string | null
   reactions?: Record<string, number>
   caption?: string | null
+  kind?: "image" | "video"
+  mimeType?: string
+}
+
+function extensionFor(mimeType: string | undefined): string {
+  if (mimeType === "video/mp4") return "mp4"
+  if (mimeType === "video/webm") return "webm"
+  return "jpg"
 }
 
 const EMOJI_LIST = [
@@ -149,7 +157,7 @@ export function MemoryViewer({
     if (!item) return
     setBusy("download")
     try {
-      await downloadViaBlob(item.downloadUrl, `snapsy-${item.id}.jpg`)
+      await downloadViaBlob(item.downloadUrl, `snapsy-${item.id}.${extensionFor(item.mimeType)}`)
     } catch (err) {
       toast({ title: "Download failed", description: err instanceof Error ? err.message : undefined, variant: "destructive" })
     } finally {
@@ -269,8 +277,19 @@ export function MemoryViewer({
           </button>
         )}
         <div className="relative max-h-full max-w-full">
-          <img src={item.url} alt={item.caption || ""} className="max-h-[calc(100vh-13rem)] max-w-full object-contain" />
-          {watermarkPreview && <WatermarkOverlay dense />}
+          {item.kind === "video" ? (
+            <video
+              key={item.id}
+              src={item.url}
+              controls
+              playsInline
+              autoPlay
+              className="max-h-[calc(100vh-13rem)] max-w-full object-contain"
+            />
+          ) : (
+            <img src={item.url} alt={item.caption || ""} className="max-h-[calc(100vh-13rem)] max-w-full object-contain" />
+          )}
+          {watermarkPreview && item.kind !== "video" && <WatermarkOverlay dense />}
         </div>
         {items.length > 1 && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">

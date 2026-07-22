@@ -119,15 +119,20 @@ export const POST = defineRoute({
     })
 
     const duration = Date.now() - t0
-    await supabase.from("face_search_logs").insert({
-      user_id: auth.user?.id ?? null,
-      event_id: eventId,
-      search_type: body.embedding ? "client_selfie" : body.photo_id ? "upload" : "selfie",
-      query_photo_id: body.photo_id ?? null,
-      results: hits,
-      result_count: hits.length,
-      search_duration_ms: duration,
-    })
+    try {
+      await supabase.from("face_search_logs").insert({
+        user_id: auth.user?.id ?? null,
+        event_id: eventId,
+        search_type: body.photo_id ? "upload" : "selfie",
+        query_photo_id: body.photo_id ?? null,
+        results: hits,
+        result_count: hits.length,
+        search_duration_ms: duration,
+      })
+    } catch (logErr) {
+      console.warn("[face-search] Failed to insert face_search_log:", logErr)
+    }
+
     void trackEvent({ user_id: auth.user?.id ?? undefined, event_type: "ai.face.searched", event_data: { count: hits.length }, request })
     return ok({ results: fullResults, duration_ms: duration })
   },
