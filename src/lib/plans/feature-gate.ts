@@ -110,6 +110,35 @@ export async function checkEventFeatureAccess(
       return { allowed: false, planId, reason: "AI Face Search is disabled for this event in event settings." }
     }
 
+    // The rest of the Step 8 wizard's AI toggles (previously cosmetic — saved
+    // to settings.ai_features but nothing ever read them back). Unlike
+    // ai_face_search above (which defaults to allowed unless explicitly
+    // turned off, for backward compatibility with events created before
+    // ai_features existed), these all default to OFF — the wizard itself
+    // always initializes them to false, so an absent key means the host
+    // never saw/enabled this toggle. Premium ones are double-checked against
+    // the event's actual plan tier so a crafted request can't flip on a
+    // Premium-only AI feature on a non-Premium event even though the wizard
+    // UI already blocks that client-side.
+    const NEW_AI_FEATURE_KEYS: Record<string, { settingsKey: string; premium: boolean }> = {
+      ai_duplicate_detection: { settingsKey: "duplicate_detection", premium: true },
+      ai_best_shot: { settingsKey: "best_shot", premium: true },
+      ai_smart_albums: { settingsKey: "smart_albums", premium: false },
+      ai_highlights: { settingsKey: "highlights", premium: false },
+      ai_auto_categorization: { settingsKey: "auto_categorization", premium: true },
+      ai_custom_layouts: { settingsKey: "custom_layouts", premium: true },
+    }
+    const newAiFeature = NEW_AI_FEATURE_KEYS[featureKey]
+    if (newAiFeature) {
+      if (aiFeatures[newAiFeature.settingsKey] !== true) {
+        return { allowed: false, planId, reason: "Not enabled for this event in event settings." }
+      }
+      if (newAiFeature.premium && planId !== "premium") {
+        return { allowed: false, planId, reason: `'${featureKey}' is a Premium-tier feature.` }
+      }
+      return { allowed: true, planId }
+    }
+
     // 3. Fetch Plan Limits & Toggles
     const { data: planRecord } = await supabase
       .from("plans")

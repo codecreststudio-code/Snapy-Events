@@ -11,6 +11,7 @@ import { trackEvent } from "@/lib/analytics/track"
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
 import { hasGuestSessionFromRequest, isEventHost } from "@/lib/security/guest-session"
 import { detectAndStoreFaces } from "@/lib/integrations/face"
+import { computeQualitySignals, hammingDistanceHex, DUPLICATE_HAMMING_THRESHOLD } from "@/lib/integrations/image-quality"
 
 const querySchema = z.object({ gallery_id: z.string().uuid() })
 
@@ -417,10 +418,18 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       const photoId = data.id
       const eventIdForDetection = gallery.event_id
       const detectionUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${finalStoragePath}`
+
       after(async () => {
         try {
-          const gate = await checkEventFeatureAccess(eventIdForDetection, "ai_face_search")
-          if (!gate.allowed) return
+          // Face detection also runs (without indexing being surfaced to
+          // guests) when Best Shot Selection is on, since that's where its
+          // smile-expression signal comes from — see detectAndStoreFaces in
+          // face.ts, which now also writes photos.smile_score.
+          const [faceGate, bestShotGate] = await Promise.all([
+            checkEventFeatureAccess(eventIdForDetection, "ai_face_search"),
+            checkEventFeatureAccess(eventIdForDetection, "ai_best_shot"),
+          ])
+          if (!faceGate.allowed && !bestShotGate.allowed) return
           await detectAndStoreFaces(supabase, {
             eventId: eventIdForDetection,
             photoId,
@@ -428,6 +437,55 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
           })
         } catch (err) {
           console.warn("[face detection after-response failed]", err)
+        }
+      })
+
+      // Smart Duplicate Detection + the blur/brightness half of Best Shot
+      // Selection's quality score (see quality-score.ts) — both need the
+      // same decoded pixel buffer, computed together in one background pass
+      // rather than fetching the image twice. Gated per-event so this never
+      // runs (and never costs a sharp decode) for events that didn't opt in.
+      after(async () => {
+        try {
+          const [dupGate, bestShotGate] = await Promise.all([
+            checkEventFeatureAccess(eventIdForDetection, "ai_duplicate_detection"),
+            checkEventFeatureAccess(eventIdForDetection, "ai_best_shot"),
+          ])
+          if (!dupGate.allowed && !bestShotGate.allowed) return
+
+          const res = await fetch(detectionUrl)
+          if (!res.ok) return
+          const buf = Buffer.from(await res.arrayBuffer())
+          const { phash, blurScore, brightnessScore } = await computeQualitySignals(buf)
+
+          const update: Record<string, unknown> = {
+            phash,
+            blur_score: blurScore,
+            brightness_score: brightnessScore,
+          }
+
+          if (dupGate.allowed) {
+            const { data: recentPhotos } = await supabase
+              .from("photos")
+              .select("id, phash")
+              .eq("gallery_id", id)
+              .not("phash", "is", null)
+              .neq("id", photoId)
+              .order("created_at", { ascending: false })
+              .limit(200)
+
+            const match = (recentPhotos || []).find(
+              (p) => p.phash && hammingDistanceHex(phash, p.phash) <= DUPLICATE_HAMMING_THRESHOLD,
+            )
+            if (match) {
+              update.is_duplicate = true
+              update.duplicate_of = match.id
+            }
+          }
+
+          await supabase.from("photos").update(update).eq("id", photoId)
+        } catch (err) {
+          console.warn("[quality/duplicate signal computation failed]", err)
         }
       })
     }

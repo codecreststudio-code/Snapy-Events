@@ -2,6 +2,7 @@ import { z } from "zod"
 import { defineRoute, ok, fail, paginate } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
 import { hasGuestSessionFromRequest, isEventHost } from "@/lib/security/guest-session"
+import { pickBestShots } from "@/lib/integrations/quality-score"
 
 const params = z.object({ id: z.string().uuid() })
 const query = z.object({
@@ -59,9 +60,17 @@ export const GET = defineRoute<unknown, z.infer<typeof query>, { id: string }>({
 
     let q = supabase.from("photos").select("*", { count: "exact" }).eq("gallery_id", id).order("created_at", { ascending: false })
 
+    const aiFeatures = ((event.settings as any)?.ai_features as Record<string, boolean>) || {}
+
     if (!isHost) {
       // For guests, show approved photos or default auto-approved photos
       q = q.neq("is_approved", false)
+      // Smart Duplicate Detection — same behavior as the main event page's
+      // inline query (src/app/event/[slug]/page.tsx); hosts still see
+      // everything, guests get near-duplicate burst shots collapsed out.
+      if (aiFeatures.duplicate_detection === true) {
+        q = q.eq("is_duplicate", false)
+      }
     } else {
       if (query.approved !== undefined) q = q.eq("is_approved", query.approved)
     }
@@ -71,6 +80,17 @@ export const GET = defineRoute<unknown, z.infer<typeof query>, { id: string }>({
     q = q.range(from, from + query.pageSize - 1)
     const { data, count, error } = await q
     if (error) return fail("DB_ERROR", error.message, 500)
-    return ok(data ?? [], { pagination: paginate({ page: query.page, pageSize: query.pageSize, total: count ?? 0 }) })
+
+    const bestShotIds = aiFeatures.best_shot === true
+      ? pickBestShots((data ?? []).map((p: any) => ({
+          id: p.id,
+          blurScore: p.blur_score,
+          brightnessScore: p.brightness_score,
+          smileScore: p.smile_score,
+        })))
+      : new Set<string>()
+    const withBestShot = (data ?? []).map((p: any) => ({ ...p, is_best_shot: bestShotIds.has(p.id) }))
+
+    return ok(withBestShot, { pagination: paginate({ page: query.page, pageSize: query.pageSize, total: count ?? 0 }) })
   },
 }).GET

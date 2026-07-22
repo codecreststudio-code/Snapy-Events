@@ -83,7 +83,10 @@ export function isEventReadyForMemoriesFinalization(event: Pick<EligibleEventRow
   return false
 }
 
-function pickCollageLayout(approvedPhotoCount: number): CollageLayout {
+// "auto" (Custom Layout Planner) is opt-in per event and Premium-gated — the
+// event-completion automation always uses one of the two fixed presets, so
+// this is narrower than the full CollageLayout type on purpose.
+function pickCollageLayout(approvedPhotoCount: number): "grid-9" | "grid-4" {
   return approvedPhotoCount >= DENSE_COLLAGE_PHOTO_THRESHOLD ? "grid-9" : "grid-4"
 }
 

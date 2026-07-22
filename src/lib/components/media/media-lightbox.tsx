@@ -31,6 +31,10 @@ export type LightboxMedia = {
     text?: string
     is_message?: boolean
   }
+  /** Set when the event has Best Shot Selection enabled — see quality-score.ts. */
+  is_best_shot?: boolean
+  /** Client-computed labels from Auto Categorization — see auto-tag-client.ts. */
+  tags?: string[]
 }
 
 const EMOJI_LIST = [

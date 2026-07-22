@@ -5,6 +5,7 @@ import { getFeatureFlags } from "@/lib/platform-settings"
 import { GalleryGallery } from "./gallery-view"
 import { GuestCaptureModal } from "@/lib/components/events/guest-capture-modal"
 import { hasGuestSessionSSR, isEventHost } from "@/lib/security/guest-session"
+import { pickBestShots } from "@/lib/integrations/quality-score"
 
 export const metadata = { title: "Gallery" }
 
@@ -24,8 +25,31 @@ export default async function GalleryPage({ params }: PageProps<"/event/[slug]/g
 
   const { data: gallery } = await supabase.from("galleries").select("*").eq("event_id", ev.id).eq("slug", gallerySlug).single()
   if (!gallery) return <div className="min-h-screen bg-[#141110] p-8 text-center text-sm text-white/60">Gallery not found.</div>
-  const { data: photos } = await supabase.from("photos").select("id, storage_path, thumbnail_path, original_filename, uploader_name, mime_type, created_at").eq("gallery_id", gallery.id).neq("is_approved", false).order("created_at", { ascending: false }).limit(200)
-  const urls = (photos ?? []).map((p) => ({ ...p, url: publicUrl("PHOTOS", p.storage_path) }))
+
+  const aiFeatures = ((ev.settings as any)?.ai_features as Record<string, boolean>) || {}
+  let photosQuery = supabase
+    // `metadata` (reactions/comments) was previously missing here too — see
+    // the identical fix + explanation in src/app/event/[slug]/page.tsx.
+    .from("photos")
+    .select("id, storage_path, thumbnail_path, original_filename, uploader_name, mime_type, created_at, metadata, is_duplicate, blur_score, brightness_score, smile_score, tags")
+    .eq("gallery_id", gallery.id)
+    .neq("is_approved", false)
+    .order("created_at", { ascending: false })
+    .limit(200)
+  if (aiFeatures.duplicate_detection === true) {
+    photosQuery = photosQuery.eq("is_duplicate", false)
+  }
+  const { data: photos } = await photosQuery
+
+  const bestShotIds = aiFeatures.best_shot === true
+    ? pickBestShots((photos ?? []).map((p) => ({
+        id: p.id,
+        blurScore: p.blur_score,
+        brightnessScore: p.brightness_score,
+        smileScore: p.smile_score,
+      })))
+    : new Set<string>()
+  const urls = (photos ?? []).map((p) => ({ ...p, url: publicUrl("PHOTOS", p.storage_path), is_best_shot: bestShotIds.has(p.id) }))
   const flags = await getFeatureFlags()
   const voiceNoteDurationLimit = Number((ev.settings as any)?.voice_note_duration_limit) || 10
   return (

@@ -12,17 +12,21 @@ import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createServiceClient } from "@/lib/supabase/server"
 import { getScoredPhotos } from "@/lib/integrations/memories"
 import {
-  COLLAGE_LAYOUTS,
+  AUTO_LAYOUT_MAX_PHOTOS,
   composeCollage,
   downloadPhotoBuffer,
+  resolveLayoutSpec,
   uploadCollage,
   type CollageLayout,
 } from "@/lib/integrations/collage"
+import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
 import { logger } from "@/lib/logger"
 
 const paramsSchema = z.object({ id: z.string().uuid() })
 const bodySchema = z.object({
-  layout: z.enum(["grid-2", "grid-4", "grid-9", "polaroid"]),
+  // "auto" is the Custom Layout Planner toggle's dynamic grid — gated below
+  // to events that actually enabled ai_features.custom_layouts (Premium-tier).
+  layout: z.enum(["grid-2", "grid-4", "grid-9", "polaroid", "auto"]),
   photo_ids: z.array(z.string().uuid()).optional(),
 })
 
@@ -49,7 +53,18 @@ export const POST = defineRoute<{ layout: CollageLayout; photo_ids?: string[] },
     const ownership = await verifyOwnership(supabase, eventId, auth.user!.id)
     if (!ownership.ok) return ownership.response
 
-    const spec = COLLAGE_LAYOUTS[body.layout]
+    if (body.layout === "auto") {
+      const gate = await checkEventFeatureAccess(eventId, "ai_custom_layouts")
+      if (!gate.allowed) {
+        return fail("FORBIDDEN", gate.reason || "Custom Layout Planner is not enabled for this event", 403)
+      }
+    }
+
+    // For fixed presets this is just that preset's tile count; for "auto" it's
+    // the max photos worth clustering into a dynamic grid (see collage.ts) —
+    // resolveLayoutSpec recomputes the real grid dimensions once we know how
+    // many photos actually came back below.
+    const targetCount = body.layout === "auto" ? AUTO_LAYOUT_MAX_PHOTOS : resolveLayoutSpec(body.layout, 0).count
 
     let photoRows: { id: string; storage_path: string }[]
     if (body.photo_ids && body.photo_ids.length > 0) {
@@ -58,14 +73,14 @@ export const POST = defineRoute<{ layout: CollageLayout; photo_ids?: string[] },
         .select("id, storage_path")
         .eq("event_id", eventId)
         .ilike("mime_type", "image/%")
-        .in("id", body.photo_ids.slice(0, spec.count))
+        .in("id", body.photo_ids.slice(0, targetCount))
       if (error) {
         logger.error("memories/collage: selected-photos query failed", { eventId, error: error.message })
         return fail("COLLAGE_FAILED", "Could not load the selected photos", 500)
       }
       photoRows = data ?? []
     } else {
-      const scored = await getScoredPhotos(supabase, eventId, spec.count)
+      const scored = await getScoredPhotos(supabase, eventId, targetCount)
       photoRows = scored.map((r) => ({ id: r.id, storage_path: r.storage_path }))
     }
 

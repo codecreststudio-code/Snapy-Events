@@ -74,6 +74,20 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: GridPhoto; watermarkEnable
         loading="lazy"
       />
       {watermarkEnabled && <WatermarkOverlay />}
+      {p.is_best_shot && (
+        <div className="absolute top-2 left-2 bg-[#B28DAE]/90 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
+          <span>✨</span> Highlight
+        </div>
+      )}
+      {p.tags && p.tags.length > 0 && (
+        <div className="absolute bottom-2 right-2 flex flex-wrap gap-1 justify-end max-w-[80%]">
+          {p.tags.slice(0, 2).map((tag) => (
+            <span key={tag} className="bg-black/60 backdrop-blur-md text-white/90 text-[9px] font-semibold px-1.5 py-0.5 rounded-full capitalize">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
       {totalReactions > 0 && (
         <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-md">
           <span>❤️</span> {totalReactions}

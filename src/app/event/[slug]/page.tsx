@@ -11,6 +11,7 @@ import { publicUrl } from "@/lib/integrations/storage"
 import { getFeatureFlags } from "@/lib/platform-settings"
 import { MediaGrid, type GridPhoto } from "@/lib/components/media/media-grid"
 import { GuestFaceSearchButton } from "@/lib/components/guest/guest-face-search-button"
+import { pickBestShots } from "@/lib/integrations/quality-score"
 
 interface EventData {
   id: string
@@ -142,9 +143,18 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
   const photosByGallery: Record<string, GridPhoto[]> = {}
   if (checkedIn && isRevealed) {
     const requiresModeration = (settings as any)?.auto_approve_photos === false || (settings as any)?.moderate_uploads === true
+    const aiFeatures = ((settings as any)?.ai_features as Record<string, boolean>) || {}
+
     let photoQuery = supabase
       .from("photos")
-      .select("id, gallery_id, event_id, storage_path, thumbnail_path, original_filename, uploader_name, mime_type, created_at, is_approved")
+      // `metadata` (reactions/comments) was previously missing from this
+      // select entirely, so the ❤️ reaction-count badge in MediaGrid always
+      // rendered as 0 on first load regardless of how many guests had
+      // actually reacted — it only ever "worked" via the optimistic client
+      // update right after you reacted yourself, in the same page load.
+      // blur_score/brightness_score/smile_score/is_duplicate back Best Shot
+      // Selection and Smart Duplicate Detection (settings.ai_features).
+      .select("id, gallery_id, event_id, storage_path, thumbnail_path, original_filename, uploader_name, mime_type, created_at, is_approved, metadata, is_duplicate, blur_score, brightness_score, smile_score, tags")
       .eq("event_id", event.id)
       .order("created_at", { ascending: false })
       .limit(200)
@@ -153,10 +163,37 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
       photoQuery = photoQuery.neq("is_approved", false)
     }
 
+    // Smart Duplicate Detection: near-identical burst shots are hidden from
+    // this guest-facing grid by default (the host still sees everything via
+    // the dashboard timeline, which doesn't apply this filter).
+    if (aiFeatures.duplicate_detection === true) {
+      photoQuery = photoQuery.eq("is_duplicate", false)
+    }
+
     const { data: photos } = await photoQuery
 
+    // Best Shot Selection: rank this batch by sharpness/brightness/smile and
+    // flag the top slice so MediaGrid can show a "✨ Highlight" badge. This
+    // uses only the static per-photo signals computed at upload time (see
+    // image-quality.ts/face.ts) — the fuller engagement-blended ranking used
+    // for Auto Collage/Slideshow/Movie (getScoredPhotos in memories.ts) also
+    // factors in live reaction/comment counts, which isn't worth
+    // recomputing on every page load of the main event page.
+    const bestShotIds = aiFeatures.best_shot === true
+      ? pickBestShots((photos ?? []).map((p) => ({
+          id: p.id,
+          blurScore: p.blur_score,
+          brightnessScore: p.brightness_score,
+          smileScore: p.smile_score,
+        })))
+      : new Set<string>()
+
     for (const p of photos ?? []) {
-      const withUrl = { ...p, url: publicUrl("PHOTOS", p.storage_path) } as GridPhoto & { gallery_id: string }
+      const withUrl = {
+        ...p,
+        url: publicUrl("PHOTOS", p.storage_path),
+        is_best_shot: bestShotIds.has(p.id),
+      } as GridPhoto & { gallery_id: string }
       const key = p.gallery_id || "default"
       if (!photosByGallery[key]) photosByGallery[key] = []
       photosByGallery[key].push(withUrl)

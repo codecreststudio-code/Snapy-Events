@@ -59,7 +59,8 @@ import {
   LayoutGrid,
   PlayCircle,
   Gift,
-  FileDown
+  FileDown,
+  FolderOpen
 } from "lucide-react"
 
 const TEMPLATE_COVERS = [
@@ -791,7 +792,26 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     enabled: !!event?.id,
   })
 
-  const [collageLayout, setCollageLayout] = useState<"grid-2" | "grid-4" | "grid-9" | "polaroid">("grid-4")
+  // Smart Albums — Step 8 wizard toggle (settings.ai_features.smart_albums).
+  // Only fetched when the host actually turned it on for this event; the
+  // route itself is cheap (a time-gap clustering pass over already-fetched
+  // photo rows, no stored table) but there's no reason to run it for events
+  // that never enabled the feature.
+  const smartAlbumsEnabled = (event?.settings as ExtEventSettings)?.ai_features?.smart_albums === true
+  const { data: memoriesAlbums } = useQuery({
+    queryKey: ["memories-albums", event?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/events/${event!.id}/memories/albums`)
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) return { albums: [] }
+      return json.data as { albums: { key: string; label: string; photoCount: number; photos: { id: string; storage_path: string; url: string }[] }[] }
+    },
+    enabled: !!event?.id && smartAlbumsEnabled,
+  })
+
+  const [collageLayout, setCollageLayout] = useState<"grid-2" | "grid-4" | "grid-9" | "polaroid" | "auto">("grid-4")
+  // Custom Layout Planner — Step 8 wizard toggle (ai_features.custom_layouts).
+  const customLayoutsEnabled = (event?.settings as ExtEventSettings)?.ai_features?.custom_layouts === true
   const collageMutation = useMutation({
     mutationFn: async (layout: typeof collageLayout) => {
       const res = await fetch(`/api/events/${event!.id}/memories/collage`, {
@@ -1033,6 +1053,30 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       setMovieRendering(false)
     }
   }
+
+  // Auto Highlights Reel — Step 8 wizard toggle (ai_features.highlights).
+  // Movie rendering runs entirely client-side (canvas + MediaRecorder, see
+  // movie-renderer.ts's header comment on why there's no server-side
+  // ffmpeg/queue in this codebase) — there is no way to render it in an
+  // unattended background job. "Auto" here means: the next time the host
+  // opens this dashboard after the event has ended and no movie exists yet,
+  // generation kicks off on its own instead of waiting for a manual click.
+  // Guarded by a ref (not just movieRendering) so this can only ever fire
+  // once per page load, even if effect deps re-run before the mutation's
+  // state updates land.
+  const autoHighlightsTriggered = useRef(false)
+  useEffect(() => {
+    if (autoHighlightsTriggered.current) return
+    if (!event?.id || !memoriesMovies) return
+    const highlightsEnabled = (event.settings as ExtEventSettings)?.ai_features?.highlights === true
+    if (!highlightsEnabled) return
+    if (memoriesMovies.movies.length > 0) return
+    const eventHasEnded = event.end_date ? new Date(event.end_date) <= new Date() : false
+    if (!eventHasEnded) return
+
+    autoHighlightsTriggered.current = true
+    handleGenerateMovie()
+  }, [event?.id, event?.end_date, memoriesMovies])
 
   const movieViewerItems: MemoryViewerItem[] = (memoriesMovies?.movies ?? []).map((m) => ({
     id: m.id,
@@ -1897,8 +1941,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               <LayoutGrid className="h-4.5 w-4.5 text-[#B28DAE]" />
               <h3 className="text-sm font-bold text-white/90">Auto Collage</h3>
             </div>
-            <div className="grid grid-cols-4 gap-1.5">
-              {(["grid-2", "grid-4", "grid-9", "polaroid"] as const).map((layout) => (
+            <div className={`grid gap-1.5 ${customLayoutsEnabled ? "grid-cols-5" : "grid-cols-4"}`}>
+              {([
+                "grid-2", "grid-4", "grid-9", "polaroid",
+                ...(customLayoutsEnabled ? (["auto"] as const) : []),
+              ] as const).map((layout) => (
                 <button
                   key={layout}
                   onClick={() => setCollageLayout(layout)}
@@ -1908,7 +1955,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
                   }`}
                 >
-                  {layout === "grid-2" ? "2-Grid" : layout === "grid-4" ? "4-Grid" : layout === "grid-9" ? "9-Grid" : "Polaroid"}
+                  {layout === "grid-2" ? "2-Grid" : layout === "grid-4" ? "4-Grid" : layout === "grid-9" ? "9-Grid" : layout === "polaroid" ? "Polaroid" : "✨ Auto"}
                 </button>
               ))}
             </div>
@@ -1936,6 +1983,48 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               </div>
             )}
           </div>
+
+          {/* Smart Albums — Step 8 wizard toggle (ai_features.smart_albums), only
+              rendered when the host actually enabled it for this event. Groups
+              photos into time-gap "moments" — see clusterIntoAlbums in
+              /api/events/[id]/memories/albums/route.ts. */}
+          {smartAlbumsEnabled && (
+            <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
+              <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+                <FolderOpen className="h-4.5 w-4.5 text-[#B28DAE]" />
+                <h3 className="text-sm font-bold text-white/90">Smart Albums</h3>
+              </div>
+              {memoriesAlbums && memoriesAlbums.albums.length > 0 ? (
+                <div className="space-y-3">
+                  {memoriesAlbums.albums.map((album) => (
+                    <div key={album.key} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="font-semibold text-white/80">{album.label}</span>
+                        <span className="text-white/40">{album.photoCount} photo{album.photoCount === 1 ? "" : "s"}</span>
+                      </div>
+                      <div className="flex gap-1.5 overflow-x-auto pb-1">
+                        {album.photos.slice(0, 6).map((p) => (
+                          <img
+                            key={p.id}
+                            src={p.url}
+                            alt=""
+                            className="h-14 w-14 shrink-0 rounded-lg object-cover border border-white/10"
+                          />
+                        ))}
+                        {album.photoCount > 6 && (
+                          <div className="h-14 w-14 shrink-0 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-[10px] font-semibold text-white/60">
+                            +{album.photoCount - 6}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-white/40">Albums form automatically as guests upload — check back once photos start coming in.</p>
+              )}
+            </div>
+          )}
 
           {/* Slideshow — live in-browser player, no video export/encoding cost */}
           <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">

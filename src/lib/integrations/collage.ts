@@ -17,7 +17,15 @@ import { STORAGE_BUCKETS } from "@/lib/constants"
 import { uploadFile } from "./storage"
 import { logger } from "@/lib/logger"
 
-export type CollageLayout = "grid-2" | "grid-4" | "grid-9" | "polaroid"
+// "auto" backs the Step 8 wizard's Custom Layout Planner toggle
+// (settings.ai_features.custom_layouts) — instead of the host picking a
+// fixed preset, the grid dimensions and tile spacing are computed from how
+// many approved photos are actually available (see buildAutoLayoutSpec),
+// scaling from a spacious 1x1/2x1 for a couple of photos down to a denser
+// print-ready grid as the count grows.
+export type CollageLayout = "grid-2" | "grid-4" | "grid-9" | "polaroid" | "auto"
+
+export const AUTO_LAYOUT_MAX_PHOTOS = 12
 
 interface LayoutSpec {
   cols: number
@@ -30,11 +38,41 @@ interface LayoutSpec {
   background: { r: number; g: number; b: number; alpha: number }
 }
 
-export const COLLAGE_LAYOUTS: Record<CollageLayout, LayoutSpec> = {
+export const COLLAGE_LAYOUTS: Record<Exclude<CollageLayout, "auto">, LayoutSpec> = {
   "grid-2": { cols: 2, rows: 1, count: 2, canvasWidth: 1200, canvasHeight: 600, gap: 8, frame: "none", background: { r: 20, g: 17, b: 16, alpha: 1 } },
   "grid-4": { cols: 2, rows: 2, count: 4, canvasWidth: 1080, canvasHeight: 1080, gap: 8, frame: "none", background: { r: 20, g: 17, b: 16, alpha: 1 } },
   "grid-9": { cols: 3, rows: 3, count: 9, canvasWidth: 1080, canvasHeight: 1080, gap: 6, frame: "none", background: { r: 20, g: 17, b: 16, alpha: 1 } },
   polaroid: { cols: 2, rows: 2, count: 4, canvasWidth: 1200, canvasHeight: 1200, gap: 24, frame: "polaroid", background: { r: 255, g: 255, b: 255, alpha: 1 } },
+}
+
+/**
+ * Dynamically-sized grid for the "auto" layout: near-square (cols/rows as
+ * close to sqrt(count) as possible) so the print/export always reads as a
+ * deliberate grid rather than one long strip, with tile size (and gap)
+ * scaled down as photo count climbs so a 9- or 12-photo grid still fits a
+ * print-ready canvas instead of ballooning in file size.
+ */
+export function buildAutoLayoutSpec(photoCount: number): LayoutSpec {
+  const count = Math.max(1, Math.min(photoCount, AUTO_LAYOUT_MAX_PHOTOS))
+  const cols = Math.ceil(Math.sqrt(count))
+  const rows = Math.ceil(count / cols)
+  const tileTarget = count <= 4 ? 480 : count <= 9 ? 340 : 260
+  const gap = count <= 4 ? 10 : count <= 9 ? 7 : 5
+  return {
+    cols,
+    rows,
+    count,
+    canvasWidth: cols * tileTarget + gap * (cols + 1),
+    canvasHeight: rows * tileTarget + gap * (rows + 1),
+    gap,
+    frame: "none",
+    background: { r: 20, g: 17, b: 16, alpha: 1 },
+  }
+}
+
+export function resolveLayoutSpec(layout: CollageLayout, photoCount: number): LayoutSpec {
+  if (layout === "auto") return buildAutoLayoutSpec(photoCount)
+  return COLLAGE_LAYOUTS[layout]
 }
 
 export interface CollagePhotoInput {
@@ -49,7 +87,7 @@ export interface ComposeCollageResult {
 }
 
 export async function composeCollage(layout: CollageLayout, photos: CollagePhotoInput[]): Promise<ComposeCollageResult> {
-  const spec = COLLAGE_LAYOUTS[layout]
+  const spec = resolveLayoutSpec(layout, photos.length)
   const tileWidth = Math.floor((spec.canvasWidth - spec.gap * (spec.cols + 1)) / spec.cols)
   const tileHeight = Math.floor((spec.canvasHeight - spec.gap * (spec.rows + 1)) / spec.rows)
 

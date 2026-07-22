@@ -26,6 +26,8 @@ export interface DetectedFace {
   boundingBox: { x: number; y: number; width: number; height: number }
   confidence: number
   embedding: number[]
+  /** "happy" expression probability (0-1) from faceExpressionNet, when requested. */
+  smile?: number
 }
 
 export interface DetectionResult {
@@ -100,6 +102,11 @@ async function ensureModelsLoaded(): Promise<void> {
       await faceapi.nets.tinyFaceDetector.loadFromDisk(MODEL_DIR)
       await faceapi.nets.faceLandmark68Net.loadFromDisk(MODEL_DIR)
       await faceapi.nets.faceRecognitionNet.loadFromDisk(MODEL_DIR)
+      // Powers the "smile" signal in DetectedFace.smile, used by Best Shot
+      // Selection (see quality-score.ts) to favor photos with genuine smiles
+      // over technically-sharp-but-awkward ones. Weights already ship in the
+      // same model/ directory as everything else loaded above.
+      await faceapi.nets.faceExpressionNet.loadFromDisk(MODEL_DIR)
       logger.info("[face] models loaded", { dir: MODEL_DIR })
     })()
   }
@@ -192,7 +199,7 @@ export async function detectFaces(input: DetectInput): Promise<DetectionResult> 
 
   try {
     const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
-    const detections = await faceapi.detectAllFaces(tensor, options).withFaceLandmarks().withFaceDescriptors()
+    const detections = await faceapi.detectAllFaces(tensor, options).withFaceLandmarks().withFaceDescriptors().withFaceExpressions()
 
     const maxFaces = input.maxFaces ?? 50
     const faces: DetectedFace[] = detections
@@ -207,6 +214,7 @@ export async function detectFaces(input: DetectInput): Promise<DetectionResult> 
         },
         confidence: r.detection.score,
         embedding: Array.from(r.descriptor as Float32Array) as number[],
+        smile: typeof r.expressions?.happy === "number" ? r.expressions.happy : undefined,
       }))
 
     return { model: MODEL_ID, faces, width, height }
@@ -294,6 +302,8 @@ export interface DetectAndStoreParams {
 
 export interface DetectAndStoreResult {
   facesDetected: number
+  /** Highest "happy" expression probability among detected faces, or null if none detected. */
+  smileScore: number | null
 }
 
 /**
@@ -394,6 +404,13 @@ export async function detectAndStoreFaces(
     }
   }
 
-  await supabase.from("photos").update({ face_count: det.faces.length }).eq("id", params.photoId)
-  return { facesDetected: det.faces.length }
+  const smileScores = det.faces.map((f) => f.smile).filter((s): s is number => typeof s === "number")
+  const smileScore = smileScores.length > 0 ? Math.max(...smileScores) : null
+
+  await supabase
+    .from("photos")
+    .update({ face_count: det.faces.length, ...(smileScore !== null ? { smile_score: smileScore } : {}) })
+    .eq("id", params.photoId)
+
+  return { facesDetected: det.faces.length, smileScore }
 }

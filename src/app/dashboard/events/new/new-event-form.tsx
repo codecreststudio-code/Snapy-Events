@@ -210,11 +210,6 @@ export function NewEventForm() {
   const [aiAutoCategorize, setAiAutoCategorize] = useState(false)
   const [aiCustomLayout, setAiCustomLayout] = useState(false)
 
-  // Memory Capsule
-  const [capsuleEnabled, setCapsuleEnabled] = useState(false)
-  const [capsuleTrigger, setCapsuleTrigger] = useState("anniversary")
-  const [capsuleCustomDate, setCapsuleCustomDate] = useState("")
-
   // Invitation Card Design
   const [invitationTheme, setInvitationTheme] = useState("minimal")
   const [invitationWelcome, setInvitationWelcome] = useState("Scan to capture and share moments with us.")
@@ -354,8 +349,13 @@ export function NewEventForm() {
           video_duration_limit: videoDuration,
           voice_note_duration_limit: voiceDuration,
           cover_gradient: coverImage.startsWith("linear") ? coverImage : null,
-          photo_reveal_mode: (revealExperience === "immediately" || revealExperience === "during_event") ? "instant" : "delayed",
-          reveal_type: (revealExperience === "immediately" || revealExperience === "during_event") ? "instant" : "delayed",
+          // Option ids from the Step 5 picker below are "immediately"/"during"/"after"/"24h"/"7d"/"custom" —
+          // this used to check for "during_event" (a value that option never produces), so hosts who picked
+          // "During Event" got silently stored as photo_reveal_mode: "delayed", and /api/galleries/[id]/photos
+          // (which does an exact "instant" match, unlike the guest event page's more lenient substring check)
+          // would withhold photos from guests during a live event despite the host explicitly choosing live reveal.
+          photo_reveal_mode: (revealExperience === "immediately" || revealExperience === "during") ? "instant" : "delayed",
+          reveal_type: (revealExperience === "immediately" || revealExperience === "during") ? "instant" : "delayed",
           reveal_experience: revealExperience,
           ai_features: {
             face_search: aiFaceSearch,
@@ -365,11 +365,6 @@ export function NewEventForm() {
             highlights: aiHighlights,
             auto_categorization: aiAutoCategorize,
             custom_layouts: aiCustomLayout,
-          },
-          capsule: {
-            enabled: capsuleEnabled,
-            reveal_trigger: capsuleTrigger,
-            custom_date: capsuleCustomDate,
           },
           invitation: {
             theme: invitationTheme,
@@ -473,7 +468,7 @@ export function NewEventForm() {
       toast({ title: "Please name your experience", description: "Name is required to build the memory capsule." })
       return
     }
-    if (step === 10) {
+    if (step === 9) {
       mutation.mutate()
       return
     }
@@ -601,7 +596,7 @@ export function NewEventForm() {
             </div>
           )}
           <div className="text-[11px] font-semibold text-white/50 tracking-widest">
-            {step <= 10 ? `STEP ${step} OF 10` : "READY"}
+            {step <= 9 ? `STEP ${step} OF 9` : "READY"}
           </div>
         </div>
       </header>
@@ -1252,77 +1247,14 @@ export function NewEventForm() {
                 </div>
               )}
 
-              {/* STEP 9: MEMORY CAPSULE */}
+              {/* STEP 9: INVITATION CARD DESIGN
+                  (previously Step 10 — the old Step 9 "Memory Capsule" toggle
+                  was removed. It stored settings.capsule but nothing server-side
+                  ever read it to actually hide content; Step 5's Reveal
+                  Experience already covers "delay guest visibility until a
+                  date" for real, via photo_reveal_mode/reveal_experience, so
+                  keeping both was two competing controls where only one worked.) */}
               {step === 9 && (
-                <div className="space-y-6">
-                  <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
-                    Create a memory capsule?
-                  </h1>
-                  <p className="text-sm text-white/50">
-                    Lock files in a secure virtual capsule until a future special date. Build anticipation.
-                  </p>
-
-                  <div className="p-4 rounded-xl border border-hairline-dark bg-surface-card flex items-center justify-between">
-                    <div className="space-y-1">
-                      <p className="text-sm font-bold text-white">Enable Memory Capsule</p>
-                      <p className="text-[10px] text-white/50">Hide contribution stream until reveal date is reached</p>
-                    </div>
-                    <Switch checked={capsuleEnabled} onCheckedChange={setCapsuleEnabled} />
-                  </div>
-
-                  {capsuleEnabled && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      className="space-y-4 pt-2"
-                    >
-                      <div className="grid grid-cols-2 gap-2">
-                        {[
-                          { id: "after_event", label: "After Event Ends" },
-                          { id: "30_days", label: "Reveal 30 Days Later" },
-                          { id: "6_months", label: "Reveal 6 Months Later" },
-                          { id: "anniversary", label: "Reveal on Anniversary" },
-                        ].map((t) => (
-                          <button
-                            key={t.id}
-                            type="button"
-                            onClick={() => setCapsuleTrigger(t.id)}
-                            className={`p-3 rounded-lg border text-[11px] font-bold text-left transition-all ${
-                              capsuleTrigger === t.id ? "bg-mauve text-[#141110] border-mauve" : "bg-surface-card border-hairline-dark text-white/50"
-                            }`}
-                          >
-                            {t.label}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Locked capsule safe box animation mock */}
-                      <div className="p-6 rounded-2xl bg-gradient-to-b from-surface-card to-surface-card-elevated border border-hairline-dark flex flex-col items-center justify-center text-center space-y-3">
-                        <div className="w-16 h-16 rounded-full bg-surface-card-elevated border border-hairline-dark flex items-center justify-center text-mauve shadow-sm relative">
-                          <motion.div
-                            animate={{ scale: [1, 1.05, 1] }}
-                            transition={{ repeat: Infinity, duration: 3 }}
-                          >
-                            <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                          </motion.div>
-                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-mauve rounded-full animate-ping" />
-                        </div>
-                        <div className="space-y-1">
-                          <p className={`font-playfair text-lg font-medium text-white`}>Memory Safe Activated</p>
-                          <p className="text-[10px] text-white/50 max-w-xs mx-auto">
-                            All media, audio, and messages will remain blurred and unreadable. Unlocking on Anniversary day.
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-              )}
-
-              {/* STEP 10: INVITATION CARD DESIGN */}
-              {step === 10 && (
                 <div className="space-y-6">
                   <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
                     Design your invitation experience.
@@ -1392,7 +1324,7 @@ export function NewEventForm() {
                     <span>Saving Capsule...</span>
                   ) : (
                     <>
-                      <span>{step === 10 ? "Launch Capsule" : "Continue"}</span>
+                      <span>{step === 9 ? "Launch Capsule" : "Continue"}</span>
                       <ArrowRight className="h-4 w-4" />
                     </>
                   )}
@@ -1401,7 +1333,7 @@ export function NewEventForm() {
 
               {/* Progress Dots indicators */}
               <div className="flex items-center justify-center gap-1.5 pt-4">
-                {Array.from({ length: 10 }).map((_, i) => (
+                {Array.from({ length: 9 }).map((_, i) => (
                   <div
                     key={i}
                     className={`h-1.5 rounded-full transition-all ${
@@ -1462,10 +1394,18 @@ export function NewEventForm() {
                         <CalendarIcon className={`h-3 w-3 ${currentTheme.accentColor}`} />
                         <span>Locks: {endDate ? formatDate(endDate) : "Oct 12, 2026"} at {endTime}</span>
                       </div>
-                      {capsuleEnabled && (
+                      {revealExperience !== "immediately" && (
                         <div className={`flex items-center gap-1.5 font-semibold ${currentTheme.accentColor}`}>
                           <ShieldCheck className="h-3 w-3" />
-                          <span>Capsule: Unlocks on {capsuleTrigger.replace(/_/g, " ")}</span>
+                          <span>Reveal: {(
+                            {
+                              during: "During the event",
+                              after: "After the event ends",
+                              "24h": "24 hours later",
+                              "7d": "7 days later",
+                              custom: "On a custom date",
+                            } as Record<string, string>
+                          )[revealExperience] || revealExperience}</span>
                         </div>
                       )}
                     </div>

@@ -14,6 +14,7 @@ import { toast } from "@/lib/components/ui/toaster"
 import { GuestCaptureModal } from "@/lib/components/events/guest-capture-modal"
 
 import { VoiceNoteRecorder } from "@/lib/components/events/voice-note-recorder"
+import { classifyImageFile } from "@/lib/integrations/auto-tag-client"
 import {
   ArrowLeft,
   Camera,
@@ -79,6 +80,9 @@ interface EventSettings {
     videos?: boolean
     voice_notes?: boolean
     messages?: boolean
+  }
+  ai_features?: {
+    auto_categorization?: boolean
   }
 }
 
@@ -327,7 +331,33 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         : (errData?.error || "Media upload failed")
       throw new Error(msg)
     }
-  }, [])
+
+    // Auto Categorization (ai_features.auto_categorization) — fire-and-forget,
+    // never blocks the upload itself. Only images get classified (MobileNet
+    // is an image model), and only when the host enabled this for the event —
+    // the model is never downloaded otherwise.
+    const eventSettings = (event?.settings || {}) as EventSettings
+    if (eventSettings.ai_features?.auto_categorization === true && effectiveMimeType.startsWith("image/")) {
+      try {
+        const uploadJson = await res.clone().json().catch(() => null)
+        const photoId = uploadJson?.data?.id as string | undefined
+        if (photoId) {
+          classifyImageFile(file)
+            .then(({ tags }) => {
+              if (tags.length === 0) return
+              return fetch(`/api/photos/${photoId}/tags`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ tags }),
+              })
+            })
+            .catch((err) => console.warn("[auto-tag] background tagging failed", err))
+        }
+      } catch (err) {
+        console.warn("[auto-tag] could not read upload response for tagging", err)
+      }
+    }
+  }, [event])
 
   // Camera-captured photos (and confirmed videos) skip the old "queue, then
   // tap Upload Files" flow entirely — CameraCapture calls this the instant a
