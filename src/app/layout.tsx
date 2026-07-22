@@ -1,10 +1,28 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter, Playfair_Display } from "next/font/google"
 import "./globals.css"
 import { QueryProvider } from "@/lib/hooks/query-provider"
 import { AuthProvider } from "@/lib/hooks/use-auth"
 import { TooltipProvider } from "@/lib/components/ui/tooltip"
 import { CurrencyProvider } from "@/lib/context/currency-context"
+import { PwaProvider } from "@/lib/pwa/pwa-provider"
+
+// Apple splash screens (public/splash/*.png, generated alongside the icon
+// set) — Apple still requires static <link rel="apple-touch-startup-image">
+// entries with device-specific media queries; there's no manifest-driven
+// equivalent to iOS's native splash screen the way Android has one. Not
+// exhaustive of every historical device, just current-gen iPhone/iPad sizes;
+// see the icon-generation script for how to add more.
+const appleSplashScreens: Array<{ url: string; media: string }> = [
+  { url: "/splash/iphone-750x1334.png", media: "(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
+  { url: "/splash/iphone-1125x2436.png", media: "(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
+  { url: "/splash/iphone-1170x2532.png", media: "(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
+  { url: "/splash/iphone-1179x2556.png", media: "(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
+  { url: "/splash/iphone-1284x2778.png", media: "(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
+  { url: "/splash/iphone-1290x2796.png", media: "(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
+  { url: "/splash/ipad-1668x2388.png", media: "(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
+  { url: "/splash/ipad-2048x2732.png", media: "(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
+]
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,9 +49,37 @@ export const metadata: Metadata = {
     siteName: "Snapy",
   },
   icons: {
-    icon: "/Favicon.png",
-    shortcut: "/Favicon.png",
-    apple: "/Favicon.png",
+    // Real square icon set (see public/icons/, generated from the brand
+    // mark) — replaces the previous single non-square Favicon.png reference,
+    // which rendered squished/cropped as a home-screen or browser tab icon.
+    icon: [
+      { url: "/icons/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180" },
+      { url: "/icons/apple-touch-icon-152.png", sizes: "152x152" },
+      { url: "/icons/apple-touch-icon-167.png", sizes: "167x167" },
+    ],
+    other: appleSplashScreens.map((s) => ({ rel: "apple-touch-startup-image", url: s.url, media: s.media })),
+  },
+  // Standalone/home-screen behavior for iOS Safari (Android/desktop take
+  // their cues from manifest.ts's display:"standalone" instead).
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Snapsy",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "msapplication-TileColor": "#141110",
+    "msapplication-config": "/browserconfig.xml",
   },
   twitter: {
     card: "summary_large_image",
@@ -44,7 +90,28 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  verification: {
+    google: "QT_hUkLEcniarABIn-custom-verification",
+  },
 }
+
+// Next 14+ requires themeColor/colorScheme/viewport in a dedicated export
+// rather than inside `metadata` (which now warns/ignores them there).
+// viewportFit: "cover" + the safe-area-inset padding already used across
+// the guest camera/upload UI (env(safe-area-inset-*)) is what makes the
+// installed app draw correctly behind the iPhone notch/Dynamic Island and
+// Android's gesture bar instead of leaving black bars.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#141110",
+  colorScheme: "dark",
+}
+
+import { Toaster } from "@/lib/components/ui/toaster"
+import { SmoothScrollProvider } from "@/lib/components/layout/smooth-scroll-provider"
+import { MicrosoftClarity } from "@/lib/components/analytics/microsoft-clarity"
 
 export default function RootLayout({
   children,
@@ -52,18 +119,24 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="dark selection:bg-mauve/30 selection:text-white">
       <head>
         {/* Preconnect to Google Fonts origins to eliminate DNS/TCP overhead */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className={`${inter.variable} ${playfair.variable} ${inter.className}`} suppressHydrationWarning>
+      <body className={`${inter.variable} ${playfair.variable} ${inter.className} bg-surface-dark text-white antialiased selection:bg-mauve/30 selection:text-white`} suppressHydrationWarning>
         <QueryProvider>
           <AuthProvider>
             <CurrencyProvider>
               <TooltipProvider>
-                {children}
+                <SmoothScrollProvider>
+                  <PwaProvider>
+                    <MicrosoftClarity />
+                    {children}
+                    <Toaster />
+                  </PwaProvider>
+                </SmoothScrollProvider>
               </TooltipProvider>
             </CurrencyProvider>
           </AuthProvider>

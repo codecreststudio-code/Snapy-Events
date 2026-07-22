@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/lib/hooks"
 import { AccountMenu } from "@/lib/components/layout/account-menu"
 import { HomeBottomTabs } from "@/lib/components/layout/home-bottom-tabs"
+import { NotificationCenter } from "@/lib/components/notifications/notification-center"
 
 // Redesigned to match a minimal, native-app-style home screen (host's own
 // request, replacing the previous sidebar/stat-cards/checklist admin-panel
@@ -134,6 +135,7 @@ export default function DashboardPage() {
               New
             </button>
           </Link>
+          <NotificationCenter />
           <AccountMenu variant="compact" />
         </div>
       </div>

@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils"
 import { MobileBottomNav } from "./mobile-bottom-nav"
 import { AccountMenu } from "./account-menu"
+import { NotificationCenter } from "@/lib/components/notifications/notification-center"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -103,8 +104,11 @@ export function DashboardSidebar() {
           </nav>
         </div>
 
-        <div className="border-t border-[#3D332A] p-4">
-          <AccountMenu variant="sidebar" />
+        <div className="flex items-center gap-2 border-t border-[#3D332A] p-4">
+          <div className="min-w-0 flex-1">
+            <AccountMenu variant="sidebar" />
+          </div>
+          <NotificationCenter />
         </div>
       </div>
 

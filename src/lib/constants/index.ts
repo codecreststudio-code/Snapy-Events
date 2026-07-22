@@ -134,6 +134,7 @@ export const API_RATE_LIMITS = {
   MEDIA_UPLOAD: Number(process.env.RATE_LIMIT_MEDIA_UPLOAD) || 30, // 30 uploads per min
   RECAP_GENERATE: Number(process.env.RATE_LIMIT_RECAP_GENERATE) || 1, // 1 render per 3 mins — ~300s ffmpeg render, a host rarely needs this more than once every few minutes
   MOVIE_UPLOAD: Number(process.env.RATE_LIMIT_MOVIE_UPLOAD) || 3, // 3 uploads per 5 mins — client renders the video, this route just stores the finished file
+  NOTIFICATION_DEVICE_REGISTER: Number(process.env.RATE_LIMIT_NOTIFICATION_DEVICE_REGISTER) || 10, // 10 device (re)registrations per min — a malicious/buggy client could hammer this on every token refresh
   // Payment routes previously had no rate limit at all, unlike every other
   // authenticated/public mutation in this codebase — a gap for both
   // Razorpay-order-spam and for hammering a coupon-validity/idempotency

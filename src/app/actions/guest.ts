@@ -7,6 +7,7 @@ import { grantGuestSession } from "@/lib/security/guest-session"
 import { rateLimit } from "@/lib/security/rate-limit"
 import { API_RATE_LIMITS } from "@/lib/constants"
 import { getClientIp } from "@/lib/security/client-ip"
+import { sendPushNotification } from "@/lib/integrations/push"
 
 // Codes use the same charset as generate_join_code() in
 // supabase/migrations/0023_event_join_code.sql (excludes 0/O/1/I) — this is
@@ -34,7 +35,7 @@ export async function logGuestAccess(
   // reads this same row anonymously), so this doesn't need elevated access.
   const { data: eventRow, error: eventErr } = await supabase
     .from("events")
-    .select("join_code, settings")
+    .select("join_code, settings, name, slug, host_id")
     .eq("id", eventId)
     .single()
 
@@ -95,6 +96,20 @@ export async function logGuestAccess(
   // reached after the join-code check above passes (when required), so a
   // valid session is proof the guest supplied a correct code.
   await grantGuestSession(eventId)
+
+  // Best-effort host notification — never blocks or fails the guest's own
+  // check-in response. sendPushNotification writes the in-app notification
+  // row and, if FIREBASE_SERVICE_ACCOUNT_KEY is configured, best-effort
+  // pushes to the host's registered devices; see src/lib/integrations/push.ts.
+  if (eventRow.host_id) {
+    void sendPushNotification({
+      userId: eventRow.host_id,
+      type: "new_guest_joined",
+      title: "New guest joined",
+      body: `${guestDetails.name} just checked in to ${eventRow.name}.`,
+      data: { url: `/dashboard/events/${eventRow.slug}` },
+    })
+  }
 
   return { success: true, sessionToken }
 }

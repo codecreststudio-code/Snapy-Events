@@ -13,15 +13,66 @@ import { Separator } from "@/lib/components/ui/separator"
 import { Skeleton } from "@/lib/components/ui/skeleton"
 import { toast } from "@/lib/components/ui/toaster"
 import { MfaSettings } from "./mfa-settings"
+import { usePushNotifications } from "@/lib/pwa/use-push-notifications"
 import {
   User as UserIcon,
   Bell,
+  BellRing,
   Shield,
   Building2,
   CreditCard,
   Settings
 } from "lucide-react"
 import type { User } from "@/lib/types"
+
+// Preference categories exposed by GET/PATCH /api/notifications/preferences
+// (Phase B push-notification infra). Kept separate from the pre-existing
+// "Notifications" card above (which is a different, older email-preference
+// shape stored on users.preferences and isn't part of this API contract).
+type NotificationPreferences = {
+  comments: boolean
+  likes: boolean
+  uploads: boolean
+  reminders: boolean
+  marketing: boolean
+  ai_stories: boolean
+  highlights: boolean
+  announcements: boolean
+  new_guest: boolean
+  milestones: boolean
+}
+
+const NOTIFICATION_PREFERENCE_FIELDS: {
+  key: keyof NotificationPreferences
+  label: string
+  description: string
+}[] = [
+  { key: "uploads", label: "New uploads", description: "When new photos are uploaded to your events" },
+  { key: "comments", label: "Comments", description: "When someone comments on your photos" },
+  { key: "likes", label: "Likes", description: "When someone likes your photos" },
+  { key: "new_guest", label: "New guest joined", description: "When a new guest joins your event" },
+  { key: "reminders", label: "Event reminders", description: "Reminders before your events start" },
+  { key: "ai_stories", label: "AI Story ready", description: "When your AI-generated story is ready to view" },
+  { key: "highlights", label: "Highlights", description: "When we pick highlight photos from your event" },
+  { key: "milestones", label: "Milestones", description: "Photo-count milestones and event achievements" },
+  { key: "announcements", label: "Announcements", description: "Important updates from Snapsy" },
+  { key: "marketing", label: "Marketing & offers", description: "Occasional product news, tips, and offers" },
+]
+
+async function getNotificationPreferences(): Promise<NotificationPreferences> {
+  const res = await fetch("/api/notifications/preferences")
+  if (!res.ok) throw new Error("Failed to load notification preferences")
+  return res.json()
+}
+
+async function patchNotificationPreferences(patch: Partial<NotificationPreferences>): Promise<void> {
+  const res = await fetch("/api/notifications/preferences", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  })
+  if (!res.ok) throw new Error("Failed to update notification preferences")
+}
 
 async function getProfile(): Promise<User | null> {
   const supabase = createClient()
@@ -107,6 +158,45 @@ export default function SettingsPage() {
       toast({ title: "Failed to update preferences", description: error.message, variant: "destructive" })
     },
   })
+
+  const { data: pushPrefs, isLoading: pushPrefsLoading } = useQuery({
+    queryKey: ["notification-preferences"],
+    queryFn: getNotificationPreferences,
+  })
+
+  const pushPrefsMutation = useMutation({
+    mutationFn: patchNotificationPreferences,
+    onSuccess: (_data, variables) => {
+      queryClient.setQueryData<NotificationPreferences | undefined>(["notification-preferences"], (prev) =>
+        prev ? { ...prev, ...variables } : prev
+      )
+      toast({ title: "Notification preference updated" })
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update preference", description: error.message, variant: "destructive" })
+    },
+  })
+
+  const { permission: pushPermission, isSupported: pushSupported, requestPermission } = usePushNotifications()
+  const [isEnablingPush, setIsEnablingPush] = useState(false)
+
+  const handleEnablePush = async () => {
+    setIsEnablingPush(true)
+    try {
+      const result = await requestPermission()
+      if (result === "granted") {
+        toast({ title: "Push notifications enabled" })
+      } else if (result === "denied") {
+        toast({
+          title: "Push notifications blocked",
+          description: "Enable notifications for this site in your browser's settings, then reload the page.",
+          variant: "destructive",
+        })
+      }
+    } finally {
+      setIsEnablingPush(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -238,6 +328,76 @@ export default function SettingsPage() {
             >
               {notificationMutation.isPending ? "Saving..." : "Save Preferences"}
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl border border-[#3D332A] bg-[#1C1814]">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <BellRing className="h-5 w-5 text-mauve" />
+              <CardTitle className="text-white">Push Notifications</CardTitle>
+            </div>
+            <CardDescription className="text-white/50">
+              Control what shows up in your notification center and on your device
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between rounded-xl border border-[#3D332A] bg-white/5 px-4 py-3">
+              <div className="space-y-0.5">
+                <Label className="text-white">Enable push notifications</Label>
+                <p className="text-sm text-white/50">
+                  {!pushSupported
+                    ? "Not supported in this browser"
+                    : pushPermission === "granted"
+                      ? "Enabled on this device"
+                      : pushPermission === "denied"
+                        ? "Blocked — enable notifications for this site in your browser settings, then reload"
+                        : "Get notified even when Snapsy isn't open"}
+                </p>
+              </div>
+              {pushPermission === "granted" ? (
+                <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">
+                  Enabled
+                </span>
+              ) : (
+                <Button
+                  onClick={handleEnablePush}
+                  disabled={!pushSupported || pushPermission === "denied" || isEnablingPush}
+                  size="sm"
+                  className="rounded-full bg-mauve font-semibold text-[#141110] hover:bg-mauve-strong"
+                >
+                  {isEnablingPush ? "Requesting..." : pushPermission === "denied" ? "Blocked" : "Enable"}
+                </Button>
+              )}
+            </div>
+
+            <Separator className="bg-[#3D332A]" />
+
+            {pushPrefsLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            ) : (
+              NOTIFICATION_PREFERENCE_FIELDS.flatMap((field, idx) => {
+                const row = (
+                  <div key={field.key} className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-white">{field.label}</Label>
+                      <p className="text-sm text-white/50">{field.description}</p>
+                    </div>
+                    <Switch
+                      checked={pushPrefs?.[field.key] ?? false}
+                      disabled={pushPrefsMutation.isPending}
+                      onCheckedChange={(checked) => pushPrefsMutation.mutate({ [field.key]: checked })}
+                    />
+                  </div>
+                )
+                if (idx === NOTIFICATION_PREFERENCE_FIELDS.length - 1) return [row]
+                return [row, <Separator key={`${field.key}-sep`} className="bg-[#3D332A]" />]
+              })
+            )}
           </CardContent>
         </Card>
 

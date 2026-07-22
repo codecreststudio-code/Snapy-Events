@@ -13,6 +13,7 @@ import { hasGuestSessionFromRequest, isEventHost } from "@/lib/security/guest-se
 import { detectAndStoreFaces } from "@/lib/integrations/face"
 import { computeQualitySignals, hammingDistanceHex, DUPLICATE_HAMMING_THRESHOLD } from "@/lib/integrations/image-quality"
 import { getPlanLimits, HARDCODED_SAFETY_NET_LIMITS } from "@/lib/plans/plan-limits"
+import { sendPushNotification } from "@/lib/integrations/push"
 
 const querySchema = z.object({ gallery_id: z.string().uuid() })
 
@@ -92,7 +93,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
 
     const { data: gallery } = await supabase
       .from("galleries")
-      .select("event_id, event:events(host_id, settings)")
+      .select("event_id, event:events(host_id, settings, name, slug)")
       .eq("id", id)
       .single()
 
@@ -403,6 +404,23 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     }
 
     void trackEvent({ user_id: auth.user?.id ?? undefined, event_type: "photo.uploaded", event_data: { gallery_id: id }, request })
+
+    // Notify the host — but never when the host is the one uploading (they
+    // reach this same route from their own dashboard, not just guests).
+    if (hostId && auth?.user?.id !== hostId) {
+      const eventName = eventObj?.name || "your event"
+      const eventSlug = eventObj?.slug
+      const uploaderLabel = cleanName || "A guest"
+      const kind = category === "VIDEO" ? "a video" : category === "AUDIO" ? "a voice note" : "a photo"
+      const notifType = category === "VIDEO" ? "video_uploaded" : category === "AUDIO" ? "voice_note_received" : "media_uploaded"
+      void sendPushNotification({
+        userId: hostId,
+        type: notifType,
+        title: category === "VIDEO" ? "New video uploaded" : category === "AUDIO" ? "New voice note" : "New photo uploaded",
+        body: `${uploaderLabel} uploaded ${kind} to ${eventName}.`,
+        data: eventSlug ? { url: `/dashboard/events/${eventSlug}` } : {},
+      })
+    }
 
     // Kick off AI face detection for photo uploads without blocking the
     // guest's upload response on it. Detection was previously only
