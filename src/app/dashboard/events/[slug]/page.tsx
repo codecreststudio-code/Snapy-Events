@@ -1044,6 +1044,38 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   }))
   const latestMovie = memoriesMovies?.movies?.[0]
 
+  const [movieSharing, setMovieSharing] = useState(false)
+
+  // Hands the movie file straight to the native share sheet (Instagram/
+  // Snapchat/WhatsApp Story targets included) instead of just opening the
+  // viewer — previously this button was functionally identical to "Watch
+  // Movie" (both just opened the same modal), which was confusing since
+  // nothing about it actually shared anything.
+  async function handleShareMovieFile() {
+    if (!latestMovie) return
+    setMovieSharing(true)
+    try {
+      const nav = navigator as Navigator & { canShare?: (data: { files?: File[] }) => boolean; share?: (data: { files?: File[]; title?: string; text?: string }) => Promise<void> }
+      const res = await fetch(latestMovie.video_url)
+      if (!res.ok) throw new Error("Failed to load movie")
+      const blob = await res.blob()
+      const ext = latestMovie.mime_type === "video/mp4" ? "mp4" : "webm"
+      const file = new File([blob], `snapsy-movie.${ext}`, { type: latestMovie.mime_type })
+      if (nav.canShare && nav.share && nav.canShare({ files: [file] })) {
+        await nav.share({ files: [file], title: event?.name || "Snapsy Events", text: event?.name ? `Check out our movie from ${event.name}!` : undefined })
+        return
+      }
+      // Browser can't share files (older desktop browsers) — fall back to
+      // opening the viewer, which has its own share/download actions.
+      setShowMovieViewer(true)
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return
+      toast({ title: "Couldn't share movie", description: err instanceof Error ? err.message : undefined, variant: "destructive" })
+    } finally {
+      setMovieSharing(false)
+    }
+  }
+
   const unviewedStory = memoriesStories?.stories?.find((s) => !s.viewed_at)
 
   // Host opt-out — mirrors isMemoriesEnabled() in src/lib/integrations/memories.ts,
@@ -2094,14 +2126,15 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   ▶ Watch Movie {latestMovie.duration_seconds ? `(${latestMovie.duration_seconds}s)` : ""}
                 </Button>
                 <Button
-                  variant="outline"
-                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-white/15 bg-transparent text-white text-xs font-semibold py-3 hover:bg-white/10 transition-colors"
-                  onClick={async () => {
-                    setShowMovieViewer(true)
-                  }}
+                  disabled={movieSharing}
+                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-[#B28DAE] hover:bg-[#A468A0] text-black text-xs font-semibold py-3 transition-colors disabled:opacity-60"
+                  onClick={handleShareMovieFile}
                 >
-                  <Share2 className="h-3.5 w-3.5" /> Share Movie
+                  <Share2 className="h-3.5 w-3.5" /> {movieSharing ? "Preparing…" : "Share to Story"}
                 </Button>
+                <p className="text-[10px] text-white/40 text-center -mt-1">
+                  Opens your share sheet — pick Instagram or Snapchat, then add it to your Story.
+                </p>
               </>
             )}
           </div>
