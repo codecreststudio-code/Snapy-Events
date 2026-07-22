@@ -9,6 +9,7 @@ export interface FaceSearchHit {
   photo?: {
     id: string
     storage_path: string
+    url?: string | null
     gallery_id: string
     event_id: string
     is_approved: boolean
@@ -65,6 +66,7 @@ export function useClientFaceSearch(options: UseClientFaceSearchOptions = {}) {
 
         setStatusMessage("Searching matching photos...")
         const payload: Record<string, any> = {
+          event_id: options.eventId,
           gallery_id: options.galleryId,
           max_results: 30,
         }
@@ -83,7 +85,14 @@ export function useClientFaceSearch(options: UseClientFaceSearchOptions = {}) {
           body: JSON.stringify(payload),
         })
 
-        const resData = await response.json()
+        let resData: any = {}
+        const contentType = response.headers.get("content-type") || ""
+        if (contentType.includes("application/json")) {
+          resData = await response.json()
+        } else {
+          const rawText = await response.text()
+          throw new Error(`Server response error (${response.status}): ${rawText.slice(0, 120)}`)
+        }
 
         if (!response.ok || !resData.success) {
           throw new Error(resData.error || resData.message || "Failed to complete face search")

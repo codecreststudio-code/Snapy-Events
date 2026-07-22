@@ -153,7 +153,7 @@ export function GuestFaceSearchModal({ isOpen, onClose, galleryId, eventId }: Gu
                   <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-400">Matched Event Photos</h4>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {results.map((hit) => {
-                      const photoUrl = hit.photo?.storage_path
+                      const photoUrl = hit.photo?.url || hit.photo?.storage_path
                       if (!photoUrl) return null
 
                       return (

@@ -5,7 +5,7 @@ import { faceSearchSchema } from "@/lib/validators"
 import { detectFaces, searchByEmbedding } from "@/lib/integrations/face"
 import { trackEvent } from "@/lib/analytics/track"
 import { API_RATE_LIMITS } from "@/lib/constants"
-
+import { publicUrl } from "@/lib/integrations/storage"
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
 import { getFeatureFlags } from "@/lib/platform-settings"
 import { hasGuestSessionFromRequest, isEventHost } from "@/lib/security/guest-session"
@@ -20,39 +20,42 @@ export const POST = defineRoute({
     const t0 = Date.now()
     const supabase = await createServiceClient()
 
-    // Resolve event_id: if gallery_id is given, look up its parent event
-    let eventId: string | null = null
+    // Resolve event_id directly if passed, or via gallery_id lookup
+    let eventId: string | null = body.event_id ?? null
     let eventHostId: string | null = null
-    if (body.gallery_id) {
+
+    if (eventId) {
+      const { data: ev } = await supabase
+        .from("events")
+        .select("id, host_id")
+        .eq("id", eventId)
+        .maybeSingle()
+      if (ev) {
+        eventHostId = ev.host_id
+      } else {
+        eventId = null
+      }
+    }
+
+    if (!eventId && body.gallery_id) {
       const { data: gallery } = await supabase
         .from("galleries")
         .select("event_id, event:events(host_id)")
         .eq("id", body.gallery_id)
-        .single()
+        .maybeSingle()
       eventId = gallery?.event_id ?? null
       const eventRel = gallery?.event as any
       eventHostId = (Array.isArray(eventRel) ? eventRel[0] : eventRel)?.host_id ?? null
     }
 
-    // Face search MUST be scoped to a single event. Without this guard an
-    // unauthenticated caller that omits gallery_id would dump every tenant's
-    // faces + photo storage paths (the query below only filters when eventId is set).
     if (!eventId) {
-      return fail("VALIDATION_ERROR", "A valid gallery_id is required", 400)
+      return fail("VALIDATION_ERROR", "A valid event_id or gallery_id is required", 400)
     }
 
-    // Same check-in gate as uploads/reactions/gallery photos — this endpoint
-    // isn't currently called from any page, but is still a live, directly
-    // callable API, so it shouldn't be the one guest-facing surface that
-    // skips the check-in requirement everything else in this app enforces.
     if (!(await isEventHost(eventHostId)) && !hasGuestSessionFromRequest(request, eventId)) {
       return fail("FORBIDDEN", "Please check in to this event before searching.", 403)
     }
 
-    // Admin > Feature Flags kill switch for AI Face Search platform-wide.
-    // Separate from the per-event/per-plan gate below — this is the global
-    // toggle an admin would flip during an incident (e.g. the face-detection
-    // provider is down or over quota).
     const flags = await getFeatureFlags()
     if (!flags.ai_search_enabled) {
       return fail("FORBIDDEN", "AI Face Search is temporarily disabled by the platform.", 403)
@@ -68,10 +71,8 @@ export const POST = defineRoute({
     let queryEmbedding: number[] | null = null
 
     if (Array.isArray(body.embedding) && body.embedding.length > 0) {
-      // Option A: Pre-computed vector passed directly from client-side browser AI (Zero server CPU/RAM cost)
       queryEmbedding = body.embedding
     } else if (body.image_data || body.photo_id) {
-      // Fallback: Server-side detection
       const det = await detectFaces({ imageUrl: body.photo_id ? undefined : body.image_data, imageBase64: body.image_data })
       if (det.faces.length > 0 && det.faces[0]?.embedding) {
         queryEmbedding = det.faces[0].embedding
@@ -96,17 +97,38 @@ export const POST = defineRoute({
       .map((f) => ({ id: f.id, embedding: f.embedding as number[] }))
 
     const hits = searchByEmbedding({ embedding: queryEmbedding, candidates, topK: body.max_results ?? 20 })
+
+    const faceMap = new Map((faces ?? []).map((f) => [f.id, f]))
+    const fullResults = hits.map((hit) => {
+      const f = faceMap.get(hit.id)
+      const photo = f?.photo as any
+      const storagePath = photo?.storage_path
+      const url = storagePath ? publicUrl("PHOTOS", storagePath) : null
+      return {
+        id: hit.id,
+        similarity: hit.similarity,
+        photo_id: f?.photo_id,
+        photo: photo
+          ? {
+              ...photo,
+              url,
+              storage_path: url || storagePath,
+            }
+          : null,
+      }
+    })
+
     const duration = Date.now() - t0
     await supabase.from("face_search_logs").insert({
       user_id: auth.user?.id ?? null,
       event_id: eventId,
-      search_type: body.embedding ? "client_selfie" : (body.photo_id ? "upload" : "selfie"),
+      search_type: body.embedding ? "client_selfie" : body.photo_id ? "upload" : "selfie",
       query_photo_id: body.photo_id ?? null,
       results: hits,
       result_count: hits.length,
       search_duration_ms: duration,
     })
     void trackEvent({ user_id: auth.user?.id ?? undefined, event_type: "ai.face.searched", event_data: { count: hits.length }, request })
-    return ok({ results: hits, duration_ms: duration })
+    return ok({ results: fullResults, duration_ms: duration })
   },
 }).POST
