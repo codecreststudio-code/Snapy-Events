@@ -91,7 +91,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   verification: {
-    google: "QT_hUkLEcniarABIn-custom-verification",
+    google: "QT_hUkLEcniarABR7a55mEDIeYyQd8HE-DursoIPuZs",
   },
 }
 
