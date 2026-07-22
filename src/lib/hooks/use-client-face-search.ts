@@ -109,8 +109,8 @@ export function useClientFaceSearch(options: UseClientFaceSearchOptions = {}) {
 
           for (const item of photosToIndex) {
             try {
-              const emb = await extractEmbeddingFromUrl(item.url)
-              if (emb) {
+              const embeddings = await extractAllEmbeddingsFromUrl(item.url)
+              for (const emb of embeddings) {
                 facesToIndex.push({ photo_id: item.id, embedding: emb })
               }
             } catch (idxErr) {
@@ -170,25 +170,24 @@ export function useClientFaceSearch(options: UseClientFaceSearchOptions = {}) {
  * Client-side face descriptor extraction helper for data URLs.
  */
 async function extractEmbeddingClientSide(dataUrl: string): Promise<number[] | null> {
-  return extractEmbeddingFromUrl(dataUrl)
+  const all = await extractAllEmbeddingsFromUrl(dataUrl)
+  return all.length > 0 ? all[0] : null
 }
 
 /**
- * Client-side face descriptor extraction helper from any image URL or Data URL.
- * Uses browser HTMLCanvasElement and dynamic face-api loader.
+ * Client-side face descriptor extraction helper for any image URL or Data URL.
+ * Extracts ALL faces present in the image for accurate group photo matching.
  */
-async function extractEmbeddingFromUrl(imageUrl: string): Promise<number[] | null> {
-  if (typeof window === "undefined") return null
+async function extractAllEmbeddingsFromUrl(imageUrl: string): Promise<number[][]> {
+  if (typeof window === "undefined") return []
 
   return new Promise((resolve) => {
     const img = new Image()
     img.crossOrigin = "anonymous"
     img.onload = async () => {
       try {
-        // Dynamic import of face-api to keep initial bundle size light
         const faceapi = await import("@vladmandic/face-api")
 
-        // Load tiny face detector & descriptor models from CDN if not loaded
         if (!faceapi.nets.tinyFaceDetector.params) {
           const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model"
           await Promise.all([
@@ -198,20 +197,20 @@ async function extractEmbeddingFromUrl(imageUrl: string): Promise<number[] | nul
           ])
         }
 
-        const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.35 })
-        const detection = await faceapi.detectSingleFace(img, options).withFaceLandmarks().withFaceDescriptor()
+        const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.35 })
+        const detections = await faceapi.detectAllFaces(img, options).withFaceLandmarks().withFaceDescriptors()
 
-        if (detection && detection.descriptor) {
-          resolve(Array.from(detection.descriptor))
+        if (detections && detections.length > 0) {
+          resolve(detections.map((d: any) => Array.from(d.descriptor)))
         } else {
-          resolve(null)
+          resolve([])
         }
       } catch (e) {
-        console.warn("Client-side face-api extraction error:", e)
-        resolve(null)
+        console.warn("Client-side multi-face extraction error:", e)
+        resolve([])
       }
     }
-    img.onerror = () => resolve(null)
+    img.onerror = () => resolve([])
     img.src = imageUrl
   })
 }

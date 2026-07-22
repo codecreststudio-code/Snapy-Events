@@ -43,6 +43,9 @@ export const POST = defineRoute({
       return fail("FORBIDDEN", "Check in required", 403)
     }
 
+    const photoIds = Array.from(new Set(body.faces.map((f) => f.photo_id)))
+    await supabase.from("faces").delete().in("photo_id", photoIds)
+
     const rows = body.faces.map((f) => ({
       event_id: body.event_id,
       photo_id: f.photo_id,

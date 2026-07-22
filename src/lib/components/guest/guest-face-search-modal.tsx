@@ -52,11 +52,8 @@ export function GuestFaceSearchModal({ isOpen, onClose, galleryId, eventId }: Gu
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <h2 className="text-lg font-bold text-white">
                 Find My Photos
-                <span className="text-[10px] font-semibold tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase">
-                  Zero Cost AI
-                </span>
               </h2>
               <p className="text-xs text-neutral-400">Snap a selfie to instantly find your photos in this event</p>
             </div>
