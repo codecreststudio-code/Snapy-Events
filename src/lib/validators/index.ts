@@ -141,6 +141,7 @@ export const faceSearchSchema = z.object({
   photo_id: z.string().uuid().optional(),
   image_data: z.string().optional(), // base64 encoded image
   embedding: z.array(z.number()).optional(), // pre-computed client-side face vector (Option A - Zero server cost)
+  threshold: z.number().min(0).max(1).optional(),
   max_results: z.number().min(1).max(100).default(20),
 })
 

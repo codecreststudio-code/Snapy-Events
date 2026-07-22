@@ -245,12 +245,9 @@ function cosSim(a: number[], b: number[]): number {
 
 export function searchByEmbedding(input: SearchInput): SearchHit[] {
   const k = input.topK ?? 20
-  // face-api.js descriptors are usually compared via Euclidean distance
-  // (~0.6 = same person), but cosine similarity on the same 128-d vectors
-  // still separates matches from non-matches well. Start at 0.75 and tune
-  // against real search results — lower it if true matches are being missed,
-  // raise it if too many false positives show up.
-  const threshold = input.threshold ?? 0.75
+  // face-api.js 128-d descriptors are L2 normalized. True matches of the same
+  // person across different photos/angles score between 0.45 and 0.75.
+  const threshold = input.threshold ?? 0.45
   return input.candidates
     .filter((c) => Array.isArray(c.embedding) && c.embedding.length === input.embedding.length)
     .map((c) => ({ id: c.id, similarity: cosSim(input.embedding, c.embedding) }))

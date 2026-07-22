@@ -100,7 +100,7 @@ export const POST = defineRoute({
       .filter((f) => Array.isArray(f.embedding) && f.embedding.length > 0)
       .map((f) => ({ id: f.id, embedding: f.embedding as number[] }))
 
-    const hits = searchByEmbedding({ embedding: queryEmbedding, candidates, topK: body.max_results ?? 20 })
+    const hits = searchByEmbedding({ embedding: queryEmbedding, candidates, topK: body.max_results ?? 20, threshold: body.threshold ?? 0.40 })
 
     const faceMap = new Map((faces ?? []).map((f) => [f.id, f]))
     const fullResults = hits.map((hit) => {
