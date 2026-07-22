@@ -929,6 +929,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [movieRendering, setMovieRendering] = useState(false)
   const [movieProgress, setMovieProgress] = useState(0)
   const [showMovieViewer, setShowMovieViewer] = useState(false)
+  // Surfaced inline on the card (not just as a toast) — a toast can be
+  // missed entirely, and "the button just resets with no explanation" was
+  // exactly what made the missing-migration failure mode confusing.
+  const [movieError, setMovieError] = useState<string | null>(null)
 
   const movieReactMutation = useMutation({
     mutationFn: async ({ movieId, emoji }: { movieId: string; emoji: string }) => {
@@ -956,6 +960,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     if (!event?.id) return
     setMovieRendering(true)
     setMovieProgress(0)
+    setMovieError(null)
     try {
       const photosRes = await fetch(`/api/events/${event.id}/memories/movie/photos?duration_seconds=${movieDuration}`)
       const photosJson = await photosRes.json().catch(() => null)
@@ -994,6 +999,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       toast({ title: "Movie ready!", description: "Tap play to watch your movie." })
     } catch (err) {
       const message = err instanceof MovieRenderError ? err.message : err instanceof Error ? err.message : "Couldn't build the movie"
+      setMovieError(message)
       toast({ title: "Couldn't build movie", description: message, variant: "destructive" })
     } finally {
       setMovieRendering(false)
@@ -2042,6 +2048,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   <div className="h-full bg-[#B28DAE] transition-all duration-300" style={{ width: `${Math.round(movieProgress * 100)}%` }} />
                 </div>
                 <p className="text-[10px] text-white/40 text-center">Keep this tab open — your movie is recording in real time.</p>
+              </div>
+            )}
+            {movieError && !movieRendering && (
+              <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5">
+                <p className="text-xs font-semibold text-red-300">Couldn't build the movie</p>
+                <p className="text-[11px] text-red-300/70 mt-0.5">{movieError}</p>
               </div>
             )}
             {latestMovie && !movieRendering && (

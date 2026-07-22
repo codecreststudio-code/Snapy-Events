@@ -111,19 +111,19 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
     user: hostData
   } as unknown as EventData
 
-  const isRevealed = (settings as any).photo_reveal_mode === "instant" ||
-    (settings as any).reveal_type === "instant" ||
-    (settings as any).reveal_experience === "immediately" ||
-    // The event-creation wizard's "During Event" option writes id "during",
-    // not "during_event" — this check never matched it, so choosing "During
-    // Event" silently behaved like a locked/delayed capsule instead of an
-    // instant one. Match both spellings so existing events created before
-    // this fix (which may have persisted "during_event" from an earlier
-    // wizard revision) keep working too.
-    (settings as any).reveal_experience === "during_event" ||
-    (settings as any).reveal_experience === "during" ||
-    !settings.enable_countdown ||
-    (settings.countdown_date && new Date(settings.countdown_date) <= new Date())
+  const revealMode = String(
+    (settings as any)?.photo_reveal_mode ||
+    (settings as any)?.reveal_type ||
+    (settings as any)?.reveal_experience ||
+    ""
+  ).toLowerCase()
+
+  const isRevealed =
+    revealMode.includes("instant") ||
+    revealMode.includes("immediately") ||
+    revealMode.includes("during") ||
+    !settings?.enable_countdown ||
+    (settings?.countdown_date && new Date(settings.countdown_date) <= new Date())
 
   // Real, server-checked gate — replaces what used to be a purely cosmetic
   // check-in popup. Until a guest has actually completed check-in (see
@@ -133,36 +133,27 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
   const checkedIn = await hasGuestSessionSSR(event.id)
 
   const visibleGalleries = event.galleries?.filter((g) => {
-    if (
-      (settings as any).photo_reveal_mode === "instant" ||
-      (settings as any).reveal_type === "instant" ||
-      (settings as any).reveal_experience === "immediately" ||
-      (settings as any).reveal_experience === "during_event" ||
-      (settings as any).reveal_experience === "during"
-    ) return true
+    if (isRevealed) return true
     if (!g.reveal_enabled) return true
     return g.reveal_at && new Date(g.reveal_at) <= new Date()
   }) || []
 
-  // Fetch each visible gallery's media inline — guests used to have to click
-  // through to a separate /g/[gallerySlug] page just to see photos, which was
-  // an extra hop for the common case of a single "All Photos" gallery per
-  // event. Only fetched once check-in has actually passed, matching the same
-  // gate the standalone gallery page enforces.
+  // Fetch event photos inline — query by event.id so all uploaded photos for this event display
   const photosByGallery: Record<string, GridPhoto[]> = {}
-  if (checkedIn && visibleGalleries.length > 0) {
+  if (checkedIn && isRevealed) {
     const { data: photos } = await supabase
       .from("photos")
-      .select("id, gallery_id, storage_path, thumbnail_path, original_filename, uploader_name, mime_type, created_at")
-      .in("gallery_id", visibleGalleries.map((g) => g.id))
+      .select("id, gallery_id, event_id, storage_path, thumbnail_path, original_filename, uploader_name, mime_type, created_at")
+      .eq("event_id", event.id)
       .neq("is_approved", false)
       .order("created_at", { ascending: false })
       .limit(200)
 
     for (const p of photos ?? []) {
       const withUrl = { ...p, url: publicUrl("PHOTOS", p.storage_path) } as GridPhoto & { gallery_id: string }
-      if (!photosByGallery[p.gallery_id]) photosByGallery[p.gallery_id] = []
-      photosByGallery[p.gallery_id].push(withUrl)
+      const key = p.gallery_id || "default"
+      if (!photosByGallery[key]) photosByGallery[key] = []
+      photosByGallery[key].push(withUrl)
     }
   }
   const flags = await getFeatureFlags()
@@ -315,23 +306,31 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                   : "This event is private to invited guests. Complete the check-in above to view galleries and share your own photos."}
               </p>
             </div>
-          ) : visibleGalleries.length > 0 ? (
+          ) : (Object.values(photosByGallery).flat().length > 0 || visibleGalleries.length > 0) ? (
             <div className="mt-6 space-y-12">
-              {visibleGalleries.map((gallery) => (
-                <div key={gallery.id}>
-                  {visibleGalleries.length > 1 && (
-                    <div className="mb-1">
-                      <h3 className="font-playfair text-lg font-medium text-white">{gallery.name}</h3>
-                      {gallery.description && <p className="text-sm text-white/60">{gallery.description}</p>}
-                    </div>
-                  )}
-                  <MediaGrid
-                    photos={photosByGallery[gallery.id] ?? []}
-                    watermarkEnabled={flags.watermark_enabled}
-                    voiceNoteDurationLimit={voiceNoteDurationLimit}
-                  />
-                </div>
-              ))}
+              {visibleGalleries.length > 0 ? (
+                visibleGalleries.map((gallery) => (
+                  <div key={gallery.id}>
+                    {visibleGalleries.length > 1 && (
+                      <div className="mb-1">
+                        <h3 className="font-playfair text-lg font-medium text-white">{gallery.name}</h3>
+                        {gallery.description && <p className="text-sm text-white/60">{gallery.description}</p>}
+                      </div>
+                    )}
+                    <MediaGrid
+                      photos={photosByGallery[gallery.id] ?? Object.values(photosByGallery).flat()}
+                      watermarkEnabled={flags.watermark_enabled}
+                      voiceNoteDurationLimit={voiceNoteDurationLimit}
+                    />
+                  </div>
+                ))
+              ) : (
+                <MediaGrid
+                  photos={Object.values(photosByGallery).flat()}
+                  watermarkEnabled={flags.watermark_enabled}
+                  voiceNoteDurationLimit={voiceNoteDurationLimit}
+                />
+              )}
             </div>
           ) : (
             <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-[#3D332A] bg-[#1C1814] px-4 py-16 text-center">
