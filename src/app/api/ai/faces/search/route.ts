@@ -73,9 +73,13 @@ export const POST = defineRoute({
     if (Array.isArray(body.embedding) && body.embedding.length > 0) {
       queryEmbedding = body.embedding
     } else if (body.image_data || body.photo_id) {
-      const det = await detectFaces({ imageUrl: body.photo_id ? undefined : body.image_data, imageBase64: body.image_data })
-      if (det.faces.length > 0 && det.faces[0]?.embedding) {
-        queryEmbedding = det.faces[0].embedding
+      try {
+        const det = await detectFaces({ imageUrl: body.photo_id ? undefined : body.image_data, imageBase64: body.image_data })
+        if (det.faces.length > 0 && det.faces[0]?.embedding) {
+          queryEmbedding = det.faces[0].embedding
+        }
+      } catch (detErr) {
+        console.warn("[face-search] Server-side detectFaces failed/unsupported:", detErr)
       }
     }
 

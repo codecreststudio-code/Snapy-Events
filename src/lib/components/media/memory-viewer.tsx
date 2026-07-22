@@ -203,11 +203,35 @@ export function MemoryViewer({
     }
   }
 
+  // For video, sharing the page *link* isn't what anyone wants here — the
+  // whole point of a 9:16 clip is dropping it straight into Instagram/
+  // Snapchat/WhatsApp Stories, which needs the actual video file handed to
+  // the native share sheet (exactly like handleStory does for photos below).
+  // Falls back to a link share (or copy-link) only if the browser can't
+  // share files or the file fetch fails.
   async function handleShare() {
-    const url = shareUrl || item?.url
-    if (!url) return
+    if (!item) return
     setBusy("share")
     try {
+      if (item.kind === "video") {
+        const nav = navigator as Navigator & { canShare?: (data: { files?: File[] }) => boolean; share?: (data: { files?: File[]; title?: string; text?: string }) => Promise<void> }
+        try {
+          const res = await fetch(item.url)
+          if (!res.ok) throw new Error("Failed to load video")
+          const blob = await res.blob()
+          const ext = item.mimeType === "video/mp4" ? "mp4" : "webm"
+          const file = new File([blob], `snapsy-movie.${ext}`, { type: item.mimeType || blob.type })
+          if (nav.canShare && nav.share && nav.canShare({ files: [file] })) {
+            await nav.share({ files: [file], title: title || "Snapsy Events", text: shareText })
+            return
+          }
+        } catch (err) {
+          if (err instanceof Error && err.name === "AbortError") return
+          // Fall through to the link-share/copy path below.
+        }
+      }
+
+      const url = shareUrl || item.url
       const nav = navigator as Navigator & { share?: (data: ShareData) => Promise<void> }
       if (nav.share) {
         await nav.share({ title: title || "Snapsy Events", text: shareText, url })
@@ -344,9 +368,15 @@ export function MemoryViewer({
             onClick={handleShare}
             className={`rounded-full bg-[#B28DAE] hover:bg-[#A468A0] text-black text-xs py-5 flex items-center justify-center gap-1.5 ${!item.storyUrl ? "col-span-2" : ""}`}
           >
-            <Share2 className="h-4 w-4" /> {busy === "share" ? "…" : "Share"}
+            <Share2 className="h-4 w-4" />
+            {busy === "share" ? "Preparing…" : item.kind === "video" ? "Share to Story" : "Share"}
           </Button>
         </div>
+        {item.kind === "video" && (
+          <p className="text-[10px] text-white/40 text-center -mt-1">
+            Opens your share sheet — pick Instagram or Snapchat, then add it to your Story.
+          </p>
+        )}
       </div>
     </div>
   )
