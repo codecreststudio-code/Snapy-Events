@@ -2128,10 +2128,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.4 }}
+              animate={{ opacity: 0.7 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsDrawerOpen(false)}
-              className="absolute inset-0 bg-black"
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             />
             {/* Slide-out Panel */}
             <motion.div
@@ -2139,13 +2139,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.35, ease: "easeInOut" }}
-              className="absolute top-0 right-0 bottom-0 w-full max-w-md glass-panel !rounded-none border-l border-hairline-dark shadow-2xl p-6 overflow-y-auto flex flex-col justify-between"
+              className="absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#181412] text-white border-l border-[#3D332A] shadow-2xl p-6 overflow-y-auto flex flex-col justify-between z-50"
             >
               <div className="space-y-6">
-                <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                  <h3 className="font-playfair text-xl font-medium text-white">Edit Capsule Settings</h3>
-                  <button onClick={() => setIsDrawerOpen(false)} className="p-1 hover:bg-white/10 rounded-full">
-                    <X className="h-5 w-5 text-white/60" />
+                <div className="sticky top-0 bg-[#181412] z-20 flex justify-between items-center border-b border-white/10 pb-4 mb-2 pt-1">
+                  <h3 className="font-playfair text-xl font-semibold text-white tracking-wide">Edit Capsule Settings</h3>
+                  <button type="button" onClick={() => setIsDrawerOpen(false)} className="p-1.5 hover:bg-white/10 rounded-full transition-colors text-white/70 hover:text-white">
+                    <X className="h-5 w-5" />
                   </button>
                 </div>
 
@@ -2170,7 +2170,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       id="name"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="!bg-white/5 border-white/15 !text-white placeholder:!text-white/30 focus-visible:!ring-[#B28DAE] focus:border-[#B28DAE]"
+                      className="!bg-[#221C19] border-white/15 !text-white placeholder:!text-white/30 focus-visible:!ring-[#B28DAE] focus:border-[#B28DAE]"
                     />
                   </div>
 
@@ -2181,7 +2181,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       type="datetime-local"
                       value={editEndDate}
                       onChange={(e) => setEditEndDate(e.target.value)}
-                      className="!bg-white/5 border-white/15 !text-white placeholder:!text-white/30 focus-visible:!ring-[#B28DAE] focus:border-[#B28DAE] [color-scheme:dark]"
+                      className="!bg-[#221C19] border-white/15 !text-white placeholder:!text-white/30 focus-visible:!ring-[#B28DAE] focus:border-[#B28DAE] [color-scheme:dark]"
                     />
                   </div>
 
@@ -2191,12 +2191,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       id="status"
                       value={editStatus}
                       onChange={(e) => setEditStatus(e.target.value as EventStatus)}
-                      className="w-full h-10 rounded-md border border-white/15 bg-white/5 text-white px-3 py-2 text-sm focus:border-[#B28DAE] outline-none [color-scheme:dark]"
+                      className="w-full h-10 rounded-xl border border-white/15 bg-[#221C19] text-white px-3 py-2 text-sm focus:border-[#B28DAE] focus:ring-1 focus:ring-[#B28DAE] outline-none cursor-pointer [color-scheme:dark]"
                     >
-                      <option value="draft">Draft</option>
-                      <option value="published">Published (Live)</option>
-                      <option value="completed">Completed</option>
-                      <option value="archived">Archived</option>
+                      <option value="draft" className="bg-[#1C1814] text-white py-1.5 px-3">Draft</option>
+                      <option value="published" className="bg-[#1C1814] text-white py-1.5 px-3">Published (Live)</option>
+                      <option value="completed" className="bg-[#1C1814] text-white py-1.5 px-3">Completed</option>
+                      <option value="archived" className="bg-[#1C1814] text-white py-1.5 px-3">Archived</option>
                     </select>
                   </div>
 
@@ -2206,21 +2206,21 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       id="reveal"
                       value={editRevealExperience}
                       onChange={(e) => setEditRevealExperience(e.target.value)}
-                      className="w-full h-10 rounded-md border border-white/15 bg-white/5 text-white px-3 py-2 text-sm focus:border-[#B28DAE] outline-none [color-scheme:dark]"
+                      className="w-full h-10 rounded-xl border border-white/15 bg-[#221C19] text-white px-3 py-2 text-sm focus:border-[#B28DAE] focus:ring-1 focus:ring-[#B28DAE] outline-none cursor-pointer [color-scheme:dark]"
                     >
-                      <option value="immediately">Immediately</option>
-                      <option value="during">During Event</option>
-                      <option value="after">After Event Ends</option>
-                      <option value="24h">24 Hours Later</option>
-                      <option value="7d">7 Days Later</option>
-                      <option value="custom">Custom Date</option>
+                      <option value="immediately" className="bg-[#1C1814] text-white py-1.5 px-3">Immediately</option>
+                      <option value="during" className="bg-[#1C1814] text-white py-1.5 px-3">During Event</option>
+                      <option value="after" className="bg-[#1C1814] text-white py-1.5 px-3">After Event Ends</option>
+                      <option value="24h" className="bg-[#1C1814] text-white py-1.5 px-3">24 Hours Later</option>
+                      <option value="7d" className="bg-[#1C1814] text-white py-1.5 px-3">7 Days Later</option>
+                      <option value="custom" className="bg-[#1C1814] text-white py-1.5 px-3">Custom Date</option>
                     </select>
                     {(editRevealExperience === "after" || editRevealExperience === "24h" || editRevealExperience === "7d" || editRevealExperience === "custom") && (
                       <p className="text-[10px] text-white/50">Uses the Countdown Ends Lock Date above as the reveal moment.</p>
                     )}
                   </div>
 
-                  <div className="rounded-xl border border-hairline-dark bg-white/5 p-4 space-y-2">
+                  <div className="rounded-xl border border-white/10 bg-[#221C19] p-4 space-y-2">
                     <p className="text-[10px] uppercase tracking-wider text-mauve font-bold">Capacity</p>
                     <div className="flex items-center justify-between text-xs text-white/80">
                       <span>Guests plan</span>
@@ -2275,7 +2275,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   </div>
 
                   {/* Settings toggle display list */}
-                  <div className="border border-white/10 rounded-xl p-4 bg-white/5 space-y-4">
+                  <div className="border border-white/10 rounded-xl p-4 bg-[#221C19] space-y-4">
                     <p className="text-[10px] uppercase tracking-wider text-[#B28DAE] font-bold">Capsule Locks & Limits</p>
 
                     <div className="flex items-center justify-between text-xs text-white/80">
@@ -2288,14 +2288,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       <select
                         value={editVideoDuration}
                         onChange={(e) => setEditVideoDuration(Number(e.target.value))}
-                        className="rounded-lg border border-white/15 bg-[#141110] px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-[#B28DAE] [color-scheme:dark]"
+                        className="rounded-lg border border-white/15 bg-[#181412] px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-[#B28DAE] cursor-pointer [color-scheme:dark]"
                       >
-                        <option value={5}>5 seconds</option>
-                        <option value={10}>10 seconds</option>
-                        <option value={15}>15 seconds</option>
-                        <option value={20}>20 seconds</option>
-                        <option value={30}>30 seconds</option>
-                        <option value={60}>60 seconds</option>
+                        <option value={5} className="bg-[#1C1814] text-white">5 seconds</option>
+                        <option value={10} className="bg-[#1C1814] text-white">10 seconds</option>
+                        <option value={15} className="bg-[#1C1814] text-white">15 seconds</option>
+                        <option value={20} className="bg-[#1C1814] text-white">20 seconds</option>
+                        <option value={30} className="bg-[#1C1814] text-white">30 seconds</option>
+                        <option value={60} className="bg-[#1C1814] text-white">60 seconds</option>
                       </select>
                     </div>
 
@@ -2304,14 +2304,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       <select
                         value={editVoiceDuration}
                         onChange={(e) => setEditVoiceDuration(Number(e.target.value))}
-                        className="rounded-lg border border-white/15 bg-[#141110] px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-[#B28DAE] [color-scheme:dark]"
+                        className="rounded-lg border border-white/15 bg-[#181412] px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-[#B28DAE] cursor-pointer [color-scheme:dark]"
                       >
-                        <option value={5}>5 seconds</option>
-                        <option value={10}>10 seconds</option>
-                        <option value={15}>15 seconds</option>
-                        <option value={20}>20 seconds</option>
-                        <option value={30}>30 seconds</option>
-                        <option value={60}>60 seconds</option>
+                        <option value={5} className="bg-[#1C1814] text-white">5 seconds</option>
+                        <option value={10} className="bg-[#1C1814] text-white">10 seconds</option>
+                        <option value={15} className="bg-[#1C1814] text-white">15 seconds</option>
+                        <option value={20} className="bg-[#1C1814] text-white">20 seconds</option>
+                        <option value={30} className="bg-[#1C1814] text-white">30 seconds</option>
+                        <option value={60} className="bg-[#1C1814] text-white">60 seconds</option>
                       </select>
                     </div>
 
