@@ -118,7 +118,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     // server-side value looked up here, not something the guest's request
     // body can influence) is the correct source of truth for guest uploads.
     if (!auth?.user?.id) {
-      approvedFlag = settings.auto_approve_photos === true
+      approvedFlag = settings.auto_approve_photos !== false && (settings as any).moderate_uploads !== true
     }
 
     // Guest uploads require a completed check-in for this specific event

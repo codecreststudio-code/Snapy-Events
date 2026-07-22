@@ -141,13 +141,19 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
   // Fetch event photos inline — query by event.id so all uploaded photos for this event display
   const photosByGallery: Record<string, GridPhoto[]> = {}
   if (checkedIn && isRevealed) {
-    const { data: photos } = await supabase
+    const requiresModeration = (settings as any)?.auto_approve_photos === false || (settings as any)?.moderate_uploads === true
+    let photoQuery = supabase
       .from("photos")
-      .select("id, gallery_id, event_id, storage_path, thumbnail_path, original_filename, uploader_name, mime_type, created_at")
+      .select("id, gallery_id, event_id, storage_path, thumbnail_path, original_filename, uploader_name, mime_type, created_at, is_approved")
       .eq("event_id", event.id)
-      .neq("is_approved", false)
       .order("created_at", { ascending: false })
       .limit(200)
+
+    if (requiresModeration) {
+      photoQuery = photoQuery.neq("is_approved", false)
+    }
+
+    const { data: photos } = await photoQuery
 
     for (const p of photos ?? []) {
       const withUrl = { ...p, url: publicUrl("PHOTOS", p.storage_path) } as GridPhoto & { gallery_id: string }
