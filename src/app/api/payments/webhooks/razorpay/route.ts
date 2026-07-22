@@ -70,7 +70,11 @@ export async function POST(request: NextRequest) {
             .eq("id", userId)
             .maybeSingle()
 
-          // First, create transaction record for this payment
+          // First, create transaction record for this payment. event_id +
+          // the boost deltas are stored here so an admin refund can find
+          // and reverse exactly what this payment granted — see the
+          // identical field usage + fuller explanation in
+          // src/app/api/payments/verify/route.ts.
           await supabase.from("transactions").insert({
             user_id: userId,
             razorpay_payment_id: p.id,
@@ -79,6 +83,9 @@ export async function POST(request: NextRequest) {
             status: "success",
             payment_method: "razorpay",
             gateway_response: evt,
+            event_id: p.notes?.event_id ?? null,
+            guests_boost_delta: p.notes?.guest_boost ? parseInt(p.notes.guest_boost) : 0,
+            shots_boost_delta: p.notes?.shots_boost ? parseInt(p.notes.shots_boost) : 0,
           })
 
           // If this is a subscription payment, update/create subscription
@@ -115,20 +122,13 @@ export async function POST(request: NextRequest) {
                 })
             }
 
-            // Update user boosts in preferences if userRow exists
-            if (userRow) {
-              const currentPrefs = (userRow.preferences as Record<string, any>) || {}
-              const newPrefs = {
-                ...currentPrefs,
-                guest_boost: (currentPrefs.guest_boost || 0) + (p.notes.guest_boost ? parseInt(p.notes.guest_boost) : 0),
-                shots_boost: (currentPrefs.shots_boost || 0) + (p.notes.shots_boost ? parseInt(p.notes.shots_boost) : 0),
-              }
-
-              await supabase
-                .from("users")
-                .update({ preferences: newPrefs })
-                .eq("id", userRow.id)
-            }
+            // Guest/shot boosts are written onto the specific event's own
+            // settings below, not onto `users.preferences` — an
+            // account-wide bucket this webhook used to increment
+            // unconditionally, with no per-event reset, causing a boost
+            // bought for one event to permanently inflate every other event
+            // the host ever created. See the identical fix + fuller
+            // explanation in src/app/api/payments/verify/route.ts.
 
             // Mark the specific event this payment was for as paid — mirrors
             // the same write in /api/payments/verify. This webhook is a
@@ -154,6 +154,10 @@ export async function POST(request: NextRequest) {
                       paid_amount_inr: p.amount / 100,
                       razorpay_payment_id: p.id,
                       paid_at: new Date().toISOString(),
+                      // Event-scoped boost amounts — see the removed
+                      // account-wide preferences increment above.
+                      guests_boost: (currentSettings.guests_boost || 0) + (p.notes.guest_boost ? parseInt(p.notes.guest_boost) : 0),
+                      shots_boost: (currentSettings.shots_boost || 0) + (p.notes.shots_boost ? parseInt(p.notes.shots_boost) : 0),
                     },
                   })
                   .eq("id", p.notes.event_id)

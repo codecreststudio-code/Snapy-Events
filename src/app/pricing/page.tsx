@@ -34,7 +34,18 @@ interface PricingPlan {
   bestValue?: boolean
 }
 
-const plans: PricingPlan[] = [
+// Emergency fallback only — rendered solely if the live /api/payments/plans
+// fetch itself fails (network error, 500, etc.), never as the initial/
+// default display. Previously this array was used to seed plansList's
+// initial state AND shown immediately on every page load until the fetch
+// resolved, which is exactly the same stale-data risk fixed on the wizard's
+// Step 6 (new-event-form.tsx): if Admin renames/reprices/removes a plan,
+// this public marketing page would keep advertising the old numbers to
+// every visitor until the fetch happened to finish, and would silently show
+// them again on any fetch failure. Now the page starts in a loading state
+// and only ever shows real fetched plans, falling back to this hardcoded
+// list (clearly marked as such) only if the live fetch genuinely errors.
+const FALLBACK_PLANS: PricingPlan[] = [
   {
     id: "free",
     name: "Free",
@@ -174,7 +185,8 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 }
 
 export default function PricingPage() {
-  const [plansList, setPlansList] = useState<PricingPlan[]>(plans)
+  const [plansList, setPlansList] = useState<PricingPlan[]>([])
+  const [plansLoading, setPlansLoading] = useState(true)
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -182,7 +194,7 @@ export default function PricingPage() {
         const res = await fetch("/api/payments/plans")
         if (res.ok) {
           const result = await res.json()
-          if (result.success && Array.isArray(result.data)) {
+          if (result.success && Array.isArray(result.data) && result.data.length > 0) {
             const mapped = result.data.map((p: any) => ({
               id: p.id,
               name: p.name,
@@ -195,14 +207,18 @@ export default function PricingPage() {
               popular: p.is_popular || false,
               bestValue: p.best_value || false,
             }))
-            if (!mapped.find((m: any) => m.id === "free")) {
-              mapped.unshift(plans[0])
-            }
             setPlansList(mapped)
+            setPlansLoading(false)
+            return
           }
         }
+        throw new Error("Live plans response was empty or unsuccessful")
       } catch (e) {
-        console.error("Failed to fetch dynamic plans:", e)
+        // Only reached on a genuine fetch failure — see FALLBACK_PLANS'
+        // comment above for why this doesn't seed the initial state.
+        console.error("Failed to fetch dynamic plans, using fallback:", e)
+        setPlansList(FALLBACK_PLANS)
+        setPlansLoading(false)
       }
     }
     fetchPlans()
@@ -256,11 +272,15 @@ export default function PricingPage() {
         </section>
 
         <section className="mx-auto max-w-7xl px-6 pb-24">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
-            {plansList.map((p) => (
-              <PricingCard key={p.id} plan={p} />
-            ))}
-          </div>
+          {plansLoading ? (
+            <div className="p-16 text-center text-white/40 text-sm font-semibold">Loading plans…</div>
+          ) : (
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
+              {plansList.map((p) => (
+                <PricingCard key={p.id} plan={p} />
+              ))}
+            </div>
+          )}
         </section>
       </main>
 

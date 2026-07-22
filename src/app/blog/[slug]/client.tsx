@@ -1,5 +1,6 @@
 "use client"
 import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
+import DOMPurify from "dompurify"
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
@@ -26,6 +27,13 @@ const inter = Inter({ subsets: ["latin"], display: "swap" })
 // HELPERS
 // ─────────────────────────────────────────────────────────
 
+// This regex blocklist used to be the ONLY defense before dangerouslySetInnerHTML
+// (see below) — blocklists are inherently bypassable (e.g. <img onerror=...>
+// variants, obfuscated event handler names, data: URIs) and became a real stored-XSS
+// path once a broken authorization check let any signed-up host account create/edit
+// blog posts (see src/app/api/blog/posts/route.ts). Kept as a cheap first pass, but
+// the actual security boundary is now the DOMPurify allowlist sanitize() call in
+// formatContent below, run on the fully-rendered HTML right before it's injected.
 function stripDangerousHtml(raw: string): string {
   return raw
     .replace(/<script[\s\S]*?<\/script>/gi, "")
@@ -33,8 +41,28 @@ function stripDangerousHtml(raw: string): string {
     .replace(/javascript\s*:/gi, "javascript&#58;")
 }
 
+// Tags/attributes this renderer itself ever produces (see the .replace() chain
+// below) — an explicit allowlist rather than trying to enumerate everything
+// dangerous, which is what made the old approach bypassable.
+const BLOG_CONTENT_ALLOWED_TAGS = [
+  "h2", "h3", "h4", "strong", "em", "code", "blockquote", "hr",
+  "div", "table", "tr", "td", "ul", "ol", "li", "p", "span",
+]
+const BLOG_CONTENT_ALLOWED_ATTR = ["class"]
+
+function sanitizeRenderedHtml(html: string): string {
+  // DOMPurify's browser build needs a real DOM (window/document), so this
+  // only runs client-side — formatContent is only ever called from this
+  // "use client" component's render path, never during SSR.
+  if (typeof window === "undefined") return ""
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: BLOG_CONTENT_ALLOWED_TAGS,
+    ALLOWED_ATTR: BLOG_CONTENT_ALLOWED_ATTR,
+  })
+}
+
 function formatContent(content: string) {
-  return stripDangerousHtml(content)
+  const rendered = stripDangerousHtml(content)
     // h2
     .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold text-white mt-10 mb-4 tracking-tight">$1</h2>')
     // h3
@@ -72,6 +100,8 @@ function formatContent(content: string) {
     // checkmarks ✅
     .replace(/✅/g, '<span class="text-green-400">✅</span>')
     .replace(/❌/g, '<span class="text-red-400">❌</span>')
+
+  return sanitizeRenderedHtml(rendered)
 }
 
 // ─────────────────────────────────────────────────────────

@@ -74,7 +74,13 @@ export const createEventSchema = z.object({
     auto_approve_photos: z.boolean().default(false),
     enable_countdown: z.boolean().default(false),
     countdown_date: z.string().datetime().optional(),
-    guest_count_plan: z.enum(["free", "starter", "standard", "premium"]).optional(),
+    // Plan ids are admin-configurable (see Admin > Subscriptions > Plan
+    // Builder, plans.id), not a fixed set — a hardcoded 4-value enum here
+    // used to hard-reject event creation for any plan the admin renamed or
+    // added (e.g. the live catalog currently has no "starter" plan at all).
+    // Any non-empty string id is accepted; the actual plan is validated to
+    // exist server-side wherever it's charged/enforced (checkout, feature-gate).
+    guest_count_plan: z.string().min(1).optional(),
     guests_boost: z.number().default(0),
     shots_boost: z.number().default(0),
     photo_limit: z.number().default(20),
@@ -126,6 +132,16 @@ export const subscribeSchema = z.object({
 
 export const validateCouponSchema = z.object({
   code: z.string().min(1, "Coupon code is required"),
+  // Optional context so the pre-checkout "Apply coupon" check can enforce
+  // the same applicable_plans/excluded_plans/min_order_value/stackable rules
+  // the actual checkout charge does (see src/lib/payments/coupon-rules.ts) —
+  // without these, a coupon could look "valid" here and then silently not
+  // discount anything (or discount the wrong amount) once checkout actually
+  // ran calculatePrice().
+  plan_id: z.string().optional(),
+  order_value: z.number().optional(),
+  has_addons: z.boolean().optional(),
+  currency: z.enum(["INR", "USD"]).default("INR"),
 })
 
 export const uploadPhotoSchema = z.object({

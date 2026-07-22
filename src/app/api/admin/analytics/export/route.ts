@@ -19,6 +19,14 @@ export const GET = defineRoute({
   method: "GET",
   requireAuth: "admin",
   handler: async ({ request }) => {
+    // Set by proxy.ts's CSP middleware (script-src now requires a nonce
+    // instead of 'unsafe-inline' — see that file for the full rationale).
+    // This route's HTML export renders with Content-Type: text/html and no
+    // Content-Disposition: attachment, so if an admin opens the export URL
+    // directly it's rendered in-browser under this same response's CSP —
+    // its inline auto-print <script> below needs the nonce or it silently
+    // fails to run (print dialog just never opens).
+    const nonce = request.headers.get("x-nonce")
     const { searchParams } = new URL(request.url)
     const format = searchParams.get("format") || "csv"
     const startDateParam = searchParams.get("startDate")
@@ -566,7 +574,7 @@ export const GET = defineRoute({
     </tbody>
   </table>
 
-  <script>
+  <script${nonce ? ` nonce="${nonce}"` : ""}>
     window.onload = () => {
       setTimeout(() => {
         window.print();

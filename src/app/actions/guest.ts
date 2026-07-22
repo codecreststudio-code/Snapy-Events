@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid"
 import { grantGuestSession } from "@/lib/security/guest-session"
 import { rateLimit } from "@/lib/security/rate-limit"
 import { API_RATE_LIMITS } from "@/lib/constants"
+import { getClientIp } from "@/lib/security/client-ip"
 
 // Codes use the same charset as generate_join_code() in
 // supabase/migrations/0023_event_join_code.sql (excludes 0/O/1/I) — this is
@@ -50,7 +51,7 @@ export async function logGuestAccess(
     // valuable brute-force target. Keyed by event+IP so guessing against
     // one event can't be laundered across others, and one slow guesser
     // can't exhaust another guest's attempts.
-    const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() || "anon"
+    const ip = getClientIp(await headers())
     const limit = await rateLimit({
       key: `guest-checkin:${eventId}:${ip}`,
       limit: API_RATE_LIMITS.GUEST_CHECKIN,

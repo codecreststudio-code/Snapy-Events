@@ -2,6 +2,7 @@ import { z } from "zod"
 import { defineRoute, ok, fail, redirect } from "@/lib/api/handler"
 import { createServiceClient } from "@/lib/supabase/server"
 import { headers } from "next/headers"
+import { getClientIp } from "@/lib/security/client-ip"
 
 import { API_RATE_LIMITS } from "@/lib/constants"
 
@@ -36,7 +37,7 @@ export const GET = defineRoute<unknown, unknown, { code: string }>({
     if (qr.expires_at && new Date(qr.expires_at) < new Date()) return fail("GONE", "QR code expired", 410)
 
     const h = await headers()
-    const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || null
+    const ip = getClientIp(h)
     const ua = h.get("user-agent") ?? null
 
     try {

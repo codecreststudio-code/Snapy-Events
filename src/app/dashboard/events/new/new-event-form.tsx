@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase/client"
 import { slugify, formatDate } from "@/lib/utils"
-import { PLAN_BASE_PHOTO_LIMITS } from "@/lib/constants"
 import { Button } from "@/lib/components/ui/button"
 import { Input } from "@/lib/components/ui/input"
 import { Switch } from "@/lib/components/ui/switch"
@@ -36,6 +35,28 @@ import {
 } from "lucide-react"
 import QRCode from "qrcode"
 import { QRCodeSVG } from "qrcode.react"
+import { EVENT_TYPES } from "@/lib/constants"
+
+// Mirrors the shape Admin > Subscriptions > Plan Builder writes to the
+// `plans` table (see src/app/admin/subscriptions/plan-builder.tsx and
+// src/app/api/payments/plans/route.ts) — this is the single live source of
+// truth for plan names, prices, guest/shot quotas, and feature toggles
+// (video_uploads, voice_notes, ai_face_search, etc., all stored inside
+// `limits`). Step 6 below renders directly from this instead of a hardcoded
+// free/starter/standard/premium options array, so it can never drift from
+// what's actually configured in Admin or shown on the public /pricing page.
+interface LivePlan {
+  id: string
+  name: string
+  description?: string
+  price_inr: number
+  price_usd: number
+  features: string[]
+  limits: Record<string, any>
+  is_popular?: boolean
+  best_value?: boolean
+  sort_order?: number
+}
 
 const getSuggestions = (userName?: string) => {
   const name = userName ? userName.trim().split(" ")[0] : "Alex"
@@ -50,16 +71,27 @@ const getSuggestions = (userName?: string) => {
   ]
 }
 
-const EVENT_TYPE_CARDS = [
-  { id: "wedding", name: "Wedding", emoji: "💍", gradient: "from-surface-card to-surface-card-elevated", color: "#B89B85" },
-  { id: "birthday", name: "Birthday", emoji: "🎂", gradient: "from-surface-card to-surface-card-elevated", color: "#D29F6C" },
-  { id: "engagement", name: "Engagement", emoji: "🍾", gradient: "from-surface-card to-surface-card-elevated", color: "#C68CA3" },
-  { id: "corporate", name: "Corporate", emoji: "🏢", gradient: "from-surface-card to-surface-card-elevated", color: "#5F87A8" },
-  { id: "baby_shower", name: "Baby Shower", emoji: "👶", gradient: "from-surface-card to-surface-card-elevated", color: "#5FB6A8" },
-  { id: "graduation", name: "Graduation", emoji: "🎓", gradient: "from-surface-card to-surface-card-elevated", color: "#6EB887" },
-  { id: "festival", name: "Festival", emoji: "🎪", gradient: "from-surface-card to-surface-card-elevated", color: "#B28659" },
-  { id: "custom", name: "Custom", emoji: "✨", gradient: "from-surface-card to-surface-card-elevated", color: "#8E8E93" },
-]
+// Ids/order come from the shared EVENT_TYPES constant (src/lib/constants) —
+// each is decorated here with its wizard-only display metadata (emoji,
+// gradient, color). Previously this array hardcoded its own separate id
+// list that had drifted from EVENT_TYPES (extra ids here, missing ids
+// there); deriving from EVENT_TYPES makes that impossible going forward —
+// add/remove an event type in one place and this card list follows.
+const EVENT_TYPE_META: Record<(typeof EVENT_TYPES)[number], { name: string; emoji: string; color: string }> = {
+  wedding: { name: "Wedding", emoji: "💍", color: "#B89B85" },
+  birthday: { name: "Birthday", emoji: "🎂", color: "#D29F6C" },
+  engagement: { name: "Engagement", emoji: "🍾", color: "#C68CA3" },
+  corporate: { name: "Corporate", emoji: "🏢", color: "#5F87A8" },
+  baby_shower: { name: "Baby Shower", emoji: "👶", color: "#5FB6A8" },
+  graduation: { name: "Graduation", emoji: "🎓", color: "#6EB887" },
+  festival: { name: "Festival", emoji: "🎪", color: "#B28659" },
+  custom: { name: "Custom", emoji: "✨", color: "#8E8E93" },
+}
+const EVENT_TYPE_CARDS = EVENT_TYPES.map((id) => ({
+  id,
+  ...EVENT_TYPE_META[id],
+  gradient: "from-surface-card to-surface-card-elevated",
+}))
 
 const TEMPLATE_COVERS = [
   "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=600&auto=format&fit=crop", // Wedding
@@ -180,10 +212,27 @@ export function NewEventForm() {
   const [coverImage, setCoverImage] = useState("linear-gradient(135deg, #FFDEB4 0%, #FFB4B4 100%)")
   const [aiPrompt, setAiPrompt] = useState("")
   const [generatingAi, setGeneratingAi] = useState(false)
+  // The actual occasion date (e.g. the wedding/party day itself) — distinct
+  // from "when do uploads lock" (endDate/endTime below) and from whenever
+  // the host happens to be sitting in this wizard filling it out. Previously
+  // there was no field for this at all: every event's `event_date` column
+  // was hardcoded to `new Date().toISOString()` at creation time (see the
+  // mutationFn below), so any event created ahead of the actual date (which
+  // is the common case — hosts set these up in advance) showed the wrong
+  // date everywhere it's surfaced: the dashboard list, the guest-facing
+  // event page, the countdown page, and the daily stories cron's date-range
+  // query. Optional — falls back to "today" if left blank, matching the old
+  // always-today behavior for anyone who skips it.
+  const [eventDate, setEventDate] = useState("")
   const [endDate, setEndDate] = useState("")
   const [endTime, setEndTime] = useState("22:00")
   const [revealExperience, setRevealExperience] = useState("immediately")
-  const [guestCountPlan, setGuestCountPlan] = useState<"free" | "starter" | "standard" | "premium">("starter")
+  // Plan ids are admin-configurable (Admin > Subscriptions > Plan Builder) —
+  // not a fixed "free"/"starter"/"standard"/"premium" set. Starts empty and
+  // gets set to a real id once /api/payments/plans resolves (see the
+  // fetchPlans effect below), the same live endpoint the public /pricing
+  // page uses.
+  const [guestCountPlan, setGuestCountPlan] = useState<string>("")
   
   // Addons
   const [guestsBoost, setGuestsBoost] = useState(0)
@@ -215,13 +264,18 @@ export function NewEventForm() {
   const [invitationWelcome, setInvitationWelcome] = useState("Scan to capture and share moments with us.")
   const [invitationCountdown, setInvitationCountdown] = useState(true)
 
-  // Dynamic plan prices (per-event pricing, synced with admin)
-  const [planPrices, setPlanPrices] = useState<Record<string, number>>({
-    free: 0,
-    starter: 499,
-    standard: 1499,
-    premium: 3999,
-  })
+  // Live plan catalog — the single source of truth for names, prices,
+  // guest/shot quotas, and feature toggles (video_uploads, voice_notes,
+  // ai_face_search, etc., all inside each plan's `limits`). Fetched from
+  // /api/payments/plans, the exact same endpoint the public /pricing page
+  // and Admin > Plan Builder read/write — this used to be a hardcoded
+  // 4-entry Free/Starter/Standard/Premium array in the Step 6 JSX below,
+  // which is why the wizard could show entirely different plans/prices/
+  // limits than what was actually live (no "Starter" plan, different guest
+  // caps, etc.).
+  const [livePlans, setLivePlans] = useState<LivePlan[]>([])
+  const [plansLoading, setPlansLoading] = useState(true)
+  const selectedPlan = livePlans.find((p) => p.id === guestCountPlan)
 
   // Add-on prices (fetched live from /api/payments/addons, itself backed by
   // the admin-editable `addons` table — see src/lib/payments/addons.ts).
@@ -234,7 +288,7 @@ export function NewEventForm() {
   }>({ guestBoosts: [], shotBoosts: [], photoLimitBoosts: [], videoAddonPrice: 0, voiceAddonPrice: 0 })
 
   // Computed per-event total
-  const planBasePrice = planPrices[guestCountPlan] ?? 0
+  const planBasePrice = selectedPlan?.price_inr ?? 0
   const guestAddonPrice = addonPrices.guestBoosts.find(b => b.value === guestsBoost)?.price ?? (guestsBoost > 0 ? Math.round(guestsBoost * 19.9) : 0)
   const shotAddonPrice = addonPrices.shotBoosts.find(b => b.value === shotsBoost)?.price ?? (shotsBoost > 0 ? Math.round(shotsBoost * 19.9) : 0)
 
@@ -243,13 +297,16 @@ export function NewEventForm() {
   // silently free (Unlimited photos on any plan). Now priced the same way
   // guest/shot boosts are (live from Admin > Add-ons), and re-validated
   // server-side at checkout so this display can't be the only thing
-  // enforcing it.
-  const planBasePhotoLimit = PLAN_BASE_PHOTO_LIMITS[guestCountPlan] ?? 0
+  // enforcing it. Gating is read straight off the selected plan's own
+  // `limits` (shots_limit / video_uploads / voice_notes) instead of
+  // hardcoded plan-id comparisons, which broke for any admin-renamed or
+  // newly-added plan.
+  const planBasePhotoLimit = Number(selectedPlan?.limits?.shots_limit ?? 0)
   const photoAddonPrice = photoLimit !== planBasePhotoLimit && (photoLimit === -1 || photoLimit > planBasePhotoLimit)
     ? (addonPrices.photoLimitBoosts.find(b => b.value === photoLimit)?.price ?? 0)
     : 0
-  const videoAddonPrice = contentVideos && guestCountPlan !== "standard" && guestCountPlan !== "premium" ? addonPrices.videoAddonPrice : 0
-  const voiceAddonPrice = contentVoiceNotes && guestCountPlan !== "premium" ? addonPrices.voiceAddonPrice : 0
+  const videoAddonPrice = contentVideos && !selectedPlan?.limits?.video_uploads ? addonPrices.videoAddonPrice : 0
+  const voiceAddonPrice = contentVoiceNotes && !selectedPlan?.limits?.voice_notes ? addonPrices.voiceAddonPrice : 0
   const featureAddonPrice = photoAddonPrice + videoAddonPrice + voiceAddonPrice
 
   const totalEventPrice = planBasePrice + guestAddonPrice + shotAddonPrice + featureAddonPrice
@@ -260,14 +317,36 @@ export function NewEventForm() {
         const res = await fetch("/api/payments/plans")
         if (res.ok) {
           const result = await res.json()
-          if (result.success && Array.isArray(result.data)) {
-            const mapped: Record<string, number> = {}
-            result.data.forEach((p: any) => { mapped[p.id] = p.price_inr })
-            setPlanPrices(prev => ({ ...prev, ...mapped }))
+          if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+            const mapped: LivePlan[] = result.data.map((p: any) => ({
+              id: p.id,
+              name: p.name,
+              description: p.description || "",
+              price_inr: p.price_inr,
+              price_usd: p.price_usd || Math.round(p.price_inr / 80) || 1,
+              features: Array.isArray(p.features) ? p.features : [],
+              limits: p.limits || {},
+              is_popular: p.is_popular || false,
+              best_value: p.best_value || false,
+              sort_order: p.sort_order ?? 0,
+            }))
+            setLivePlans(mapped)
+            // Default the wizard's selection to a real plan id from the live
+            // catalog — the previous hardcoded default ("starter") doesn't
+            // necessarily exist at all (today's live catalog has no plan
+            // id'd "starter"). Prefers the plan Admin flagged as popular,
+            // else the cheapest paid plan, else whatever's first.
+            setGuestCountPlan((prev) => {
+              if (prev && mapped.some((p) => p.id === prev)) return prev
+              const recommended = mapped.find((p) => p.is_popular) || mapped.find((p) => p.price_inr > 0) || mapped[0]
+              return recommended?.id || prev
+            })
           }
         }
       } catch (e) {
-        console.error("Failed to fetch plan prices", e)
+        console.error("Failed to fetch live plans", e)
+      } finally {
+        setPlansLoading(false)
       }
     }
     const fetchAddons = async () => {
@@ -303,9 +382,14 @@ export function NewEventForm() {
       const supabase = createClient()
       const slug = `${slugify(name || "my-event")}-${Date.now().toString(36)}`
 
-      const calculatedEndDate = endDate 
-        ? new Date(`${endDate}T${endTime}`).toISOString() 
+      const calculatedEndDate = endDate
+        ? new Date(`${endDate}T${endTime}`).toISOString()
         : new Date(Date.now() + 86400000 * 2).toISOString() // default 2 days from now
+      // Falls back to "now" if the host left it blank — same behavior this
+      // field always had before it existed, just now overridable.
+      const calculatedEventDate = eventDate
+        ? new Date(`${eventDate}T00:00:00`).toISOString()
+        : new Date().toISOString()
 
       const eventData = {
         host_id: profile.id,
@@ -314,7 +398,7 @@ export function NewEventForm() {
         description: `Experience created with Snapsy.`,
         event_type: eventType === "custom" && customEventTypeName.trim() ? customEventTypeName.trim() : eventType,
         custom_event_type_name: eventType === "custom" ? customEventTypeName.trim() : null,
-        event_date: new Date().toISOString(),
+        event_date: calculatedEventDate,
         end_date: calculatedEndDate,
         venue: "Virtual Room",
         timezone: "Asia/Kolkata",
@@ -336,7 +420,7 @@ export function NewEventForm() {
           // was no per-event payment record at all — only an account-level
           // subscription — so nothing could tell whether a given event had
           // actually been paid for.
-          payment_status: guestCountPlan === "free" ? "free" : "pending",
+          payment_status: totalEventPrice === 0 ? "free" : "pending",
           guests_boost: guestsBoost,
           shots_boost: shotsBoost,
           content_types: {
@@ -442,30 +526,28 @@ export function NewEventForm() {
     setEndDate(today.toISOString().split("T")[0])
   }, [])
 
-  // Auto-adjust photo limits based on plans
+  // Auto-adjust photo/video/voice defaults to whatever the selected live
+  // plan actually includes (its `limits` object) instead of a hardcoded
+  // free/starter/standard/premium branch — that hardcoded version silently
+  // fell through to a no-op for any plan id it didn't recognize, which is
+  // exactly what happens with today's live catalog (ids don't match those
+  // four assumptions).
   useEffect(() => {
-    if (guestCountPlan === "free") {
-      setPhotoLimit(5)
-      setContentVideos(false)
-      setContentVoiceNotes(false)
-    } else if (guestCountPlan === "starter") {
-      setPhotoLimit(20)
-      setContentVideos(false)
-      setContentVoiceNotes(false)
-    } else if (guestCountPlan === "standard") {
-      setPhotoLimit(45)
-      setContentVideos(true)
-    } else if (guestCountPlan === "premium") {
-      setPhotoLimit(85)
-      setContentVideos(true)
-      setContentVoiceNotes(true)
-      setAiFaceSearch(true)
-    }
-  }, [guestCountPlan])
+    if (!selectedPlan) return
+    const limits = selectedPlan.limits || {}
+    setPhotoLimit(typeof limits.shots_limit === "number" ? limits.shots_limit : 20)
+    setContentVideos(Boolean(limits.video_uploads))
+    setContentVoiceNotes(Boolean(limits.voice_notes))
+    if (limits.ai_face_search) setAiFaceSearch(true)
+  }, [guestCountPlan, selectedPlan])
 
   const handleNext = () => {
     if (step === 1 && !name.trim()) {
       toast({ title: "Please name your experience", description: "Name is required to build the memory capsule." })
+      return
+    }
+    if (step === 6 && !guestCountPlan) {
+      toast({ title: "Please choose a plan", description: "Select an event plan to continue." })
       return
     }
     if (step === 9) {
@@ -500,10 +582,13 @@ export function NewEventForm() {
   const handleLaunch = () => {
     if (!createdEvent) return
 
-    // Per-event model: free plan skips payment, all paid plans (and any paid
-    // add-on — guest/shot boosts, or a photo cap / video / voice upsell) go
-    // to checkout for this specific event.
-    if (guestCountPlan === "free" && guestsBoost === 0 && shotsBoost === 0 && featureAddonPrice === 0) {
+    // Per-event model: a ₹0 total (free plan, no boosts, no feature add-ons)
+    // skips payment entirely; anything with a nonzero total goes to checkout
+    // for this specific event. Driven by totalEventPrice (which already sums
+    // the live plan base price + every boost/add-on) rather than assuming
+    // the plan's id is literally "free" — that assumption broke the instant
+    // an admin-configured zero-price plan used a different id.
+    if (totalEventPrice === 0) {
       router.push(`/dashboard/events/${createdEvent.slug}`)
       return
     }
@@ -582,7 +667,7 @@ export function NewEventForm() {
           {step >= 6 && step <= 10 && (
             <div className="flex items-center gap-2 bg-surface-card-elevated border border-hairline-dark rounded-full px-3 py-1">
               <span className="text-[10px] font-semibold text-mauve capitalize">
-                {guestCountPlan === "free" ? "Free Trial" : `${guestCountPlan.charAt(0).toUpperCase() + guestCountPlan.slice(1)} Plan`}
+                {selectedPlan?.name || (guestCountPlan ? guestCountPlan.charAt(0).toUpperCase() + guestCountPlan.slice(1) : "Choose plan")}
               </span>
               {(guestsBoost > 0 || shotsBoost > 0) && (
                 <span className="text-[9px] text-white/50">
@@ -811,12 +896,32 @@ export function NewEventForm() {
                 </div>
               )}
 
-              {/* STEP 4: EVENT END DATE */}
+              {/* STEP 4: EVENT DATE + UPLOAD LOCK */}
               {step === 4 && (
                 <div className="space-y-6">
                   <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-white`}>
-                    When does your event end?
+                    When is your event?
                   </h1>
+                  <p className="text-sm text-white/50">
+                    The actual day of your celebration — shown to guests and used for your countdown.
+                  </p>
+
+                  <div className="space-y-2">
+                    <label className="text-[11px] uppercase tracking-widest text-white/50 font-bold">Event Date</label>
+                    <div className="relative bg-surface-card border border-hairline-dark rounded-xl p-3 flex items-center gap-3">
+                      <CalendarIcon className="h-4 w-4 text-mauve" />
+                      <input
+                        type="date"
+                        value={eventDate}
+                        onChange={(e) => setEventDate(e.target.value)}
+                        className="bg-transparent outline-none text-sm text-white flex-1 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  <h2 className="font-playfair text-2xl font-light leading-tight tracking-tight text-white pt-2">
+                    When does uploading end?
+                  </h2>
                   <p className="text-sm text-white/50">
                     Once ended, guest upload portals lock, and final preparation for the memory reveal starts.
                   </p>
@@ -920,38 +1025,58 @@ export function NewEventForm() {
                   </h1>
                   
                   <div className="space-y-3 pt-2">
-                    {[
-                      { id: "free", name: "Free Trial", price: "Free (₹0)", limit: "Up to 5 guests", desc: "5 shots/guest · Standard photo reveal · Basic web gallery · All media view" },
-                      { id: "starter", name: "Starter Plan", price: `₹${planPrices.starter || 499}`, limit: "Up to 10 guests", desc: "20 shots/guest · Standard reveal · Basic web gallery · 3 filters · All media download" },
-                      { id: "standard", name: "Standard Plan", price: `₹${planPrices.standard || 1499}`, limit: "Up to 25 guests", desc: "45 shots/guest · Custom reveal · 7 filters · Download option · 10s Video uploads" },
-                      { id: "premium", name: "Premium Plan", price: `₹${planPrices.premium || 3999}`, limit: "Up to 100 guests", desc: "85 shots/guest · AI Face matching · 15 filters · 30s Video · 30s Voice notes · Reactions" },
-                    ].map((plan) => {
-                      const isSelected = guestCountPlan === plan.id
-                      return (
-                        <div
-                          key={plan.id}
-                          onClick={() => setGuestCountPlan(plan.id as any)}
-                          className={`p-4 rounded-2xl border-2 transition-all bg-surface-card cursor-pointer flex justify-between items-start gap-4 ${
-                            isSelected ? "border-mauve shadow-sm" : "border-hairline-dark hover:border-mauve/30"
-                          }`}
-                        >
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-bold text-white">{plan.name}</span>
-                              {plan.id === "premium" && (
-                                <span className="bg-surface-card-elevated text-mauve text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">Luxe</span>
-                              )}
+                    {plansLoading && livePlans.length === 0 ? (
+                      <div className="p-8 text-center text-white/40 text-xs font-semibold">Loading plans…</div>
+                    ) : livePlans.length === 0 ? (
+                      <div className="p-8 text-center text-white/40 text-xs font-semibold">
+                        No plans are available right now. Please try again shortly.
+                      </div>
+                    ) : (
+                      // Rendered directly from the live /api/payments/plans catalog —
+                      // same data source as the public /pricing page and Admin >
+                      // Plan Builder — instead of a hardcoded Free/Starter/Standard/
+                      // Premium array that no longer matched what's actually
+                      // configured (that array assumed 4 fixed plans/prices/limits;
+                      // the live catalog may have a different count, different ids,
+                      // and different guest/shot limits entirely).
+                      livePlans.map((plan) => {
+                        const isSelected = guestCountPlan === plan.id
+                        const guestsLimit = plan.limits?.guests_limit
+                        const shotsLimit = plan.limits?.shots_limit
+                        const guestsLabel = guestsLimit === -1 || guestsLimit == null
+                          ? (guestsLimit === -1 ? "Unlimited guests" : "Guest limit set by host")
+                          : `Up to ${guestsLimit} guests`
+                        const shotsLabel = shotsLimit === -1 ? "Unlimited shots/guest" : `${shotsLimit ?? "—"} shots/guest`
+                        const descParts = [shotsLabel, ...plan.features.slice(0, 3)]
+                        return (
+                          <div
+                            key={plan.id}
+                            onClick={() => setGuestCountPlan(plan.id)}
+                            className={`p-4 rounded-2xl border-2 transition-all bg-surface-card cursor-pointer flex justify-between items-start gap-4 ${
+                              isSelected ? "border-mauve shadow-sm" : "border-hairline-dark hover:border-mauve/30"
+                            }`}
+                          >
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-bold text-white">{plan.name}</span>
+                                {plan.best_value && (
+                                  <span className="bg-surface-card-elevated text-mauve text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">Best Value</span>
+                                )}
+                                {!plan.best_value && plan.is_popular && (
+                                  <span className="bg-surface-card-elevated text-mauve text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">Popular</span>
+                                )}
+                              </div>
+                              <p className="text-xs text-mauve font-medium">{guestsLabel}</p>
+                              <p className="text-[10px] text-white/50 leading-relaxed max-w-sm">{descParts.join(" · ")}</p>
                             </div>
-                            <p className="text-xs text-mauve font-medium">{plan.limit}</p>
-                            <p className="text-[10px] text-white/50 leading-relaxed max-w-sm">{plan.desc}</p>
+                            <div className="text-right shrink-0">
+                              <span className="text-lg font-bold text-white">{plan.price_inr === 0 ? "Free" : `₹${plan.price_inr}`}</span>
+                              <span className="text-[9px] text-white/50 block">One-time event</span>
+                            </div>
                           </div>
-                          <div className="text-right shrink-0">
-                            <span className="text-lg font-bold text-white">{plan.price}</span>
-                            <span className="text-[9px] text-white/50 block">One-time event</span>
-                          </div>
-                        </div>
-                      )
-                    })}
+                        )
+                      })
+                    )}
                   </div>
 
                   {/* Addon boosters section */}
@@ -1099,7 +1224,7 @@ export function NewEventForm() {
                         <Switch
                           checked={contentVideos}
                           onCheckedChange={(c) => {
-                            if (c && guestCountPlan !== "standard" && guestCountPlan !== "premium") {
+                            if (c && !selectedPlan?.limits?.video_uploads) {
                               toast({ title: "Videos add-on", description: `Not included in your plan — adds ₹${addonPrices.videoAddonPrice} to this event.` })
                             }
                             setContentVideos(c)
@@ -1144,8 +1269,8 @@ export function NewEventForm() {
                         <Switch
                           checked={contentVoiceNotes}
                           onCheckedChange={(c) => {
-                            if (c && guestCountPlan !== "premium") {
-                              toast({ title: "Voice Notes add-on", description: `Premium-tier feature — adds ₹${addonPrices.voiceAddonPrice} to this event.` })
+                            if (c && !selectedPlan?.limits?.voice_notes) {
+                              toast({ title: "Voice Notes add-on", description: `Not included in your plan — adds ₹${addonPrices.voiceAddonPrice} to this event.` })
                             }
                             setContentVoiceNotes(c)
                           }}
@@ -1234,8 +1359,8 @@ export function NewEventForm() {
                         <Switch
                           checked={feature.state}
                           onCheckedChange={(c) => {
-                            if (feature.premium && guestCountPlan !== "premium") {
-                              toast({ title: "Upgrade required", description: "This AI capability is unlocked on the Premium tier." })
+                            if (feature.premium && !selectedPlan?.limits?.ai_face_search) {
+                              toast({ title: "Upgrade required", description: "This AI capability is unlocked on plans that include AI Face Search." })
                               return
                             }
                             feature.setter(c)
@@ -1512,7 +1637,7 @@ export function NewEventForm() {
 
                 <div className="text-center space-y-0.5">
                   <p className="text-sm font-semibold text-white/90">{name}</p>
-                  <p className="text-[10px] uppercase tracking-widest text-[#B28DAE] font-bold">Plan: {guestCountPlan.toUpperCase()}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-[#B28DAE] font-bold">Plan: {(selectedPlan?.name || guestCountPlan).toUpperCase()}</p>
                 </div>
 
                 {/* Copyable join/invite pill */}

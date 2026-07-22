@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { defineRoute, ok, fail, created } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
+import { sanitizeBlogContent } from "@/lib/security/blog-sanitize"
 
 const updatePostSchema = z.object({
   title: z.string().optional(),
@@ -48,12 +49,17 @@ export const PATCH = defineRoute<z.infer<typeof updatePostSchema>, unknown, { id
   requireAuth: true,
   handler: async ({ body, params, auth }) => {
     const supabase = await createClient()
-    const { data: profile } = await supabase.from("users").select("is_admin, role").eq("id", auth.user!.id).single()
-    if (!profile?.is_admin && profile?.role !== "owner") {
+    // Platform-admin only — see the identical fix + explanation in
+    // src/app/api/blog/posts/route.ts. "owner" is a default self-service
+    // account role, not a blog-publishing permission.
+    const { data: profile } = await supabase.from("users").select("is_admin").eq("id", auth.user!.id).single()
+    if (!profile?.is_admin) {
       return fail("FORBIDDEN", "Admin access required to edit blog posts", 403)
     }
     const updates: Record<string, unknown> = {
       ...body,
+      // Sanitized at the write boundary — see src/lib/security/blog-sanitize.ts.
+      ...(body.content ? { content: sanitizeBlogContent(body.content) } : {}),
       updated_at: new Date().toISOString(),
     }
     if (body.status === "published" && !body.published_at) {
@@ -86,8 +92,10 @@ export const DELETE = defineRoute<unknown, unknown, { id: string }>({
   requireAuth: true,
   handler: async ({ params, auth }) => {
     const supabase = await createClient()
-    const { data: profile } = await supabase.from("users").select("is_admin, role").eq("id", auth.user!.id).single()
-    if (!profile?.is_admin && profile?.role !== "owner") {
+    // Platform-admin only — see the identical fix + explanation in
+    // src/app/api/blog/posts/route.ts.
+    const { data: profile } = await supabase.from("users").select("is_admin").eq("id", auth.user!.id).single()
+    if (!profile?.is_admin) {
       return fail("FORBIDDEN", "Admin access required to delete blog posts", 403)
     }
     const { error } = await supabase.from("blog_posts").delete().eq("id", params.id)

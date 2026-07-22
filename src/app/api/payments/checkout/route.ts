@@ -4,8 +4,9 @@ import { createClient } from "@/lib/supabase/server"
 import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder } from "@/lib/integrations/razorpay"
 import { adminDb } from "@/lib/supabase/admin"
 import { getLiveAddonCatalog, type LiveAddonCatalog } from "@/lib/payments/addons"
-import { PLAN_BASE_PHOTO_LIMITS } from "@/lib/constants"
 import { getFeatureFlags } from "@/lib/platform-settings"
+import { evaluateCouponEligibility, applyCouponDiscount } from "@/lib/payments/coupon-rules"
+import { API_RATE_LIMITS } from "@/lib/constants"
 
 const checkoutBodySchema = z.object({
   plan_id: z.string().min(1),
@@ -38,26 +39,35 @@ const checkoutBodySchema = z.object({
 // what the host actually owes, regardless of what the wizard UI displayed.
 // Priced from the live Admin > Add-ons catalog (catalog is fetched once by
 // the caller and passed in, so calculatePrice() only hits the DB once).
+//
+// `planLimits` is the selected plan's own `plans.limits` JSONB (fetched by
+// the caller from the live table) — includes shots_limit and the
+// video_uploads/voice_notes toggle keys Admin > Plan Builder writes. This
+// used to be re-derived from a hardcoded PLAN_BASE_PHOTO_LIMITS map plus
+// `planId === "standard" || planId === "premium"` checks, which silently
+// mispriced (or wrongly zero-charged) any admin-renamed or newly-added plan
+// id — today's live catalog, for instance, has no plan literally id'd
+// "standard" or "premium".
 export function calculateFeatureAddonPrice(
-  planId: string,
+  planLimits: Record<string, any>,
   catalog: Pick<LiveAddonCatalog, "photoLimitBoosts" | "videoAddonPrice" | "voiceAddonPrice">,
   photoLimit?: number,
   videos?: boolean,
   voiceNotes?: boolean
 ) {
   let addon = 0
-  const planBaseLimit = PLAN_BASE_PHOTO_LIMITS[planId] ?? 0
+  const planBaseLimit = Number(planLimits?.shots_limit ?? 0)
 
   if (typeof photoLimit === "number" && photoLimit !== planBaseLimit && (photoLimit === -1 || photoLimit > planBaseLimit)) {
     addon += catalog.photoLimitBoosts.find((b) => b.value === photoLimit)?.price ?? 0
   }
 
-  const planIncludesVideo = planId === "standard" || planId === "premium"
+  const planIncludesVideo = Boolean(planLimits?.video_uploads)
   if (videos && !planIncludesVideo) {
     addon += catalog.videoAddonPrice
   }
 
-  const planIncludesVoice = planId === "premium"
+  const planIncludesVoice = Boolean(planLimits?.voice_notes)
   if (voiceNotes && !planIncludesVoice) {
     addon += catalog.voiceAddonPrice
   }
@@ -78,6 +88,7 @@ export async function calculatePrice(
   voiceNotes?: boolean
 ) {
   let price = 0
+  let planLimits: Record<string, any> = {}
 
   // Every event is its own purchase — "Per Event (Pay-per-Event)" is the
   // actual billing model this product advertises on the Billing page. This
@@ -92,7 +103,7 @@ export async function calculatePrice(
   {
     const { data: planRecord } = await supabase
       .from("plans")
-      .select("price_inr, price_usd")
+      .select("price_inr, price_usd, limits")
       .eq("id", planId)
       .single()
 
@@ -102,6 +113,7 @@ export async function calculatePrice(
       } else {
         price = planRecord.price_inr
       }
+      planLimits = (planRecord.limits as Record<string, any>) || {}
     } else {
       throw new Error("Plan not found")
     }
@@ -120,12 +132,22 @@ export async function calculatePrice(
   const guestAddonPrice = currency === "USD" ? (Math.round(guestAddonPriceInr / 80) || (guestBoost > 0 ? 3 : 0)) : guestAddonPriceInr
   const shotAddonPrice = currency === "USD" ? (Math.round(shotAddonPriceInr / 80) || (shotsBoost > 0 ? 2 : 0)) : shotAddonPriceInr
 
-  const featureAddonPriceInr = calculateFeatureAddonPrice(planId, catalog, photoLimit, videos, voiceNotes)
+  const featureAddonPriceInr = calculateFeatureAddonPrice(planLimits, catalog, photoLimit, videos, voiceNotes)
   const featureAddonPrice = currency === "USD" ? (Math.round(featureAddonPriceInr / 80) || (featureAddonPriceInr > 0 ? 1 : 0)) : featureAddonPriceInr
 
   price = price + guestAddonPrice + shotAddonPrice + featureAddonPrice
+  const hasAddons = guestAddonPrice > 0 || shotAddonPrice > 0 || featureAddonPrice > 0
 
-  // Apply Coupon if exists
+  // Apply Coupon if exists. Admin > Marketing > Coupons lets an admin
+  // configure applicable_plans, excluded_plans, max_discount_amount,
+  // min_order_value, stackable, first_purchase_only, and specific_users on
+  // every coupon (see src/app/api/admin/subscriptions/coupons/route.ts) —
+  // none of these were ever actually read here. Every coupon behaved
+  // identically regardless of what an admin configured: a "Premium only"
+  // coupon applied to Free checkouts, a "first purchase only" coupon
+  // applied to repeat buyers, a coupon meant for the base plan discounted
+  // add-ons on top of it too, etc. Only the fields already enforced above
+  // (is_active, valid_until, max_uses) actually worked.
   if (couponCode) {
     const sb = await adminDb()
     const { data: coupon } = await sb.from("coupons").select("*").eq("code", couponCode).eq("is_active", true).single()
@@ -134,14 +156,31 @@ export async function calculatePrice(
     const notStarted = !coupon?.valid_from || new Date(coupon.valid_from).getTime() <= now
     const underMaxUses =
       coupon?.max_uses == null || (coupon.used_count || 0) < coupon.max_uses
-    if (coupon && notExpired && notStarted && underMaxUses) {
-      if (coupon.discount_type === "percentage") {
-        price = price - (price * (coupon.discount_value / 100))
-      } else {
-        const disc = currency === "USD" ? Math.round(coupon.discount_value / 80) : coupon.discount_value
-        price = price - disc
-      }
-      if (price < 0) price = 0
+
+    let priorSuccessfulPurchases: number | undefined
+    if (coupon?.first_purchase_only && userId) {
+      const { count } = await sb
+        .from("transactions")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("status", "success")
+      priorSuccessfulPurchases = count || 0
+    }
+
+    const eligibility = coupon
+      ? evaluateCouponEligibility({
+          coupon,
+          planId,
+          priceInCurrency: price,
+          currency,
+          hasAddons,
+          userId,
+          priorSuccessfulPurchases,
+        })
+      : { eligible: false }
+
+    if (coupon && notExpired && notStarted && underMaxUses && eligibility.eligible) {
+      price = applyCouponDiscount(coupon, price, currency)
     }
   }
 
@@ -153,6 +192,10 @@ export const POST = defineRoute({
   method: "POST",
   body: checkoutBodySchema,
   requireAuth: true,
+  // Order creation had no rate limit at all — unusual for a mutating,
+  // authenticated route in this codebase, and a real gap since each call
+  // hits Razorpay's API to mint a new order.
+  rateLimit: { key: "payments:checkout", limit: API_RATE_LIMITS.PAYMENT_CHECKOUT, windowSeconds: 60 },
   handler: async ({ body, auth }) => {
     if (!isRazorpayConfigured()) {
       return fail("BILLING_UNAVAILABLE", "Razorpay is not configured", 503)

@@ -707,8 +707,9 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         <Card className="bg-[#1C1814] border-[#3D332A] shadow-sm">
           <CardContent className="p-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-white/60">Select Gallery</label>
+              <label htmlFor="upload-gallery-select" className="text-sm font-medium text-white/60">Select Gallery</label>
               <select
+                id="upload-gallery-select"
                 value={selectedGallery}
                 onChange={(e) => setSelectedGallery(e.target.value)}
                 className="flex h-10 w-full rounded-md border border-[#3D332A] bg-[#141110] px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#B28DAE]"
@@ -756,8 +757,13 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Card 1: Take Photo / Video */}
-                <div
-                  className="border-2 border-dashed border-[#3D332A] bg-[#1C1814]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#B28DAE] hover:bg-[#B28DAE]/5 transition-all cursor-pointer group"
+                {/* Was a plain <div onClick>: unreachable by keyboard/screen
+                    reader (no role, no tab stop, no Enter/Space handling).
+                    A real <button> gets all of that for free — no nested
+                    interactive elements here to conflict with. */}
+                <button
+                  type="button"
+                  className="border-2 border-dashed border-[#3D332A] bg-[#1C1814]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#B28DAE] hover:bg-[#B28DAE]/5 transition-all cursor-pointer group text-left w-full"
                   onClick={() => setShowCamera(true)}
                 >
                   <div className="p-4 rounded-full bg-[#1C1814] group-hover:bg-[#B28DAE]/20 transition-colors border border-transparent group-hover:border-[#B28DAE]/30">
@@ -773,12 +779,13 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                         : "Use camera with premium filters"}
                     </p>
                   </div>
-                </div>
+                </button>
 
                 {/* Card 2: Record Voice Note */}
                 {allowVoice && (
-                  <div
-                    className="border-2 border-dashed border-[#3D332A] bg-[#1C1814]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#B28DAE] hover:bg-[#B28DAE]/5 transition-all cursor-pointer group"
+                  <button
+                    type="button"
+                    className="border-2 border-dashed border-[#3D332A] bg-[#1C1814]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#B28DAE] hover:bg-[#B28DAE]/5 transition-all cursor-pointer group text-left w-full"
                     onClick={() => setShowVoiceRecorder(true)}
                   >
                     <div className="p-4 rounded-full bg-[#1C1814] group-hover:bg-[#B28DAE]/20 transition-colors border border-transparent group-hover:border-[#B28DAE]/30">
@@ -790,13 +797,27 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                         Leave vocal wishes & audio notes up to {voiceLimit}s
                       </p>
                     </div>
-                  </div>
+                  </button>
                 )}
 
                 {/* Card 4: Upload Media */}
+                {/* Kept as a <div> (not <button>) because it contains a
+                    nested <input type="file"> — a <button> can't legally
+                    contain interactive descendants. role="button" +
+                    tabIndex + onKeyDown restore keyboard operability
+                    (Enter/Space) that the bare onClick-only div lacked. */}
                 <div
-                  className="border-2 border-dashed border-[#3D332A] bg-[#1C1814]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#B28DAE] hover:bg-[#B28DAE]/5 transition-all cursor-pointer group"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Upload media from your device"
+                  className="border-2 border-dashed border-[#3D332A] bg-[#1C1814]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[#B28DAE] hover:bg-[#B28DAE]/5 transition-all cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#B28DAE]"
                   onClick={() => fileInputRef.current?.click()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      fileInputRef.current?.click()
+                    }
+                  }}
                   onDragOver={(e) => {
                     e.preventDefault()
                     e.currentTarget.classList.add("border-[#B28DAE]", "bg-[#B28DAE]/5")
@@ -870,11 +891,25 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                   : file.file.type.startsWith("audio/")
                   ? "audio"
                   : "image"
+                // role="button"/tabIndex/onKeyDown below (not a real
+                // <button>, since this wraps its own nested delete <button>
+                // further down — interactive elements can't nest) restore
+                // keyboard access to open the preview, which the bare
+                // onClick-only div lacked.
                 return (
                 <div
                   key={file.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Preview ${file.file.name}`}
                   onClick={() => setPreviewFile(file)}
-                  className="relative aspect-square rounded-xl overflow-hidden bg-[#1C1814] border border-[#3D332A] cursor-pointer"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      setPreviewFile(file)
+                    }
+                  }}
+                  className="relative aspect-square rounded-xl overflow-hidden bg-[#1C1814] border border-[#3D332A] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B28DAE]"
                 >
                   {kind === "image" && (
                     <img
@@ -1005,7 +1040,13 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         <Card className="bg-[#1C1814] border-[#3D332A] p-6 shadow-sm">
           <h3 className="font-semibold text-white mb-2">Upload Guidelines</h3>
           <ul className="text-sm text-white/60 space-y-1">
-            <li>• Photos will be reviewed before appearing in the gallery</li>
+            {/* Used to say this unconditionally even though every event
+                defaulted to auto-approve with no host-facing way to turn
+                review on — see the new toggle in Event Settings
+                (auto_approve_photos) that this now actually reflects. */}
+            <li>• {settings.auto_approve_photos === false
+              ? "Photos will be reviewed before appearing in the gallery"
+              : "Photos appear in the gallery right after uploading"}</li>
             <li>• Please only upload photos from the event</li>
             <li>• Ensure you have permission from people in your photos</li>
             <li>• High-quality photos are encouraged</li>

@@ -1,8 +1,9 @@
 import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { calculatePrice } from "@/app/api/payments/checkout/route"
 import { getFeatureFlags } from "@/lib/platform-settings"
+import { API_RATE_LIMITS } from "@/lib/constants"
 
 // Handles the case where /api/payments/checkout's calculatePrice() legitimately
 // comes back to ₹0/$0 — e.g. the host's plan is already active and this
@@ -22,12 +23,21 @@ const bodySchema = z.object({
   photo_limit: z.number().optional(),
   videos: z.boolean().default(false),
   voice_notes: z.boolean().default(false),
+  // Client-generated once per checkout attempt and resent on retry (see
+  // src/app/checkout/page.tsx). Unlike the paid flow, this route has no
+  // Razorpay payment id to naturally dedupe repeat requests on — without
+  // this, a double-click or a client retry after a slow/dropped response
+  // would re-run the whole handler, double-incrementing this event's
+  // guests_boost/shots_boost and burning a second use off a coupon's
+  // max_uses for a single actual checkout.
+  idempotency_key: z.string().min(1).max(200).optional(),
 })
 
 export const POST = defineRoute({
   method: "POST",
   body: bodySchema,
   requireAuth: true,
+  rateLimit: { key: "payments:checkout-free", limit: API_RATE_LIMITS.PAYMENT_CHECKOUT, windowSeconds: 60 },
   handler: async ({ body, auth }) => {
     const flags = await getFeatureFlags()
     if (!flags.payments_enabled) {
@@ -36,6 +46,25 @@ export const POST = defineRoute({
 
     const supabase = await createClient()
     const userId = auth.user!.id
+
+    // Idempotency check — see the schema comment on idempotency_key above.
+    // Reuses the same transactions.razorpay_payment_id uniqueness the paid
+    // flow relies on (see verify/route.ts), namespaced with a "free_" prefix
+    // so a free-checkout key can never collide with a real Razorpay id.
+    // Requires the service client: transactions has no RLS insert policy
+    // for regular users (only a user_id-scoped SELECT policy), matching how
+    // verify/route.ts also has to use the service client for this table.
+    const sbAdmin = await createServiceClient()
+    if (body.idempotency_key) {
+      const { data: existingTxn } = await sbAdmin
+        .from("transactions")
+        .select("id")
+        .eq("razorpay_payment_id", `free_${body.idempotency_key}`)
+        .maybeSingle()
+      if (existingTxn) {
+        return ok({ success: true, already_processed: true, plan: body.plan_id })
+      }
+    }
 
     const { data: eventRow } = await supabase
       .from("events")
@@ -71,24 +100,13 @@ export const POST = defineRoute({
       return fail("PAYMENT_REQUIRED", "This checkout is not free — use the paid checkout flow.", 402)
     }
 
-    // Apply guest/shot boosts to preferences, same as a verified payment would.
-    if (body.guest_boost > 0 || body.shots_boost > 0) {
-      const { data: userRecord } = await supabase
-        .from("users")
-        .select("id, preferences")
-        .eq("id", userId)
-        .maybeSingle()
-
-      if (userRecord) {
-        const currentPrefs = (userRecord.preferences as Record<string, any>) || {}
-        const newPrefs = {
-          ...currentPrefs,
-          guest_boost: (currentPrefs.guest_boost || 0) + body.guest_boost,
-          shots_boost: (currentPrefs.shots_boost || 0) + body.shots_boost,
-        }
-        await supabase.from("users").update({ preferences: newPrefs }).eq("id", userRecord.id)
-      }
-    }
+    // Guest/shot boosts are applied onto THIS event's own settings below
+    // (in the "Mark this specific event as covered" write) — not onto
+    // `users.preferences`. Writing them account-wide, as this route used to,
+    // meant a boost picked for one event permanently inflated every other
+    // event the host ever created, since nothing ever reset that bucket per
+    // event. See the identical fix + fuller explanation in
+    // src/app/api/payments/verify/route.ts.
 
     // Activate/refresh the subscription record for this plan tier.
     const { data: existingSub } = await supabase
@@ -133,6 +151,11 @@ export const POST = defineRoute({
           plan_tier: body.plan_id,
           paid_amount_inr: 0,
           paid_at: new Date().toISOString(),
+          // Event-scoped boost amounts, additive across repeat purchases for
+          // this SAME event — see the removed account-wide preferences
+          // increment above.
+          guests_boost: (currentSettings.guests_boost || 0) + body.guest_boost,
+          shots_boost: (currentSettings.shots_boost || 0) + body.shots_boost,
         },
       })
       .eq("id", body.event_id)
@@ -150,6 +173,25 @@ export const POST = defineRoute({
           .update({ used_count: (coupon.used_count || 0) + 1 })
           .eq("id", coupon.id)
       }
+    }
+
+    // Record the idempotency marker last, once everything above has
+    // actually succeeded — a retry that arrives before this point (e.g. the
+    // very first attempt's response was lost mid-flight) is still safely
+    // allowed to run the whole handler again rather than silently no-op
+    // before anything was actually applied.
+    if (body.idempotency_key) {
+      await sbAdmin.from("transactions").insert({
+        user_id: userId,
+        razorpay_payment_id: `free_${body.idempotency_key}`,
+        amount: 0,
+        currency: body.currency,
+        status: "success",
+        payment_method: "free",
+        event_id: body.event_id,
+        guests_boost_delta: body.guest_boost,
+        shots_boost_delta: body.shots_boost,
+      })
     }
 
     return ok({ success: true, plan: body.plan_id })

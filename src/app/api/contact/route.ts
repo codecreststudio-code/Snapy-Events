@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/server"
 import { sendEmail, getEmailSettings } from "@/lib/integrations/resend"
 import { logger } from "@/lib/logger"
 import { z } from "zod"
+import { getClientIp } from "@/lib/security/client-ip"
 
 function escapeHtml(text: string): string {
   const map: Record<string, string> = {
@@ -36,7 +37,7 @@ export const POST = defineRoute({
 
     const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
     const userAgent = request.headers.get("user-agent") || "Unknown browser"
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "Unknown"
+    const ip = getClientIp(request.headers)
     const subjectLine = body.subject || `Contact: ${body.name}`
 
     try {

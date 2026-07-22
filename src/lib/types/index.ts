@@ -1,5 +1,11 @@
 export type PlanId = string
-export type EventType = typeof import("@/lib/constants").EVENT_TYPES[number]
+// Not actually confined to EVENT_TYPES's fixed list: the wizard's "custom"
+// card lets the host type any free-text label (see new-event-form.tsx,
+// which writes the trimmed custom text straight into event_type when
+// eventType === "custom"), and the create-event validator accepts any
+// string (src/lib/validators/index.ts: `event_type: z.string().optional()`)
+// rather than an enum. A closed union here would just be inaccurate.
+export type EventType = string
 export type EventStatus = "draft" | "published" | "completed" | "archived"
 export type UserRole = "owner" | "admin" | "member" | "viewer"
 export type SubscriptionStatus = "active" | "cancelled" | "past_due" | "trialing"

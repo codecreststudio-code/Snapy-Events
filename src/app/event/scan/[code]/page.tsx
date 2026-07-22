@@ -4,6 +4,7 @@ import { headers } from "next/headers"
 import { trackEvent } from "@/lib/analytics/track"
 import { increment_qr_scan } from "@/lib/db/rpc"
 import { redirect } from "next/navigation"
+import { getClientIp } from "@/lib/security/client-ip"
 
 export async function generateMetadata({ params }: PageProps<"/event/scan/[code]">) {
   return { title: "Opening event…" }
@@ -22,7 +23,7 @@ export default async function ScanRedirectPage({ params }: PageProps<"/event/sca
 
   if (qr && qr.is_active && (!qr.expires_at || new Date(qr.expires_at) >= new Date())) {
     const h = await headers()
-    const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || null
+    const ip = getClientIp(h)
     const ua = h.get("user-agent") ?? null
     void increment_qr_scan({ qr_id: qr.id, ip, ua, country: h.get("x-vercel-ip-country"), city: h.get("x-vercel-ip-city"), device: ua?.includes("Mobile") ? "mobile" : "desktop", referrer: h.get("referer") }).catch(() => null)
     const event = qr.event as any

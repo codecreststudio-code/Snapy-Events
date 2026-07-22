@@ -1,20 +1,28 @@
 
 
+// Single source of truth for the event "type" a host can pick when creating
+// an event. Consumed by the event-creation wizard's Step 2 cards
+// (new-event-form.tsx's EVENT_TYPE_CARDS, which decorates each id below
+// with an emoji/color via EVENT_TYPE_META) and by the EventType type below.
+// Previously the wizard kept its own separate, hand-copied list that had
+// drifted from this one — this one had "conference"/"concert"/"sports"/
+// "anniversary"/"fundraiser"/"trade_show"/"community"/"other", none of
+// which the wizard actually offered as a selectable card, while the wizard
+// had "festival" and "custom", neither of which existed here. Since the
+// wizard is the only place event_type is ever actually set, and it now
+// imports this exact array instead of a second copy, the two can't drift
+// again. Note "custom" is the wizard's free-text escape hatch — see
+// EventType in lib/types/index.ts for why the stored value isn't actually
+// confined to this list.
 export const EVENT_TYPES = [
   "wedding",
   "birthday",
-  "corporate",
-  "conference",
-  "concert",
-  "sports",
-  "graduation",
-  "baby_shower",
   "engagement",
-  "anniversary",
-  "fundraiser",
-  "trade_show",
-  "community",
-  "other",
+  "corporate",
+  "baby_shower",
+  "graduation",
+  "festival",
+  "custom",
 ] as const
 
 export const EVENT_STATUS = {
@@ -126,6 +134,14 @@ export const API_RATE_LIMITS = {
   MEDIA_UPLOAD: Number(process.env.RATE_LIMIT_MEDIA_UPLOAD) || 30, // 30 uploads per min
   RECAP_GENERATE: Number(process.env.RATE_LIMIT_RECAP_GENERATE) || 1, // 1 render per 3 mins — ~300s ffmpeg render, a host rarely needs this more than once every few minutes
   MOVIE_UPLOAD: Number(process.env.RATE_LIMIT_MOVIE_UPLOAD) || 3, // 3 uploads per 5 mins — client renders the video, this route just stores the finished file
+  // Payment routes previously had no rate limit at all, unlike every other
+  // authenticated/public mutation in this codebase — a gap for both
+  // Razorpay-order-spam and for hammering a coupon-validity/idempotency
+  // check. Order creation is capped tighter than verify, since verify is
+  // also legitimately retried by both the browser and the async webhook for
+  // the same payment.
+  PAYMENT_CHECKOUT: Number(process.env.RATE_LIMIT_PAYMENT_CHECKOUT) || 10, // 10 order-creations per min
+  PAYMENT_VERIFY: Number(process.env.RATE_LIMIT_PAYMENT_VERIFY) || 20, // 20 verify calls per min
 
   // 4. Admin Routes (Strict high-security limit)
   ADMIN_STRICT: Number(process.env.RATE_LIMIT_ADMIN_STRICT) || 30, // 30 admin requests per min

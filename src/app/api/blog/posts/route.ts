@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
+import { sanitizeBlogContent } from "@/lib/security/blog-sanitize"
 
 const listQuerySchema = z.object({
   status: z.enum(["draft", "published", "archived", "all"]).optional(),
@@ -67,8 +68,13 @@ export const POST = defineRoute({
   rateLimit: { key: "blog:post:create", limit: 20, windowSeconds: 3600 },
   handler: async ({ body, auth }) => {
     const supabase = await createClient()
-    const { data: profile } = await supabase.from("users").select("is_admin, role").eq("id", auth.user!.id).single()
-    if (!profile?.is_admin && profile?.role !== "owner") {
+    // Platform-admin only. `role === "owner"` is the default role every
+    // self-service signup gets (see src/lib/auth/session.ts) — it means
+    // "owns their own events," not "can publish to the public blog." Using
+    // it here let every registered host account create/edit/delete/publish
+    // arbitrary blog posts.
+    const { data: profile } = await supabase.from("users").select("is_admin").eq("id", auth.user!.id).single()
+    if (!profile?.is_admin) {
       return fail("FORBIDDEN", "Admin access required to create blog posts", 403)
     }
 
@@ -76,6 +82,9 @@ export const POST = defineRoute({
       .from("blog_posts")
       .insert({
         ...body,
+        // Sanitized at the write boundary — see src/lib/security/blog-sanitize.ts
+        // for why this can't be left to render-time-only sanitization.
+        content: body.content ? sanitizeBlogContent(body.content) : body.content,
         published_at: body.status === "published" ? (body.published_at || new Date().toISOString()) : null,
       })
       .select(`id, title, slug, status, created_at, author:blog_authors(id, name, slug), category:blog_categories(id, name, slug, emoji, color)`)

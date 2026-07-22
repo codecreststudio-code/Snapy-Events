@@ -35,14 +35,16 @@ async function loadPhoto(photoId: string) {
   const supabase = await createServiceClient()
   const { data: photo, error } = await supabase
     .from("photos")
-    .select("id, event_id, gallery_id, is_approved, event:events(host_id)")
+    .select("id, event_id, gallery_id, is_approved, event:events(host_id, settings)")
     .eq("id", photoId)
     .single()
   if (error || !photo) return null
 
   const eventRel = photo.event as any
-  const hostId = (Array.isArray(eventRel) ? eventRel[0] : eventRel)?.host_id as string | undefined
-  return { ...photo, host_id: hostId }
+  const ev = Array.isArray(eventRel) ? eventRel[0] : eventRel
+  const hostId = ev?.host_id as string | undefined
+  const settings = (ev?.settings as Record<string, any>) || {}
+  return { ...photo, host_id: hostId, event_settings: settings }
 }
 
 async function isVisibleToGuest(photo: { is_approved: boolean | null; gallery_id: string }): Promise<boolean> {
@@ -88,11 +90,26 @@ export const POST = defineRoute<unknown, unknown, { id: string }>({
       return fail("NOT_FOUND", "Photo not found", 404)
     }
 
+    // The wizard's "Reaction Messages" toggle (Step 7 — guest notes, emoji
+    // reactions, advice cards) saved to settings.content_types.messages but
+    // nothing ever read it back: turning it off in the wizard didn't
+    // actually stop guests from reacting or commenting. Only guests are
+    // gated — the host managing their own event isn't affected by their own
+    // toggle. Voice-note replies are gated separately by content_types.voice_notes,
+    // matching the same key photos/upload/route.ts and events/public-info/route.ts
+    // already use for the primary voice-note upload flow.
+    const contentTypes = (photo.event_settings?.content_types as Record<string, boolean>) || {}
+    const messagesEnabled = contentTypes.messages !== false
+    const voiceNotesEnabled = contentTypes.voice_notes !== false
+
     const supabase = await createServiceClient()
     const contentType = request.headers.get("content-type") || ""
 
     // Voice-note reply: multipart upload with an audio file field.
     if (contentType.includes("multipart/form-data")) {
+      if (!requesterIsHost && !voiceNotesEnabled) {
+        return fail("FORBIDDEN", "Voice note replies are disabled for this event.", 403)
+      }
       const fd = await request.formData()
       const file = fd.get("audio") as File | null
       const authorName = cleanAuthorName(fd.get("author_name"))
@@ -130,6 +147,10 @@ export const POST = defineRoute<unknown, unknown, { id: string }>({
       })
       if (error) return fail("DB_ERROR", `Failed to save voice reply: ${error.message}`, 500)
       return ok({ comments })
+    }
+
+    if (!requesterIsHost && !messagesEnabled) {
+      return fail("FORBIDDEN", "Reactions and comments are disabled for this event.", 403)
     }
 
     // JSON body: either an emoji reaction or a text comment.

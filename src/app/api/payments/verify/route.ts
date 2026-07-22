@@ -3,6 +3,7 @@ import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createServiceClient } from "@/lib/supabase/server"
 import crypto from "node:crypto"
 import { fetchRazorpayOrder } from "@/lib/integrations/razorpay"
+import { API_RATE_LIMITS } from "@/lib/constants"
 
 function timingSafeEqualHex(a: string, b: string): boolean {
   const ba = Buffer.from(a, "utf8")
@@ -26,6 +27,7 @@ export const POST = defineRoute({
   method: "POST",
   body: verifyBodySchema,
   requireAuth: true,
+  rateLimit: { key: "payments:verify", limit: API_RATE_LIMITS.PAYMENT_VERIFY, windowSeconds: 60 },
   handler: async ({ body, auth }) => {
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = body
 
@@ -83,26 +85,16 @@ export const POST = defineRoute({
     // Amount actually captured by Razorpay, in paise — authoritative for records.
     const amountInPaise = typeof order.amount === "number" ? order.amount : Number(order.amount) || 0
 
-    // 4. Fetch user preferences
-    const { data: userRecord } = await supabase
-      .from("users")
-      .select("id, preferences")
-      .eq("id", userId)
-      .maybeSingle()
-
-    // Update user boosts in preferences
-    if (userRecord) {
-      const currentPrefs = (userRecord.preferences as Record<string, any>) || {}
-      const newPrefs = {
-        ...currentPrefs,
-        guest_boost: (currentPrefs.guest_boost || 0) + guest_boost,
-        shots_boost: (currentPrefs.shots_boost || 0) + shots_boost,
-      }
-      await supabase
-        .from("users")
-        .update({ preferences: newPrefs })
-        .eq("id", userRecord.id)
-    }
+    // 4. Guest/shot boosts purchased at checkout are scoped to the specific
+    //    event this payment was for (see step 7 below, which writes
+    //    guests_boost/shots_boost onto that event's own settings). This used
+    //    to ALSO increment `users.preferences.guest_boost/shots_boost` — an
+    //    account-wide bucket read by photos/upload/route.ts and
+    //    events/public-info/route.ts — with no per-event reset, so a boost
+    //    bought for one event permanently inflated every other event the
+    //    host ever created, stacking indefinitely across purchases. That
+    //    increment has been removed; the event-scoped write in step 7 is now
+    //    the only place a boost is persisted.
 
     // 3. Create or update Subscription
     let subscriptionId: string | null = null
@@ -164,7 +156,11 @@ export const POST = defineRoute({
       .single()
     invoiceId = invoice?.id ?? null
 
-    // 6. Record Transaction
+    // 6. Record Transaction. event_id + the boost deltas this specific
+    //    payment granted are stored here so an admin refund
+    //    (src/app/api/admin/payments/refund/route.ts) can find and reverse
+    //    exactly what this transaction gave the event — not guess, and not
+    //    touch boosts contributed by some other transaction on the same event.
     await supabase.from("transactions").insert({
       user_id: userId,
       invoice_id: invoiceId,
@@ -174,6 +170,9 @@ export const POST = defineRoute({
       currency: "INR",
       status: "success",
       payment_method: "razorpay",
+      event_id: eventId ?? null,
+      guests_boost_delta: guest_boost,
+      shots_boost_delta: shots_boost,
     })
 
     // 7. Mark the specific event this payment was for as paid. This is the
@@ -200,6 +199,13 @@ export const POST = defineRoute({
               paid_amount_inr: amountInPaise / 100,
               razorpay_payment_id: razorpay_payment_id,
               paid_at: new Date().toISOString(),
+              // Event-scoped boost amounts — see the removed account-wide
+              // preferences increment above for why this is the only place
+              // these are written now. Additive so a second boost purchase
+              // for the SAME event stacks correctly, without touching any
+              // other event.
+              guests_boost: (currentSettings.guests_boost || 0) + guest_boost,
+              shots_boost: (currentSettings.shots_boost || 0) + shots_boost,
             },
           })
           .eq("id", eventId)

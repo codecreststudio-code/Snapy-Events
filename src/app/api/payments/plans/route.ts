@@ -75,23 +75,12 @@ const DEFAULT_PLANS = [
     ],
     limits: { events_limit: -1, storage_limit_gb: 1000, photo_limit: -1, guests_limit: 100, shots_limit: 25 },
   },
-  {
-    id: "free",
-    name: "Free",
-    description: "Perfect for trying out Snapsy",
-    price_inr: 0,
-    price_usd: 0,
-    billing_interval: "event",
-    is_active: true,
-    sort_order: 4,
-    features: [
-      "5 guests limit",
-      "5 shots per guest",
-      "Standard photo reveal",
-      "Basic web gallery",
-    ],
-    limits: { events_limit: 1, storage_limit_gb: 1, photo_limit: 100, guests_limit: 5, shots_limit: 5 },
-  },
+  // NOTE: a duplicate second "free" entry (sort_order 4) used to live here,
+  // colliding with the first "free" row's primary key. Since `plans.insert`
+  // sends every row in one batch, that duplicate made the whole seed insert
+  // fail on a unique-constraint violation, silently falling through to the
+  // catch block below and returning this raw array (dupes and all) instead
+  // of ever actually seeding the table. Removed the duplicate.
 ]
 
 export const GET = defineRoute({

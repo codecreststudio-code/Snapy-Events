@@ -22,7 +22,7 @@ export const POST = defineRoute({
     // 1. Fetch the transaction
     const { data: tx, error: txErr } = await sb
       .from("transactions")
-      .select("id, razorpay_payment_id, amount, status, user_id")
+      .select("id, razorpay_payment_id, amount, status, user_id, event_id, guests_boost_delta, shots_boost_delta")
       .eq("id", transactionId)
       .single()
 
@@ -30,6 +30,50 @@ export const POST = defineRoute({
     if (tx.status === "refunded") return fail("CONFLICT", "This transaction has already been refunded", 409)
     if (tx.status !== "success") return fail("CONFLICT", "Only successful transactions can be refunded", 409)
     if (!tx.razorpay_payment_id) return fail("CONFLICT", "No Razorpay payment ID found for this transaction", 409)
+
+    // Reverses what this specific transaction granted its event: refunding
+    // used to only ever flip transactions.status, leaving the event's own
+    // settings — guest_count_plan (the field feature-gate.ts and
+    // photos/upload/route.ts actually key entitlements off, not
+    // payment_status) and any guests_boost/shots_boost this payment added —
+    // fully paid and boosted forever, refund or not. Only reverses THIS
+    // transaction's own boost contribution (guests_boost_delta/
+    // shots_boost_delta, recorded at purchase time), not the event's whole
+    // boost total, so a refund on one of several purchases doesn't wipe out
+    // boosts a different, still-valid payment added.
+    // Only a full refund reverses entitlements — a partial refund (amount <
+    // the original charge) means the host is keeping most of what they paid
+    // for, so the event shouldn't be knocked back down to the free tier.
+    const isFullRefund = !amount || amount >= tx.amount
+    // Rebind as a fresh, non-null const so the nested closure below doesn't
+    // need to re-narrow `tx` across a function boundary (TS doesn't carry
+    // the `if (!tx) return` narrowing above into nested function
+    // declarations, even though `tx` itself is never reassigned).
+    const txData = tx
+
+    async function reverseEventEntitlements() {
+      if (!txData.event_id || !isFullRefund) return
+      const { data: eventRow } = await sb
+        .from("events")
+        .select("id, settings")
+        .eq("id", txData.event_id)
+        .maybeSingle()
+      if (!eventRow) return
+      const currentSettings = (eventRow.settings as Record<string, any>) || {}
+      await sb
+        .from("events")
+        .update({
+          settings: {
+            ...currentSettings,
+            payment_status: "refunded",
+            guest_count_plan: "free",
+            plan_tier: "free",
+            guests_boost: Math.max(0, (currentSettings.guests_boost || 0) - (txData.guests_boost_delta || 0)),
+            shots_boost: Math.max(0, (currentSettings.shots_boost || 0) - (txData.shots_boost_delta || 0)),
+          },
+        })
+        .eq("id", txData.event_id)
+    }
 
     // 2. Trigger real Razorpay refund
     if (!isRazorpayConfigured()) {
@@ -40,6 +84,7 @@ export const POST = defineRoute({
         .eq("id", transactionId)
 
       if (updateErr) return fail("DB_ERROR", "Failed to process refund", 500)
+      await reverseEventEntitlements()
       return ok({ success: true, mode: "simulation", message: "Razorpay not configured — DB-only refund recorded." })
     }
 
@@ -67,6 +112,8 @@ export const POST = defineRoute({
         .eq("id", transactionId)
 
       if (updateErr) return fail("DB_ERROR", "Failed to update transaction status", 500)
+
+      await reverseEventEntitlements()
 
       return ok({
         success: true,

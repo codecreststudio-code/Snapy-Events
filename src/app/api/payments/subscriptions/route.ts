@@ -56,15 +56,17 @@ export const POST = defineRoute({
     if (body.plan_id === "free") return ok({ plan: "free" })
     if (!isRazorpayConfigured()) return fail("BILLING_UNAVAILABLE", "Razorpay not configured", 503)
     const supabase = await createClient()
+    // Only razorpay_customer_id is actually used below — this used to also
+    // select+join user:users(full_name) into an unused `hostUser as any`
+    // (dead code, and an unnecessary join+cast).
     const { data: existingSub } = await supabase
       .from("subscriptions")
-      .select("razorpay_customer_id, user:users(full_name)")
+      .select("razorpay_customer_id")
       .eq("user_id", auth.user!.id)
       .in("status", ["active", "past_due"])
       .limit(1)
       .maybeSingle()
 
-    const hostUser = existingSub?.user as any
     let customerId = existingSub?.razorpay_customer_id ?? null
     if (!customerId) {
       const { data: userProfile } = await supabase

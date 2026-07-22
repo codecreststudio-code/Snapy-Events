@@ -12,6 +12,7 @@ import { rateLimit } from "@/lib/security/rate-limit"
 import { verifyCsrf } from "@/lib/security/csrf"
 import { trackEvent } from "@/lib/analytics/track"
 import { logAudit } from "@/lib/audit/log"
+import { getClientIp } from "@/lib/security/client-ip"
 
 export type Handler<C = unknown> = (
   ctx: C,
@@ -58,7 +59,7 @@ export function defineRoute<TBody = unknown, TQuery = unknown, C = unknown>(opts
 
         // Rate limit
         if (opts.rateLimit) {
-          const ip = (request.headers.get("x-forwarded-for") ?? "anon").split(",")[0].trim()
+          const ip = getClientIp(request.headers)
           const r = await rateLimit({
             key: `${opts.rateLimit.key}:${ip}`,
             limit: opts.rateLimit.limit,

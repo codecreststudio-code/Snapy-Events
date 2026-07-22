@@ -12,6 +12,7 @@ import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
 import { hasGuestSessionFromRequest, isEventHost } from "@/lib/security/guest-session"
 import { detectAndStoreFaces } from "@/lib/integrations/face"
 import { computeQualitySignals, hammingDistanceHex, DUPLICATE_HAMMING_THRESHOLD } from "@/lib/integrations/image-quality"
+import { getPlanLimits, HARDCODED_SAFETY_NET_LIMITS } from "@/lib/plans/plan-limits"
 
 const querySchema = z.object({ gallery_id: z.string().uuid() })
 
@@ -172,12 +173,6 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       fileSize = Number(realSize)
     }
 
-    const { data: hostProfile } = await supabase
-      .from("users")
-      .select("preferences")
-      .eq("id", hostId)
-      .maybeSingle()
-
     const { data: subscription } = hostId
       ? await supabase
           .from("subscriptions")
@@ -188,31 +183,35 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
           .maybeSingle()
       : { data: null }
 
-    const orgPlan = subscription?.plan_id || "free"
-    const hostPrefs = (hostProfile?.preferences as Record<string, any>) || {}
+    // Guest/shot quotas are scoped per event below (event_id filters on the
+    // counts further down), so the plan that should apply here is the one
+    // THIS event was created/paid for (settings.guest_count_plan) — not the
+    // host's account-wide `subscriptions` row, which is a single row that
+    // gets overwritten by whichever event the host most recently paid for
+    // (see the identical fix + fuller explanation in
+    // src/lib/plans/feature-gate.ts). Falling back to the account
+    // subscription only covers events created before guest_count_plan
+    // started being persisted.
+    const orgPlan = settings.guest_count_plan || subscription?.plan_id || "free"
 
-    const guestBoost = hostPrefs.guest_boost || 0
-    const shotsBoost = hostPrefs.shots_boost || 0
+    // Guest/shot boosts purchased at checkout are written onto THIS event's
+    // own settings (see src/app/api/payments/verify/route.ts and
+    // checkout-free/route.ts) — not onto the host's account-wide
+    // `users.preferences`, which used to be read here instead. That bucket
+    // never reset per event, so a boost bought for event A permanently
+    // inflated the limits of every other event the same host created.
+    const guestBoost = settings.guests_boost || 0
+    const shotsBoost = settings.shots_boost || 0
 
-    const PLAN_DEFAULT_LIMITS: Record<string, { guests: number; shots: number; storage: number }> = {
-      free: { guests: 5, shots: 5, storage: 1 },
-      starter: { guests: 10, shots: 10, storage: 10 },
-      standard: { guests: 50, shots: 15, storage: 100 },
-      premium: { guests: 100, shots: 25, storage: 1000 },
-    }
-
-    const fallback = PLAN_DEFAULT_LIMITS[orgPlan] || PLAN_DEFAULT_LIMITS.free
-
-    let baseLimits = { guests_limit: fallback.guests, shots_limit: fallback.shots, storage_limit_gb: fallback.storage }
-    if (orgPlan) {
-      const { data: planData } = await supabase.from("plans").select("limits").eq("id", orgPlan).maybeSingle()
-      if (planData?.limits) {
-        baseLimits = {
-          guests_limit: planData.limits.guests_limit ?? planData.limits.guest_limit ?? fallback.guests,
-          shots_limit: planData.limits.shots_limit ?? planData.limits.shot_limit ?? fallback.shots,
-          storage_limit_gb: planData.limits.storage_limit_gb ?? fallback.storage,
-        }
-      }
+    // Resolves orgPlan against the LIVE plans table, falling back to the
+    // platform's actual current "free" plan (not a hardcoded, drift-prone
+    // guess) if orgPlan was renamed/deleted since this event was created —
+    // see src/lib/plans/plan-limits.ts for the full explanation.
+    const { limits: planLimits } = await getPlanLimits(supabase, orgPlan)
+    const baseLimits = {
+      guests_limit: planLimits.guests_limit ?? planLimits.guest_limit ?? HARDCODED_SAFETY_NET_LIMITS.guests_limit,
+      shots_limit: planLimits.shots_limit ?? planLimits.shot_limit ?? HARDCODED_SAFETY_NET_LIMITS.shots_limit,
+      storage_limit_gb: planLimits.storage_limit_gb ?? HARDCODED_SAFETY_NET_LIMITS.storage_limit_gb,
     }
 
     const maxGuests = baseLimits.guests_limit + guestBoost

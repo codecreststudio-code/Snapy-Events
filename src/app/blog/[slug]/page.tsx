@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { headers } from "next/headers"
 import BlogPostClient from "./client"
 import { createClient } from "@/lib/supabase/server"
 import type { BlogPost } from "@/lib/types/blog"
@@ -149,14 +150,22 @@ export default async function BlogPostPage({ params }: Props) {
   const safeJson = (obj: unknown) =>
     JSON.stringify(obj).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026")
 
+  // proxy.ts's CSP now requires script-src content to carry a nonce instead
+  // of relying on 'unsafe-inline' — these two JSON-LD tags are the only
+  // inline <script>s this page itself renders (BlogPostClient's own
+  // dangerouslySetInnerHTML only ever writes into a <div>, not a <script>).
+  const nonce = (await headers()).get("x-nonce") ?? undefined
+
   return (
     <>
       <script
         type="application/ld+json"
+        nonce={nonce}
         dangerouslySetInnerHTML={{ __html: safeJson(jsonLd) }}
       />
       <script
         type="application/ld+json"
+        nonce={nonce}
         dangerouslySetInnerHTML={{ __html: safeJson(breadcrumbLd) }}
       />
       <BlogPostClient post={post} related={related} />

@@ -1,102 +1,36 @@
 import { z } from "zod"
-import { defineRoute, ok, fail } from "@/lib/api/handler"
-import { createClient } from "@/lib/supabase/server"
-import { isRazorpayConfigured, createRazorpayCustomer, createRazorpayOrder } from "@/lib/integrations/razorpay"
-import { getLiveAddonCatalog } from "@/lib/payments/addons"
-import { getFeatureFlags } from "@/lib/platform-settings"
+import { defineRoute, fail } from "@/lib/api/handler"
 
 const addonCheckoutSchema = z.object({
   boost_type: z.enum(["guest", "shots"]),
   boost_value: z.number().min(1),
 })
 
+// Disabled. This standalone flow had no `event_id` anywhere in its schema —
+// it could only ever grant a boost account-wide via
+// `users.preferences.guest_boost/shots_boost`. That bucket was exactly the
+// source of a cross-event leak fixed across the payment system: a boost
+// bought for one event permanently inflated the guest/shot limits of every
+// OTHER event the same host owned, because nothing ever reset it per event.
+// Enforcement (photos/upload/route.ts, events/public-info/route.ts) now
+// reads boosts from the specific event's own `settings.guests_boost` /
+// `settings.shots_boost` instead, and no longer looks at
+// `users.preferences` at all — so left live, this route would still take a
+// real payment but grant nothing anywhere a host could see it. There is
+// also no UI caller anywhere in the app (the Billing page and the event
+// wizard both use the event-scoped /api/payments/checkout + verify flow).
+// It's disabled rather than reworked to be event-scoped, since that would
+// require new UI (letting a host pick which event to top up) that doesn't
+// exist today.
 export const POST = defineRoute({
   method: "POST",
   body: addonCheckoutSchema,
   requireAuth: true,
-  handler: async ({ body, auth }) => {
-    if (!isRazorpayConfigured()) {
-      return fail("BILLING_UNAVAILABLE", "Razorpay is not configured", 503)
-    }
-
-    const flags = await getFeatureFlags()
-    if (!flags.payments_enabled) {
-      return fail("BILLING_UNAVAILABLE", "Payments are temporarily disabled by the platform. Please try again later.", 503)
-    }
-
-    const supabase = await createClient()
-
-    // 1. Fetch Addon Prices — live from the Admin > Add-ons catalog (same
-    // source used by the Billing page and the event-wizard checkout).
-    let price = 0
-    const { guestBoosts, shotBoosts } = await getLiveAddonCatalog()
-
-    // Calculate specific addon price
-    if (body.boost_type === "guest") {
-      const item = guestBoosts.find((b) => b.value === body.boost_value)
-      if (!item) return fail("INVALID_ADDON", "Invalid guest boost selected", 400)
-      price = item.price
-    } else {
-      const item = shotBoosts.find((b) => b.value === body.boost_value)
-      if (!item) return fail("INVALID_ADDON", "Invalid shots boost selected", 400)
-      price = item.price
-    }
-
-    if (price <= 0) return fail("INVALID_PRICE", "Invalid addon price calculated", 400)
-    const amountInPaise = price * 100
-
-    // 2. Fetch or create Customer ID
-    const { data: sub } = await supabase
-      .from("subscriptions")
-      .select("razorpay_customer_id, user:users(full_name)")
-      .eq("user_id", auth.user!.id)
-      .in("status", ["active", "past_due"])
-      .limit(1)
-      .maybeSingle()
-
-    const hostUser = sub?.user as any
-    let customerId = sub?.razorpay_customer_id ?? null
-    if (!customerId) {
-      try {
-        const c = await createRazorpayCustomer({
-          name: hostUser?.full_name ?? auth.user!.email,
-          email: auth.user!.email,
-        })
-        customerId = c.id
-        await supabase
-          .from("subscriptions")
-          .update({ razorpay_customer_id: customerId })
-          .eq("user_id", auth.user!.id)
-      } catch (err: any) {
-        return fail("PAYMENT_ERROR", `Failed to register billing customer: ${err.message}`, 500)
-      }
-    }
-
-    // 3. Create Razorpay Order
-    try {
-      const order = await createRazorpayOrder({
-        amount: amountInPaise,
-        currency: "INR",
-        receipt: `addon_${Date.now().toString(36)}_${auth.user!.id.slice(0, 8)}`,
-        notes: {
-          user_id: auth.user!.id,
-          addon_type: body.boost_type,
-          addon_value: String(body.boost_value),
-        },
-      })
-
-      return ok({
-        order_id: order.id,
-        amount: amountInPaise,
-        currency: "INR",
-        key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
-        customer_id: customerId,
-        total_price: price,
-        boost_type: body.boost_type,
-        boost_value: body.boost_value,
-      })
-    } catch (err: any) {
-      return fail("PAYMENT_ERROR", `Failed to create addon payment order: ${err.message}`, 500)
-    }
+  handler: async () => {
+    return fail(
+      "GONE",
+      "Standalone add-on top-ups are no longer available. Boosts are purchased per-event from the event's checkout flow.",
+      410,
+    )
   },
 }).POST

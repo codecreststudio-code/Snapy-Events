@@ -56,12 +56,22 @@ export default function AdminModerationQueuePage() {
     fetchModerationItems()
   }, [])
 
+  // photos, videos, and voice notes are all rows in the single `photos`
+  // table (differentiated only by mime_type — see src/app/api/admin/photos,
+  // /videos, /voice-notes route.ts, which all select from the same table).
+  // /api/admin/photos's PATCH (approve) and DELETE handlers don't filter by
+  // mime_type, so they work unmodified for any of these resource types —
+  // this previously only ran for resource_type === "photo", so a flagged
+  // video or voice note could never actually be approved/removed from here,
+  // only dismissed from the queue view with no real action taken.
+  const MEDIA_RESOURCE_TYPES = new Set(["photo", "video", "voice_note", "audio"])
+
   const handleResolve = async (itemId: string, action: "approve" | "delete") => {
     const item = items.find((i) => i.id === itemId)
     if (!item) return
     setActioningId(itemId)
     try {
-      if (item.resource_type === "photo" && item.resource_id) {
+      if (MEDIA_RESOURCE_TYPES.has(item.resource_type) && item.resource_id) {
         if (action === "approve") {
           const res = await fetch("/api/admin/photos", {
             method: "PATCH",
@@ -69,16 +79,18 @@ export default function AdminModerationQueuePage() {
             body: JSON.stringify({ photoIds: [item.resource_id], action: "approve" }),
           })
           const json = await res.json()
-          if (!res.ok || json.success === false) throw new Error(json.error?.message || "Failed to approve photo")
+          if (!res.ok || json.success === false) throw new Error(json.error?.message || "Failed to approve content")
         } else {
           const res = await fetch(`/api/admin/photos?photoIds=${item.resource_id}`, { method: "DELETE" })
           const json = await res.json()
-          if (!res.ok || json.success === false) throw new Error(json.error?.message || "Failed to delete photo")
+          if (!res.ok || json.success === false) throw new Error(json.error?.message || "Failed to delete content")
         }
         toast({ title: "Resolved", description: `Report resolved: ${action === "approve" ? "content kept" : "content deleted"}.` })
       } else {
-        // No moderation action route exists yet for this resource type — just
-        // clear it from the queue view rather than pretending to act on it.
+        // No moderation action route exists yet for this resource type (e.g.
+        // a flagged comment, which lives inside a photo's JSONB `comments`
+        // array rather than its own row) — just clear it from the queue view
+        // rather than pretending to act on it.
         toast({ title: "Dismissed", description: `No automated action available for "${item.resource_type}" reports yet — removed from queue view only.` })
       }
       setItems(items.filter((i) => i.id !== itemId))

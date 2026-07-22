@@ -84,6 +84,9 @@ interface ExtEventSettings extends EventSettings {
   // key defaults to false/off so existing events don't suddenly start
   // requiring a code guests were never given.
   require_join_code?: boolean
+  // auto_approve_photos is already declared (required) on the base
+  // EventSettings interface — see src/lib/types/index.ts. Not redeclared
+  // here to avoid an incompatible-optionality conflict.
   photo_limit?: number
   video_duration_limit?: number
   voice_note_duration_limit?: number
@@ -1149,6 +1152,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   // as every other settings toggle here.
   const [editMemoriesEnabled, setEditMemoriesEnabled] = useState<boolean>(true)
   const [editRequireJoinCode, setEditRequireJoinCode] = useState<boolean>(false)
+  // Every event was created with settings.auto_approve_photos hardcoded to
+  // true (see new-event-form.tsx) and there was no UI anywhere to turn it
+  // off — so the guest upload page's "Photos will be reviewed before
+  // appearing in the gallery" copy was false for every single event. This
+  // gives hosts an actual switch, and photos/upload/route.ts already reads
+  // this exact field (settings.auto_approve_photos !== false) to decide
+  // is_approved, so flipping it here immediately takes effect.
+  const [editRequirePhotoApproval, setEditRequirePhotoApproval] = useState<boolean>(false)
 
   useEffect(() => {
     if (event) {
@@ -1162,6 +1173,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       setEditRevealExperience((event.settings as ExtEventSettings)?.reveal_experience || "immediately")
       setEditMemoriesEnabled((event.settings as ExtEventSettings)?.memories_enabled !== false)
       setEditRequireJoinCode((event.settings as ExtEventSettings)?.require_join_code === true)
+      setEditRequirePhotoApproval((event.settings as ExtEventSettings)?.auto_approve_photos === false)
     }
   }, [event, isDrawerOpen])
 
@@ -1456,6 +1468,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         reveal_type: isInstantReveal ? "instant" : "delayed",
         memories_enabled: editMemoriesEnabled,
         require_join_code: editRequireJoinCode,
+        auto_approve_photos: !editRequirePhotoApproval,
         ...(isoEndDate ? { countdown_date: isoEndDate } : {}),
       }
     })
@@ -2496,6 +2509,26 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           type="checkbox"
                           checked={editRequireJoinCode}
                           onChange={(e) => setEditRequireJoinCode(e.target.checked)}
+                          className="rounded border-white/20 bg-white/5 text-[#B28DAE] focus:ring-[#B28DAE] h-4 w-4"
+                        />
+                      </label>
+                    </div>
+
+                    {/* Every event used to hardcode auto_approve_photos:true
+                        at creation with no way to turn it off, while the
+                        guest upload page unconditionally claimed "Photos
+                        will be reviewed before appearing in the gallery" —
+                        a real toggle now backs that copy. */}
+                    <div className="flex items-center justify-between text-xs text-white/80 pt-1 border-t border-white/10">
+                      <div>
+                        <span className="block">🛡️ Review photos before they're visible</span>
+                        <span className="block text-[10px] text-white/40">Guest uploads wait for your approval instead of appearing instantly</span>
+                      </div>
+                      <label className="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editRequirePhotoApproval}
+                          onChange={(e) => setEditRequirePhotoApproval(e.target.checked)}
                           className="rounded border-white/20 bg-white/5 text-[#B28DAE] focus:ring-[#B28DAE] h-4 w-4"
                         />
                       </label>

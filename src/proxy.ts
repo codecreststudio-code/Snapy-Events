@@ -55,6 +55,18 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const reqId = request.headers.get("x-request-id") ?? crypto.randomUUID()
 
+  // Per-request CSP nonce (Next.js's documented pattern for a script-src
+  // that doesn't need 'unsafe-inline' — see the CSP block below). Set on
+  // the *request* headers (not just the response) so it flows through to
+  // Server Components/route handlers via headers().get("x-nonce"), for any
+  // inline <script> our own code renders (e.g. the blog post's JSON-LD tags
+  // and the admin analytics HTML export's auto-print script) to attach it
+  // via nonce={nonce}. Next.js also auto-detects this nonce from the CSP
+  // header value and applies it to its own framework-injected inline
+  // scripts, so no other wiring is needed for those.
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64")
+  request.headers.set("x-nonce", nonce)
+
   // 1. Create response
   let response = NextResponse.next({
     request: {
@@ -87,17 +99,12 @@ export async function proxy(request: NextRequest) {
   )
 
   // 3. Trigger session refresh to write updated cookies to response
-  if (process.env.NODE_ENV === "development") {
-    // Only log in development, never in production
-    console.log(`[Proxy Request] ${pathname} (${request.cookies.getAll().length} cookies)`)
-  }
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError && process.env.NODE_ENV === "development") {
-    console.error(`[Proxy Auth Error] ${pathname}:`, authError.message)
-  }
-  if (process.env.NODE_ENV === "development") {
-    console.log(`[Proxy Auth] ${pathname}:`, user ? "authenticated" : "unauthenticated")
-  }
+  // (debug console.log/error calls that used to sit here — dev-gated, so
+  // never actually reached in production — were removed; this middleware
+  // runs on every single request, and per-request console noise isn't worth
+  // it even in local dev. Use the request's X-Request-Id header to correlate
+  // logs elsewhere if needed.)
+  const { data: { user } } = await supabase.auth.getUser()
 
   // 4. Set security headers
   response.headers.set("X-Frame-Options", "DENY")
@@ -120,7 +127,24 @@ export async function proxy(request: NextRequest) {
         // pointed at them — this was silently breaking voice-note playback
         // in production (console: "violates ... media-src 'self' blob:").
         "media-src 'self' blob: https://*.supabase.co",
-        "script-src 'self' 'unsafe-inline' https://*.supabase.co https://*.razorpay.com https://cdn.jsdelivr.net",
+        // 'unsafe-inline' replaced with a per-request nonce (generated
+        // above) — closes off arbitrary inline-script execution (the
+        // dangerous half of an XSS payload) while still allowing the
+        // handful of inline scripts this app legitimately renders itself
+        // (blog JSON-LD, admin export auto-print), which now carry
+        // nonce={nonce}/nonce="${nonce}" explicitly. Per the CSP spec,
+        // browsers that understand 'nonce-...' ignore 'unsafe-inline' when
+        // both are present, so this is a real tightening, not cosmetic.
+        `script-src 'self' 'nonce-${nonce}' https://*.supabase.co https://*.razorpay.com https://cdn.jsdelivr.net`,
+        // style-src intentionally keeps 'unsafe-inline': this app uses
+        // React inline style={{...}} extensively (dynamic gradients, per-
+        // event theme colors, etc.), which renders as native style=""
+        // attributes — governed by style-src, not nonce-able the way
+        // <script> tags are (a nonce on a style attribute isn't a thing;
+        // only nonces/hashes on <style> *elements* are supported, and CSP
+        // has no per-attribute equivalent). Removing this would require
+        // migrating every dynamic inline style to CSS custom properties/
+        // classes first — a large, separate refactor, not a one-line fix.
         "style-src 'self' 'unsafe-inline'",
         "font-src 'self' data: https://*.gstatic.com",
         "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://*.razorpay.com https://api.razorpay.com https://*.resend.com https://graph.facebook.com https://cdn.jsdelivr.net",

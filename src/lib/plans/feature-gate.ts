@@ -1,4 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/server"
+import { getPlanLimits } from "@/lib/plans/plan-limits"
 
 export interface FeatureGateResult {
   allowed: boolean
@@ -37,17 +38,27 @@ export async function checkEventFeatureAccess(
     // 2. Determine this EVENT's own plan tier. Snapy Events charges per
     // event, not as an ongoing account subscription (fixed earlier — see
     // calculatePrice()/verify/checkout-free route comments) — so the
-    // authoritative entitlement lives on the event itself
-    // (settings.plan_tier, set at successful checkout), not on a
+    // authoritative entitlement lives on the event itself, not on a
     // user-scoped `subscriptions` row. That table is a single row per host
     // and gets overwritten by whichever event the host most recently paid
     // for, so keying off it here silently misattributed plan tier to every
     // OTHER event that same host owns (e.g. a free test event would
-    // inherit "premium" from a later purchase, or vice versa). Only fall
-    // back to `subscriptions` for events created before `plan_tier` started
-    // being persisted on settings.
+    // inherit "premium" from a later purchase, or vice versa).
+    //
+    // settings.guest_count_plan is what the wizard actually writes at event
+    // creation time (Step 6's plan selection) — it's present on every event
+    // from the moment it's created, paid or not. settings.plan_tier is only
+    // ever written later, at successful checkout (see checkout-free/verify/
+    // razorpay-webhook routes), so relying on it alone left every event
+    // without entitlements between creation and payment completion — and
+    // permanently for free-tier events, since those never go through
+    // checkout at all. Prefer guest_count_plan; fall back to plan_tier (in
+    // case it was ever set without guest_count_plan) and finally to
+    // `subscriptions` for events created before either field existed.
     let planId = "free"
-    if (typeof eventSettings.plan_tier === "string" && eventSettings.plan_tier) {
+    if (typeof eventSettings.guest_count_plan === "string" && eventSettings.guest_count_plan) {
+      planId = eventSettings.guest_count_plan
+    } else if (typeof eventSettings.plan_tier === "string" && eventSettings.plan_tier) {
       planId = eventSettings.plan_tier
     } else {
       const { data: sub } = await supabase
@@ -62,6 +73,22 @@ export async function checkEventFeatureAccess(
         planId = sub.plan_id
       }
     }
+
+    // Fetch the live plan record once, up front — its `limits` object is the
+    // single source of truth for what this plan actually includes (guest/shot
+    // quotas, and the same feature-toggle keys Admin > Plan Builder writes:
+    // video_uploads, voice_notes, ai_face_search, etc.). Replaces the
+    // hardcoded `planId === "standard" || planId === "premium"` style checks
+    // that used to gate video/voice access below — those silently broke for
+    // any admin-renamed or newly-added plan id (e.g. today's live catalog has
+    // no "starter" plan and a "free"-id plan displayed as "Basic").
+    //
+    // getPlanLimits() additionally falls back to the platform's actual
+    // current "free" plan (rather than an empty {}, which silently denied
+    // every single feature toggle) if planId itself was renamed/deleted
+    // since this event was created — see src/lib/plans/plan-limits.ts.
+    const { limits: planLimits, planId: resolvedPlanId } = await getPlanLimits(supabase, planId)
+    planId = resolvedPlanId
 
     // Check nested content_types toggles. An explicit true/false is honored
     // either way — it reflects what the host actually selected in the event
@@ -82,7 +109,7 @@ export async function checkEventFeatureAccess(
         return { allowed: false, planId, reason: "Video uploads are disabled for this event in event settings." }
       }
       if (contentTypes.videos !== true) {
-        const planIncludesVideo = planId === "standard" || planId === "premium"
+        const planIncludesVideo = Boolean(planLimits.video_uploads)
         return {
           allowed: planIncludesVideo,
           planId,
@@ -95,11 +122,11 @@ export async function checkEventFeatureAccess(
         return { allowed: false, planId, reason: "Voice notes are disabled for this event in event settings." }
       }
       if (contentTypes.voice_notes !== true) {
-        const planIncludesVoice = planId === "premium"
+        const planIncludesVoice = Boolean(planLimits.voice_notes)
         return {
           allowed: planIncludesVoice,
           planId,
-          reason: planIncludesVoice ? undefined : "Voice notes are a Premium-only feature.",
+          reason: planIncludesVoice ? undefined : "Voice notes are not included in this event's plan.",
         }
       }
     }
@@ -133,20 +160,21 @@ export async function checkEventFeatureAccess(
       if (aiFeatures[newAiFeature.settingsKey] !== true) {
         return { allowed: false, planId, reason: "Not enabled for this event in event settings." }
       }
-      if (newAiFeature.premium && planId !== "premium") {
-        return { allowed: false, planId, reason: `'${featureKey}' is a Premium-tier feature.` }
+      // "Premium-tier" here means whatever plan has ai_face_search enabled in
+      // its Admin > Plan Builder toggles — the flagship gated feature this
+      // codebase already treats as the premium-tier signal elsewhere (see
+      // the isPaid fallback below). A hardcoded `planId !== "premium"` check
+      // used to live here, which broke the instant an admin renamed/removed
+      // the "premium"-id plan (today's live catalog has no plan literally
+      // named/id'd "premium" either).
+      if (newAiFeature.premium && !planLimits.ai_face_search) {
+        return { allowed: false, planId, reason: `'${featureKey}' requires a plan with AI Face Search included.` }
       }
       return { allowed: true, planId }
     }
 
-    // 3. Fetch Plan Limits & Toggles
-    const { data: planRecord } = await supabase
-      .from("plans")
-      .select("limits, features")
-      .eq("id", planId)
-      .maybeSingle()
-
-    const limits = (planRecord?.limits as Record<string, any>) || {}
+    // 3. Plan limits/toggles were already fetched above as planLimits.
+    const limits = planLimits
 
     // Check if explicitly set in plan limits
     if (limits[featureKey] !== undefined) {

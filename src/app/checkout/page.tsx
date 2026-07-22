@@ -16,10 +16,25 @@ import { CurrencyToggle } from "@/lib/components/ui/currency-toggle"
 
 // Fallback-only values, used only until the live catalog loads (or if that
 // fetch fails). The actual display AND the actual charge are both driven by
-// the live Admin > Add-ons catalog: this page fetches it via
-// /api/payments/addons (see fetchAddons below) and /api/payments/checkout
-// re-fetches it server-side so the Razorpay order amount can't be spoofed.
-const PLAN_BASE_PHOTO_LIMITS: Record<string, number> = { free: 5, starter: 20, standard: 45, premium: 85 }
+// the live Admin > Add-ons / Admin > Plan Builder catalogs: this page fetches
+// plans via /api/payments/plans (see fetchPlans below, same endpoint the
+// public /pricing page and the event wizard's Step 6 use) and addons via
+// /api/payments/addons, and /api/payments/checkout re-fetches both server-side
+// so the Razorpay order amount can't be spoofed.
+//
+// Plan ids/names/limits below are NOT assumed to be "free"/"starter"/
+// "standard"/"premium" — those were hardcoded here previously and silently
+// went stale the moment an admin renamed or reconfigured a plan (today's live
+// catalog, for instance, has no plan literally id'd "starter"). This fallback
+// map only exists so the page has *something* to render for the couple of
+// frames before the live fetch resolves.
+const PLAN_FALLBACK: Record<string, { name: string; price_inr: number; price_usd: number; limits: Record<string, any> }> = {
+  free: { name: "Free", price_inr: 0, price_usd: 0, limits: { shots_limit: 5 } },
+  starter: { name: "Starter Plan", price_inr: 499, price_usd: 6, limits: { shots_limit: 20 } },
+  standard: { name: "Standard Plan", price_inr: 1499, price_usd: 19, limits: { shots_limit: 45, video_uploads: true } },
+  premium: { name: "Premium Plan", price_inr: 3999, price_usd: 50, limits: { shots_limit: 85, video_uploads: true, voice_notes: true, ai_face_search: true } },
+}
+
 const PHOTO_LIMIT_ADDON_PRICES: Record<number, number> = { 5: 0, 10: 99, 25: 179, 50: 249, [-1]: 599 }
 const VIDEO_UNLOCK_ADDON_PRICE = 599
 const VOICE_UNLOCK_ADDON_PRICE = 399
@@ -37,31 +52,13 @@ const SHOT_PRICES: Record<number, number> = {
   25: 249,
 }
 
-const PLAN_NAMES: Record<string, string> = {
-  starter: "Starter Plan",
-  standard: "Standard Plan",
-  premium: "Premium Plan",
-}
-
-const PLAN_DEFAULT_PRICES: Record<string, number> = {
-  starter: 499,
-  standard: 1499,
-  premium: 3999,
-}
-
-const PLAN_DEFAULT_USD: Record<string, number> = {
-  starter: 6,
-  standard: 19,
-  premium: 50,
-}
-
 function CheckoutForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user, profile, isLoading: authLoading } = useAuth()
   const { currency, symbol, getPrice } = useCurrency()
   
-  const plan = searchParams?.get("plan") || "starter"
+  const plan = searchParams?.get("plan") || "free"
   const eventId = searchParams?.get("event_id") || ""
   const eventSlug = searchParams?.get("event") || ""
   const guests = parseInt(searchParams?.get("guests") || "0")
@@ -73,13 +70,24 @@ function CheckoutForm() {
 
   const [initiating, setInitiating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [planPrices, setPlanPrices] = useState<Record<string, number>>(PLAN_DEFAULT_PRICES)
-  const [planUsdPrices, setPlanUsdPrices] = useState<Record<string, number>>(PLAN_DEFAULT_USD)
+  // Live plan record for the id in the URL — name, price, and limits (guest/
+  // shot quotas + video_uploads/voice_notes/ai_face_search toggles), all
+  // sourced from the same /api/payments/plans data the wizard and /pricing
+  // page use. Falls back to PLAN_FALLBACK only until this resolves.
+  const [livePlans, setLivePlans] = useState<Record<string, { name: string; price_inr: number; price_usd: number; limits: Record<string, any> }>>(PLAN_FALLBACK)
   const [guestPrices, setGuestPrices] = useState<Record<number, number>>(GUEST_PRICES)
   const [shotPrices, setShotPrices] = useState<Record<number, number>>(SHOT_PRICES)
   const [photoLimitPrices, setPhotoLimitPrices] = useState<Record<number, number>>(PHOTO_LIMIT_ADDON_PRICES)
   const [videoAddonPrice, setVideoAddonPrice] = useState<number>(VIDEO_UNLOCK_ADDON_PRICE)
   const [voiceAddonPrice, setVoiceAddonPrice] = useState<number>(VOICE_UNLOCK_ADDON_PRICE)
+
+  // Generated once per page load and reused on every /api/payments/checkout-free
+  // attempt from this page — lets the server recognize and no-op a retry
+  // (double-click, flaky network causing the client to resend) instead of
+  // double-applying a coupon's used_count or double-incrementing this
+  // event's guest/shot boosts. checkout-free has no Razorpay payment id to
+  // naturally dedupe on the way the paid flow does, so this fills that gap.
+  const [freeCheckoutIdempotencyKey] = useState(() => (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`))
 
   const [couponCode, setCouponCode] = useState("")
   const [appliedCoupon, setAppliedCoupon] = useState<{ discount_type: string, discount_value: number, code: string } | null>(null)
@@ -94,9 +102,10 @@ function CheckoutForm() {
   // pay once for a tier, and every later event on that tier priced at ₹0 for
   // as long as the subscription row said "active". Removed — the full plan
   // price is always shown and always charged.
-  const rawBaseInr = planPrices[plan] || PLAN_DEFAULT_PRICES[plan] || 0
-  const rawBaseUsd = planUsdPrices[plan] || PLAN_DEFAULT_USD[plan] || Math.round((planPrices[plan] || 0) / 80) || 1
-  
+  const selectedPlan = livePlans[plan]
+  const rawBaseInr = selectedPlan?.price_inr || 0
+  const rawBaseUsd = selectedPlan?.price_usd || Math.round(rawBaseInr / 80) || 1
+
   const rawGuestInr = guestPrices[guests] || (guests > 0 ? Math.round(guests * 19.9) : 0)
   const rawGuestUsd = Math.round(rawGuestInr / 80) || (guests > 0 ? 3 : 0)
   
@@ -108,12 +117,12 @@ function CheckoutForm() {
   // a plan that doesn't include them. Priced here only for display; the
   // authoritative charge is recomputed server-side in /api/payments/checkout
   // so this can't be spoofed by editing the URL.
-  const planBasePhotoLimit = PLAN_BASE_PHOTO_LIMITS[plan] ?? 0
+  const planBasePhotoLimit = Number(selectedPlan?.limits?.shots_limit ?? 0)
   const photoAddonInr = typeof photoLimit === "number" && photoLimit !== planBasePhotoLimit && (photoLimit === -1 || photoLimit > planBasePhotoLimit)
     ? (photoLimitPrices[photoLimit] ?? 0)
     : 0
-  const videoAddonInr = videos && plan !== "standard" && plan !== "premium" ? videoAddonPrice : 0
-  const voiceAddonInr = voiceNotes && plan !== "premium" ? voiceAddonPrice : 0
+  const videoAddonInr = videos && !selectedPlan?.limits?.video_uploads ? videoAddonPrice : 0
+  const voiceAddonInr = voiceNotes && !selectedPlan?.limits?.voice_notes ? voiceAddonPrice : 0
   const featureAddonInr = photoAddonInr + videoAddonInr + voiceAddonInr
   const featureAddonUsd = Math.round(featureAddonInr / 80) || (featureAddonInr > 0 ? 1 : 0)
 
@@ -139,10 +148,17 @@ function CheckoutForm() {
     setCouponLoading(true)
     setCouponError("")
     try {
+      const preDiscountTotal = basePrice + guestAddonPrice + shotAddonPrice + featureAddonPrice
       const res = await fetch("/api/payments/coupons/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponCode }),
+        body: JSON.stringify({
+          code: couponCode,
+          plan_id: plan,
+          order_value: preDiscountTotal,
+          has_addons: guestAddonPrice > 0 || shotAddonPrice > 0 || featureAddonPrice > 0,
+          currency,
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error?.message || "Invalid coupon")
@@ -163,14 +179,16 @@ function CheckoutForm() {
         if (res.ok) {
           const result = await res.json()
           if (result.success && Array.isArray(result.data)) {
-            const mappedInr: Record<string, number> = {}
-            const mappedUsd: Record<string, number> = {}
+            const mapped: Record<string, { name: string; price_inr: number; price_usd: number; limits: Record<string, any> }> = {}
             result.data.forEach((p: any) => {
-              mappedInr[p.id] = p.price_inr
-              mappedUsd[p.id] = p.price_usd || Math.round(p.price_inr / 80) || 1
+              mapped[p.id] = {
+                name: p.name,
+                price_inr: p.price_inr,
+                price_usd: p.price_usd || Math.round(p.price_inr / 80) || 1,
+                limits: p.limits || {},
+              }
             })
-            setPlanPrices(prev => ({ ...prev, ...mappedInr }))
-            setPlanUsdPrices(prev => ({ ...prev, ...mappedUsd }))
+            setLivePlans(prev => ({ ...prev, ...mapped }))
           }
         }
       } catch (e) {
@@ -263,7 +281,7 @@ function CheckoutForm() {
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Snapsy Events",
-        description: `${PLAN_NAMES[plan]} + Custom Boosts`,
+        description: `${selectedPlan?.name || plan} + Custom Boosts`,
         order_id: orderData.order_id,
         prefill: {
           name: profile?.full_name || user?.email?.split("@")[0] || "",
@@ -300,7 +318,7 @@ function CheckoutForm() {
 
             toast({
               title: "Payment Successful",
-              description: `You have successfully subscribed to ${PLAN_NAMES[plan]}!`,
+              description: `You have successfully subscribed to ${selectedPlan?.name || plan}!`,
             })
 
             // Redirect to dashboard with success query
@@ -347,6 +365,7 @@ function CheckoutForm() {
           photo_limit: photoLimit,
           videos,
           voice_notes: voiceNotes,
+          idempotency_key: freeCheckoutIdempotencyKey,
         }),
       })
 
@@ -357,7 +376,7 @@ function CheckoutForm() {
 
       toast({
         title: "Plan Activated",
-        description: `You're all set on ${PLAN_NAMES[plan] || plan}!`,
+        description: `You're all set on ${selectedPlan?.name || plan}!`,
       })
       router.push("/dashboard?subscribed=success")
     } catch (err: any) {
@@ -423,7 +442,7 @@ function CheckoutForm() {
                 {/* Plan Base */}
                 <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                   <div className="space-y-0.5">
-                    <span className="font-semibold text-white">{PLAN_NAMES[plan] || plan}</span>
+                    <span className="font-semibold text-white">{selectedPlan?.name || plan}</span>
                     <p className="text-xs text-white/50">
                       Base event plan features
                     </p>
@@ -471,7 +490,7 @@ function CheckoutForm() {
                   <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                     <div className="space-y-0.5">
                       <span className="font-semibold text-white">Videos Add-on</span>
-                      <p className="text-xs text-white/50">Not included in {PLAN_NAMES[plan] || plan}</p>
+                      <p className="text-xs text-white/50">Not included in {selectedPlan?.name || plan}</p>
                     </div>
                     <span className="font-bold text-white">{symbol}{getPrice(videoAddonInr, Math.round(videoAddonInr / 80) || 1)}</span>
                   </div>
@@ -584,7 +603,7 @@ function CheckoutForm() {
                   <Check className="h-4 w-4 text-mauve shrink-0" />
                   <span>QR codes for guest scanning and direct uploads</span>
                 </li>
-                {plan !== "starter" && (
+                {selectedPlan?.limits?.ai_face_search && (
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-mauve shrink-0" />
                     <span>AI Face Search matching engine</span>
