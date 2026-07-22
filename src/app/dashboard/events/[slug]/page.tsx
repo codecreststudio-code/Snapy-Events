@@ -980,18 +980,46 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         onProgress: setMovieProgress,
       })
 
-      const fd = new FormData()
-      const ext = rendered.mimeType === "video/mp4" ? "mp4" : "webm"
-      fd.set("file", rendered.blob, `movie.${ext}`)
-      fd.set("duration_seconds", String(Math.round(rendered.durationSeconds)))
-      if (movieMusicTrack) fd.set("music_track", movieMusicTrack)
-      fd.set("width", String(rendered.width))
-      fd.set("height", String(rendered.height))
+      // Vercel Serverless Functions cap request bodies at 4.5MB — a rendered
+      // movie is routinely well past that, so the file never goes through a
+      // normal POST body. Instead: get a signed Storage URL, PUT the blob
+      // straight to Supabase Storage, then confirm with a small JSON call.
+      const normalizedMimeType = rendered.mimeType.split(";")[0].trim() as "video/webm" | "video/mp4"
+      const urlRes = await fetch(`/api/events/${event.id}/memories/movie/url`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mime_type: normalizedMimeType }),
+      })
+      const urlJson = await urlRes.json().catch(() => null)
+      if (!urlRes.ok || !urlJson?.success) {
+        throw new MovieRenderError(urlJson?.error?.message || "Couldn't prepare the upload")
+      }
+      const { signedUrl, path } = urlJson.data as { signedUrl: string; token: string; path: string }
 
-      const uploadRes = await fetch(`/api/events/${event.id}/memories/movie`, { method: "POST", body: fd })
+      const putRes = await fetch(signedUrl, {
+        method: "PUT",
+        headers: { "Content-Type": normalizedMimeType },
+        body: rendered.blob,
+      })
+      if (!putRes.ok) {
+        throw new MovieRenderError("Couldn't upload the rendered movie to storage")
+      }
+
+      const uploadRes = await fetch(`/api/events/${event.id}/memories/movie`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          storage_path: path,
+          mime_type: normalizedMimeType,
+          duration_seconds: Math.round(rendered.durationSeconds),
+          music_track: movieMusicTrack,
+          width: rendered.width,
+          height: rendered.height,
+        }),
+      })
       const uploadJson = await uploadRes.json().catch(() => null)
       if (!uploadRes.ok || !uploadJson?.success) {
-        throw new MovieRenderError(uploadJson?.error?.message || "Movie was rendered but could not be saved")
+        throw new MovieRenderError(uploadJson?.error?.message || "Movie was uploaded but could not be saved")
       }
 
       await refetchMovies()

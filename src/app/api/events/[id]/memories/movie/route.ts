@@ -4,22 +4,36 @@
 // (ffmpeg, server-side, never reliable on Vercel serverless — see
 // src/lib/integrations/recap-video.ts's removal note) this route does zero
 // video encoding. The host's browser renders and records the entire 9:16
-// video client-side (src/lib/movie/movie-renderer.ts, canvas + MediaRecorder)
-// and this route just validates + stores the already-finished file, exactly
-// the same shape as the collage routes (memories/collage/route.ts) store an
-// already-composited image.
+// video client-side (src/lib/movie/movie-renderer.ts, canvas + MediaRecorder).
+//
+// POST here does NOT receive the video bytes — Vercel Serverless Functions
+// cap request bodies at 4.5MB, and even a short rendered movie is well past
+// that (an earlier version of this route tried a multipart upload straight
+// through this handler and every real movie 413'd). The browser instead gets
+// a signed Storage URL from the sibling /url route, PUTs the file directly to
+// Supabase Storage, and only then calls this route with small JSON metadata
+// (the storage path plus duration/music/dimensions) to register the DB row —
+// same "signed URL, then confirm" shape already proven by
+// /api/photos/upload/url + /api/photos/upload for guest photo/video uploads.
 
 import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createServiceClient } from "@/lib/supabase/server"
-import { uploadFile } from "@/lib/integrations/storage"
-import { isDangerousExtension, isSvgContent, validateFile } from "@/lib/security/file-validation"
-import { MAX_FILE_SIZES, API_RATE_LIMITS } from "@/lib/constants"
 import { isValidTrackId } from "@/lib/integrations/slideshow-music"
+import { API_RATE_LIMITS } from "@/lib/constants"
 import { logger } from "@/lib/logger"
 
 const paramsSchema = z.object({ id: z.string().uuid() })
 const ALLOWED_MOVIE_MIME = new Set(["video/webm", "video/mp4"])
+
+const bodySchema = z.object({
+  storage_path: z.string().min(1),
+  mime_type: z.enum(["video/webm", "video/mp4"]).default("video/webm"),
+  duration_seconds: z.number().int().positive().max(600).nullable().optional(),
+  music_track: z.string().nullable().optional(),
+  width: z.number().int().positive().max(4096).default(1080),
+  height: z.number().int().positive().max(4096).default(1920),
+})
 
 async function verifyOwnership(supabase: Awaited<ReturnType<typeof createServiceClient>>, eventId: string, userId: string) {
   const { data: eventRow, error } = await supabase.from("events").select("id, host_id").eq("id", eventId).single()
@@ -30,12 +44,13 @@ async function verifyOwnership(supabase: Awaited<ReturnType<typeof createService
   return { ok: true as const, hostId: eventRow.host_id as string }
 }
 
-export const POST = defineRoute<unknown, unknown, { id: string }>({
+export const POST = defineRoute<z.infer<typeof bodySchema>, unknown, { id: string }>({
   method: "POST",
+  body: bodySchema,
   requireAuth: true,
   rateLimit: { key: "memories:movie:upload", limit: API_RATE_LIMITS.MOVIE_UPLOAD, windowSeconds: 300 },
   audit: "memories.movie.upload",
-  handler: async ({ params, auth, request }) => {
+  handler: async ({ body, params, auth }) => {
     const parsedParams = paramsSchema.safeParse(params)
     if (!parsedParams.success) return fail("VALIDATION_ERROR", "Invalid event ID", 422)
     const eventId = parsedParams.data.id
@@ -44,60 +59,32 @@ export const POST = defineRoute<unknown, unknown, { id: string }>({
     const ownership = await verifyOwnership(supabase, eventId, auth.user!.id)
     if (!ownership.ok) return ownership.response
 
-    const contentType = request.headers.get("content-type") || ""
-    if (!contentType.includes("multipart/form-data")) {
-      return fail("VALIDATION_ERROR", "Expected a multipart video upload", 422)
+    if (!ALLOWED_MOVIE_MIME.has(body.mime_type)) return fail("VALIDATION_ERROR", "Unsupported video type", 415)
+
+    // The storage path was handed out by /memories/movie/url for this exact
+    // host+event (createSignedUploadUrl scoped it under
+    // `${hostId}/${eventId}/movies/...`) — re-check the prefix here so this
+    // route can't be used to register an arbitrary/spoofed storage path.
+    const expectedPrefix = `${ownership.hostId}/${eventId}/movies/`
+    if (!body.storage_path.startsWith(expectedPrefix)) {
+      return fail("VALIDATION_ERROR", "Invalid storage path", 422)
     }
 
-    const fd = await request.formData()
-    const file = fd.get("file") as File | null
-    const durationSeconds = Number(fd.get("duration_seconds")) || null
-    const musicTrackRaw = fd.get("music_track") as string | null
-    const musicTrack = isValidTrackId(musicTrackRaw) ? musicTrackRaw : null
-    const width = Number(fd.get("width")) || 1080
-    const height = Number(fd.get("height")) || 1920
+    const musicTrack = isValidTrackId(body.music_track) ? body.music_track! : null
 
-    if (!file || file.size === 0) return fail("VALIDATION_ERROR", "Missing video file", 422)
-    if (file.size > MAX_FILE_SIZES.VIDEO) return fail("VALIDATION_ERROR", "Video too large", 413)
-    if (isDangerousExtension(file.name)) return fail("VALIDATION_ERROR", "File type not allowed", 415)
-
-    const mimeType = ALLOWED_MOVIE_MIME.has(file.type) ? file.type : "video/webm"
-    if (!ALLOWED_MOVIE_MIME.has(mimeType)) return fail("VALIDATION_ERROR", "Unsupported video type", 415)
-
-    const buf = Buffer.from(await file.arrayBuffer())
-    if (isSvgContent(new Uint8Array(buf))) return fail("VALIDATION_ERROR", "Invalid file", 415)
-
-    const validation = validateFile(new Uint8Array(buf), file.name || `movie.${mimeType === "video/mp4" ? "mp4" : "webm"}`, mimeType, file.size)
-    if (!validation.valid) return fail("VALIDATION_ERROR", validation.error!, 415)
-
-    const ext = mimeType === "video/mp4" ? "mp4" : "webm"
-    const storagePath = `${ownership.hostId}/${eventId}/movies/movie-${Date.now()}.${ext}`
-
-    let uploaded
-    try {
-      uploaded = await uploadFile({
-        bucket: "PHOTOS",
-        path: storagePath,
-        file: new Blob([new Uint8Array(buf)], { type: mimeType }),
-        contentType: mimeType,
-        cacheControl: "31536000",
-      })
-    } catch (err) {
-      logger.error("memories/movie: upload failed", { eventId, error: String(err) })
-      return fail("MOVIE_FAILED", "Could not save the movie. Please try again.", 500)
-    }
+    const { data: pub } = supabase.storage.from("photos").getPublicUrl(body.storage_path)
 
     const { data: inserted, error: insertErr } = await supabase
       .from("event_movies")
       .insert({
         event_id: eventId,
-        storage_path: uploaded.path,
-        video_url: uploaded.publicUrl,
-        mime_type: mimeType,
-        duration_seconds: durationSeconds,
+        storage_path: body.storage_path,
+        video_url: pub.publicUrl,
+        mime_type: body.mime_type,
+        duration_seconds: body.duration_seconds ?? null,
         music_track: musicTrack,
-        width,
-        height,
+        width: body.width,
+        height: body.height,
       })
       .select("id, video_url, mime_type, duration_seconds, music_track, width, height, metadata, created_at")
       .single()
