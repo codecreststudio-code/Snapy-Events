@@ -96,6 +96,20 @@ export const POST = defineRoute({
     const { data: faces, error } = await facesQuery
     if (error) return fail("DB_ERROR", "Failed to search faces", 500)
 
+    let photosToIndex: Array<{ id: string; url: string }> = []
+    if ((!faces || faces.length === 0) && eventId) {
+      const { data: unindexedPhotos } = await supabase
+        .from("photos")
+        .select("id, storage_path")
+        .eq("event_id", eventId)
+        .limit(50)
+
+      photosToIndex = (unindexedPhotos ?? []).map((p) => ({
+        id: p.id,
+        url: publicUrl("PHOTOS", p.storage_path),
+      }))
+    }
+
     const candidates = (faces ?? [])
       .filter((f) => Array.isArray(f.embedding) && f.embedding.length > 0)
       .map((f) => ({ id: f.id, embedding: f.embedding as number[] }))
@@ -138,6 +152,6 @@ export const POST = defineRoute({
     }
 
     void trackEvent({ user_id: auth.user?.id ?? undefined, event_type: "ai.face.searched", event_data: { count: hits.length }, request })
-    return ok({ results: fullResults, duration_ms: duration })
+    return ok({ results: fullResults, duration_ms: duration, total_faces_indexed: faces?.length ?? 0, photos_to_index: photosToIndex })
   },
 }).POST

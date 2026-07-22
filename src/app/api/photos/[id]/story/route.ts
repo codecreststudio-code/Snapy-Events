@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { createServiceClient } from "@/lib/supabase/server"
 import { composeStoryFormat } from "@/lib/integrations/image-processing"
+import { isEventHost } from "@/lib/security/guest-session"
 import { logger } from "@/lib/logger"
 
 const uuidSchema = z.string().uuid()
@@ -29,27 +30,36 @@ export async function GET(
     const supabase = await createServiceClient()
     const { data: photo, error } = await supabase
       .from("photos")
-      .select("id, storage_path, original_filename, mime_type, is_approved, gallery_id")
+      .select("id, storage_path, original_filename, mime_type, is_approved, gallery_id, event:events(host_id)")
       .eq("id", photoId)
       .single()
 
     if (error || !photo) {
       return NextResponse.json({ error: "Photo not found" }, { status: 404 })
     }
-    if (photo.is_approved === false) {
-      return NextResponse.json({ error: "Photo not available" }, { status: 404 })
-    }
     if (!photo.mime_type || !photo.mime_type.startsWith("image/")) {
       return NextResponse.json({ error: "Story export is only available for photos" }, { status: 400 })
     }
 
-    const { data: gallery } = await supabase
-      .from("galleries")
-      .select("is_public")
-      .eq("id", photo.gallery_id)
-      .maybeSingle()
-    if (gallery && gallery.is_public === false) {
-      return NextResponse.json({ error: "Photo not available" }, { status: 404 })
+    // Same host bypass as /api/photos/[id]/download/route.ts — the host
+    // dashboard shows every upload regardless of approval status, so a host
+    // exporting their own not-yet-approved photo shouldn't be blocked here.
+    const eventRel = photo.event as { host_id: string } | { host_id: string }[] | null
+    const hostId = (Array.isArray(eventRel) ? eventRel[0] : eventRel)?.host_id
+    const requesterIsHost = await isEventHost(hostId)
+
+    if (!requesterIsHost) {
+      if (photo.is_approved === false) {
+        return NextResponse.json({ error: "Photo not available" }, { status: 404 })
+      }
+      const { data: gallery } = await supabase
+        .from("galleries")
+        .select("is_public")
+        .eq("id", photo.gallery_id)
+        .maybeSingle()
+      if (gallery && gallery.is_public === false) {
+        return NextResponse.json({ error: "Photo not available" }, { status: 404 })
+      }
     }
 
     const { data: fileData, error: downloadErr } = await supabase.storage

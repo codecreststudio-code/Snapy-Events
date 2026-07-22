@@ -3,6 +3,7 @@ import { z } from "zod"
 import { createServiceClient } from "@/lib/supabase/server"
 import { getFeatureFlags } from "@/lib/platform-settings"
 import { applyWatermark } from "@/lib/integrations/image-processing"
+import { isEventHost } from "@/lib/security/guest-session"
 import { logger } from "@/lib/logger"
 
 const uuidSchema = z.string().uuid()
@@ -32,26 +33,39 @@ export async function GET(
     const supabase = await createServiceClient()
     const { data: photo, error } = await supabase
       .from("photos")
-      .select("id, storage_path, original_filename, mime_type, is_approved, gallery_id")
+      .select("id, storage_path, original_filename, mime_type, is_approved, gallery_id, event:events(host_id)")
       .eq("id", photoId)
       .single()
 
     if (error || !photo) {
       return NextResponse.json({ error: "Photo not found" }, { status: 404 })
     }
-    if (photo.is_approved === false) {
-      return NextResponse.json({ error: "Photo not available" }, { status: 404 })
-    }
 
-    // Public galleries only — matches the visibility already granted by the
-    // bucket's public URL, just double-checked here before we serve it.
-    const { data: gallery } = await supabase
-      .from("galleries")
-      .select("is_public")
-      .eq("id", photo.gallery_id)
-      .maybeSingle()
-    if (gallery && gallery.is_public === false) {
-      return NextResponse.json({ error: "Photo not available" }, { status: 404 })
+    // The host dashboard timeline intentionally shows every upload
+    // regardless of approval status or gallery visibility (same reasoning as
+    // loadPhoto()'s host bypass in /api/photos/[id]/react/route.ts) — a host
+    // clicking Download from their own dashboard on a not-yet-approved photo
+    // was previously 404ing with "Photo not available", identically to how a
+    // guest would be blocked. Only guests need the approval/visibility gate.
+    const eventRel = photo.event as { host_id: string } | { host_id: string }[] | null
+    const hostId = (Array.isArray(eventRel) ? eventRel[0] : eventRel)?.host_id
+    const requesterIsHost = await isEventHost(hostId)
+
+    if (!requesterIsHost) {
+      if (photo.is_approved === false) {
+        return NextResponse.json({ error: "Photo not available" }, { status: 404 })
+      }
+
+      // Public galleries only — matches the visibility already granted by
+      // the bucket's public URL, just double-checked here before serving it.
+      const { data: gallery } = await supabase
+        .from("galleries")
+        .select("is_public")
+        .eq("id", photo.gallery_id)
+        .maybeSingle()
+      if (gallery && gallery.is_public === false) {
+        return NextResponse.json({ error: "Photo not available" }, { status: 404 })
+      }
     }
 
     const { data: fileData, error: downloadErr } = await supabase.storage

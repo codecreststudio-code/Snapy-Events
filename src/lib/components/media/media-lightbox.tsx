@@ -12,6 +12,7 @@ import { Input } from "@/lib/components/ui/input"
 import { Volume2, X, Download, Heart, Flame, PartyPopper, ThumbsUp, Smile, Send, MessageCircle, Mic, Play, Pause, ChevronLeft, ChevronRight } from "lucide-react"
 import { WatermarkOverlay } from "@/lib/components/media/watermark-overlay"
 import { VoiceNoteRecorder } from "@/lib/components/events/voice-note-recorder"
+import { toast } from "@/lib/components/ui/toaster"
 
 export type LightboxComment =
   | { id: string; type?: "text"; author_name: string; comment: string; created_at: string }
@@ -109,11 +110,38 @@ export function MediaLightbox({
   const [commentInput, setCommentInput] = useState("")
   const [nameInput, setNameInput] = useState("")
   const [showRecorder, setShowRecorder] = useState(false)
+  const [downloading, setDownloading] = useState(false)
   const canDownload = !isMessage(p)
   const touchStartRef = useRef<{ x: number; y: number } | null>(null)
 
-  function handleDownload() {
-    window.open(`/api/photos/${p.id}/download`, "_blank")
+  // Previously window.open(url, "_blank") — on any failure (e.g. the host
+  // dashboard requesting a not-yet-approved photo the download route didn't
+  // know to allow for hosts) this just navigated the whole tab to a raw
+  // {"error": "..."} JSON page instead of showing a real error message. A
+  // fetch->blob->synthetic-download-link never leaves the app, and any
+  // failure surfaces as a normal toast instead of a broken-looking page.
+  async function handleDownload() {
+    setDownloading(true)
+    try {
+      const res = await fetch(`/api/photos/${p.id}/download`)
+      if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        throw new Error(body?.error || "Download failed")
+      }
+      const blob = await res.blob()
+      const objectUrl = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = objectUrl
+      a.download = p.original_filename || `snapsy-${p.id}`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(objectUrl)
+    } catch (err) {
+      toast({ title: "Download failed", description: err instanceof Error ? err.message : undefined, variant: "destructive" })
+    } finally {
+      setDownloading(false)
+    }
   }
 
   const reactions = p.metadata?.reactions || {}
@@ -234,8 +262,8 @@ export function MediaLightbox({
           </div>
           <div className="flex items-center gap-1">
             {canDownload && (
-              <Button variant="ghost" size="icon" onClick={handleDownload} title="Download" className="text-white/60 hover:text-white rounded-full">
-                <Download className="h-4.5 w-4.5" />
+              <Button variant="ghost" size="icon" disabled={downloading} onClick={handleDownload} title="Download" className="text-white/60 hover:text-white rounded-full disabled:opacity-50">
+                <Download className={`h-4.5 w-4.5 ${downloading ? "animate-pulse" : ""}`} />
               </Button>
             )}
             <Button variant="ghost" size="icon" onClick={onClose} className="text-white/60 hover:text-white rounded-full">

@@ -98,7 +98,52 @@ export function useClientFaceSearch(options: UseClientFaceSearchOptions = {}) {
           throw new Error(resData.error || resData.message || "Failed to complete face search")
         }
 
-        setResults(resData.data?.results || [])
+        let searchResults = resData.data?.results || []
+
+        // If no results because photos in this event haven't been indexed into `faces` table yet,
+        // automatically index event photos using in-browser face-api (Option A - Zero Cost) and re-search!
+        if (searchResults.length === 0 && Array.isArray(resData.data?.photos_to_index) && resData.data.photos_to_index.length > 0 && clientEmbedding) {
+          setStatusMessage("Indexing event photos on device...")
+          const photosToIndex = resData.data.photos_to_index
+          const facesToIndex: Array<{ photo_id: string; embedding: number[] }> = []
+
+          for (const item of photosToIndex) {
+            try {
+              const emb = await extractEmbeddingFromUrl(item.url)
+              if (emb) {
+                facesToIndex.push({ photo_id: item.id, embedding: emb })
+              }
+            } catch (idxErr) {
+              console.warn("[client-face-search] Failed to index photo:", item.id, idxErr)
+            }
+          }
+
+          if (facesToIndex.length > 0) {
+            setStatusMessage("Saving photo indices...")
+            await fetch("/api/ai/faces/index", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                event_id: options.eventId,
+                faces: facesToIndex,
+              }),
+            })
+
+            // Re-run search now that faces are indexed!
+            setStatusMessage("Finalizing match search...")
+            const reSearchResponse = await fetch("/api/ai/faces/search", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            })
+            if (reSearchResponse.ok) {
+              const reData = await reSearchResponse.json()
+              searchResults = reData.data?.results || []
+            }
+          }
+        }
+
+        setResults(searchResults)
         setStatusMessage(null)
       } catch (err: any) {
         console.error("[useClientFaceSearch] Error:", err)
@@ -108,7 +153,7 @@ export function useClientFaceSearch(options: UseClientFaceSearchOptions = {}) {
         setStatusMessage(null)
       }
     },
-    [options.galleryId]
+    [options.galleryId, options.eventId]
   )
 
   return {
@@ -122,10 +167,17 @@ export function useClientFaceSearch(options: UseClientFaceSearchOptions = {}) {
 }
 
 /**
- * Client-side face descriptor extraction helper.
- * Uses browser HTMLCanvasElement and dynamic face-api loader.
+ * Client-side face descriptor extraction helper for data URLs.
  */
 async function extractEmbeddingClientSide(dataUrl: string): Promise<number[] | null> {
+  return extractEmbeddingFromUrl(dataUrl)
+}
+
+/**
+ * Client-side face descriptor extraction helper from any image URL or Data URL.
+ * Uses browser HTMLCanvasElement and dynamic face-api loader.
+ */
+async function extractEmbeddingFromUrl(imageUrl: string): Promise<number[] | null> {
   if (typeof window === "undefined") return null
 
   return new Promise((resolve) => {
@@ -136,7 +188,7 @@ async function extractEmbeddingClientSide(dataUrl: string): Promise<number[] | n
         // Dynamic import of face-api to keep initial bundle size light
         const faceapi = await import("@vladmandic/face-api")
 
-        // Load tiny face detector & descriptor models from public static path or CDN if not loaded
+        // Load tiny face detector & descriptor models from CDN if not loaded
         if (!faceapi.nets.tinyFaceDetector.params) {
           const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model"
           await Promise.all([
@@ -160,6 +212,6 @@ async function extractEmbeddingClientSide(dataUrl: string): Promise<number[] | n
       }
     }
     img.onerror = () => resolve(null)
-    img.src = dataUrl
+    img.src = imageUrl
   })
 }
