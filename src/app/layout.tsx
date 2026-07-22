@@ -118,12 +118,36 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Snapsy",
+    "operatingSystem": "All",
+    "applicationCategory": "MultimediaApplication",
+    "url": "https://snapsy-events.vercel.app",
+    "description": "The complete AI event photography platform for hosts and guests. Instant QR code photo sharing, AI face recognition, live event wall, and guestbook audio notes.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "1280",
+    },
+  }
+
   return (
     <html lang="en" suppressHydrationWarning className="dark selection:bg-mauve/30 selection:text-white">
       <head>
         {/* Preconnect to Google Fonts origins to eliminate DNS/TCP overhead */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
       <body className={`${inter.variable} ${playfair.variable} ${inter.className} bg-surface-dark text-white antialiased selection:bg-mauve/30 selection:text-white`} suppressHydrationWarning>
         <QueryProvider>
