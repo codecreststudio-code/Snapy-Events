@@ -8,6 +8,7 @@ import { API_RATE_LIMITS } from "@/lib/constants"
 
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
 import { getFeatureFlags } from "@/lib/platform-settings"
+import { hasGuestSessionFromRequest, isEventHost } from "@/lib/security/guest-session"
 
 export const POST = defineRoute({
   method: "POST",
@@ -21,13 +22,16 @@ export const POST = defineRoute({
 
     // Resolve event_id: if gallery_id is given, look up its parent event
     let eventId: string | null = null
+    let eventHostId: string | null = null
     if (body.gallery_id) {
       const { data: gallery } = await supabase
         .from("galleries")
-        .select("event_id")
+        .select("event_id, event:events(host_id)")
         .eq("id", body.gallery_id)
         .single()
       eventId = gallery?.event_id ?? null
+      const eventRel = gallery?.event as any
+      eventHostId = (Array.isArray(eventRel) ? eventRel[0] : eventRel)?.host_id ?? null
     }
 
     // Face search MUST be scoped to a single event. Without this guard an
@@ -35,6 +39,14 @@ export const POST = defineRoute({
     // faces + photo storage paths (the query below only filters when eventId is set).
     if (!eventId) {
       return fail("VALIDATION_ERROR", "A valid gallery_id is required", 400)
+    }
+
+    // Same check-in gate as uploads/reactions/gallery photos — this endpoint
+    // isn't currently called from any page, but is still a live, directly
+    // callable API, so it shouldn't be the one guest-facing surface that
+    // skips the check-in requirement everything else in this app enforces.
+    if (!(await isEventHost(eventHostId)) && !hasGuestSessionFromRequest(request, eventId)) {
+      return fail("FORBIDDEN", "Please check in to this event before searching.", 403)
     }
 
     // Admin > Feature Flags kill switch for AI Face Search platform-wide.

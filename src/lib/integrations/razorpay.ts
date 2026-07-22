@@ -104,7 +104,15 @@ export async function verifyRazorpaySignature(opts: {
     return false
   }
   const expected = crypto.createHmac("sha256", secret).update(opts.body).digest("hex")
-  return expected === opts.signature
+  // Constant-time compare (same reasoning as safeEqual() in guest-session.ts
+  // and csrf.ts) — a plain === leaks timing information about how many
+  // leading characters matched, which is unnecessary risk for a webhook
+  // that directly triggers plan upgrades and payment records. Length must
+  // match first since timingSafeEqual throws on mismatched buffer sizes.
+  const expectedBuf = Buffer.from(expected)
+  const actualBuf = Buffer.from(opts.signature)
+  if (expectedBuf.length !== actualBuf.length) return false
+  return crypto.timingSafeEqual(expectedBuf, actualBuf)
 }
 
 // Map our plan IDs to the Razorpay plan ID stored in `plans.razorpay_plan_id`.

@@ -1,5 +1,6 @@
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createServiceClient } from "@/lib/supabase/server"
+import { API_RATE_LIMITS } from "@/lib/constants"
 
 const PLAN_DEFAULT_LIMITS: Record<string, { guests: number; shots: number }> = {
   free: { guests: 5, shots: 5 },
@@ -11,6 +12,9 @@ const PLAN_DEFAULT_LIMITS: Record<string, { guests: number; shots: number }> = {
 export const GET = defineRoute({
   method: "GET",
   requireAuth: false,
+  // Public, unauthenticated, does a handful of DB reads per call — was
+  // previously unrated, unlike its sibling public routes.
+  rateLimit: { key: "events:public-info", limit: API_RATE_LIMITS.PUBLIC_DEFAULT, windowSeconds: 60 },
   handler: async ({ request }) => {
     const url = new URL(request.url)
     const slug = url.searchParams.get("slug")

@@ -13,12 +13,16 @@ import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createServiceClient } from "@/lib/supabase/server"
 import { resolveTrackUrl } from "@/lib/integrations/slideshow-music"
+import { API_RATE_LIMITS } from "@/lib/constants"
 
 const paramsSchema = z.object({ slug: z.string().min(1) })
 
 export const GET = defineRoute<unknown, unknown, { slug: string }>({
   method: "GET",
   requireAuth: false,
+  // Public, unauthenticated — was previously unrated, unlike its sibling
+  // public routes.
+  rateLimit: { key: "movie:get", limit: API_RATE_LIMITS.PUBLIC_DEFAULT, windowSeconds: 60 },
   handler: async ({ params }) => {
     const parsedParams = paramsSchema.safeParse(params)
     if (!parsedParams.success) return fail("VALIDATION_ERROR", "Invalid slug", 422)

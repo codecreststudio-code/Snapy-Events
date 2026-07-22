@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { defineRoute, ok, fail, paginate } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
+import { hasGuestSessionFromRequest, isEventHost } from "@/lib/security/guest-session"
 
 const params = z.object({ id: z.string().uuid() })
 const query = z.object({
@@ -14,7 +15,7 @@ export const GET = defineRoute<unknown, z.infer<typeof query>, { id: string }>({
   method: "GET",
   query,
   requireAuth: false,
-  handler: async ({ params, query, auth }) => {
+  handler: async ({ params, query, auth, request }) => {
     const { id } = params
     const supabase = await createClient()
     const { data: gallery } = await supabase
@@ -32,7 +33,16 @@ export const GET = defineRoute<unknown, z.infer<typeof query>, { id: string }>({
 
     if (!event || event.status === "archived") return fail("NOT_FOUND", "Event not found", 404)
 
-    const isHost = auth?.user?.id && event.host_id === auth.user.id
+    const isHost = (auth?.user?.id && event.host_id === auth.user.id) || (await isEventHost(event.host_id))
+
+    // Same check-in gate as uploads/reactions (src/lib/security/guest-session.ts)
+    // — this route isn't currently linked from any page (the main event page
+    // fetches photos inline, already gated on checkedIn), but it's still a
+    // live, directly-callable API that returns real guest photo listings, so
+    // it must enforce the same gate rather than relying on obscurity.
+    if (!isHost && !hasGuestSessionFromRequest(request, gallery.event_id)) {
+      return fail("FORBIDDEN", "Please check in to this event to view its photos.", 403)
+    }
 
     // If not host, enforce reveal settings & approval rules
     if (!isHost) {

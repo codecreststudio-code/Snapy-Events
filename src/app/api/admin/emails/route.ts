@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { adminDb } from "@/lib/supabase/admin"
 import { createClient } from "@/lib/supabase/server"
 import { sendEmail, getEmailSettings } from "@/lib/integrations/resend"
+import { verifyCsrf } from "@/lib/security/csrf"
 import { z } from "zod"
 
 async function requireAdmin() {
@@ -54,6 +55,18 @@ const templateSchema = z.object({
 export async function POST(request: NextRequest) {
   const user = await requireAdmin()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  // This route predates defineRoute() (which auto-applies this same check
+  // for every POST/PUT/PATCH/DELETE — see src/lib/api/handler.ts) and was
+  // built directly on NextRequest/NextResponse, so it never got CSRF
+  // protection despite mutating email templates/settings and sending mail.
+  // verifyCsrf() passes automatically for genuine same-origin requests (it
+  // checks Origin/Referer first), so this doesn't require any client-side
+  // change — it only blocks requests that don't originate from this app.
+  const isValidCsrf = await verifyCsrf(request.headers.get("x-csrf-token"), request)
+  if (!isValidCsrf) {
+    return NextResponse.json({ error: "Invalid or missing CSRF token" }, { status: 403 })
+  }
 
   const body = await request.json()
   const action = body.action as string

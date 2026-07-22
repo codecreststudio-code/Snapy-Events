@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createClient } from "@/lib/supabase/server"
+import { API_RATE_LIMITS } from "@/lib/constants"
 
 const subscribeSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -10,6 +11,9 @@ const subscribeSchema = z.object({
 export const POST = defineRoute({
   method: "POST",
   body: subscribeSchema,
+  // Public, unauthenticated upsert — previously unrated, so it could be
+  // hammered to spam-flood blog_subscribers with junk emails.
+  rateLimit: { key: "blog:subscribe", limit: API_RATE_LIMITS.NEWSLETTER_SUBSCRIBE, windowSeconds: 60 },
   handler: async ({ body }) => {
     const { email, name } = body
     const supabase = await createClient()

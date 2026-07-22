@@ -53,6 +53,12 @@
     "uuid": "^14.0.0",
     "zod": "^4.4.3"
   },
+  "overrides": {
+    "next": {
+      "sharp": "^0.35.3",
+      "postcss": "^8.5.18"
+    }
+  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",

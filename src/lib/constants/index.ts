@@ -119,6 +119,7 @@ export const API_RATE_LIMITS = {
   // against brute-forcing a 6-char code, keyed by event+IP in guest.ts.
   GUEST_CHECKIN: Number(process.env.RATE_LIMIT_GUEST_CHECKIN) || 10, // 10 attempts per 10 min per event+IP
   PHOTO_REACT: Number(process.env.RATE_LIMIT_PHOTO_REACT) || 60, // 60 reactions/comments per min — generous since a live event can have bursts of guests reacting at once
+  NEWSLETTER_SUBSCRIBE: Number(process.env.RATE_LIMIT_NEWSLETTER_SUBSCRIBE) || 10, // 10 per min — public, unauthenticated upsert into blog_subscribers
 
   // 3. Authenticated User Routes
   USER_DEFAULT: Number(process.env.RATE_LIMIT_USER_DEFAULT) || 120, // 120 requests per min
