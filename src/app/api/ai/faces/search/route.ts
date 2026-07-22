@@ -65,8 +65,20 @@ export const POST = defineRoute({
       }
     }
 
-    const det = await detectFaces({ imageUrl: body.photo_id ? undefined : body.image_data, imageBase64: body.image_data })
-    if (det.faces.length === 0) return ok({ results: [] })
+    let queryEmbedding: number[] | null = null
+
+    if (Array.isArray(body.embedding) && body.embedding.length > 0) {
+      // Option A: Pre-computed vector passed directly from client-side browser AI (Zero server CPU/RAM cost)
+      queryEmbedding = body.embedding
+    } else if (body.image_data || body.photo_id) {
+      // Fallback: Server-side detection
+      const det = await detectFaces({ imageUrl: body.photo_id ? undefined : body.image_data, imageBase64: body.image_data })
+      if (det.faces.length > 0 && det.faces[0]?.embedding) {
+        queryEmbedding = det.faces[0].embedding
+      }
+    }
+
+    if (!queryEmbedding) return ok({ results: [] })
 
     let facesQuery = supabase
       .from("faces")
@@ -78,19 +90,17 @@ export const POST = defineRoute({
 
     const { data: faces, error } = await facesQuery
     if (error) return fail("DB_ERROR", "Failed to search faces", 500)
-    // Compare against the real stored descriptor for each detected face.
-    // Rows detected before the `embedding` column existed (or where face
-    // detection failed to produce a descriptor) have no embedding — skip
-    // them rather than matching against nothing.
+
     const candidates = (faces ?? [])
       .filter((f) => Array.isArray(f.embedding) && f.embedding.length > 0)
       .map((f) => ({ id: f.id, embedding: f.embedding as number[] }))
-    const hits = searchByEmbedding({ embedding: det.faces[0]!.embedding, candidates, topK: body.max_results ?? 20 })
+
+    const hits = searchByEmbedding({ embedding: queryEmbedding, candidates, topK: body.max_results ?? 20 })
     const duration = Date.now() - t0
     await supabase.from("face_search_logs").insert({
       user_id: auth.user?.id ?? null,
       event_id: eventId,
-      search_type: body.photo_id ? "upload" : "selfie",
+      search_type: body.embedding ? "client_selfie" : (body.photo_id ? "upload" : "selfie"),
       query_photo_id: body.photo_id ?? null,
       results: hits,
       result_count: hits.length,

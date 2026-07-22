@@ -10,6 +10,7 @@ import { hasGuestSessionSSR } from "@/lib/security/guest-session"
 import { publicUrl } from "@/lib/integrations/storage"
 import { getFeatureFlags } from "@/lib/platform-settings"
 import { MediaGrid, type GridPhoto } from "@/lib/components/media/media-grid"
+import { GuestFaceSearchButton } from "@/lib/components/guest/guest-face-search-button"
 
 interface EventData {
   id: string
@@ -268,6 +269,12 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                     Upload Photos
                   </Link>
                 </Button>
+              )}
+              {checkedIn && (
+                <GuestFaceSearchButton
+                  eventId={event.id}
+                  galleryId={visibleGalleries[0]?.id}
+                />
               )}
               <Button
                 asChild
