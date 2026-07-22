@@ -107,7 +107,7 @@ export const POST = defineRoute<{ layout: CollageLayout; photo_ids?: string[] },
         width: composed.width,
         height: composed.height,
       })
-      .select("id, layout, image_url, width, height, created_at")
+      .select("id, layout, image_url, width, height, metadata, created_at")
       .single()
 
     if (insertErr || !inserted) {
@@ -133,7 +133,7 @@ export const GET = defineRoute<unknown, unknown, { id: string }>({
 
     const { data, error } = await supabase
       .from("event_collages")
-      .select("id, layout, image_url, width, height, created_at")
+      .select("id, layout, image_url, width, height, metadata, created_at")
       .eq("event_id", eventId)
       .order("created_at", { ascending: false })
       .limit(20)

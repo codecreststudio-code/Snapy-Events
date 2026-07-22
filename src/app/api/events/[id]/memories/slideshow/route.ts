@@ -90,13 +90,14 @@ export const POST = defineRoute<z.infer<typeof bodySchema>, unknown, { id: strin
     // second round trip from the client.
     const { data: photoRows } = await supabase
       .from("photos")
-      .select("id, storage_path, thumbnail_path")
+      .select("id, storage_path, thumbnail_path, metadata")
       .in("id", inserted.photo_ids as string[])
 
     const photoMap = new Map((photoRows ?? []).map((p) => [p.id, p]))
     const orderedPhotos = (inserted.photo_ids as string[])
       .map((id) => photoMap.get(id))
-      .filter((p): p is { id: string; storage_path: string; thumbnail_path: string | null } => !!p)
+      .filter((p): p is { id: string; storage_path: string; thumbnail_path: string | null; metadata: Record<string, unknown> | null } => !!p)
+      .map((p) => ({ id: p.id, storage_path: p.storage_path, thumbnail_path: p.thumbnail_path, reactions: (p.metadata as { reactions?: Record<string, number> } | null)?.reactions ?? {} }))
 
     return ok({
       slideshow: inserted,
@@ -131,13 +132,14 @@ export const GET = defineRoute<unknown, unknown, { id: string }>({
 
     const { data: photoRows } = await supabase
       .from("photos")
-      .select("id, storage_path, thumbnail_path")
+      .select("id, storage_path, thumbnail_path, metadata")
       .in("id", (slideshow.photo_ids as string[]) ?? [])
 
     const photoMap = new Map((photoRows ?? []).map((p) => [p.id, p]))
     const orderedPhotos = ((slideshow.photo_ids as string[]) ?? [])
       .map((id) => photoMap.get(id))
-      .filter((p): p is { id: string; storage_path: string; thumbnail_path: string | null } => !!p)
+      .filter((p): p is { id: string; storage_path: string; thumbnail_path: string | null; metadata: Record<string, unknown> | null } => !!p)
+      .map((p) => ({ id: p.id, storage_path: p.storage_path, thumbnail_path: p.thumbnail_path, reactions: (p.metadata as { reactions?: Record<string, number> } | null)?.reactions ?? {} }))
 
     return ok({
       slideshow,

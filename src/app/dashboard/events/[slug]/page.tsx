@@ -20,7 +20,7 @@ import { useWatermarkEnabled } from "@/lib/hooks"
 import { toDatetimeLocalValue } from "@/lib/utils"
 import { WatermarkOverlay } from "@/lib/components/media/watermark-overlay"
 import { MediaLightbox, type LightboxMedia } from "@/lib/components/media/media-lightbox"
-import { SlideshowPlayer } from "@/lib/components/media/slideshow-player"
+import { MemoryViewer, type MemoryViewerItem } from "@/lib/components/media/memory-viewer"
 import { SLIDESHOW_TRACKS } from "@/lib/integrations/slideshow-music"
 import {
   ArrowLeft,
@@ -759,7 +759,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       const res = await fetch(`/api/events/${event!.id}/memories/collage`)
       const json = await res.json().catch(() => null)
       if (!res.ok || !json?.success) return { collages: [] }
-      return json.data as { collages: { id: string; layout: string; image_url: string; width: number; height: number; created_at: string }[] }
+      return json.data as { collages: { id: string; layout: string; image_url: string; width: number; height: number; metadata?: { reactions?: Record<string, number> }; created_at: string }[] }
     },
     enabled: !!event?.id,
   })
@@ -772,7 +772,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       if (!res.ok || !json?.success) return { slideshow: null, photos: [], musicTrackUrl: null }
       return json.data as {
         slideshow: { id: string; transition: string; interval_seconds: number; music_track: string | null } | null
-        photos: { id: string; storage_path: string; thumbnail_path: string | null }[]
+        photos: { id: string; storage_path: string; thumbnail_path: string | null; reactions?: Record<string, number> }[]
         musicTrackUrl: string | null
       }
     },
@@ -834,6 +834,75 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       toast({ title: "Couldn't build slideshow", description: error.message, variant: "destructive" })
     },
   })
+
+  // In-app viewer state for Auto Collage + Slideshow (MemoryViewer) — replaces
+  // the old <a target="_blank"> collage thumbnails and the plain
+  // autoplay-only <SlideshowPlayer>. `collageViewerIndex` also doubles as
+  // "is the collage viewer open" (null = closed); `showSlideshowPlayer` keeps
+  // its original name since it already means "is the slideshow viewer open".
+  const [collageViewerIndex, setCollageViewerIndex] = useState<number | null>(null)
+
+  const collageReactMutation = useMutation({
+    mutationFn: async ({ collageId, emoji }: { collageId: string; emoji: string }) => {
+      const res = await fetch(`/api/events/${event!.id}/memories/collage/${collageId}/react`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emoji }),
+      })
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) throw new Error(json?.error?.message || "Failed to save reaction")
+      return { collageId, reactions: json.data.reactions as Record<string, number> }
+    },
+    onSuccess: ({ collageId, reactions }) => {
+      queryClient.setQueryData(["memories-collages", event?.id], (old: typeof memoriesCollages) => {
+        if (!old) return old
+        return { collages: old.collages.map((c) => (c.id === collageId ? { ...c, metadata: { ...c.metadata, reactions } } : c)) }
+      })
+    },
+    onError: () => {
+      toast({ title: "Couldn't save reaction", variant: "destructive" })
+    },
+  })
+
+  const slideshowReactMutation = useMutation({
+    mutationFn: async ({ photoId, emoji }: { photoId: string; emoji: string }) => {
+      const res = await fetch(`/api/photos/${photoId}/react`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emoji }),
+      })
+      const json = await res.json().catch(() => null)
+      if (!res.ok || !json?.success) throw new Error("Failed to save reaction")
+      return { photoId, reactions: json.data.reactions as Record<string, number> }
+    },
+    onSuccess: ({ photoId, reactions }) => {
+      queryClient.setQueryData(["memories-slideshow", event?.id], (old: typeof memoriesSlideshow) => {
+        if (!old) return old
+        return { ...old, photos: old.photos.map((p) => (p.id === photoId ? { ...p, reactions } : p)) }
+      })
+    },
+    onError: () => {
+      toast({ title: "Couldn't save reaction", variant: "destructive" })
+    },
+  })
+
+  const supabasePhotoUrl = (path: string) => `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${path}`
+
+  const collageViewerItems: MemoryViewerItem[] = (memoriesCollages?.collages ?? []).map((c) => ({
+    id: c.id,
+    url: c.image_url,
+    downloadUrl: c.image_url,
+    storyUrl: event?.id ? `/api/events/${event.id}/memories/collage/${c.id}/story` : null,
+    reactions: c.metadata?.reactions,
+  }))
+
+  const slideshowViewerItems: MemoryViewerItem[] = (memoriesSlideshow?.photos ?? []).map((p) => ({
+    id: p.id,
+    url: supabasePhotoUrl(p.storage_path),
+    downloadUrl: `/api/photos/${p.id}/download`,
+    storyUrl: `/api/photos/${p.id}/story`,
+    reactions: p.reactions,
+  }))
 
   const unviewedStory = memoriesStories?.stories?.find((s) => !s.viewed_at)
 
@@ -1682,10 +1751,15 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </Button>
             {memoriesCollages && memoriesCollages.collages.length > 0 && (
               <div className="grid grid-cols-3 gap-2 pt-1">
-                {memoriesCollages.collages.slice(0, 3).map((c) => (
-                  <a key={c.id} href={c.image_url} target="_blank" rel="noopener noreferrer" className="block rounded-lg overflow-hidden border border-white/10 aspect-square bg-black/20">
+                {memoriesCollages.collages.slice(0, 3).map((c, i) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setCollageViewerIndex(i)}
+                    className="block rounded-lg overflow-hidden border border-white/10 aspect-square bg-black/20"
+                  >
                     <img src={c.image_url} alt={`${c.layout} collage`} className="w-full h-full object-cover" />
-                  </a>
+                  </button>
                 ))}
               </div>
             )}
@@ -1761,15 +1835,32 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 </Button>
                 {/* Share — merged in from the old standalone "Share Movie" card
                     once Recap Video was removed; points guests at the same
-                    slideshow via a public link + QR instead of a video file. */}
+                    slideshow via a public link + QR instead of a video file.
+                    Uses the native share sheet (falls back to copy-link) so
+                    tapping this never navigates the host away from their
+                    dashboard into a new tab. */}
                 {event?.slug && (
-                  <Link
-                    href={`/movie/${event.slug}`}
-                    target="_blank"
+                  <Button
+                    variant="outline"
                     className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-white/15 bg-transparent text-white text-xs font-semibold py-3 hover:bg-white/10 transition-colors"
+                    onClick={async () => {
+                      const url = `${window.location.origin}/movie/${event.slug}`
+                      const nav = navigator as Navigator & { share?: (data: ShareData) => Promise<void> }
+                      try {
+                        if (nav.share) {
+                          await nav.share({ title: event.name, text: `Check out the highlights from ${event.name}!`, url })
+                          return
+                        }
+                        await navigator.clipboard.writeText(url)
+                        toast({ title: "Link copied!", description: "Paste it anywhere to share your slideshow." })
+                      } catch (err) {
+                        if (err instanceof Error && err.name === "AbortError") return
+                        toast({ title: "Couldn't share", variant: "destructive" })
+                      }
+                    }}
                   >
-                    <ExternalLink className="h-3.5 w-3.5" /> Share Slideshow
-                  </Link>
+                    <Share2 className="h-3.5 w-3.5" /> Share Slideshow
+                  </Button>
                 )}
               </>
             )}
@@ -2125,12 +2216,28 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         </div>
       )}
 
-      {showSlideshowPlayer && memoriesSlideshow?.photos && memoriesSlideshow.photos.length > 0 && (
-        <SlideshowPlayer
-          photos={memoriesSlideshow.photos}
-          intervalSeconds={memoriesSlideshow.slideshow?.interval_seconds || 4}
-          musicTrackUrl={memoriesSlideshow.musicTrackUrl}
+      {showSlideshowPlayer && slideshowViewerItems.length > 0 && (
+        <MemoryViewer
+          items={slideshowViewerItems}
+          title={event?.name}
+          shareUrl={event?.slug ? `${window.location.origin}/movie/${event.slug}` : undefined}
+          shareText={event?.name ? `Check out the highlights from ${event.name}!` : undefined}
+          musicUrl={memoriesSlideshow?.musicTrackUrl}
+          autoPlaySeconds={memoriesSlideshow?.slideshow?.interval_seconds || 4}
+          watermarkPreview={watermarkEnabled}
           onClose={() => setShowSlideshowPlayer(false)}
+          onReact={(photoId, emoji) => slideshowReactMutation.mutate({ photoId, emoji })}
+        />
+      )}
+
+      {collageViewerIndex !== null && collageViewerItems.length > 0 && (
+        <MemoryViewer
+          items={collageViewerItems}
+          initialIndex={collageViewerIndex}
+          title={event?.name}
+          watermarkPreview={watermarkEnabled}
+          onClose={() => setCollageViewerIndex(null)}
+          onReact={(collageId, emoji) => collageReactMutation.mutate({ collageId, emoji })}
         />
       )}
 

@@ -115,6 +115,37 @@ async function getWatermarkLogoBuffer(): Promise<Buffer | null> {
   }
 }
 
+// Builds the same bottom-right corner logo overlay used by applyWatermark()
+// below, factored out so composeStoryFormat() (Instagram Story export) can
+// burn in an identical mark without duplicating the sizing/fallback logic.
+async function buildWatermarkOverlay(width: number, height: number): Promise<{ input: Buffer; left: number; top: number }> {
+  const logoBuf = await getWatermarkLogoBuffer()
+
+  if (logoBuf) {
+    const logoTargetSize = Math.max(40, Math.min(220, Math.round(width * 0.12)))
+    const padding = Math.max(14, Math.round(width * 0.02))
+    const resizedLogo = await sharp(logoBuf)
+      .resize(logoTargetSize, logoTargetSize, { fit: "inside" })
+      .ensureAlpha()
+      .png()
+      .toBuffer()
+    const logoMeta = await sharp(resizedLogo).metadata()
+    const logoW = logoMeta.width || logoTargetSize
+    const logoH = logoMeta.height || logoTargetSize
+    return {
+      input: resizedLogo,
+      left: Math.max(0, width - logoW - padding),
+      top: Math.max(0, height - logoH - padding),
+    }
+  }
+
+  // Fallback if the logo fetch fails: a small single-line text mark in the
+  // corner (not tiled) so a download is never fully unwatermarked.
+  const fontSize = Math.max(16, Math.round(Math.min(width, height) * 0.032))
+  const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg"><text x="${width - 16}" y="${height - 16}" font-size="${fontSize}" font-family="sans-serif" font-weight="700" fill="#ffffff" fill-opacity="0.85" stroke="#000000" stroke-opacity="0.25" stroke-width="1" text-anchor="end">SNAPSY</text></svg>`
+  return { input: Buffer.from(svg), left: 0, top: 0 }
+}
+
 /**
  * Composites a small logo mark into the bottom-right corner of an image and
  * returns the re-encoded buffer. Used for guest photo downloads when
@@ -143,39 +174,55 @@ export async function applyWatermark(buffer: Buffer, mimeType: string): Promise<
   // falls back to jpeg, which is fine for a download copy.
   const outFormat = formatMap[mimeType] || "jpeg"
 
-  const logoBuf = await getWatermarkLogoBuffer()
-  let overlayInput: Buffer
-  let overlayLeft = 0
-  let overlayTop = 0
-
-  if (logoBuf) {
-    const logoTargetSize = Math.max(40, Math.min(220, Math.round(width * 0.12)))
-    const padding = Math.max(14, Math.round(width * 0.02))
-    const resizedLogo = await sharp(logoBuf)
-      .resize(logoTargetSize, logoTargetSize, { fit: "inside" })
-      .ensureAlpha()
-      .png()
-      .toBuffer()
-    const logoMeta = await sharp(resizedLogo).metadata()
-    const logoW = logoMeta.width || logoTargetSize
-    const logoH = logoMeta.height || logoTargetSize
-    overlayInput = resizedLogo
-    overlayLeft = Math.max(0, width - logoW - padding)
-    overlayTop = Math.max(0, height - logoH - padding)
-  } else {
-    // Fallback if the logo fetch fails: a small single-line text mark in the
-    // corner (not tiled) so a download is never fully unwatermarked.
-    const fontSize = Math.max(16, Math.round(Math.min(width, height) * 0.032))
-    const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg"><text x="${width - 16}" y="${height - 16}" font-size="${fontSize}" font-family="sans-serif" font-weight="700" fill="#ffffff" fill-opacity="0.85" stroke="#000000" stroke-opacity="0.25" stroke-width="1" text-anchor="end">SNAPSY</text></svg>`
-    overlayInput = Buffer.from(svg)
-  }
-
-  let pipeline = image.composite([{ input: overlayInput, left: overlayLeft, top: overlayTop }])
+  const overlay = await buildWatermarkOverlay(width, height)
+  let pipeline = image.composite([overlay])
   pipeline = outFormat === "png"
     ? pipeline.png()
     : pipeline.toFormat(outFormat, { quality: 88 })
 
   return pipeline.toBuffer()
+}
+
+// Instagram Story canvas: 1080x1920 (9:16). The source photo is rarely
+// already that ratio, so instead of cropping content away we fill the frame
+// with a soft blurred/darkened cover of the same photo (so there's never a
+// bare letterbox bar) and place the full, uncropped photo centered on top —
+// same "blurred background + contained foreground" treatment Instagram's own
+// story composer uses for non-9:16 source images. The corner watermark is
+// always burned in here (unlike applyWatermark(), which only runs when the
+// admin's watermark feature flag is on) — a Story export is explicitly for
+// outbound social sharing, where the brand mark should always travel with
+// the image regardless of that per-photo-protection toggle.
+export async function composeStoryFormat(buffer: Buffer): Promise<Buffer> {
+  const STORY_W = 1080
+  const STORY_H = 1920
+
+  const source = sharp(buffer, { failOn: "none" }).rotate() // .rotate() with no args auto-applies EXIF orientation
+
+  const background = await source
+    .clone()
+    .resize(STORY_W, STORY_H, { fit: "cover", position: "attention" })
+    .blur(28)
+    .modulate({ brightness: 0.55 })
+    .toBuffer()
+
+  const foreground = await source
+    .clone()
+    .resize(STORY_W, STORY_H, { fit: "inside", withoutEnlargement: true })
+    .toBuffer()
+  const fgMeta = await sharp(foreground).metadata()
+  const fgW = fgMeta.width || STORY_W
+  const fgH = fgMeta.height || STORY_H
+
+  const overlay = await buildWatermarkOverlay(STORY_W, STORY_H)
+
+  return sharp(background)
+    .composite([
+      { input: foreground, left: Math.round((STORY_W - fgW) / 2), top: Math.round((STORY_H - fgH) / 2) },
+      overlay,
+    ])
+    .jpeg({ quality: 90 })
+    .toBuffer()
 }
 
 export async function validateImageDimensions(
