@@ -1,6 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { duration, easing } from "@/lib/motion/tokens"
+import { useReducedMotion } from "@/lib/motion/use-reduced-motion"
 
 interface CountdownValues {
   days: number
@@ -28,6 +31,7 @@ export function CountdownTimer({ targetDate }: { targetDate: string }) {
   const [timeLeft, setTimeLeft] = useState<CountdownValues>(() =>
     calculateTimeLeft(targetDate)
   )
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -50,12 +54,21 @@ export function CountdownTimer({ targetDate }: { targetDate: string }) {
         <div key={label} className="text-center">
           <div className="flex items-center justify-center">
             <div className="relative">
-              <div className="flex h-24 w-24 items-center justify-center rounded-2xl border bg-card shadow-sm md:h-28 md:w-28">
-                <span className="text-4xl font-bold md:text-5xl">
-                  {value.toString().padStart(2, "0")}
-                </span>
+              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-[#3D332A] bg-[#1C1814] shadow-sm md:h-28 md:w-28">
+                <AnimatePresence mode="popLayout" initial={false}>
+                  <motion.span
+                    key={value}
+                    initial={prefersReducedMotion ? { opacity: 0 } : { y: -12, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={prefersReducedMotion ? { opacity: 0 } : { y: 12, opacity: 0 }}
+                    transition={{ duration: duration.fast, ease: easing.easeOut }}
+                    className="text-4xl font-bold text-white md:text-5xl"
+                  >
+                    {value.toString().padStart(2, "0")}
+                  </motion.span>
+                </AnimatePresence>
               </div>
-              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs uppercase tracking-wider text-muted-foreground">
+              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs uppercase tracking-wider text-white/40">
                 {label}
               </div>
             </div>

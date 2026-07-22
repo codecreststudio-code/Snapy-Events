@@ -10,23 +10,10 @@ import {
   Settings,
   CreditCard,
   Download,
-  LogOut,
-  ChevronDown,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/lib/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/lib/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/lib/components/ui/dropdown-menu"
 import { MobileBottomNav } from "./mobile-bottom-nav"
-
-import { useAuth } from "@/lib/hooks"
+import { AccountMenu } from "./account-menu"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -43,11 +30,15 @@ const secondaryNavigation = [
 
 export function DashboardSidebar() {
   const pathname = usePathname()
-  const { user, profile, signOut } = useAuth()
 
-  const handleSignOut = async () => {
-    await signOut()
-    window.location.href = "/login"
+  // The dashboard home page (exactly "/dashboard") owns its own full-bleed,
+  // app-style chrome now — a slim top bar plus the 2-tab HomeBottomTabs bar,
+  // at every screen size, not just mobile — instead of this sidebar. See
+  // src/app/dashboard/page.tsx and home-bottom-tabs.tsx. Every other
+  // /dashboard/* route (Events, Galleries, QR, Settings, Billing, etc.) is
+  // untouched and keeps this sidebar + MobileBottomNav exactly as before.
+  if (pathname === "/dashboard") {
+    return null
   }
 
   return (
@@ -113,54 +104,7 @@ export function DashboardSidebar() {
         </div>
 
         <div className="border-t border-[#3D332A] p-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start gap-3 h-auto py-2 text-white hover:bg-white/5 hover:text-white">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={profile?.avatar_url || undefined} />
-                  <AvatarFallback className="bg-mauve/10 text-mauve">
-                    {profile?.full_name?.substring(0, 2).toUpperCase() ||
-                     user?.email?.substring(0, 2).toUpperCase() ||
-                     "US"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col items-start text-sm overflow-hidden">
-                  <span className="font-medium truncate max-w-[150px] text-white">
-                    {profile?.full_name || user?.email?.split("@")[0] || "User"}
-                  </span>
-                  <span className="text-xs text-white/50 truncate max-w-[150px]">
-                    {user?.email || ""}
-                  </span>
-                </div>
-                <ChevronDown className="h-4 w-4 ml-auto flex-shrink-0 text-white/50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {profile?.is_admin && (
-                <>
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin" className="font-semibold text-mauve hover:text-mauve-strong">
-                      Admin Portal
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                </>
-              )}
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings">Settings</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard/billing">Billing</Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <AccountMenu variant="sidebar" />
         </div>
       </div>
 

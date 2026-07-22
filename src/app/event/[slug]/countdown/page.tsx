@@ -71,13 +71,17 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="flex min-h-screen flex-col bg-[#141110] text-white/90">
+      <header className="sticky top-0 z-50 w-full border-b border-[#3D332A] bg-[#141110]/95 backdrop-blur supports-[backdrop-filter]:bg-[#141110]/80">
         <div className="container flex h-16 items-center justify-between">
           <Link href="/">
             <Logo />
           </Link>
-          <Button asChild variant="outline" size="sm">
+          <Button
+            asChild
+            size="sm"
+            className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-[#B28DAE]"
+          >
             <Link href={`/event/${event.slug}/upload`}>
               <Camera className="h-4 w-4" />
               Upload
@@ -88,37 +92,41 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-16">
         <div className="text-center space-y-6 max-w-2xl">
-          <div className="flex justify-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-              <Clock className="h-10 w-10 text-primary" />
+          {/* Server Component hero — can't reach for Framer Motion hooks here,
+              so the staggered entrance is pure CSS (existing keyframe
+              utilities + .animate-delay-* steps from globals.css), same
+              pattern as event/[slug]/page.tsx's hero section. */}
+          <div className="animate-slide-up flex justify-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/5">
+              <Clock className="h-10 w-10 text-[#B28DAE]" />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <p className="text-sm uppercase tracking-widest text-muted-foreground">
+          <div className="animate-slide-up animate-delay-1 space-y-2">
+            <p className="text-sm uppercase tracking-widest text-[#B28DAE]">
               {event.user?.name ?? "Event"}
             </p>
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+            <h1 className="font-playfair text-3xl font-medium tracking-tight text-white md:text-4xl">
               {event.name}
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-white/60">
               Photos Coming Soon
             </p>
           </div>
 
-          <div className="py-8">
+          <div className="animate-slide-up animate-delay-2 py-8">
             <CountdownTimer targetDate={countdownDate} />
           </div>
 
-          <div className="rounded-lg border bg-card p-6 text-center">
-            <h2 className="font-semibold mb-2">What happens next?</h2>
-            <p className="text-sm text-muted-foreground">
+          <div className="animate-slide-up animate-delay-3 rounded-2xl border border-[#3D332A] bg-[#1C1814] p-6 text-center">
+            <h2 className="font-playfair font-medium text-white mb-2">What happens next?</h2>
+            <p className="text-sm text-white/60">
               Our photographer is busy capturing amazing moments. Once the gallery is ready,
               you&apos;ll be able to view and download all the photos from this event.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
+          <div className="animate-slide-up animate-delay-3 flex flex-wrap items-center justify-center gap-4 text-sm text-white/60">
             {event.event_date && (
               <span className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
@@ -132,17 +140,18 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
             )}
           </div>
 
-          <div className="pt-8">
-            <p className="text-sm text-muted-foreground mb-4">
+          <div className="animate-slide-up animate-delay-4 pt-8">
+            <p className="text-sm text-white/60 mb-4">
               Want to be notified when photos are ready?
             </p>
             <div className="flex items-center justify-center gap-2 max-w-sm mx-auto">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                aria-label="Email address"
+                className="flex h-10 w-full rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-white ring-offset-background placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:ring-offset-2"
               />
-              <Button>
+              <Button className="rounded-full bg-[#B28DAE] text-[#141110] hover:bg-[#a468a0]">
                 <Mail className="h-4 w-4" />
                 Notify Me
               </Button>

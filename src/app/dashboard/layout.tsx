@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { getAuthContext } from "@/lib/auth/session"
 import { DashboardSidebar } from "@/lib/components/layout"
+import { DashboardMain } from "@/lib/components/layout/dashboard-main"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getAuthContext()
@@ -12,11 +13,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen bg-surface-dark">
       <DashboardSidebar />
-      <main className="lg:pl-72">
-        {/* pb-24 clears the fixed phone/tablet bottom tab bar (MobileBottomNav)
-            plus its safe-area inset; not needed once the lg: sidebar takes over. */}
-        <div className="py-3 pb-24 md:py-4 px-3 sm:px-6 lg:px-8 lg:pb-8">{children}</div>
-      </main>
+      <DashboardMain>{children}</DashboardMain>
     </div>
   )
 }

@@ -195,3 +195,33 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* ─── Staggered entrance utilities ──────────────────────────────────────
+   Small, composable animation-delay steps to pair with .animate-slide-up /
+   .animate-fade-in on sibling elements (hero title -> description -> CTAs),
+   so Server Components can get a staggered, premium-feeling entrance using
+   pure CSS — no client-side JS or Framer Motion required. */
+.animate-delay-1 { animation-delay: 0.08s; animation-fill-mode: both; }
+.animate-delay-2 { animation-delay: 0.16s; animation-fill-mode: both; }
+.animate-delay-3 { animation-delay: 0.24s; animation-fill-mode: both; }
+.animate-delay-4 { animation-delay: 0.32s; animation-fill-mode: both; }
+
+/* ─── Reduced motion ─────────────────────────────────────────────────────
+   WCAG 2.2 / 2.3.3 compliance: guests who've asked their OS for reduced
+   motion get near-instant, transform-free transitions everywhere — covers
+   the CSS keyframe utilities above (used by Server Components that can't
+   reach for Framer Motion's own useReducedMotion hook) plus any Tailwind
+   `transition-*`/`duration-*` utility in the app. Framer Motion components
+   handle this themselves via the shared `useReducedMotion` hook in
+   src/lib/motion/use-reduced-motion.ts; this block is the safety net for
+   everything else. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

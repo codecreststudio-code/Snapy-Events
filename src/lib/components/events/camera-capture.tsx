@@ -1,8 +1,15 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/lib/components/ui/button"
 import { Camera, RefreshCw, X, Check, Video, Square, Play, Pause, Zap, ZapOff, Grid3x3, ZoomIn, AlertTriangle } from "lucide-react"
+import { spring, duration, easing, fadeInDown, tapScaleSubtle } from "@/lib/motion/tokens"
+import { useReducedMotion } from "@/lib/motion/use-reduced-motion"
+
+// Motion-wrapped shadcn Button for the few spots (flip camera) that need
+// whileTap press feedback but otherwise keep the shared Button's styling.
+const MotionButton = motion(Button)
 
 export interface FilterPreset {
   id: string
@@ -104,6 +111,11 @@ export function CameraCapture({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const recordedChunksRef = useRef<Blob[]>([])
   const videoTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  // WCAG 2.3.3 — every animation added below is skipped/shortened when this
+  // is true (falls back to instant CSS-driven state changes, same as before
+  // this pass), never blocked entirely since none of it is essential motion.
+  const prefersReducedMotion = useReducedMotion()
 
   const availableFilters = allowedFilters && allowedFilters.length > 0
     ? PRESET_FILTERS.filter(f => allowedFilters.includes(f.id) || f.id === "normal")
@@ -476,21 +488,40 @@ export function CameraCapture({
 
         {/* Mode Switcher Tabs */}
         {allowVideo && !hasPreview && !isRecordingVideo && (
-          <div className="flex items-center bg-black/60 border border-[#3D332A] rounded-full p-1 backdrop-blur-md">
+          <div className="relative flex items-center bg-black/60 border border-[#3D332A] rounded-full p-1 backdrop-blur-md">
             <button
               onClick={() => setCaptureMode("photo")}
-              className={`px-4 py-1 rounded-full text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none ${
-                captureMode === "photo" ? "bg-[#B28DAE] text-black shadow-md" : "text-white/70 hover:text-white"
+              className={`relative z-10 px-4 py-1 rounded-full text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none ${
+                captureMode === "photo" ? "text-black" : "text-white/70 hover:text-white"
               }`}
             >
+              {/* Shared-element pill: same layoutId on both tabs means Framer
+                  Motion slides/resizes this background between them instead
+                  of an instant color swap — only one of the two ever mounts
+                  at a time, which is what lets the layout animation read as a
+                  single pill "traveling" rather than two pills cross-fading. */}
+              {captureMode === "photo" && (
+                <motion.div
+                  layoutId="camera-mode-pill"
+                  className="absolute inset-0 -z-10 rounded-full bg-[#B28DAE] shadow-md"
+                  transition={prefersReducedMotion ? { duration: 0 } : spring.snappy}
+                />
+              )}
               Photo
             </button>
             <button
               onClick={() => setCaptureMode("video")}
-              className={`px-4 py-1 rounded-full text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none ${
-                captureMode === "video" ? "bg-red-600 text-white shadow-md" : "text-white/70 hover:text-white"
+              className={`relative z-10 px-4 py-1 rounded-full text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none ${
+                captureMode === "video" ? "text-white" : "text-white/70 hover:text-white"
               }`}
             >
+              {captureMode === "video" && (
+                <motion.div
+                  layoutId="camera-mode-pill"
+                  className="absolute inset-0 -z-10 rounded-full bg-red-600 shadow-md"
+                  transition={prefersReducedMotion ? { duration: 0 } : spring.snappy}
+                />
+              )}
               Video
             </button>
           </div>
@@ -506,29 +537,38 @@ export function CameraCapture({
 
         <div className="flex gap-2">
           {!hasPreview && (
-            <button
+            <motion.button
               onClick={() => setShowGrid((g) => !g)}
               aria-label="Toggle grid"
               aria-pressed={showGrid}
+              whileTap={prefersReducedMotion ? undefined : tapScaleSubtle}
               className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none ${showGrid ? "bg-[#B28DAE]/30 text-[#B28DAE]" : "text-white hover:bg-white/20"}`}
             >
               <Grid3x3 className="h-5 w-5" />
-            </button>
+            </motion.button>
           )}
           {!hasPreview && torchSupported && (
-            <button
+            <motion.button
               onClick={toggleTorch}
               aria-label="Toggle flashlight"
               aria-pressed={torchOn}
+              whileTap={prefersReducedMotion ? undefined : tapScaleSubtle}
               className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none ${torchOn ? "bg-[#B28DAE]/90 text-black" : "text-white hover:bg-white/20"}`}
             >
               {torchOn ? <Zap className="h-5 w-5" /> : <ZapOff className="h-5 w-5" />}
-            </button>
+            </motion.button>
           )}
           {!hasPreview && !isRecordingVideo && (
-            <Button variant="ghost" size="icon" onClick={toggleCamera} aria-label="Flip camera" className="text-white hover:bg-white/20 rounded-full">
+            <MotionButton
+              variant="ghost"
+              size="icon"
+              onClick={toggleCamera}
+              aria-label="Flip camera"
+              whileTap={prefersReducedMotion ? undefined : tapScaleSubtle}
+              className="text-white hover:bg-white/20 rounded-full"
+            >
               <RefreshCw className="h-6 w-6" />
-            </Button>
+            </MotionButton>
           )}
         </div>
       </div>
@@ -576,56 +616,95 @@ export function CameraCapture({
           className={`pointer-events-none absolute inset-0 z-30 bg-white transition-opacity duration-150 ${flash ? "opacity-70" : "opacity-0"}`}
         />
 
-        {/* Non-blocking upload status pills: queued/undo, aggregate uploading count, and per-item errors */}
+        {/* Non-blocking upload status pills: queued/undo, aggregate uploading count, and per-item errors.
+            Each list gets its own AnimatePresence so pills slide/fade in and
+            (on removal — undo, upload finishing, dismiss) fade+shrink out
+            instead of just vanishing via conditional render. Reduced-motion
+            guests get an instant appear/disappear (initial=false, no exit)
+            since the pill's *information* is essential but its entrance
+            choreography is not. */}
         {!hasPreview && (queuedUploads.length > 0 || uploadingCount > 0 || erroredUploads.length > 0) && (
           <div className="absolute top-20 inset-x-0 z-20 flex flex-col items-center gap-1.5 px-4 pointer-events-none">
-            {queuedUploads.map((p) => (
-              <div
-                key={p.id}
-                className="pointer-events-auto flex items-center gap-2 bg-black/70 border border-[#3D332A] backdrop-blur-md rounded-full pl-3 pr-1.5 py-1 text-xs font-medium text-white shadow-lg"
-              >
-                <span>Shot captured</span>
-                <button
-                  onClick={() => undoCapture(p.id)}
-                  className="rounded-full bg-white/10 hover:bg-white/20 px-2.5 py-1 text-[11px] font-bold text-[#B28DAE] transition-colors focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none"
+            <AnimatePresence initial={false}>
+              {queuedUploads.map((p) => (
+                <motion.div
+                  key={p.id}
+                  initial={prefersReducedMotion ? false : "hidden"}
+                  animate="visible"
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.9, transition: { duration: duration.fast, ease: easing.easeOut } }}
+                  variants={fadeInDown}
+                  className="pointer-events-auto flex items-center gap-2 bg-black/70 border border-[#3D332A] backdrop-blur-md rounded-full pl-3 pr-1.5 py-1 text-xs font-medium text-white shadow-lg"
                 >
-                  Undo
-                </button>
-              </div>
-            ))}
-            {uploadingCount > 0 && (
-              <div className="pointer-events-auto flex items-center gap-2 bg-black/60 border border-[#3D332A] backdrop-blur-md rounded-full px-3 py-1.5 text-xs font-medium text-white shadow-lg">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#B28DAE] animate-pulse" />
-                {uploadingCount === 1 ? "Uploading…" : `${uploadingCount} uploading…`}
-              </div>
-            )}
-            {erroredUploads.map((p) => (
-              <div
-                key={p.id}
-                className="pointer-events-auto flex items-center gap-2 bg-red-950/80 border border-red-500/40 backdrop-blur-md rounded-full pl-3 pr-1.5 py-1 text-xs font-medium text-red-100 shadow-lg"
-              >
-                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-                <span>Upload failed</span>
-                <button
-                  onClick={() => retryUpload(p.id)}
-                  className="rounded-full bg-red-500/30 hover:bg-red-500/50 px-2.5 py-1 text-[11px] font-bold text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none"
+                  <span>Shot captured</span>
+                  <button
+                    onClick={() => undoCapture(p.id)}
+                    className="rounded-full bg-white/10 hover:bg-white/20 px-2.5 py-1 text-[11px] font-bold text-[#B28DAE] transition-colors focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none"
+                  >
+                    Undo
+                  </button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            <AnimatePresence initial={false}>
+              {uploadingCount > 0 && (
+                <motion.div
+                  key="uploading"
+                  initial={prefersReducedMotion ? false : "hidden"}
+                  animate="visible"
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.9, transition: { duration: duration.fast, ease: easing.easeOut } }}
+                  variants={fadeInDown}
+                  className="pointer-events-auto flex items-center gap-2 bg-black/60 border border-[#3D332A] backdrop-blur-md rounded-full px-3 py-1.5 text-xs font-medium text-white shadow-lg"
                 >
-                  Retry
-                </button>
-                <button
-                  onClick={() => dismissUpload(p.id)}
-                  aria-label="Dismiss upload error"
-                  className="rounded-full p-1 hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none"
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#B28DAE] animate-pulse" />
+                  {uploadingCount === 1 ? "Uploading…" : `${uploadingCount} uploading…`}
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <AnimatePresence initial={false}>
+              {erroredUploads.map((p) => (
+                <motion.div
+                  key={p.id}
+                  initial={prefersReducedMotion ? false : "hidden"}
+                  animate="visible"
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.9, transition: { duration: duration.fast, ease: easing.easeOut } }}
+                  variants={fadeInDown}
+                  className="pointer-events-auto flex items-center gap-2 bg-red-950/80 border border-red-500/40 backdrop-blur-md rounded-full pl-3 pr-1.5 py-1 text-xs font-medium text-red-100 shadow-lg"
                 >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                  <span>Upload failed</span>
+                  <button
+                    onClick={() => retryUpload(p.id)}
+                    className="rounded-full bg-red-500/30 hover:bg-red-500/50 px-2.5 py-1 text-[11px] font-bold text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none"
+                  >
+                    Retry
+                  </button>
+                  <button
+                    onClick={() => dismissUpload(p.id)}
+                    aria-label="Dismiss upload error"
+                    className="rounded-full p-1 hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
 
         {!hasPreview && zoomSupported && zoomRange.max > zoomRange.min && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-black/50 backdrop-blur-md rounded-full px-4 py-2 w-56 max-w-[80%]">
+          // The `-50%` x offset (replacing the old `-translate-x-1/2` CSS
+          // class) is expressed as a Framer Motion style value rather than a
+          // Tailwind transform utility — once this element animates via
+          // Framer Motion, it owns the `transform` CSS property outright, so
+          // centering has to be expressed the same way `y` is, instead of
+          // fighting a CSS class over the same property.
+          <motion.div
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: duration.slow, ease: easing.easeOut }}
+            style={{ x: "-50%" }}
+            className="absolute bottom-3 left-1/2 z-10 flex items-center gap-2 bg-black/50 backdrop-blur-md rounded-full px-4 py-2 w-56 max-w-[80%]"
+          >
             <ZoomIn className="h-4 w-4 text-white shrink-0" />
             <input
               type="range"
@@ -638,7 +717,7 @@ export function CameraCapture({
               className="w-full accent-[#B28DAE]"
             />
             <span className="text-[10px] font-mono text-white/80 w-8 text-right shrink-0">{zoomLevel.toFixed(1)}x</span>
-          </div>
+          </motion.div>
         )}
         <canvas ref={canvasRef} className="hidden" />
       </div>
@@ -651,10 +730,22 @@ export function CameraCapture({
             {!isRecordingVideo && (
               <div className="flex overflow-x-auto px-4 pb-4 gap-3 no-scrollbar snap-x">
                 {availableFilters.map(filter => (
-                  <button
+                  // Selected/unselected scale used to be the Tailwind
+                  // `scale-110`/`scale-90` utilities; now that this button
+                  // also needs a Framer Motion `whileTap`, the scale is moved
+                  // entirely onto `animate` so only one system (Framer
+                  // Motion) ever writes the `transform` property here —
+                  // mixing a CSS transform class with a motion-controlled
+                  // transform on the same element causes one to silently
+                  // clobber the other. Opacity stays a plain CSS class since
+                  // it doesn't touch transform.
+                  <motion.button
                     key={filter.id}
                     onClick={() => setActiveFilterId(filter.id)}
-                    className={`flex flex-col items-center gap-1 shrink-0 snap-center transition-all rounded-full focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none ${activeFilterId === filter.id ? "scale-110" : "opacity-60 scale-90"}`}
+                    animate={{ scale: activeFilterId === filter.id ? 1.1 : 0.9 }}
+                    transition={prefersReducedMotion ? { duration: 0 } : spring.soft}
+                    whileTap={prefersReducedMotion ? undefined : tapScaleSubtle}
+                    className={`flex flex-col items-center gap-1 shrink-0 snap-center rounded-full focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none ${activeFilterId === filter.id ? "" : "opacity-60"}`}
                   >
                     <div
                       className={`w-14 h-14 rounded-full border-2 overflow-hidden bg-slate-800 ${activeFilterId === filter.id ? "border-[#B28DAE]" : "border-white/20"}`}
@@ -665,7 +756,7 @@ export function CameraCapture({
                       />
                     </div>
                     <span className="text-[10px] font-medium text-white">{filter.name}</span>
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             )}
@@ -689,30 +780,36 @@ export function CameraCapture({
               </div>
 
               {captureMode === "photo" ? (
-                <button
+                // Snappy spring press-down — the shutter is the single most
+                // tapped control in this whole component, so it gets the
+                // most tactile feedback (deepest scale of anything here).
+                <motion.button
                   onClick={takePhoto}
                   aria-label="Take photo"
+                  whileTap={prefersReducedMotion ? undefined : { scale: 0.88, transition: spring.snappy }}
                   className="w-16 h-16 rounded-full border-4 border-[#B28DAE] p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer shadow-[0_0_16px_rgba(178,141,174,0.35)] focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none"
                 >
                   <div className="w-full h-full bg-white rounded-full" />
-                </button>
+                </motion.button>
               ) : (
                 !isRecordingVideo ? (
-                  <button
+                  <motion.button
                     onClick={startVideoRecording}
                     aria-label="Start video recording"
+                    whileTap={prefersReducedMotion ? undefined : { scale: 0.92, transition: spring.snappy }}
                     className="w-16 h-16 rounded-full border-4 border-red-500/80 p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none"
                   >
                     <div className="w-full h-full bg-red-600 rounded-full" />
-                  </button>
+                  </motion.button>
                 ) : (
-                  <button
+                  <motion.button
                     onClick={stopVideoRecording}
                     aria-label="Stop video recording"
+                    whileTap={prefersReducedMotion ? undefined : { scale: 0.92, transition: spring.snappy }}
                     className="w-16 h-16 rounded-full border-4 border-red-500/80 p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-[#B28DAE] focus-visible:outline-none"
                   >
                     <Square className="h-6 w-6 fill-red-600 text-red-600" />
-                  </button>
+                  </motion.button>
                 )
               )}
 

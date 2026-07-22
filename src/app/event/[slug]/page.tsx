@@ -259,25 +259,30 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
           )}
           <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#141110]/30 via-[#141110]/70 to-[#141110]" />
           <div className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 sm:py-20">
+            {/* Server Component hero — can't reach for Framer Motion hooks here,
+                so the staggered entrance is pure CSS (existing keyframe
+                utilities + the new .animate-delay-* steps from globals.css).
+                GPU-accelerated (opacity/transform only), zero extra JS, and
+                automatically neutralized by the prefers-reduced-motion guard. */}
             {event.user?.branding?.logo_url && (
               <img
                 src={event.user.branding.logo_url}
                 alt={event.user.name}
-                className="mx-auto mb-4 h-10"
+                className="animate-slide-up mx-auto mb-4 h-10"
               />
             )}
-            <p className="text-sm uppercase tracking-widest text-[#B28DAE]">
+            <p className="animate-slide-up text-sm uppercase tracking-widest text-[#B28DAE]">
               {event.user?.name ?? "Event"}
             </p>
-            <h1 className="font-playfair mt-2 text-4xl font-medium tracking-tight text-white sm:text-5xl">
+            <h1 className="animate-slide-up animate-delay-1 font-playfair mt-2 text-4xl font-medium tracking-tight text-white sm:text-5xl">
               {event.name}
             </h1>
             {event.description && (
-              <p className="mx-auto mt-3 max-w-2xl text-pretty text-white/60">
+              <p className="animate-slide-up animate-delay-2 mx-auto mt-3 max-w-2xl text-pretty text-white/60">
                 {event.description}
               </p>
             )}
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-white/60">
+            <div className="animate-slide-up animate-delay-2 mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-white/60">
               {event.event_date && (
                 <span className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
@@ -291,12 +296,12 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                 </span>
               )}
             </div>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="animate-slide-up animate-delay-3 mt-8 flex flex-wrap items-center justify-center gap-3">
               {settings.allow_guest_uploads && checkedIn && (
                 <Button
                   asChild
                   size="lg"
-                  className="rounded-full bg-[#B28DAE] px-6 text-[#141110] hover:bg-[#a468a0]"
+                  className="rounded-full bg-[#B28DAE] px-6 text-[#141110] transition-transform hover:scale-[1.02] hover:bg-[#a468a0] active:scale-[0.98]"
                 >
                   <Link href={`/event/${event.slug}/upload`}>
                     <Camera className="mr-2 h-4 w-4" />
@@ -314,7 +319,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                 asChild
                 size="lg"
                 variant="outline"
-                className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                className="rounded-full border border-white/15 bg-transparent text-white transition-transform hover:scale-[1.02] hover:bg-white/10 hover:text-white active:scale-[0.98]"
               >
                 <Link href={`/event/${event.slug}/qr`}>
                   <QrCode className="mr-2 h-4 w-4" />
@@ -325,7 +330,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+        <section className="animate-fade-in mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <h2 className="font-playfair text-2xl font-medium tracking-tight text-white">
             {!checkedIn ? "Private Memory Capsule" : isRevealed ? "Photos" : "Coming Soon"}
           </h2>
