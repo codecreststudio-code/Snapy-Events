@@ -4,20 +4,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Camera, Disc } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { AccountMenu } from "./account-menu"
 
-// Minimal 2-tab bottom bar used ONLY on the dashboard home page
-// (src/app/dashboard/page.tsx), matching the reference app's clean
-// "Films / Tapes" bar exactly — Events / Galleries here (see the mapping
-// decided when this page was redesigned). Deliberately a separate, simpler
-// component from MobileBottomNav (which still handles every other
-// /dashboard/* page and has 5 slots — Events, Galleries, a raised Home hub,
-// QR Codes, and a More sheet for Downloads/Settings/Billing/Admin/Sign out).
-// Reusing that richer bar here would either lose those extra destinations
-// or clutter a screen that's supposed to look like the minimal reference —
-// instead, the home page's top bar carries a profile menu that covers
-// Settings/Billing/QR Codes/Downloads/Admin/Sign out, and this bar just
-// does the two tabs. Visible at every screen width (no `lg:hidden`) since
-// the home page replaces the desktop sidebar entirely, not just on mobile.
 const TABS = [
   { name: "Events", href: "/dashboard/events", icon: Camera },
   { name: "Galleries", href: "/dashboard/galleries", icon: Disc },
@@ -36,28 +24,36 @@ export function HomeBottomTabs() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Primary"
     >
-      <div className="mx-auto flex max-w-md items-stretch px-2">
-        {TABS.map((item) => {
-          const active = isActivePath(pathname, item.href)
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="relative flex flex-1 flex-col items-center justify-center gap-1.5 py-3 text-[11px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 rounded-lg"
-              aria-current={active ? "page" : undefined}
-            >
-              <item.icon
-                className={cn(
-                  "h-5 w-5 transition-colors duration-200",
-                  active ? "text-mauve" : "text-ink-secondary"
-                )}
-              />
-              <span className={cn("transition-colors duration-200", active ? "text-mauve" : "text-ink-secondary")}>
-                {item.name}
-              </span>
-            </Link>
-          )
-        })}
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2.5">
+        {/* Left / Center Navigation Tabs */}
+        <div className="flex items-center gap-4 sm:gap-6">
+          {TABS.map((item) => {
+            const active = isActivePath(pathname, item.href)
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="relative flex items-center gap-2 py-1.5 px-3 text-[11px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 rounded-xl transition-all hover:bg-mauve/5"
+                aria-current={active ? "page" : undefined}
+              >
+                <item.icon
+                  className={cn(
+                    "h-4.5 w-4.5 transition-colors duration-200",
+                    active ? "text-mauve" : "text-ink-secondary"
+                  )}
+                />
+                <span className={cn("transition-colors duration-200", active ? "text-mauve font-bold" : "text-ink-secondary font-semibold")}>
+                  {item.name}
+                </span>
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* Far Right Integrated Profile Avatar */}
+        <div className="flex items-center">
+          <AccountMenu variant="compact" />
+        </div>
       </div>
     </nav>
   )

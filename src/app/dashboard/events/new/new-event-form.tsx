@@ -227,6 +227,8 @@ export function NewEventForm() {
   const [endDate, setEndDate] = useState("")
   const [endTime, setEndTime] = useState("22:00")
   const [revealExperience, setRevealExperience] = useState("immediately")
+  const [customRevealDate, setCustomRevealDate] = useState("")
+  const [customRevealTime, setCustomRevealTime] = useState("12:00")
   // Plan ids are admin-configurable (Admin > Subscriptions > Plan Builder) —
   // not a fixed "free"/"starter"/"standard"/"premium" set. Starts empty and
   // gets set to a real id once /api/payments/plans resolves (see the
@@ -391,6 +393,18 @@ export function NewEventForm() {
         ? new Date(`${eventDate}T00:00:00`).toISOString()
         : new Date().toISOString()
 
+      // Calculate exact reveal date/time for the event based on chosen experience
+      let computedRevealDate: string | null = null
+      if (revealExperience === "after") {
+        computedRevealDate = calculatedEndDate
+      } else if (revealExperience === "24h") {
+        computedRevealDate = new Date(new Date(calculatedEndDate).getTime() + 24 * 60 * 60 * 1000).toISOString()
+      } else if (revealExperience === "7d") {
+        computedRevealDate = new Date(new Date(calculatedEndDate).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      } else if (revealExperience === "custom" && customRevealDate) {
+        computedRevealDate = new Date(`${customRevealDate}T${customRevealTime || "12:00"}:00`).toISOString()
+      }
+
       const eventData = {
         host_id: profile.id,
         name: name || "Celebration",
@@ -410,16 +424,8 @@ export function NewEventForm() {
           allow_guest_uploads: contentPhotos,
           auto_approve_photos: true,
           enable_countdown: invitationCountdown,
-          countdown_date: calculatedEndDate,
+          countdown_date: computedRevealDate || calculatedEndDate,
           guest_count_plan: guestCountPlan,
-          // Informational record of this event's own payment state — set to
-          // "free" immediately for the free tier (no checkout ever happens
-          // for it), or "pending" for a paid tier until /api/payments/verify
-          // (or the free-checkout fallback) flips it to "paid"/"free" once
-          // the purchase for THIS event actually completes. Previously there
-          // was no per-event payment record at all — only an account-level
-          // subscription — so nothing could tell whether a given event had
-          // actually been paid for.
           payment_status: totalEventPrice === 0 ? "free" : "pending",
           guests_boost: guestsBoost,
           shots_boost: shotsBoost,
@@ -433,14 +439,11 @@ export function NewEventForm() {
           video_duration_limit: videoDuration,
           voice_note_duration_limit: voiceDuration,
           cover_gradient: coverImage.startsWith("linear") ? coverImage : null,
-          // Option ids from the Step 5 picker below are "immediately"/"during"/"after"/"24h"/"7d"/"custom" —
-          // this used to check for "during_event" (a value that option never produces), so hosts who picked
-          // "During Event" got silently stored as photo_reveal_mode: "delayed", and /api/galleries/[id]/photos
-          // (which does an exact "instant" match, unlike the guest event page's more lenient substring check)
-          // would withhold photos from guests during a live event despite the host explicitly choosing live reveal.
           photo_reveal_mode: (revealExperience === "immediately" || revealExperience === "during") ? "instant" : "delayed",
           reveal_type: (revealExperience === "immediately" || revealExperience === "during") ? "instant" : "delayed",
           reveal_experience: revealExperience,
+          reveal_date: computedRevealDate,
+          custom_reveal_date: computedRevealDate,
           ai_features: {
             face_search: aiFaceSearch,
             duplicate_detection: aiDuplicateCheck,
@@ -993,6 +996,57 @@ export function NewEventForm() {
                       )
                     })}
                   </div>
+
+                  {/* Custom Date & Time Selector */}
+                  {revealExperience === "custom" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-4 rounded-2xl border border-mauve/40 bg-mauve/5 space-y-3"
+                    >
+                      <div className="flex items-center gap-2 text-xs font-bold text-mauve">
+                        <CalendarIcon className="h-4 w-4 text-mauve" />
+                        <span>Select Custom Reveal Date & Time</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-ink-secondary">Reveal Date</label>
+                          <div className="relative bg-surface-card border border-hairline-dark rounded-xl p-3 flex items-center gap-2">
+                            <CalendarIcon className="h-4 w-4 text-mauve" />
+                            <input
+                              type="date"
+                              value={customRevealDate}
+                              onChange={(e) => setCustomRevealDate(e.target.value)}
+                              className="bg-transparent outline-none text-xs text-ink flex-1 cursor-pointer"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-ink-secondary">Reveal Time</label>
+                          <div className="relative bg-surface-card border border-hairline-dark rounded-xl p-3 flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-mauve" />
+                            <input
+                              type="time"
+                              value={customRevealTime}
+                              onChange={(e) => setCustomRevealTime(e.target.value)}
+                              className="bg-transparent outline-none text-xs text-ink flex-1 cursor-pointer"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {customRevealDate ? (
+                        <p className="text-[11px] font-semibold text-mauve">
+                          ✨ Memories will unlock on {new Date(`${customRevealDate}T${customRevealTime || "12:00"}`).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
+                        </p>
+                      ) : (
+                        <p className="text-[11px] text-amber-600 font-medium">
+                          ⚠️ Please select a date above to set your custom reveal time.
+                        </p>
+                      )}
+                    </motion.div>
+                  )}
 
                   {/* Thumbnail Reveal Blur Demo */}
                   <div className="border border-hairline-dark rounded-xl p-4 bg-surface-card space-y-3">

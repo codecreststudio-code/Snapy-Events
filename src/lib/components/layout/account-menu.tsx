@@ -38,33 +38,33 @@ export function AccountMenu({ variant = "sidebar" }: { variant?: "sidebar" | "co
     "US"
 
   const menuContent = (
-    <DropdownMenuContent align="end" className="w-56">
-      <DropdownMenuLabel>My Account</DropdownMenuLabel>
-      <DropdownMenuSeparator />
+    <DropdownMenuContent side="top" align="end" sideOffset={12} className="w-56 rounded-2xl border border-[#e5dfd0] bg-white p-2 shadow-xl z-50">
+      <DropdownMenuLabel className="px-3 py-2 text-xs font-bold text-ink">My Account</DropdownMenuLabel>
+      <DropdownMenuSeparator className="my-1 bg-[#e5dfd0]" />
       {profile?.is_admin && (
         <>
           <DropdownMenuItem asChild>
-            <Link href="/admin" className="font-semibold text-mauve hover:text-mauve-strong">
+            <Link href="/admin" className="cursor-pointer rounded-xl px-3 py-2 text-xs font-semibold text-mauve hover:bg-mauve/10">
               Admin Portal
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="my-1 bg-[#e5dfd0]" />
         </>
       )}
       <DropdownMenuItem asChild>
-        <Link href="/dashboard/settings">Settings</Link>
+        <Link href="/dashboard/settings" className="cursor-pointer rounded-xl px-3 py-2 text-xs font-medium text-ink hover:bg-mauve/10">Settings</Link>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
-        <Link href="/dashboard/billing">Billing</Link>
+        <Link href="/dashboard/billing" className="cursor-pointer rounded-xl px-3 py-2 text-xs font-medium text-ink hover:bg-mauve/10">Billing</Link>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
-        <Link href="/dashboard/qr">QR Codes</Link>
+        <Link href="/dashboard/qr" className="cursor-pointer rounded-xl px-3 py-2 text-xs font-medium text-ink hover:bg-mauve/10">QR Codes</Link>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
-        <Link href="/dashboard/downloads">Downloads</Link>
+        <Link href="/dashboard/downloads" className="cursor-pointer rounded-xl px-3 py-2 text-xs font-medium text-ink hover:bg-mauve/10">Downloads</Link>
       </DropdownMenuItem>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+      <DropdownMenuSeparator className="my-1 bg-[#e5dfd0]" />
+      <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer rounded-xl px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/10">
         <LogOut className="mr-2 h-4 w-4" />
         Sign out
       </DropdownMenuItem>
@@ -78,11 +78,11 @@ export function AccountMenu({ variant = "sidebar" }: { variant?: "sidebar" | "co
           <button
             type="button"
             aria-label="Account menu"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e5dfd0] bg-[#ffffff] hover:border-mauve/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e5dfd0] bg-[#ffffff] hover:border-mauve/60 transition-all hover:scale-105 active:scale-95 focus-visible:outline-none cursor-pointer"
           >
             <Avatar className="h-9 w-9">
               <AvatarImage src={profile?.avatar_url || undefined} />
-              <AvatarFallback className="bg-mauve/10 text-mauve text-xs font-bold">
+              <AvatarFallback className="bg-mauve/15 text-mauve text-xs font-bold">
                 {initials}
               </AvatarFallback>
             </Avatar>
