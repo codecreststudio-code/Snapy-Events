@@ -9,6 +9,16 @@
 // guests receive actually reflects what the host designed.
 //
 // Everything happens client-side via <canvas>; nothing is uploaded anywhere.
+//
+// Layout is computed in two passes: first we measure how tall the header
+// text (eyebrow / event name / date / welcome message) will actually render
+// at — since a long event name or welcome message can wrap to multiple
+// lines — and only THEN do we decide where the QR panel, "scan to upload"
+// caption, and footer link go, and how tall the whole canvas needs to be.
+// Previously the QR panel's Y position (and canvas height) were fixed
+// constants that assumed a single short line of text everywhere; any event
+// with a longer name/message/date pushed the header past that fixed offset
+// and the QR panel got drawn right on top of it.
 
 export type InvitationTheme = "minimal" | "luxury" | "modern" | "elegant" | "glass" | "dark"
 
@@ -45,6 +55,13 @@ export interface InvitationCardOptions {
   headingFontFamily?: string
   /** Short join_code (migrations/0023_event_join_code.sql) — printed under the QR as a no-scan fallback. */
   joinCode?: string
+}
+
+function hexToRgb(hex: string): [number, number, number] {
+  const clean = hex.replace("#", "")
+  const full = clean.length === 3 ? clean.split("").map((c) => c + c).join("") : clean
+  const num = parseInt(full, 16)
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255]
 }
 
 function loadImage(src: string, crossOrigin?: "anonymous"): Promise<HTMLImageElement | null> {
@@ -101,7 +118,61 @@ export async function generateInvitationCard(opts: InvitationCardOptions): Promi
 
   async function render(includeCover: boolean): Promise<Blob | null> {
     const W = 1080
-    const H = 1350
+    const hasCover = includeCover && !!opts.coverImageUrl
+    // Only reserve a big photo band when there's actually a photo to show —
+    // otherwise the card was rendering ~45% of blank cream space up top.
+    const bandH = hasCover ? 620 : 90
+
+    const headingFont = opts.headingFontFamily || "Georgia, 'Times New Roman', serif"
+    if (opts.headingFontFamily && (document as any).fonts?.load) {
+      try { await (document as any).fonts.load(`600 64px ${headingFont}`) } catch { /* best-effort */ }
+    }
+
+    // ── Pass 1: measure text on a scratch context so we know exactly how
+    // many lines the title/message wrap to BEFORE deciding where anything
+    // else (QR panel, footer, canvas height) goes. Font metrics come from
+    // the browser, not canvas-specific state, so measuring on a throwaway
+    // context gives the same wrapping we'll actually draw below. ──
+    const measureCanvas = document.createElement("canvas")
+    const mctx = measureCanvas.getContext("2d")
+    if (!mctx) return null
+
+    mctx.font = `600 64px ${headingFont}`
+    const nameLines = wrapLines(mctx, opts.eventName, W - 160, 2)
+
+    mctx.font = "400 32px system-ui, -apple-system, sans-serif"
+    const msgLines = opts.welcomeMessage ? wrapLines(mctx, opts.welcomeMessage, W - 220, 3) : []
+
+    // ── Layout: every Y coordinate below is derived from the actual end of
+    // whatever was drawn before it, so longer content pushes later elements
+    // down instead of being overdrawn by them. ──
+    const titleLineH = 74
+    const msgLineH = 42
+
+    const eyebrowY = bandH + 70
+    const titleStartY = eyebrowY + 80
+    let cursorY = titleStartY + (nameLines.length - 1) * titleLineH // baseline of the LAST title line
+
+    let dateY: number | null = null
+    if (opts.eventDate) {
+      cursorY += 60
+      dateY = cursorY
+    }
+    const msgStartY = cursorY + 55
+    const msgEndY = msgLines.length > 0 ? msgStartY + (msgLines.length - 1) * msgLineH : cursorY
+
+    const panelSize = 440
+    const panelGap = 80
+    const panelY = msgEndY + panelGap
+    const panelX = (W - panelSize) / 2
+
+    const captionY = panelY + panelSize + 50
+    const codeY = opts.joinCode ? captionY + 42 : captionY
+    const footerY = codeY + 60
+    const H = Math.round(footerY + 46)
+
+    // ── Pass 2: build the real canvas at the height we just computed and
+    // draw everything using the coordinates above. ──
     const canvas = document.createElement("canvas")
     canvas.width = W
     canvas.height = H
@@ -115,68 +186,64 @@ export async function generateInvitationCard(opts: InvitationCardOptions): Promi
     ctx.fillStyle = bgGrad
     ctx.fillRect(0, 0, W, H)
 
-    // Cover photo band (top ~48%), faded into the background color
-    const bandH = Math.round(H * 0.48)
-    if (includeCover && opts.coverImageUrl) {
-      const cover = await loadImage(opts.coverImageUrl, "anonymous")
+    // Cover photo band, faded into the background color — only drawn when
+    // there's a real photo, and using an opaque-color-to-opaque-color fade
+    // (matching alpha-0 and alpha-1 stops to the SAME rgb) instead of fading
+    // from rgba(0,0,0,0): interpolating from transparent BLACK to an opaque
+    // light color produces a muddy gray band in the middle of the gradient,
+    // because canvas gradients interpolate the RGB channels independently of
+    // alpha — that band was rendering right across the event title.
+    if (hasCover) {
+      const cover = await loadImage(opts.coverImageUrl!, "anonymous")
       if (cover) {
         const scale = Math.max(W / cover.width, bandH / cover.height)
         const dw = cover.width * scale
         const dh = cover.height * scale
         ctx.drawImage(cover, (W - dw) / 2, (bandH - dh) / 2, dw, dh)
       }
+      const [r, g, b] = hexToRgb(palette.bgTo)
+      const fade = ctx.createLinearGradient(0, bandH - 260, 0, bandH)
+      fade.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0)`)
+      fade.addColorStop(1, `rgba(${r}, ${g}, ${b}, 1)`)
+      ctx.fillStyle = fade
+      ctx.fillRect(0, bandH - 260, W, 260)
     }
-    const fade = ctx.createLinearGradient(0, bandH - 260, 0, bandH)
-    fade.addColorStop(0, "rgba(0,0,0,0)")
-    fade.addColorStop(1, palette.bgTo)
-    ctx.fillStyle = fade
-    ctx.fillRect(0, bandH - 260, W, 260)
 
     // Eyebrow
     ctx.textAlign = "center"
     ctx.fillStyle = palette.accent
     ctx.font = "700 28px system-ui, -apple-system, sans-serif"
-    ctx.fillText("Y O U ' R E   I N V I T E D", W / 2, bandH + 70)
+    ctx.fillText("Y O U ' R E   I N V I T E D", W / 2, eyebrowY)
 
     // Event name (heading font, wrapped up to 2 lines)
-    const headingFont = opts.headingFontFamily || "Georgia, 'Times New Roman', serif"
-    if (opts.headingFontFamily && (document as any).fonts?.load) {
-      try { await (document as any).fonts.load(`600 64px ${headingFont}`) } catch { /* best-effort */ }
-    }
     ctx.fillStyle = palette.title
     ctx.font = `600 64px ${headingFont}`
-    const nameLines = wrapLines(ctx, opts.eventName, W - 160, 2)
-    let y = bandH + 150
+    let y = titleStartY
     for (const line of nameLines) {
       ctx.fillText(line, W / 2, y)
-      y += 74
+      y += titleLineH
     }
 
     // Date
-    if (opts.eventDate) {
+    if (dateY !== null && opts.eventDate) {
       const formatted = new Date(opts.eventDate).toLocaleDateString(undefined, {
         weekday: "long", year: "numeric", month: "long", day: "numeric",
       })
       ctx.fillStyle = palette.accent
       ctx.font = "600 30px system-ui, -apple-system, sans-serif"
-      ctx.fillText(formatted, W / 2, y + 20)
-      y += 60
+      ctx.fillText(formatted, W / 2, dateY)
     }
 
     // Welcome message
     ctx.fillStyle = palette.subtext
     ctx.font = "400 32px system-ui, -apple-system, sans-serif"
-    const msgLines = wrapLines(ctx, opts.welcomeMessage, W - 220, 3)
-    let my = y + 55
+    let my = msgStartY
     for (const line of msgLines) {
       ctx.fillText(line, W / 2, my)
-      my += 42
+      my += msgLineH
     }
 
     // QR panel
-    const panelSize = 480
-    const panelY = H - panelSize - 130
-    const panelX = (W - panelSize) / 2
     const radius = 32
     ctx.fillStyle = palette.panelBg
     ctx.beginPath()
@@ -196,20 +263,20 @@ export async function generateInvitationCard(opts: InvitationCardOptions): Promi
 
     ctx.fillStyle = palette.subtext
     ctx.font = "600 26px system-ui, -apple-system, sans-serif"
-    ctx.fillText("Scan to upload photos", W / 2, panelY + panelSize + 50)
+    ctx.fillText("Scan to upload photos", W / 2, captionY)
 
     // No-scan fallback: the event's short join code, for anyone typing it in
     // manually (e.g. off a printed card) instead of scanning.
     if (opts.joinCode) {
       ctx.fillStyle = palette.accent
       ctx.font = "700 30px system-ui, -apple-system, sans-serif"
-      ctx.fillText(`Or enter code: ${opts.joinCode}`, W / 2, panelY + panelSize + 92)
+      ctx.fillText(`Or enter code: ${opts.joinCode}`, W / 2, codeY)
     }
 
     // Footer: fallback link text + brand
     ctx.fillStyle = palette.subtext
     ctx.font = "400 22px system-ui, -apple-system, sans-serif"
-    ctx.fillText(opts.inviteUrl.replace(/^https?:\/\//, ""), W / 2, H - 50)
+    ctx.fillText(opts.inviteUrl.replace(/^https?:\/\//, ""), W / 2, footerY)
 
     return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), "image/png"))
   }
