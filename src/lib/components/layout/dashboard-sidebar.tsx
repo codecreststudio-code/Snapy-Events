@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils"
 import { MobileBottomNav } from "./mobile-bottom-nav"
 import { AccountMenu } from "./account-menu"
 import { NotificationCenter } from "@/lib/components/notifications/notification-center"
+import { Logo } from "./logo"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -48,11 +49,8 @@ export function DashboardSidebar() {
           see below — rather than a hamburger + slide-in copy of this panel. */}
       <div className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-[#e5dfd0] bg-[#faf6ed] lg:flex">
         <div className="flex h-16 items-center gap-2 border-b border-[#e5dfd0] px-6">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-mauve">
-              <Camera className="h-5 w-5 text-[#faf6ed]" />
-            </div>
-            <span className="font-playfair font-semibold text-lg text-ink">Snapsy</span>
+          <Link href="/dashboard" className="inline-flex items-center transition-opacity hover:opacity-90">
+            <Logo />
           </Link>
         </div>
 

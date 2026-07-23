@@ -41,6 +41,7 @@ export function PlanBuilder() {
   const [formTrial, setFormTrial] = useState(0)
   const [formTheme, setFormTheme] = useState("")
   const [formBestValue, setFormBestValue] = useState(false)
+  const [formIsPopular, setFormIsPopular] = useState(false)
   const [formActive, setFormActive] = useState(true)
   
   // Advanced Editor Mode
@@ -99,8 +100,9 @@ export function PlanBuilder() {
     setFormTrial(0)
     setFormTheme("")
     setFormBestValue(false)
+    setFormIsPopular(false)
     setFormActive(true)
-    
+
     // Limits
     setLimitGuests(10)
     setLimitShots(10)
@@ -139,6 +141,7 @@ export function PlanBuilder() {
     setFormTrial(p.trial_days || 0)
     setFormTheme(p.theme_color || "")
     setFormBestValue(p.best_value || false)
+    setFormIsPopular(p.is_popular || false)
     setFormActive(p.is_active)
     
     const lim = p.limits || {}
@@ -215,6 +218,7 @@ export function PlanBuilder() {
       trial_days: formTrial,
       theme_color: formTheme,
       best_value: formBestValue,
+      is_popular: formIsPopular,
       is_active: formActive,
       features: formFeatures.split("\n").map(f => f.trim()).filter(Boolean),
       limits: finalLimits,
@@ -299,7 +303,8 @@ export function PlanBuilder() {
                         <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", p.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-ink/5 text-ink-secondary border-hairline-dark")}>
                           {p.is_active ? "Active" : "Inactive"}
                         </span>
-                        {p.best_value && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-mauve/10 text-mauve border-mauve/20">Best Value</span>}
+                        {p.best_value && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-ink text-surface-dark border-ink">Best Value</span>}
+                        {p.is_popular && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-surface-dark text-mauve-strong border-mauve/25">Popular</span>}
                         <span className="text-[10px] font-semibold text-ink-secondary">
                           {p.billing_interval === "event" ? "Per Event" : p.billing_interval}
                         </span>
@@ -414,7 +419,7 @@ export function PlanBuilder() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-6 py-2 px-3 bg-ink/5 rounded-lg border border-hairline-dark">
+                  <div className="flex items-center gap-6 flex-wrap py-2 px-3 bg-ink/5 rounded-lg border border-hairline-dark">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-mauve focus:ring-mauve h-4 w-4" />
                       <span className="text-xs font-bold text-ink-secondary">Active Tier</span>
@@ -422,6 +427,10 @@ export function PlanBuilder() {
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={formBestValue} onChange={e => setFormBestValue(e.target.checked)} className="rounded text-mauve focus:ring-mauve h-4 w-4" />
                       <span className="text-xs font-bold text-ink-secondary">Highlight as "Best Value"</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={formIsPopular} onChange={e => setFormIsPopular(e.target.checked)} className="rounded text-mauve focus:ring-mauve h-4 w-4" />
+                      <span className="text-xs font-bold text-ink-secondary">Highlight as "Popular"</span>
                     </label>
                   </div>
                 </div>

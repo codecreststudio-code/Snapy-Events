@@ -55,7 +55,7 @@ export function PublicNavbar() {
 
   return (
     <header className="pt-safe sticky top-0 z-50 w-full bg-surface-dark/85 backdrop-blur-xl border-b border-hairline-dark">
-      <div className="container relative mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="container relative mx-auto flex h-22 sm:h-24 items-center justify-between px-4 sm:px-6 lg:px-8 py-2">
 
         {/* Left: Brand Logo */}
         <div className="flex items-center shrink-0">

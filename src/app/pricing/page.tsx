@@ -123,13 +123,13 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       }`}
     >
       {plan.popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-mauve px-4 py-1 text-[10px] font-bold text-[#faf6ed] tracking-widest uppercase shadow-md flex items-center gap-1">
-          <Sparkles className="h-3 w-3" />
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-surface-dark border border-mauve/25 px-4 py-1 text-[10px] font-bold text-mauve-strong tracking-widest uppercase shadow-md flex items-center gap-1">
+          <Sparkles className="h-3 w-3 text-mauve" />
           POPULAR
         </div>
       )}
       {plan.bestValue && (
-        <div className="absolute -top-3 right-4 rounded-full bg-mauve-strong px-3 py-1 text-[10px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1">
+        <div className="absolute -top-3 right-4 rounded-full bg-ink px-3 py-1 text-[10px] font-bold text-surface-dark tracking-widest uppercase shadow-md flex items-center gap-1">
           <Crown className="h-3 w-3" />
           BEST VALUE
         </div>
@@ -144,8 +144,13 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
             </p>
           </div>
           {plan.popular && (
-            <span className="h-8 w-8 rounded-full bg-mauve/20 flex items-center justify-center text-mauve">
+            <span className="h-8 w-8 rounded-full bg-mauve/10 flex items-center justify-center text-mauve shrink-0">
               <Sparkles className="h-4 w-4" />
+            </span>
+          )}
+          {plan.bestValue && (
+            <span className="h-8 w-8 rounded-full bg-ink/10 flex items-center justify-center text-ink shrink-0">
+              <Crown className="h-4 w-4" />
             </span>
           )}
         </div>
@@ -169,7 +174,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
         <Link href={`/signup?plan=${plan.id}`}>
           <Button
             className={`w-full font-bold py-5 rounded-full transition-all active:scale-[0.99] ${
-              plan.popular
+              plan.popular || plan.bestValue
                 ? "bg-mauve hover:bg-mauve-strong text-[#faf6ed] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
                 : "border border-hairline-dark text-ink hover:bg-mauve/5"
             }`}

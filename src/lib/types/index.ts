@@ -154,6 +154,7 @@ export interface Plan {
   trial_days: number
   theme_color: string | null
   best_value: boolean
+  is_popular: boolean
   features: string[]
   limits: Record<string, any>
   is_active: boolean

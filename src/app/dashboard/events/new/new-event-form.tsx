@@ -1060,10 +1060,10 @@ export function NewEventForm() {
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-bold text-ink">{plan.name}</span>
                                 {plan.best_value && (
-                                  <span className="bg-surface-card-elevated text-mauve text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">Best Value</span>
+                                  <span className="bg-ink text-surface-dark text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">Best Value</span>
                                 )}
                                 {!plan.best_value && plan.is_popular && (
-                                  <span className="bg-surface-card-elevated text-mauve text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">Popular</span>
+                                  <span className="bg-surface-dark border border-mauve/25 text-mauve-strong text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">Popular</span>
                                 )}
                               </div>
                               <p className="text-xs text-mauve font-medium">{guestsLabel}</p>

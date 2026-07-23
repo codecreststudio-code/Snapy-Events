@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/hooks"
 import { AccountMenu } from "@/lib/components/layout/account-menu"
 import { HomeBottomTabs } from "@/lib/components/layout/home-bottom-tabs"
 import { NotificationCenter } from "@/lib/components/notifications/notification-center"
+import { Logo } from "@/lib/components/layout/logo"
 
 // Redesigned to match a minimal, native-app-style home screen (host's own
 // request, replacing the previous sidebar/stat-cards/checklist admin-panel
@@ -119,11 +120,8 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-surface-dark text-ink pb-28">
       {/* Top bar */}
       <div className="pt-safe sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-[#e5dfd0] bg-[#faf6ed]/95 px-5 py-4 backdrop-blur-lg">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-mauve">
-            <Camera className="h-5 w-5 text-[#faf6ed]" />
-          </div>
-          <span className="font-playfair text-lg font-semibold text-ink">Snapsy</span>
+        <Link href="/dashboard" className="inline-flex items-center transition-opacity hover:opacity-90">
+          <Logo />
         </Link>
         <div className="flex items-center gap-2">
           <Link href="/dashboard/events/new">

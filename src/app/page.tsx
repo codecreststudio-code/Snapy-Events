@@ -120,14 +120,14 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 
       {/* Badges Container */}
       {plan.popular && (
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-mauve px-3.5 py-1 text-[9px] sm:text-[10px] font-bold text-[#faf6ed] tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
-          <Sparkles className="h-3 w-3" />
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-surface-dark border border-mauve/25 px-3.5 py-1 text-[9px] sm:text-[10px] font-bold text-mauve-strong tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
+          <Sparkles className="h-3 w-3 text-mauve" />
           POPULAR
         </div>
       )}
 
       {plan.bestValue && (
-        <div className="absolute -top-3.5 right-6 rounded-full bg-mauve-strong px-3 py-1 text-[9px] sm:text-[10px] font-bold text-[#faf6ed] tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
+        <div className="absolute -top-3.5 right-6 rounded-full bg-ink px-3 py-1 text-[9px] sm:text-[10px] font-bold text-surface-dark tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
           <Crown className="h-3.5 w-3.5" />
           BEST VALUE
         </div>
@@ -143,8 +143,13 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
             </p>
           </div>
           {plan.popular && (
-            <span className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-mauve/20 flex items-center justify-center text-mauve shrink-0 ml-2">
+            <span className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-mauve/10 flex items-center justify-center text-mauve shrink-0 ml-2">
               <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            </span>
+          )}
+          {plan.bestValue && (
+            <span className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-ink/10 flex items-center justify-center text-ink shrink-0 ml-2">
+              <Crown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </span>
           )}
         </div>
@@ -167,7 +172,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       <div className="mt-6 sm:mt-8 pt-2 sm:pt-4">
         <Link href={`/signup?plan=${plan.name.toLowerCase()}`}>
           <Button
-            className={`w-full font-bold py-3.5 sm:py-5 rounded-full transition-all active:scale-[0.99] ${plan.popular
+            className={`w-full font-bold py-3.5 sm:py-5 rounded-full transition-all active:scale-[0.99] ${plan.popular || plan.bestValue
                 ? "bg-mauve hover:bg-mauve-strong text-[#faf6ed] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
                 : "border border-hairline-dark text-ink hover:bg-mauve/5"
               }`}

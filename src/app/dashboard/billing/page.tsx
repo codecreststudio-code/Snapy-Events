@@ -49,6 +49,8 @@ interface PlanInfo {
     storage: number
     photos: number
   }
+  is_popular?: boolean
+  best_value?: boolean
 }
 
 const PLAN_INFO: PlanInfo[] = [
@@ -84,6 +86,7 @@ const PLAN_INFO: PlanInfo[] = [
       "Guestbook & photo reactions",
     ],
     limits: { events: 10, storage: 20, photos: 5000 },
+    is_popular: true,
   },
   {
     id: "premium" as PlanId,
@@ -107,6 +110,7 @@ const PLAN_INFO: PlanInfo[] = [
       "24/7 Priority support",
     ],
     limits: { events: -1, storage: 100, photos: -1 },
+    best_value: true,
   },
 ]
 
@@ -193,25 +197,23 @@ function PricingCard({
     })
   }
 
-  const isPopular = plan.id === "standard"
-  const isPremium = plan.id === "premium"
+  const isPopular = !!plan.is_popular
+  const isPremium = !!plan.best_value
 
   let selectedClasses = "border-[#e5dfd0] hover:border-mauve/40 hover:shadow-xl"
   if (isSelected) {
-    if (plan.id === "free") {
+    if (isPremium) {
+      selectedClasses = "border-mauve-strong ring-2 ring-mauve-strong/20 shadow-[0_20px_50px_rgba(150,114,58,0.15)] md:scale-[1.03] z-10"
+    } else if (isPopular) {
+      selectedClasses = "border-mauve ring-2 ring-mauve/20 shadow-[0_20px_50px_rgba(184,146,90,0.15)] md:scale-[1.03] z-10"
+    } else {
       selectedClasses = "border-mauve ring-2 ring-mauve/15 shadow-[0_15px_40px_rgba(184,146,90,0.1)]"
-    } else if (plan.id === "starter") {
-      selectedClasses = "border-indigo-500 ring-2 ring-indigo-500/15 shadow-[0_15px_40px_rgba(99,102,241,0.15)]"
-    } else if (plan.id === "standard") {
-      selectedClasses = "border-violet-500 ring-2 ring-violet-500/20 shadow-[0_20px_50px_rgba(139,92,246,0.15)] md:scale-[1.03] z-10"
-    } else if (plan.id === "premium") {
-      selectedClasses = "border-orange-500 ring-2 ring-orange-500/20 shadow-[0_20px_50px_rgba(249,115,22,0.15)] md:scale-[1.03] z-10"
     }
   } else {
     if (isPopular) {
-      selectedClasses = "border-[#e5dfd0] hover:border-violet-400/50 hover:shadow-lg"
+      selectedClasses = "border-[#e5dfd0] hover:border-mauve/50 hover:shadow-lg"
     } else if (isPremium) {
-      selectedClasses = "border-[#e5dfd0] hover:border-orange-400/50 hover:shadow-lg"
+      selectedClasses = "border-[#e5dfd0] hover:border-mauve-strong/50 hover:shadow-lg"
     }
   }
 
@@ -234,13 +236,11 @@ function PricingCard({
             className="absolute -inset-px transition duration-300 opacity-100"
             style={{
               background: `radial-gradient(320px circle at ${coords.x}px ${coords.y}px, ${
-                isPopular
-                  ? "rgba(139, 92, 246, 0.08)"
-                  : isPremium
-                  ? "rgba(249, 115, 22, 0.08)"
-                  : plan.id === "starter"
-                  ? "rgba(79, 70, 229, 0.06)"
-                  : "rgba(100, 116, 139, 0.05)"
+                isPremium
+                  ? "rgba(150,114,58,0.10)"
+                  : isPopular
+                  ? "rgba(184,146,90,0.08)"
+                  : "rgba(184,146,90,0.05)"
               }, transparent 80%)`,
             }}
           />
@@ -249,13 +249,13 @@ function PricingCard({
 
       {/* Badges Container */}
       {isPopular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-1.5 text-[9px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
-          <Sparkles className="h-3 w-3" />
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-surface-dark border border-mauve/25 px-4 py-1.5 text-[9px] font-bold text-mauve-strong tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
+          <Sparkles className="h-3 w-3 text-mauve" />
           POPULAR
         </div>
       )}
       {isPremium && (
-        <div className="absolute -top-3 right-4 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1.5 text-[9px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
+        <div className="absolute -top-3 right-4 rounded-full bg-ink px-3 py-1.5 text-[9px] font-bold text-surface-dark tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
           <Crown className="h-3.5 w-3.5" />
           BEST VALUE
         </div>
@@ -270,12 +270,12 @@ function PricingCard({
             </p>
           </div>
           {isPopular && (
-            <span className="h-7 w-7 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-400 shrink-0">
+            <span className="h-7 w-7 rounded-full bg-mauve/10 flex items-center justify-center text-mauve shrink-0">
               <Sparkles className="h-3.5 w-3.5" />
             </span>
           )}
           {isPremium && (
-            <span className="h-7 w-7 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 shrink-0">
+            <span className="h-7 w-7 rounded-full bg-ink/10 flex items-center justify-center text-ink shrink-0">
               <Crown className="h-3.5 w-3.5" />
             </span>
           )}
@@ -292,13 +292,9 @@ function PricingCard({
               <Check
                 className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
                   isSelected
-                    ? plan.id === "free"
-                      ? "text-mauve"
-                      : plan.id === "starter"
-                      ? "text-indigo-400"
-                      : isPopular
-                      ? "text-violet-400"
-                      : "text-orange-400"
+                    ? isPremium
+                      ? "text-mauve-strong"
+                      : "text-mauve"
                     : "text-ink-tertiary"
                 }`}
               />
@@ -313,13 +309,7 @@ function PricingCard({
           type="button"
           className={`w-full font-bold py-2.5 rounded-xl transition-all active:scale-[0.98] text-xs border-none ${
             isSelected
-              ? plan.id === "free"
-                ? "bg-mauve text-[#faf6ed] shadow-md shadow-mauve/10"
-                : plan.id === "starter"
-                ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/10"
-                : isPopular
-                ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/20"
-                : "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/20"
+              ? "bg-mauve text-[#faf6ed] shadow-md shadow-mauve/10"
               : "bg-mauve/5 text-ink-secondary hover:bg-mauve/10"
           }`}
         >
@@ -384,7 +374,9 @@ export default function BillingPage() {
                   events: dbPlan.limits?.events_limit ?? -1,
                   storage: dbPlan.limits?.storage_limit_gb ?? 0,
                   photos: dbPlan.limits?.photo_limit ?? -1,
-                }
+                },
+                is_popular: dbPlan.is_popular || false,
+                best_value: dbPlan.best_value || false,
               }
             })
             mapped.sort((a: any, b: any) => (a.price ?? 0) - (b.price ?? 0))
@@ -448,32 +440,14 @@ export default function BillingPage() {
   }
 
   const getAccentColor = () => {
-    if (selectedPlan === "starter") return {
-      text: "text-indigo-400",
-      bg: "bg-indigo-500/10",
-      border: "border-indigo-500/30",
-      badge: "bg-indigo-500",
-      hover: "hover:border-indigo-400/50",
-      buttonActive: "bg-indigo-500/10 border-indigo-500 text-indigo-300 shadow-[0_0_10px_rgba(99,102,241,0.1)]",
-      icon: "text-indigo-400"
-    }
-    if (selectedPlan === "standard") return {
-      text: "text-violet-400",
-      bg: "bg-violet-500/10",
-      border: "border-violet-500/30",
-      badge: "bg-violet-500",
-      hover: "hover:border-violet-400/50",
-      buttonActive: "bg-violet-500/10 border-violet-500 text-violet-300 shadow-[0_0_10px_rgba(139,92,246,0.1)]",
-      icon: "text-violet-400"
-    }
     if (selectedPlan === "premium") return {
-      text: "text-orange-400",
-      bg: "bg-orange-500/10",
-      border: "border-orange-500/30",
-      badge: "bg-orange-500",
-      hover: "hover:border-orange-400/50",
-      buttonActive: "bg-orange-500/10 border-orange-500 text-orange-300 shadow-[0_0_10px_rgba(249,115,22,0.1)]",
-      icon: "text-orange-400"
+      text: "text-mauve-strong",
+      bg: "bg-mauve-strong/10",
+      border: "border-mauve-strong/30",
+      badge: "bg-mauve-strong",
+      hover: "hover:border-mauve-strong/50",
+      buttonActive: "bg-mauve-strong/10 border-mauve-strong text-mauve-strong shadow-[0_0_10px_rgba(150,114,58,0.15)]",
+      icon: "text-mauve-strong"
     }
     return {
       text: "text-mauve",
@@ -514,14 +488,10 @@ export default function BillingPage() {
     }
     if (selectedPlan === "free") {
       return base + "bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/10"
-    } else if (selectedPlan === "starter") {
-      return base + "bg-indigo-500 hover:bg-indigo-600 text-white shadow-md shadow-indigo-500/10"
-    } else if (selectedPlan === "standard") {
-      return base + "bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white shadow-lg shadow-violet-500/20"
     } else if (selectedPlan === "premium") {
-      return base + "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-orange-500/20"
+      return base + "bg-mauve-strong hover:bg-mauve text-[#faf6ed] shadow-md shadow-mauve-strong/20"
     }
-    return base + "bg-orange-500 hover:bg-orange-600 text-white"
+    return base + "bg-mauve hover:bg-mauve-strong text-[#faf6ed] shadow-md shadow-mauve/20"
   }
 
   const getActionButtonText = () => {

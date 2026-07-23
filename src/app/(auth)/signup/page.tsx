@@ -53,7 +53,7 @@ const PLANS_DATA = [
       "Voice notes & audio greetings",
       "Guestbook & photo reactions",
     ],
-    badge: null,
+    badge: "Popular",
   },
   {
     id: "premium",
@@ -165,10 +165,16 @@ function SignupPricingCard({
       </div>
 
       {/* Badges Container */}
-      {plan.badge && (
-        <div className="absolute -top-3.5 right-6 rounded-full bg-mauve-strong px-3 py-1 text-[9px] font-bold text-[#faf6ed] tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
+      {plan.badge === "Popular" && (
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-surface-dark border border-mauve/25 px-4 py-1 text-[9px] font-bold text-mauve-strong tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
+          <Sparkles className="h-3.5 w-3.5 text-mauve" />
+          POPULAR
+        </div>
+      )}
+      {plan.badge === "Best Value" && (
+        <div className="absolute -top-3.5 right-6 rounded-full bg-ink px-3 py-1 text-[9px] font-bold text-surface-dark tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
           <Crown className="h-3.5 w-3.5" />
-          {plan.badge}
+          BEST VALUE
         </div>
       )}
 
