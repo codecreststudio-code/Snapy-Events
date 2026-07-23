@@ -110,6 +110,10 @@ export interface Photo {
   file_size: number | null
   width: number | null
   height: number | null
+  // Video/voice-note length in seconds (null for photos, or when the client
+  // couldn't determine it in time — see getMediaDuration in
+  // src/app/event/[slug]/upload/page.tsx).
+  duration: number | null
   metadata: Record<string, unknown>
   is_approved: boolean
   is_featured: boolean

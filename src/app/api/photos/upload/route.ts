@@ -46,6 +46,12 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     let uploaderEmail: string | null = null
     let approvedFlag = true
     let fileBuffer: Buffer | null = null
+    // Video/voice-note length in seconds, computed client-side (see
+    // getMediaDuration in src/app/event/[slug]/upload/page.tsx). Only ever
+    // sent on the JSON confirm branch — the legacy multipart branch below is
+    // dead code in production (no live caller), so it has no client-side
+    // duration to forward and simply stores null.
+    let duration: number | null = null
 
     if (contentType.includes("application/json")) {
       const body = await request.json()
@@ -56,6 +62,9 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       uploaderName = body.uploader_name ?? null
       uploaderEmail = body.uploader_email ?? null
       approvedFlag = body.is_approved !== false
+      duration = typeof body.duration === "number" && Number.isFinite(body.duration) && body.duration > 0
+        ? body.duration
+        : null
       if (!preUploadedPath) return fail("VALIDATION_ERROR", "Missing storage_path in JSON payload", 422)
     } else {
       const fd = await request.formData()
@@ -373,6 +382,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
         file_size: Number(uploadSize || 0),
         width: imageWidth || null,
         height: imageHeight || null,
+        duration: category === "PHOTO" ? null : duration,
         is_approved: approvedFlag,
         processing_status: "ready",
       })

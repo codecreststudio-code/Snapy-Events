@@ -118,4 +118,20 @@ CREATE POLICY "Service role can insert notifications" ON public.notifications
     WITH CHECK (true);
 
 -- Realtime — Notification Center subscribes to this table for live updates.
-ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+-- Guarded (unlike a bare ALTER PUBLICATION ... ADD TABLE) because Postgres
+-- has no "ADD TABLE IF NOT EXISTS" form, and this statement isn't safe to
+-- run twice like every other statement in this file — see
+-- 0042_realtime_publication_idempotent.sql for the fix that closes this for
+-- already-deployed databases where this file ran before the guard existed.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'notifications'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+  END IF;
+END $$;

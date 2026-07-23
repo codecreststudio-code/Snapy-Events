@@ -159,8 +159,16 @@ export const MAX_FILE_SIZES = {
 
 export const ALLOWED_MIME_TYPES = {
   PHOTO: ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"],
-  VIDEO: ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"],
-  AUDIO: ["audio/mpeg", "audio/wav", "audio/webm", "audio/mp4", "audio/ogg", "audio/m4a"],
+  // video/x-m4v covers the .m4v container some older iPhones/iTunes exports
+  // use (distinct from video/quicktime .mov and video/mp4); video/3gpp
+  // matches the photos storage bucket's allowlist (see
+  // supabase/migrations/0040_photos_bucket_mime_coverage.sql).
+  VIDEO: ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo", "video/3gpp", "video/x-m4v"],
+  // audio/aac and audio/x-m4a cover browsers/recorders that report those
+  // instead of the already-listed audio/mp4 / audio/m4a for the same voice-
+  // note containers; audio/mp3 is a nonstandard-but-sometimes-seen variant
+  // of the correct audio/mpeg.
+  AUDIO: ["audio/mpeg", "audio/mp3", "audio/wav", "audio/webm", "audio/mp4", "audio/ogg", "audio/m4a", "audio/x-m4a", "audio/aac"],
   COVER: ["image/jpeg", "image/png", "image/webp"],
 } as const
 

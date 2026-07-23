@@ -37,6 +37,30 @@ import {
 
 import type { Gallery } from "@/lib/types"
 
+// Unwraps this app's standard API error envelope (`{ success: false, error:
+// { code, message, details? } }` — see src/lib/api/response.ts's `fail()`)
+// into a plain, human-readable string. Every API route in this codebase
+// returns `error` as an OBJECT, never a bare string, so code that does
+// `errData?.error || fallback` and feeds the result straight into
+// `new Error(...)` ends up constructing `new Error({code, message})` — the
+// Error constructor stringifies a non-string message via
+// `Object.prototype.toString`, producing the literal text "[object Object]"
+// (this is the exact cause of guests seeing a garbled "[object Object]"-style
+// error on every failed video/voice-note upload: those are the two file types
+// that actually hit server-side rejections here — plan/feature gating, size
+// limits, unsupported type — while photos rarely do, so the bug was invisible
+// for images and consistent for video/audio).
+function extractErrorMessage(errData: unknown, fallback: string): string {
+  const err = (errData as { error?: unknown } | null)?.error
+  if (!err) return fallback
+  if (typeof err === "string") return err
+  if (typeof err === "object") {
+    const obj = err as { message?: string; code?: string }
+    return obj.message || obj.code || fallback
+  }
+  return fallback
+}
+
 async function getEvent(slug: string) {
   const supabase = createClient()
   const { data, error } = await supabase
@@ -68,6 +92,12 @@ export interface UploadFile {
   progress: number
   status: "pending" | "uploading" | "done" | "error" | "idle"
   error?: string
+  // Video/voice-note length in seconds, computed client-side via
+  // getMediaDuration() below. Undefined for photos (never computed) and for
+  // video/audio where metadata failed to load in time (see the 2s safety
+  // timeout in getMediaDuration) — in both cases the server treats it as
+  // "unknown" and stores null rather than a misleading 0.
+  duration?: number
 }
 
 interface EventSettings {
@@ -222,9 +252,14 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
     for (const file of Array.from(selectedFiles)) {
       const effectiveType = file.type || "image/jpeg"
+      // Captured alongside the existing validation duration-check below so
+      // it can be persisted to the DB later (see uploadFileDirect) instead
+      // of being computed once for validation and then thrown away.
+      let mediaDuration: number | undefined
 
       if (effectiveType.startsWith("video/")) {
         const dur = await getMediaDuration(file)
+        mediaDuration = dur
         if (dur > maxVideoSecs + 1) {
           toast({
             title: "Video Too Long",
@@ -237,6 +272,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
       if (effectiveType.startsWith("audio/")) {
         const dur = await getMediaDuration(file)
+        mediaDuration = dur
         if (dur > maxVoiceSecs + 1) {
           toast({
             title: "Voice Note Too Long",
@@ -255,6 +291,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         preview: URL.createObjectURL(file),
         progress: 0,
         status: "pending" as const,
+        duration: mediaDuration,
       })
     }
 
@@ -272,7 +309,8 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     targetGallery: string,
     cleanName: string,
     cleanEmail: string,
-    isApproved: boolean
+    isApproved: boolean,
+    duration?: number
   ): Promise<void> => {
     const effectiveMimeType = file.type || "image/jpeg"
 
@@ -290,8 +328,8 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     })
 
     if (!urlRes.ok) {
-      const errData = await urlRes.json()
-      throw new Error(errData?.error || "Failed to obtain signed upload URL")
+      const errData = await urlRes.json().catch(() => null)
+      throw new Error(extractErrorMessage(errData, "Failed to obtain signed upload URL"))
     }
 
     const { data: signedData } = await urlRes.json()
@@ -321,15 +359,17 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         uploader_name: cleanName,
         uploader_email: cleanEmail,
         is_approved: isApproved,
+        // Undefined (not 0) when duration is unknown/not applicable (photos,
+        // or a video/audio file whose metadata failed to load in time) —
+        // JSON.stringify drops undefined keys, and the API treats a missing
+        // duration as null rather than persisting a misleading 0.
+        duration: duration && duration > 0 ? duration : undefined,
       }),
     })
 
     if (!res.ok) {
-      const errData = await res.json()
-      const msg = typeof errData?.error === "object"
-        ? (errData.error.message || errData.error.code)
-        : (errData?.error || "Media upload failed")
-      throw new Error(msg)
+      const errData = await res.json().catch(() => null)
+      throw new Error(extractErrorMessage(errData, "Media upload failed"))
     }
 
     // Auto Categorization (ai_features.auto_categorization) — fire-and-forget,
@@ -400,7 +440,17 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
     }
 
     try {
-      await uploadFileDirect(file, targetGallery, cleanName, cleanEmail, settings.auto_approve_photos)
+      // Compute duration for video/voice-note captures the same way manual
+      // uploads do (getMediaDuration), so instant camera-capture/voice-note
+      // uploads also get their length persisted, not just files chosen via
+      // the picker in handleFileSelect.
+      const effectiveType = file.type || "image/jpeg"
+      let mediaDuration: number | undefined
+      if (effectiveType.startsWith("video/") || effectiveType.startsWith("audio/")) {
+        mediaDuration = await getMediaDuration(file)
+      }
+
+      await uploadFileDirect(file, targetGallery, cleanName, cleanEmail, settings.auto_approve_photos, mediaDuration)
       setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, progress: 100, status: "done" } : f)))
       setQuotaInfo((prev) => (prev ? { ...prev, uploaded: prev.uploaded + 1 } : prev))
     } catch (err) {
@@ -522,7 +572,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
           // Shared pipeline (signed URL -> direct storage PUT -> register) —
           // same helper the instant-upload-on-capture path uses.
-          await uploadFileDirect(uploadFile.file, targetGallery, cleanName, cleanEmail, settings.auto_approve_photos)
+          await uploadFileDirect(uploadFile.file, targetGallery, cleanName, cleanEmail, settings.auto_approve_photos, uploadFile.duration)
 
           setFiles((prev) =>
             prev.map((f) =>

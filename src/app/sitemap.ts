@@ -73,8 +73,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const supabase = await createServiceClient()
     const { data: posts } = await supabase
       .from("blog_posts")
+      // blog_posts has no `published` boolean column — publication state is
+      // tracked via the `status` enum (draft/published/scheduled/archived),
+      // same as everywhere else in the app (see e.g. src/app/blog/[slug]/
+      // page.tsx). The old `.eq("published", true)` here threw
+      // "column blog_posts.published does not exist" (Postgres 42703) on
+      // every single sitemap.xml request — caught by the try/catch below so
+      // it never crashed the route, but it meant blogRoutes was silently
+      // empty forever (no blog post ever made it into the sitemap) and spammed
+      // the error logs on every crawl.
       .select("slug, updated_at, published_at")
-      .eq("published", true)
+      .eq("status", "published")
       .limit(500)
 
     if (posts && posts.length > 0) {
