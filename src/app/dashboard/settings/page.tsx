@@ -14,6 +14,7 @@ import { Skeleton } from "@/lib/components/ui/skeleton"
 import { toast } from "@/lib/components/ui/toaster"
 import { MfaSettings } from "./mfa-settings"
 import { usePushNotifications } from "@/lib/pwa/use-push-notifications"
+import { useAuth } from "@/lib/hooks"
 import {
   User as UserIcon,
   Bell,
@@ -21,9 +22,34 @@ import {
   Shield,
   Building2,
   CreditCard,
-  Settings
+  Settings,
+  Pencil,
+  Globe,
+  Mail,
+  Tag,
+  LogOut,
+  Trash2
 } from "lucide-react"
 import type { User } from "@/lib/types"
+
+const InstagramIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+)
 
 // Preference categories exposed by GET/PATCH /api/notifications/preferences
 // (Phase B push-notification infra). Kept separate from the pre-existing
@@ -119,6 +145,7 @@ async function updateNotificationPreferences(preferences: Record<string, boolean
 export default function SettingsPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
+  const { signOut } = useAuth()
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile"],
@@ -198,6 +225,11 @@ export default function SettingsPage() {
     }
   }
 
+  const handleSignOut = async () => {
+    await signOut()
+    router.push("/login")
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -211,14 +243,112 @@ export default function SettingsPage() {
     )
   }
 
+  // Derive initials
+  const nameToUse = profileForm.full_name || profile?.full_name || profile?.email || "User"
+  const initials = nameToUse
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase()
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      <div className="border-b border-[#e5dfd0] pb-6">
+    <div className="space-y-8 max-w-3xl mx-auto pb-16">
+      <div className="border-b border-[#e5dfd0] pb-4">
         <h1 className="font-playfair text-3xl font-light text-ink">Settings</h1>
-        <p className="text-ink-secondary mt-1 text-sm">Manage your account and preferences</p>
       </div>
 
-      <div className="space-y-6">
+      {/* SECTION 1: INFO */}
+      <div className="space-y-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-secondary">INFO</p>
+        <div className="flex items-center gap-4 bg-surface-card border border-hairline-dark p-4 rounded-3xl shadow-sm">
+          <div className="w-14 h-14 rounded-full bg-[#faf6ed] border-2 border-[#e5dfd0] flex items-center justify-center text-[#b8925a] font-bold text-lg shrink-0 shadow-inner">
+            {initials}
+          </div>
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={profileForm.full_name || profile?.full_name || ""}
+              onChange={(e) => setProfileForm({ ...profileForm, full_name: e.target.value })}
+              placeholder="Enter your name"
+              className="w-full rounded-2xl border border-hairline-dark bg-surface-dark px-4 py-3 text-sm text-ink font-semibold focus:border-mauve outline-none transition-colors pr-10"
+            />
+            <button
+              onClick={() => profileMutation.mutate()}
+              disabled={profileMutation.isPending}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ink-secondary hover:text-mauve transition cursor-pointer"
+              title="Save name"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 2: SOCIALS */}
+      <div className="space-y-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-secondary">SOCIALS</p>
+        <div className="grid grid-cols-2 gap-3">
+          <a
+            href="https://instagram.com"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-3 bg-surface-card border border-hairline-dark p-4 rounded-2xl hover:border-mauve transition text-ink font-semibold text-xs cursor-pointer shadow-sm"
+          >
+            <InstagramIcon className="h-4 w-4 text-pink-500" />
+            <span>Instagram</span>
+          </a>
+          <a
+            href="https://snapsy.events"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-3 bg-surface-card border border-hairline-dark p-4 rounded-2xl hover:border-mauve transition text-ink font-semibold text-xs cursor-pointer shadow-sm"
+          >
+            <Globe className="h-4 w-4 text-mauve" />
+            <span>Website</span>
+          </a>
+        </div>
+        <a
+          href="/contact"
+          className="flex items-center gap-3 bg-surface-card border border-hairline-dark p-4 rounded-2xl hover:border-mauve transition text-ink font-semibold text-xs cursor-pointer shadow-sm w-full"
+        >
+          <Mail className="h-4 w-4 text-ink-secondary" />
+          <span>Contact Support</span>
+        </a>
+      </div>
+
+      {/* SECTION 3: PARTNER */}
+      <div className="space-y-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-secondary">PARTNER</p>
+        <button
+          onClick={() => toast({ title: "Discount Code", description: "Enter code at checkout when upgrading your plan." })}
+          className="flex items-center gap-3 bg-surface-card border border-hairline-dark p-4 rounded-2xl hover:border-emerald-500/40 transition text-emerald-600 dark:text-emerald-400 font-semibold text-xs cursor-pointer shadow-sm w-full text-left"
+        >
+          <Tag className="h-4 w-4 text-emerald-500" />
+          <span>Have a discount code?</span>
+        </button>
+      </div>
+
+      {/* SECTION 4: ACCOUNT */}
+      <div className="space-y-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-secondary">ACCOUNT</p>
+        <button
+          onClick={handleSignOut}
+          className="flex items-center gap-3 bg-surface-card border border-red-500/20 p-4 rounded-2xl hover:bg-red-500/10 transition text-red-500 font-semibold text-xs cursor-pointer shadow-sm w-full text-left"
+        >
+          <LogOut className="h-4 w-4 text-red-500" />
+          <span>Logout</span>
+        </button>
+        <button
+          onClick={() => toast({ title: "Delete Account", description: "Please contact support to delete your account data.", variant: "destructive" })}
+          className="flex items-center gap-3 bg-surface-card border border-red-500/20 p-4 rounded-2xl hover:bg-red-500/10 transition text-red-500 font-semibold text-xs cursor-pointer shadow-sm w-full text-left"
+        >
+          <Trash2 className="h-4 w-4 text-red-500" />
+          <span>Delete Account</span>
+        </button>
+      </div>
+
+      <div className="space-y-6 pt-6 border-t border-[#e5dfd0]">
 
         <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff]">
           <CardHeader>

@@ -703,32 +703,37 @@ export function NewEventForm() {
               {/* STEP 1: EVENT NAME */}
               {step === 1 && (
                 <div className="space-y-6">
-                  <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-ink`}>
-                    What should we call your event?
+                  <h1 className="font-playfair text-3xl md:text-4xl font-normal leading-tight text-ink">
+                    What is the name of your event?
                   </h1>
-                  <p className="text-sm text-ink-secondary max-w-md">
-                    Give your memory capsule a name. Something personal, emotional, or celebratory.
+                  <p className="text-xs md:text-sm text-ink-secondary max-w-md">
+                    Choose the perfect title for your event. This title will be visible to all of your event guests.
                   </p>
                   <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-tertiary" />
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder={`e.g. ${profile?.full_name?.split(" ")[0] || "Alex"}'s Wedding Celebration`}
-                      className="w-full bg-transparent border-b-2 border-hairline-dark focus:border-mauve outline-none text-2xl md:text-3xl py-3 transition-colors placeholder:text-ink-tertiary"
+                      placeholder="Enter your event title"
+                      className="w-full rounded-2xl border border-hairline-dark bg-surface-card pl-11 pr-4 py-3.5 text-sm text-ink outline-none focus:border-mauve transition-colors placeholder:text-ink-tertiary font-medium"
                       autoFocus
                     />
                   </div>
                   
                   {/* Suggestions */}
                   <div className="pt-2 space-y-3">
-                    <p className="text-[11px] uppercase tracking-widest text-ink-secondary">Suggestions</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-secondary">SUGGESTIONS</p>
                     <div className="flex flex-wrap gap-2">
                       {getSuggestions(profile?.full_name || user?.user_metadata?.full_name || user?.email).map((s) => (
                         <button
                           key={s}
                           onClick={() => setName(s)}
-                          className="px-4 py-2 text-xs rounded-full border border-hairline-dark bg-surface-card hover:border-mauve hover:bg-surface-card-elevated text-ink-secondary transition-all cursor-pointer"
+                          className={`px-4 py-2.5 text-xs rounded-full border transition-all cursor-pointer ${
+                            name === s
+                              ? "bg-mauve text-[#faf6ed] border-mauve font-semibold shadow-md"
+                              : "border-hairline-dark bg-surface-card hover:border-mauve text-ink-secondary"
+                          }`}
                         >
                           {s}
                         </button>
