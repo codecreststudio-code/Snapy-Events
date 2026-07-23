@@ -208,19 +208,19 @@ export default function AdminMarketingPage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="relative flex-1 min-w-[160px] sm:flex-initial">
               <Input
                 placeholder="Search name, email, phone..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8 text-xs w-48 sm:w-64 bg-surface-card border-hairline-dark"
+                className="h-8 text-xs w-full sm:w-64 bg-surface-card border-hairline-dark"
               />
             </div>
             <select
               value={leadFilter}
               onChange={(e: any) => setLeadFilter(e.target.value)}
-              className="h-8 rounded-lg border border-hairline-dark bg-surface-card px-2.5 text-xs font-bold text-ink-secondary focus:outline-none focus:ring-1 focus:ring-mauve/50 shadow-sm"
+              className="h-8 rounded-lg border border-hairline-dark bg-surface-card px-2.5 text-xs font-bold text-ink-secondary focus:outline-none focus:ring-1 focus:ring-mauve/50 shadow-sm shrink-0"
             >
               <option value="all">All Contacts</option>
               <option value="hosts">Hosts Only</option>

@@ -53,67 +53,60 @@ interface PlanInfo {
 
 const PLAN_INFO: PlanInfo[] = [
   {
-    id: "starter",
-    name: "Starter",
-    description: "For small events and personal use",
-    price: 499,
-    priceUsd: 6,
-    priceMonthly: 499,
-    features: [
-      "10 guests limit",
-      "10 shots per guest",
-      "Custom reveal time",
-      "All image filters enabled",
-    ],
-    limits: { events: 1, storage: 1, photos: 100 },
-  },
-  {
-    id: "standard",
-    name: "Standard",
-    description: "For growing photographers",
-    price: 1499,
-    priceUsd: 19,
-    priceMonthly: 1499,
-    features: [
-      "50 guests limit",
-      "15 shots per guest",
-      "AI Face Search matching",
-      "Download all photos",
-      "Priority customer support",
-    ],
-    limits: { events: 25, storage: 100, photos: 50000 },
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    description: "For professional photographers and large events",
-    price: 3999,
-    priceUsd: 50,
-    priceMonthly: 3999,
-    features: [
-      "100 guests limit",
-      "25 shots per guest",
-      "Live Photo Wall stream",
-      "Print-ready download gallery",
-      "WhatsApp notification alerts",
-      "24/7 Priority support",
-    ],
-    limits: { events: -1, storage: 1000, photos: -1 },
-  },
-  {
-    id: "free",
-    name: "Free",
+    id: "free" as PlanId,
+    name: "Basic",
     description: "Perfect for trying out Snapsy",
     price: 0,
     priceUsd: 0,
     priceMonthly: 0,
     features: [
-      "5 guests limit",
-      "5 shots per guest",
-      "Standard photo reveal",
-      "Basic web gallery",
+      "Up to 5 guests limit",
+      "30 shots per guest",
+      "Custom reveal countdown",
+      "Guestbook & photo reactions",
     ],
     limits: { events: 1, storage: 1, photos: 100 },
+  },
+  {
+    id: "starter" as PlanId,
+    name: "Standard",
+    description: "For small events and personal use",
+    price: 499,
+    priceUsd: 6,
+    priceMonthly: 499,
+    features: [
+      "Up to 20 guests limit",
+      "36 shots per guest",
+      "AI Face Search matching",
+      "Custom reveal countdown",
+      "All camera filters enabled",
+      "Voice notes & audio greetings",
+      "Guestbook & photo reactions",
+    ],
+    limits: { events: 10, storage: 20, photos: 5000 },
+  },
+  {
+    id: "premium" as PlanId,
+    name: "Premium",
+    description: "For professional photographers and large events",
+    price: 2999,
+    priceUsd: 36,
+    priceMonthly: 2999,
+    features: [
+      "Up to 50 guests limit",
+      "50 shots per guest",
+      "AI Face Search matching",
+      "Live Photo Wall stream",
+      "Custom reveal countdown",
+      "All camera filters enabled",
+      "Video uploads support",
+      "Voice notes & audio greetings",
+      "Guestbook & photo reactions",
+      "Print-ready download gallery",
+      "WhatsApp notification alerts",
+      "24/7 Priority support",
+    ],
+    limits: { events: -1, storage: 100, photos: -1 },
   },
 ]
 
@@ -206,7 +199,7 @@ function PricingCard({
   let selectedClasses = "border-[#e5dfd0] hover:border-mauve/40 hover:shadow-xl"
   if (isSelected) {
     if (plan.id === "free") {
-      selectedClasses = "border-mauve ring-2 ring-mauve/15 shadow-[0_15px_40px_rgba(184, 146, 90,0.1)]"
+      selectedClasses = "border-mauve ring-2 ring-mauve/15 shadow-[0_15px_40px_rgba(184,146,90,0.1)]"
     } else if (plan.id === "starter") {
       selectedClasses = "border-indigo-500 ring-2 ring-indigo-500/15 shadow-[0_15px_40px_rgba(99,102,241,0.15)]"
     } else if (plan.id === "standard") {
@@ -394,12 +387,7 @@ export default function BillingPage() {
                 }
               }
             })
-            const PLAN_ORDER = ["starter", "standard", "premium", "free"]
-            mapped.sort((a: any, b: any) => {
-              const ia = PLAN_ORDER.indexOf(a.id)
-              const ib = PLAN_ORDER.indexOf(b.id)
-              return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib)
-            })
+            mapped.sort((a: any, b: any) => (a.price ?? 0) - (b.price ?? 0))
             setPlansList(mapped)
           }
         }
@@ -493,7 +481,7 @@ export default function BillingPage() {
       border: "border-mauve/30",
       badge: "bg-mauve",
       hover: "hover:border-mauve/50",
-      buttonActive: "bg-mauve/10 border-mauve text-mauve shadow-[0_0_10px_rgba(184, 146, 90,0.1)]",
+      buttonActive: "bg-mauve/10 border-mauve text-mauve shadow-[0_0_10px_rgba(184,146,90,0.1)]",
       icon: "text-mauve"
     }
   }
@@ -616,7 +604,7 @@ export default function BillingPage() {
       </div>
 
       {/* Pricing Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch max-w-5xl mx-auto">
         {plansList.map((plan) => (
           <PricingCard
             key={plan.id}

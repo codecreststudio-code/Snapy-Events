@@ -12,7 +12,7 @@ const buttonVariants = cva(
         mauve: "bg-mauve text-[#faf6ed] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/20 hover:shadow-mauve/40",
         glass: "bg-mauve/5 border border-hairline-dark text-ink backdrop-blur-md hover:bg-mauve/10 hover:border-mauve/30 hover:shadow-lg hover:shadow-mauve/5",
         gradient: "bg-gradient-to-r from-mauve via-amber-200/80 to-mauve text-[#faf6ed] font-semibold hover:brightness-110 shadow-lg shadow-mauve/25",
-        glow: "bg-mauve text-[#faf6ed] font-semibold shadow-[0_0_20px_rgba(184, 146, 90,0.4)] hover:shadow-[0_0_30px_rgba(184, 146, 90,0.6)]",
+        glow: "bg-mauve text-[#faf6ed] font-semibold shadow-[0_0_20px_rgba(184,146,90,0.4)] hover:shadow-[0_0_30px_rgba(184,146,90,0.6)]",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-md shadow-destructive/20",
         outline: "border border-hairline-dark bg-surface-card/60 text-ink hover:bg-surface-card hover:text-ink hover:border-mauve/40",
         secondary: "bg-ink/5 text-ink hover:bg-ink/10 border border-hairline-dark",

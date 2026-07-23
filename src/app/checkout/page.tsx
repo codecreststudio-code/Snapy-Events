@@ -29,10 +29,10 @@ import { CurrencyToggle } from "@/lib/components/ui/currency-toggle"
 // map only exists so the page has *something* to render for the couple of
 // frames before the live fetch resolves.
 const PLAN_FALLBACK: Record<string, { name: string; price_inr: number; price_usd: number; limits: Record<string, any> }> = {
-  free: { name: "Free", price_inr: 0, price_usd: 0, limits: { shots_limit: 5 } },
-  starter: { name: "Starter Plan", price_inr: 499, price_usd: 6, limits: { shots_limit: 20 } },
-  standard: { name: "Standard Plan", price_inr: 1499, price_usd: 19, limits: { shots_limit: 45, video_uploads: true } },
-  premium: { name: "Premium Plan", price_inr: 3999, price_usd: 50, limits: { shots_limit: 85, video_uploads: true, voice_notes: true, ai_face_search: true } },
+  free: { name: "Basic", price_inr: 0, price_usd: 0, limits: { shots_limit: 30 } },
+  starter: { name: "Standard Plan", price_inr: 499, price_usd: 6, limits: { shots_limit: 36, ai_face_search: true } },
+  standard: { name: "Standard Plan", price_inr: 499, price_usd: 6, limits: { shots_limit: 36, ai_face_search: true } },
+  premium: { name: "Premium Plan", price_inr: 2999, price_usd: 36, limits: { shots_limit: 50, video_uploads: true, voice_notes: true, ai_face_search: true } },
 }
 
 const PHOTO_LIMIT_ADDON_PRICES: Record<number, number> = { 5: 0, 10: 99, 25: 179, 50: 249, [-1]: 599 }

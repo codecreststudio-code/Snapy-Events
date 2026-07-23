@@ -1443,7 +1443,7 @@ export function NewEventForm() {
                 <Button
                   onClick={handleNext}
                   disabled={mutation.isPending}
-                  className="bg-mauve text-[#faf6ed] hover:bg-mauve-strong font-bold px-6 py-5 rounded-full flex items-center gap-2 border-none shadow-[0_4px_14px_rgba(184, 146, 90,0.25)] cursor-pointer"
+                  className="bg-mauve text-[#faf6ed] hover:bg-mauve-strong font-bold px-6 py-5 rounded-full flex items-center gap-2 border-none shadow-[0_4px_14px_rgba(184,146,90,0.25)] cursor-pointer"
                 >
                   {mutation.isPending ? (
                     <span>Saving Capsule...</span>
@@ -1690,7 +1690,7 @@ export function NewEventForm() {
                 </Button>
                 <Button
                   onClick={handleLaunch}
-                  className="flex-1 rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a] font-bold py-5 border-none shadow-[0_4px_14px_rgba(184, 146, 90,0.25)]"
+                  className="flex-1 rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a] font-bold py-5 border-none shadow-[0_4px_14px_rgba(184,146,90,0.25)]"
                 >
                   Launch Event
                 </Button>

@@ -640,8 +640,8 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
           check in — the modal issues the guest-session cookie the upload
           API now requires (see src/lib/security/guest-session.ts). */}
       <GuestCaptureModal eventId={event.id} eventName={event.name} />
-      <header className="sticky top-0 z-40 border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur">
-        <div className="container flex h-14 items-center justify-between px-4">
+      <header className="pt-safe sticky top-0 z-40 border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur">
+        <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <Link
             href={`/event/${slug}`}
             className="flex items-center gap-2 text-ink-secondary hover:text-ink text-sm"
@@ -977,7 +977,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
               <Button
                 onClick={uploadFiles}
                 disabled={isUploading || files.length === 0}
-                className="rounded-full bg-[#b8925a] hover:bg-[#96723a] text-[#faf6ed] font-bold px-6 py-5 shadow-[0_0_15px_rgba(184, 146, 90,0.25)]"
+                className="rounded-full bg-[#b8925a] hover:bg-[#96723a] text-[#faf6ed] font-bold px-6 py-5 shadow-[0_0_15px_rgba(184,146,90,0.25)]"
               >
 
                 {isUploading ? (
@@ -1055,7 +1055,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
       </main>
 
       <footer className="border-t border-[#e5dfd0] py-6 mt-12 bg-[#ffffff]">
-        <div className="container text-center text-xs text-ink-secondary">
+        <div className="container mx-auto px-4 text-center text-xs text-ink-secondary">
           Powered by{" "}
           <a href="/" className="underline hover:text-mauve-strong">
             Snapsy

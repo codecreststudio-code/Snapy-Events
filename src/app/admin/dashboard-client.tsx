@@ -811,12 +811,12 @@ export default function DashboardClient() {
                   <div className="text-center text-ink-tertiary py-8 text-xs font-medium">No revenue generated in range.</div>
                 ) : (
                   data.topLists?.users?.map((user: any, i: number) => (
-                    <div key={i} className="flex justify-between items-center text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="h-5 w-5 bg-mauve/10 text-mauve text-[10px] font-extrabold rounded-md flex items-center justify-center">{i+1}</span>
-                        <span className="font-bold text-ink-secondary">{user.name}</span>
+                    <div key={i} className="flex justify-between items-center text-xs gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="h-5 w-5 shrink-0 bg-mauve/10 text-mauve text-[10px] font-extrabold rounded-md flex items-center justify-center">{i+1}</span>
+                        <span className="font-bold text-ink-secondary truncate">{user.name}</span>
                       </div>
-                      <span className="font-extrabold text-ink">₹{user.revenue.toLocaleString()}</span>
+                      <span className="font-extrabold text-ink shrink-0">₹{user.revenue.toLocaleString()}</span>
                     </div>
                   ))
                 )}
@@ -831,15 +831,15 @@ export default function DashboardClient() {
                   <div className="text-center text-ink-tertiary py-8 text-xs font-medium">No media uploaded in range.</div>
                 ) : (
                   data.topLists?.events.map((ev: any, i: number) => (
-                    <div key={i} className="flex justify-between items-center text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="h-5 w-5 bg-pink-500/10 text-pink-400 text-[10px] font-extrabold rounded-md flex items-center justify-center">{i+1}</span>
-                        <div>
-                          <span className="font-bold text-ink-secondary block">{ev.name}</span>
-                          <span className="text-[10px] text-ink-tertiary font-semibold">{ev.user}</span>
+                    <div key={i} className="flex justify-between items-center text-xs gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="h-5 w-5 shrink-0 bg-pink-500/10 text-pink-400 text-[10px] font-extrabold rounded-md flex items-center justify-center">{i+1}</span>
+                        <div className="min-w-0">
+                          <span className="font-bold text-ink-secondary block truncate">{ev.name}</span>
+                          <span className="text-[10px] text-ink-tertiary font-semibold block truncate">{ev.user}</span>
                         </div>
                       </div>
-                      <span className="font-extrabold text-ink">{ev.count.toLocaleString()} uploads</span>
+                      <span className="font-extrabold text-ink shrink-0 whitespace-nowrap">{ev.count.toLocaleString()} uploads</span>
                     </div>
                   ))
                 )}

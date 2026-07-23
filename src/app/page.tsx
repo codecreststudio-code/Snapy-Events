@@ -702,47 +702,48 @@ export default function HomePage() {
 
   const [plansList, setPlansList] = useState<PricingPlan[]>([
     {
-      name: "Free",
+      name: "Basic",
       price: 0,
-      period: "forever",
+      period: "per event",
       description: "Perfect for trying out Snapsy",
-      features: ["5 guests limit", "5 shots per guest", "Standard photo reveal", "Basic web gallery"],
-    },
-    {
-      name: "Starter",
-      price: 499,
-      period: "month",
-      description: "For small events and personal use",
       features: [
-        "10 guests limit",
-        "10 shots per guest",
-        "Custom reveal time",
-        "All image filters enabled",
+        "Up to 5 guests limit",
+        "30 shots per guest",
+        "Custom reveal countdown",
+        "Guestbook & photo reactions",
       ],
     },
     {
       name: "Standard",
-      price: 1499,
-      period: "month",
-      description: "For growing photographers",
+      price: 499,
+      period: "per event",
+      description: "For small events and personal use",
       features: [
-        "50 guests limit",
-        "15 shots per guest",
+        "Up to 20 guests limit",
+        "36 shots per guest",
         "AI Face Search matching",
-        "Download all photos",
-        "Priority customer support",
+        "Custom reveal countdown",
+        "All camera filters enabled",
+        "Voice notes & audio greetings",
+        "Guestbook & photo reactions",
       ],
       popular: true,
     },
     {
       name: "Premium",
-      price: 3999,
-      period: "month",
+      price: 2999,
+      period: "per event",
       description: "For professional photographers and large events",
       features: [
-        "100 guests limit",
-        "25 shots per guest",
+        "Up to 50 guests limit",
+        "50 shots per guest",
+        "AI Face Search matching",
         "Live Photo Wall stream",
+        "Custom reveal countdown",
+        "All camera filters enabled",
+        "Video uploads support",
+        "Voice notes & audio greetings",
+        "Guestbook & photo reactions",
         "Print-ready download gallery",
         "WhatsApp notification alerts",
         "24/7 Priority support",
@@ -757,26 +758,17 @@ export default function HomePage() {
         const res = await fetch("/api/payments/plans")
         if (res.ok) {
           const result = await res.json()
-          if (result.success && Array.isArray(result.data)) {
+          if (result.success && Array.isArray(result.data) && result.data.length > 0) {
             const mapped = result.data.map((p: any) => ({
               name: p.name,
               price: p.price_inr,
               period: p.billing_interval === "monthly" ? "month" : "per event",
               description: p.description || "",
               features: Array.isArray(p.features) ? p.features : [],
-              popular: p.id === "standard",
-              bestValue: p.id === "premium",
+              popular: p.is_popular || false,
+              bestValue: p.best_value || false,
             }))
-            // Add free tier if not returned in API to preserve basic signup
-            if (!mapped.find((m: any) => m.name.toLowerCase() === "free")) {
-              mapped.unshift({
-                name: "Free",
-                price: 0,
-                period: "forever",
-                description: "Perfect for trying out Snapsy",
-                features: ["5 guests limit", "5 shots per guest", "Standard photo reveal", "Basic web gallery"],
-              })
-            }
+            mapped.sort((a: any, b: any) => (a.price ?? 0) - (b.price ?? 0))
             setPlansList(mapped)
           }
         }
@@ -875,7 +867,7 @@ export default function HomePage() {
       <main className="flex-1 overflow-hidden">
         {/* --- SECTION 1: HERO --- */}
         <section
-          className="relative w-full min-h-[85vh] sm:min-h-[90vh] flex items-center justify-center py-10 sm:py-16 md:py-24 px-4 sm:px-6 overflow-hidden"
+          className="hero-min-h relative w-full flex items-center justify-center py-10 sm:py-16 md:py-24 px-4 sm:px-6 overflow-hidden"
           onPointerMove={(event) => {
             const rect = event.currentTarget.getBoundingClientRect()
             setPointer({
@@ -884,7 +876,7 @@ export default function HomePage() {
             })
           }}
         >
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,rgba(184, 146, 90,0.20),transparent_18%),radial-gradient(circle_at_20%_20%,rgba(150, 114, 58,0.14),transparent_20%),radial-gradient(circle_at_bottom_left,rgba(184, 146, 90,0.08),transparent_25%),linear-gradient(180deg,rgba(250,246,237,0.94),rgba(255,255,255,0.9))]" />
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,rgba(184,146,90,0.20),transparent_18%),radial-gradient(circle_at_20%_20%,rgba(150,114,58,0.14),transparent_20%),radial-gradient(circle_at_bottom_left,rgba(184,146,90,0.08),transparent_25%),linear-gradient(180deg,rgba(250,246,237,0.94),rgba(255,255,255,0.9))]" />
           <div className="absolute inset-0 -z-10 overflow-hidden">
             <motion.div
               animate={{ x: pointer.x * 24, y: pointer.y * 24 }}
@@ -899,7 +891,7 @@ export default function HomePage() {
             <motion.div
               animate={{ y: scrollY * 0.08 }}
               transition={{ ease: "easeOut", duration: 0.4 }}
-              className="absolute left-1/2 top-1/4 h-[320px] sm:h-[420px] w-[320px] sm:w-[420px] -translate-x-1/2 rounded-full border border-ink/10 bg-ink/[0.02] shadow-[0_0_120px_rgba(184, 146, 90,0.12)]"
+              className="absolute left-1/2 top-1/4 h-[320px] sm:h-[420px] w-[320px] sm:w-[420px] -translate-x-1/2 rounded-full border border-ink/10 bg-ink/[0.02] shadow-[0_0_120px_rgba(184,146,90,0.12)]"
             />
             <div className="pointer-events-none absolute inset-0">
               <motion.div
@@ -1549,7 +1541,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto items-stretch">
+            <div className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto items-stretch">
               {plansList.map((plan) => (
                 <PricingCard key={plan.name} plan={plan} />
               ))}

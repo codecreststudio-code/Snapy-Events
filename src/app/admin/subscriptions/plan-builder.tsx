@@ -287,15 +287,15 @@ export function PlanBuilder() {
             {plans.map(p => (
               <Card key={p.id} className={cn("bg-surface-card border-hairline-dark shadow-sm transition-all hover:border-mauve/30", editingPlan?.id === p.id && "ring-2 ring-mauve/50 border-mauve")}>
                 <CardContent className="p-5">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 className="font-extrabold text-ink text-base flex items-center gap-2">
-                        {p.name}
-                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-ink/5 text-ink-secondary border border-hairline-dark">
+                  <div className="flex justify-between items-start mb-2 gap-2">
+                    <div className="min-w-0">
+                      <h3 className="font-extrabold text-ink text-base flex items-center gap-2 flex-wrap">
+                        <span className="truncate">{p.name}</span>
+                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-ink/5 text-ink-secondary border border-hairline-dark shrink-0">
                           {p.id}
                         </span>
                       </h3>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
                         <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", p.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-ink/5 text-ink-secondary border-hairline-dark")}>
                           {p.is_active ? "Active" : "Inactive"}
                         </span>
@@ -305,7 +305,7 @@ export function PlanBuilder() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 shrink-0">
                       <Button variant="ghost" size="sm" onClick={() => startEdit(p)} className="h-7 w-7 p-0 text-ink-secondary hover:bg-mauve/5 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
                       <Button variant="ghost" size="sm" onClick={() => handleDelete(p.id)} className="h-7 w-7 p-0 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
                     </div>

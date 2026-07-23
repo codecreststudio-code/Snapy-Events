@@ -199,9 +199,9 @@ export default function AdminVoiceNotesPage() {
                   <span className="text-ink-tertiary font-bold uppercase tracking-wider">Event Name</span>
                   <span className="text-ink-secondary font-semibold">{selectedVoice.event?.name || "N/A"}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Uploader Email</span>
-                  <span className="text-ink-secondary font-semibold">{selectedVoice.uploader?.email || "N/A"}</span>
+                <div className="flex justify-between gap-2">
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider shrink-0">Uploader Email</span>
+                  <span className="text-ink-secondary font-semibold break-all text-right">{selectedVoice.uploader?.email || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-ink-tertiary font-bold uppercase tracking-wider">Duration</span>

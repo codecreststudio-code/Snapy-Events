@@ -72,8 +72,8 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
 
   return (
     <div className="flex min-h-screen flex-col bg-[#faf6ed] text-ink">
-      <header className="sticky top-0 z-50 w-full border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur supports-[backdrop-filter]:bg-[#faf6ed]/80">
-        <div className="container flex h-16 items-center justify-between">
+      <header className="pt-safe sticky top-0 z-50 w-full border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur supports-[backdrop-filter]:bg-[#faf6ed]/80">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           <Link href="/">
             <Logo />
           </Link>

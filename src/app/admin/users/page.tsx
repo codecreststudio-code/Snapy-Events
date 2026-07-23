@@ -329,16 +329,16 @@ export default function AdminUsersPage() {
                 <div className="h-12 w-12 rounded-full bg-mauve/10 text-mauve font-bold flex items-center justify-center text-lg">
                   {selectedUser.full_name?.charAt(0) || "U"}
                 </div>
-                <div>
-                  <h3 className="font-bold text-ink text-base">{selectedUser.full_name || "N/A"}</h3>
-                  <span className="text-xs text-ink-tertiary block mt-0.5">{selectedUser.email}</span>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-ink text-base truncate">{selectedUser.full_name || "N/A"}</h3>
+                  <span className="text-xs text-ink-tertiary block mt-0.5 break-all">{selectedUser.email}</span>
                 </div>
               </div>
 
               <div className="border-t border-hairline-dark pt-4 space-y-3 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">User ID</span>
-                  <span className="font-mono text-ink-secondary font-semibold">{selectedUser.id}</span>
+                <div className="flex justify-between gap-2">
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider shrink-0">User ID</span>
+                  <span className="font-mono text-ink-secondary font-semibold break-all text-right">{selectedUser.id}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-ink-tertiary font-bold uppercase tracking-wider">Role</span>

@@ -153,7 +153,7 @@ export default function AdminRevenuePage() {
         </div>
         <div className="flex items-center gap-2">
           {/* Period Selector */}
-          <div className="flex items-center gap-1 bg-surface-card border border-hairline-dark rounded-lg p-0.5 shadow-sm">
+          <div className="flex items-center gap-1 flex-wrap bg-surface-card border border-hairline-dark rounded-lg p-0.5 shadow-sm">
             {PERIODS.map((p) => (
               <button
                 key={p.value}

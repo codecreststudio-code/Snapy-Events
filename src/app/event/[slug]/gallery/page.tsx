@@ -428,13 +428,13 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
 
   return (
     <div className="min-h-screen flex flex-col bg-[#faf6ed] text-ink">
-      <header className="sticky top-0 z-40 border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur">
-        <div className="container flex h-14 items-center justify-between">
-          <Link href={`/event/${slug}`} className="flex items-center gap-2">
-            <ImageIcon className="h-5 w-5 text-[#b8925a]" />
-            <span className="font-playfair font-medium text-ink">{event.name}</span>
+      <header className="pt-safe sticky top-0 z-40 border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur">
+        <div className="container mx-auto flex h-14 items-center justify-between px-4 sm:px-6">
+          <Link href={`/event/${slug}`} className="flex min-w-0 items-center gap-2">
+            <ImageIcon className="h-5 w-5 shrink-0 text-[#b8925a]" />
+            <span className="truncate font-playfair font-medium text-ink">{event.name}</span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             {settings.allow_downloads && (
               <span className="text-xs text-ink-tertiary hidden sm:inline">
                 Downloads enabled
@@ -455,7 +455,7 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
         </div>
       </header>
 
-      <main className="flex-1 container py-6">
+      <main className="flex-1 container mx-auto py-6">
         {visibleGalleries.length > 1 && (
           <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
             {visibleGalleries.map((gallery) => (
@@ -522,7 +522,7 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
       </main>
 
       <footer className="border-t border-[#e5dfd0] py-4">
-        <div className="container text-center text-xs text-ink-tertiary">
+        <div className="container mx-auto px-4 text-center text-xs text-ink-tertiary">
           Powered by{" "}
           <a href="/" className="underline hover:text-mauve-strong">
             Snapsy

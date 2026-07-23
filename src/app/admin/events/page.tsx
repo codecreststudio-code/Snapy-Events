@@ -182,20 +182,20 @@ export default function AdminEventsPage() {
         <Card className="bg-surface-card border-hairline-dark p-6 sticky top-6">
           {selectedEvent ? (
             <div className="space-y-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-bold text-ink text-base">{selectedEvent.name}</h3>
+              <div className="flex justify-between items-start gap-2">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-ink text-base truncate">{selectedEvent.name}</h3>
                   <a
                     href={`/event/${selectedEvent.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-mauve hover:text-mauve-strong font-semibold flex items-center gap-1 mt-1"
+                    className="text-xs text-mauve hover:text-mauve-strong font-semibold flex items-center gap-1 mt-1 min-w-0"
                   >
-                    <span>slug: {selectedEvent.slug}</span>
-                    <LinkIcon className="h-3 w-3" />
+                    <span className="truncate">slug: {selectedEvent.slug}</span>
+                    <LinkIcon className="h-3 w-3 shrink-0" />
                   </a>
                 </div>
-                <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold border",
+                <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0",
                   selectedEvent.status === "published" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-ink/5 text-ink-secondary border-hairline-dark"
                 )}>
                   {selectedEvent.status}

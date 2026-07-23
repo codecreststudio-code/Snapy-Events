@@ -118,7 +118,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-surface-dark text-ink pb-28">
       {/* Top bar */}
-      <div className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-[#e5dfd0] bg-[#faf6ed]/95 px-5 py-4 backdrop-blur-lg">
+      <div className="pt-safe sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-[#e5dfd0] bg-[#faf6ed]/95 px-5 py-4 backdrop-blur-lg">
         <Link href="/dashboard" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-mauve">
             <Camera className="h-5 w-5 text-[#faf6ed]" />

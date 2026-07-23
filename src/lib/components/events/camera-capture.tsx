@@ -787,7 +787,7 @@ export function CameraCapture({
                   onClick={takePhoto}
                   aria-label="Take photo"
                   whileTap={prefersReducedMotion ? undefined : { scale: 0.88, transition: spring.snappy }}
-                  className="w-16 h-16 rounded-full border-4 border-[#b8925a] p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer shadow-[0_0_16px_rgba(184, 146, 90,0.35)] focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none"
+                  className="w-16 h-16 rounded-full border-4 border-[#b8925a] p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer shadow-[0_0_16px_rgba(184,146,90,0.35)] focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none"
                 >
                   <div className="w-full h-full bg-white rounded-full" />
                 </motion.button>

@@ -48,58 +48,56 @@ interface PricingPlan {
 const FALLBACK_PLANS: PricingPlan[] = [
   {
     id: "free",
-    name: "Free",
+    name: "Basic",
     price: 0,
     priceUsd: 0,
-    period: "forever",
+    period: "per event",
     description: "Perfect for trying out Snapsy",
     cta: "Start free",
-    features: ["5 guests limit", "5 shots per guest", "Standard photo reveal", "Basic web gallery"],
+    features: [
+      "Up to 5 guests limit",
+      "30 shots per guest",
+      "Custom reveal countdown",
+      "Guestbook & photo reactions",
+    ],
   },
   {
     id: "starter",
-    name: "Starter",
+    name: "Standard",
     price: 499,
     priceUsd: 6,
     period: "per event",
     description: "For small events and personal use",
-    cta: "Choose Starter",
-    features: [
-      "10 guests limit",
-      "10 shots per guest",
-      "Custom reveal time",
-      "All image filters enabled",
-    ],
-  },
-  {
-    id: "standard",
-    name: "Standard",
-    price: 1499,
-    priceUsd: 18,
-    period: "per event",
-    description: "For growing photographers",
     cta: "Choose Standard",
     features: [
-      "50 guests limit",
-      "15 shots per guest",
+      "Up to 20 guests limit",
+      "36 shots per guest",
       "AI Face Search matching",
-      "Download all photos",
-      "Priority customer support",
+      "Custom reveal countdown",
+      "All camera filters enabled",
+      "Voice notes & audio greetings",
+      "Guestbook & photo reactions",
     ],
     popular: true,
   },
   {
     id: "premium",
     name: "Premium",
-    price: 3999,
-    priceUsd: 49,
+    price: 2999,
+    priceUsd: 36,
     period: "per event",
     description: "For professional photographers and large events",
     cta: "Choose Premium",
     features: [
-      "100 guests limit",
-      "25 shots per guest",
+      "Up to 50 guests limit",
+      "50 shots per guest",
+      "AI Face Search matching",
       "Live Photo Wall stream",
+      "Custom reveal countdown",
+      "All camera filters enabled",
+      "Video uploads support",
+      "Voice notes & audio greetings",
+      "Guestbook & photo reactions",
       "Print-ready download gallery",
       "WhatsApp notification alerts",
       "24/7 Priority support",
@@ -120,7 +118,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
       className={`relative rounded-3xl border bg-surface-card p-8 cursor-pointer flex flex-col justify-between transition-shadow duration-300 ${
         plan.popular
-          ? "border-mauve ring-2 ring-mauve/20 shadow-[0_20px_50px_rgba(184, 146, 90,0.15)] md:scale-105 z-10"
+          ? "border-mauve ring-2 ring-mauve/20 shadow-[0_20px_50px_rgba(184,146,90,0.15)] md:scale-105 z-10"
           : "border-hairline-dark hover:border-mauve/40 hover:shadow-xl"
       }`}
     >
@@ -207,6 +205,7 @@ export default function PricingPage() {
               popular: p.is_popular || false,
               bestValue: p.best_value || false,
             }))
+            mapped.sort((a: any, b: any) => (a.price ?? 0) - (b.price ?? 0))
             setPlansList(mapped)
             return
           }
@@ -269,7 +268,7 @@ export default function PricingPage() {
           {plansLoading ? (
             <div className="p-16 text-center text-ink-tertiary text-sm font-semibold">Loading plans…</div>
           ) : (
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto items-stretch">
               {plansList.map((p) => (
                 <PricingCard key={p.id} plan={p} />
               ))}

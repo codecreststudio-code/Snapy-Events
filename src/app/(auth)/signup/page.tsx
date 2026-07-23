@@ -26,57 +26,51 @@ const inter = Inter({
 const PLANS_DATA = [
   {
     id: "free",
-    name: "Free",
+    name: "Basic",
     price: 0,
-    period: "forever",
+    period: "per event",
     description: "Perfect for trying out Snapsy",
     features: [
-      "5 guests limit",
-      "5 shots per guest",
-      "Standard photo reveal",
-      "Basic web gallery",
+      "Up to 5 guests limit",
+      "30 shots per guest",
+      "Custom reveal countdown",
+      "Guestbook & photo reactions",
     ],
     badge: null,
   },
   {
     id: "starter",
-    name: "Starter",
-    price: 99,
+    name: "Standard",
+    price: 499,
     period: "per event",
     description: "For small events and personal use",
     features: [
-      "10 guests limit",
-      "10 shots per guest",
-      "Custom reveal time",
-      "All image filters enabled",
+      "Up to 20 guests limit",
+      "36 shots per guest",
+      "AI Face Search matching",
+      "Custom reveal countdown",
+      "All camera filters enabled",
+      "Voice notes & audio greetings",
+      "Guestbook & photo reactions",
     ],
     badge: null,
   },
   {
-    id: "standard",
-    name: "Standard",
-    price: 499,
-    period: "per event",
-    description: "For growing photographers",
-    features: [
-      "50 guests limit",
-      "15 shots per guest",
-      "AI Face Search matching",
-      "Download all photos",
-      "Priority customer support",
-    ],
-    badge: "Popular",
-  },
-  {
     id: "premium",
     name: "Premium",
-    price: 1499,
+    price: 2999,
     period: "per event",
     description: "For professional photographers and large events",
     features: [
-      "100 guests limit",
-      "25 shots per guest",
+      "Up to 50 guests limit",
+      "50 shots per guest",
+      "AI Face Search matching",
       "Live Photo Wall stream",
+      "Custom reveal countdown",
+      "All camera filters enabled",
+      "Video uploads support",
+      "Voice notes & audio greetings",
+      "Guestbook & photo reactions",
       "Print-ready download gallery",
       "WhatsApp notification alerts",
       "24/7 Priority support",
@@ -130,25 +124,17 @@ function SignupPricingCard({
     })
   }
 
-  const isPopular = plan.id === "standard"
+  const isPopular = plan.id === "standard" || plan.id === "starter"
   const isPremium = plan.id === "premium"
 
   let selectedClasses = "border-hairline-dark hover:border-mauve/40 hover:shadow-xl"
   if (isSelected) {
     if (plan.id === "free") {
       selectedClasses = "border-ink/30 ring-2 ring-ink/10 shadow-[0_15px_40px_rgba(0,0,0,0.1)]"
-    } else if (plan.id === "starter") {
-      selectedClasses = "border-mauve ring-2 ring-mauve/15 shadow-[0_15px_40px_rgba(184, 146, 90,0.15)]"
-    } else if (plan.id === "standard") {
-      selectedClasses = "border-mauve ring-2 ring-mauve/25 shadow-[0_20px_50px_rgba(184, 146, 90,0.2)] md:scale-[1.03] z-10"
+    } else if (plan.id === "starter" || plan.id === "standard") {
+      selectedClasses = "border-mauve ring-2 ring-mauve/40 shadow-[0_15px_40px_rgba(184,146,90,0.2)]"
     } else if (plan.id === "premium") {
-      selectedClasses = "border-mauve-strong ring-2 ring-mauve-strong/25 shadow-[0_20px_50px_rgba(150, 114, 58,0.2)] md:scale-[1.03] z-10"
-    }
-  } else {
-    if (isPopular) {
-      selectedClasses = "border-hairline-dark hover:border-mauve/50 hover:shadow-lg"
-    } else if (isPremium) {
-      selectedClasses = "border-hairline-dark hover:border-mauve-strong/50 hover:shadow-lg"
+      selectedClasses = "border-mauve-strong ring-2 ring-mauve-strong/40 shadow-[0_15px_40px_rgba(163,122,70,0.25)]"
     }
   }
 
@@ -158,8 +144,11 @@ function SignupPricingCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className={`relative rounded-3xl border bg-surface-card p-6 cursor-pointer flex flex-col justify-between transition-all duration-300 ${selectedClasses}`}
+      className={`relative rounded-3xl border bg-surface-card p-6 flex flex-col justify-between cursor-pointer transition-all duration-300 ${selectedClasses}`}
     >
       {/* Background Spotlight Glow Wrapper */}
       <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
@@ -167,14 +156,8 @@ function SignupPricingCard({
           <div
             className="absolute -inset-px transition duration-300 opacity-100"
             style={{
-              background: `radial-gradient(320px circle at ${coords.x}px ${coords.y}px, ${
-                isPopular
-                  ? "rgba(184, 146, 90, 0.12)"
-                  : isPremium
-                  ? "rgba(150, 114, 58, 0.12)"
-                  : plan.id === "starter"
-                  ? "rgba(184, 146, 90, 0.08)"
-                  : "rgba(42, 36, 28, 0.04)"
+              background: `radial-gradient(350px circle at ${coords.x}px ${coords.y}px, ${
+                isPremium ? "rgba(163, 122, 70, 0.14)" : "rgba(184, 146, 90, 0.08)"
               }, transparent 80%)`,
             }}
           />
@@ -182,60 +165,33 @@ function SignupPricingCard({
       </div>
 
       {/* Badges Container */}
-      {isPopular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-mauve px-4 py-1.5 text-[9px] font-bold text-[#faf6ed] tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
-          <Sparkles className="h-3 w-3" />
-          POPULAR
-        </div>
-      )}
-      {isPremium && (
-        <div className="absolute -top-3 right-4 rounded-full bg-mauve-strong px-3 py-1.5 text-[9px] font-bold text-[#faf6ed] tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
+      {plan.badge && (
+        <div className="absolute -top-3.5 right-6 rounded-full bg-mauve-strong px-3 py-1 text-[9px] font-bold text-[#faf6ed] tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
           <Crown className="h-3.5 w-3.5" />
-          BEST VALUE
+          {plan.badge}
         </div>
       )}
 
+      {/* Plan Header */}
       <div className="relative z-10">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-lg font-bold text-ink">{plan.name}</h3>
-            <p className="mt-1.5 text-xs text-ink-secondary leading-relaxed font-light min-h-[32px]">
+            <h3 className="text-xl font-bold text-ink">{plan.name}</h3>
+            <p className="mt-1 text-xs text-ink-secondary leading-relaxed font-light min-h-[32px]">
               {plan.description}
             </p>
           </div>
-          {isPopular && (
-            <span className="h-7 w-7 rounded-full bg-mauve/10 flex items-center justify-center text-mauve shrink-0">
-              <Sparkles className="h-3.5 w-3.5" />
-            </span>
-          )}
-          {isPremium && (
-            <span className="h-7 w-7 rounded-full bg-mauve-strong/10 flex items-center justify-center text-mauve-strong shrink-0">
-              <Crown className="h-3.5 w-3.5" />
-            </span>
-          )}
         </div>
 
         <div className="mt-4 flex items-baseline gap-1">
           <span className="text-3xl font-extrabold text-ink">₹{plan.price}</span>
-          <span className="text-ink-tertiary text-xs font-light">/ {plan.period}</span>
+          <span className="text-ink-secondary text-xs font-light">/ {plan.period}</span>
         </div>
 
-        <ul className="mt-5 space-y-3 border-t border-hairline-dark pt-5">
-          {plan.features.map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-2.5 text-xs text-ink-secondary font-light">
-              <Check
-                className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
-                  isSelected
-                    ? plan.id === "free"
-                      ? "text-ink"
-                      : plan.id === "starter"
-                      ? "text-mauve"
-                      : isPopular
-                      ? "text-mauve"
-                      : "text-mauve-strong"
-                    : "text-ink-tertiary"
-                }`}
-              />
+        <ul className="mt-6 space-y-3 border-t border-hairline-dark pt-6">
+          {plan.features.map((feature) => (
+            <li key={feature} className="flex items-start gap-2.5 text-xs text-ink-secondary font-light">
+              <Check className={`h-4 w-4 flex-shrink-0 mt-0.5 ${isSelected ? "text-mauve font-bold" : "text-ink-tertiary"}`} />
               <span>{feature}</span>
             </li>
           ))}
@@ -249,10 +205,8 @@ function SignupPricingCard({
             isSelected
               ? plan.id === "free"
                 ? "bg-ink/10 text-ink shadow-md"
-                : plan.id === "starter"
+                : plan.id === "starter" || plan.id === "standard"
                 ? "bg-mauve text-[#faf6ed] shadow-md shadow-mauve/10"
-                : isPopular
-                ? "bg-mauve text-[#faf6ed] shadow-lg shadow-mauve/20"
                 : "bg-mauve-strong text-[#faf6ed] shadow-lg shadow-mauve-strong/20"
               : "bg-mauve/5 text-ink-secondary hover:bg-mauve/10"
           }`}
@@ -289,7 +243,7 @@ export default function SignupPage() {
         const res = await fetch("/api/payments/plans")
         if (res.ok) {
           const result = await res.json()
-          if (result.success && Array.isArray(result.data)) {
+          if (result.success && Array.isArray(result.data) && result.data.length > 0) {
             const mapped = result.data.map((p: any) => ({
               id: p.id,
               name: p.name,
@@ -297,21 +251,15 @@ export default function SignupPage() {
               period: p.billing_interval === "monthly" ? "month" : "per event",
               description: p.description || "",
               features: Array.isArray(p.features) ? p.features : [],
-              badge: p.id === "standard" ? "Popular" : p.id === "premium" ? "Best Value" : null,
+              badge: p.best_value ? "Best Value" : p.is_popular ? "Popular" : null,
             }))
-            // Add free tier if not returned in API
-            if (!mapped.find((m: any) => m.id === "free")) {
-              mapped.unshift(PLANS_DATA[0])
-            }
-            const ordered = ["free", "starter", "standard", "premium"]
-            const sortedMapped = mapped.sort((a: any, b: any) => ordered.indexOf(a.id) - ordered.indexOf(b.id))
-            setPlansList(sortedMapped)
+            mapped.sort((a: any, b: any) => (a.price ?? 0) - (b.price ?? 0))
+            setPlansList(mapped)
 
-            // Sync URL param selection with dynamic plans list
             if (typeof window !== "undefined") {
               const params = new URLSearchParams(window.location.search)
               const planParam = params.get("plan")
-              if (planParam && sortedMapped.some((p: any) => p.id === planParam)) {
+              if (planParam && mapped.some((p: any) => p.id === planParam)) {
                 setSelectedPlan(planParam)
               }
             }
@@ -415,7 +363,7 @@ export default function SignupPage() {
       border: "border-mauve-strong/30",
       badge: "bg-mauve-strong",
       hover: "hover:border-mauve-strong/50",
-      buttonActive: "bg-mauve-strong/10 border-mauve-strong text-mauve-strong shadow-[0_0_10px_rgba(150, 114, 58,0.15)]",
+      buttonActive: "bg-mauve-strong/10 border-mauve-strong text-mauve-strong shadow-[0_0_10px_rgba(150,114,58,0.15)]",
       icon: "text-mauve-strong"
     }
     // free, starter, and standard all share the primary mauve accent
@@ -425,7 +373,7 @@ export default function SignupPage() {
       border: "border-mauve/30",
       badge: "bg-mauve",
       hover: "hover:border-mauve/50",
-      buttonActive: "bg-mauve/10 border-mauve text-mauve shadow-[0_0_10px_rgba(184, 146, 90,0.15)]",
+      buttonActive: "bg-mauve/10 border-mauve text-mauve shadow-[0_0_10px_rgba(184,146,90,0.15)]",
       icon: "text-mauve"
     }
   }
@@ -464,7 +412,7 @@ export default function SignupPage() {
           </div>
 
           {/* Pricing Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 items-stretch">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto gap-6 mb-10 items-stretch">
             {plansList.map((plan) => (
               <SignupPricingCard
                 key={plan.id}

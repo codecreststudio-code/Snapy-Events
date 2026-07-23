@@ -136,9 +136,56 @@
   border-color: hsl(214.3 31.8% 91.4%);
 }
 
+/* ─── Global horizontal-overflow guard ──────────────────────────────────
+   Backstop against any single element (a decorative blur circle, a stray
+   fixed-width element, a translate animation, a not-yet-caught arbitrary
+   value) pushing the document wider than the viewport. Without this, ONE
+   offending element anywhere on a page makes the ENTIRE page horizontally
+   scrollable on mobile, which visually shifts and clips every centered
+   section (hero heading, buttons, join box) even though those sections'
+   own CSS is correct — the browser is just scrolled sideways. `clip`
+   (rather than `hidden`) avoids creating a new scroll container, so it
+   doesn't interfere with `position: sticky` headers/bottom bars. */
+html {
+  overflow-x: clip;
+  max-width: 100vw;
+}
+
 body {
   background-color: hsl(0 0% 100%);
   color: hsl(222.2 84% 4.9%);
+  overflow-x: clip;
+  max-width: 100vw;
+}
+
+/* ─── Mobile viewport height + safe areas ───────────────────────────────
+   `100vh`/`85vh` etc. size against the LARGEST possible mobile viewport
+   (address bar collapsed), so a section centered with `min-h-[85vh]` sits
+   lower than what's actually visible while the address bar is showing —
+   reads as "excessive blank space above the hero" until the user scrolls.
+   `dvh` tracks the real, current viewport instead. Declared with a `vh`
+   value first as a same-rule fallback (cascade, not a media query) for
+   browsers that don't understand `dvh` yet — they simply ignore that
+   second declaration and keep the first. */
+.hero-min-h {
+  min-height: 85vh;
+  min-height: 85dvh;
+}
+@media (min-width: 640px) {
+  .hero-min-h {
+    min-height: 90vh;
+    min-height: 90dvh;
+  }
+}
+
+/* Installed PWA / iOS safe areas — env(safe-area-inset-*) resolves to 0 on
+   browsers/devices without a notch or home indicator, so this is a no-op
+   everywhere except iPhone notch/Dynamic Island + Android gesture bars. */
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .dark * {

@@ -153,9 +153,9 @@ export function AddonMarketplace() {
             {addons.map(a => (
               <Card key={a.id} className="bg-surface-card border-hairline-dark shadow-sm hover:border-hairline-dark">
                 <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 className="font-extrabold text-ink">{a.name}</h3>
+                  <div className="flex justify-between items-start mb-2 gap-2">
+                    <div className="min-w-0">
+                      <h3 className="font-extrabold text-ink truncate">{a.name}</h3>
                       <div className="text-xs text-ink-secondary font-medium line-clamp-2 mt-1">{a.description}</div>
                     </div>
                     <div className="flex gap-1 shrink-0">

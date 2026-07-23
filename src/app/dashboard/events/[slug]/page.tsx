@@ -1478,7 +1478,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     <div className="min-h-screen bg-[#faf6ed] text-ink flex flex-col font-sans selection:bg-[#b8925a]/30 pb-16">
 
       {/* Top Banner Navigation */}
-      <header className="px-4 py-4 sm:px-6 bg-[#ffffff] border-b border-[#e5dfd0] sticky top-0 z-30">
+      <header className="pt-safe px-4 py-4 sm:px-6 bg-[#ffffff] border-b border-[#e5dfd0] sticky top-0 z-30">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-4">
             <Link href="/dashboard/events" className="shrink-0 p-2 hover:bg-mauve/5 rounded-full transition-colors">

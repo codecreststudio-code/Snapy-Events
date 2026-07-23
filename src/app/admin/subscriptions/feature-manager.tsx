@@ -125,37 +125,41 @@ export function FeatureManager() {
           </div>
         ) : (
           <div className="bg-surface-card border border-hairline-dark rounded-xl overflow-hidden shadow-sm">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-hairline-dark bg-ink/5 text-ink-secondary font-bold uppercase tracking-wider">
-                  <th className="p-3">Feature</th>
-                  <th className="p-3">Type</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-hairline-dark font-medium text-ink-secondary">
-                {features.map(f => (
-                  <tr key={f.id} className="hover:bg-mauve/5 transition-colors">
-                    <td className="p-3">
-                      <div className="font-bold text-ink">{f.name}</div>
-                      <div className="text-[10px] text-ink-tertiary font-mono mt-0.5">{f.id}</div>
-                    </td>
-                    <td className="p-3 uppercase text-[10px] tracking-wider font-bold text-ink-secondary">{f.type}</td>
-                    <td className="p-3">
-                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", f.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-ink/5 text-ink-secondary border-hairline-dark")}>
-                        {f.is_active ? "Active" : "Inactive"}
-                      </span>
-                      {f.is_beta && <span className="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-amber-500/10 text-amber-400 border-amber-500/20">Beta</span>}
-                    </td>
-                    <td className="p-3 text-right flex justify-end gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => startEdit(f)} className="h-7 w-7 p-0 text-ink-secondary hover:bg-mauve/5 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(f.id)} className="h-7 w-7 p-0 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-hairline-dark bg-ink/5 text-ink-secondary font-bold uppercase tracking-wider">
+                    <th className="p-3">Feature</th>
+                    <th className="p-3">Type</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-hairline-dark font-medium text-ink-secondary">
+                  {features.map(f => (
+                    <tr key={f.id} className="hover:bg-mauve/5 transition-colors">
+                      <td className="p-3 min-w-[140px]">
+                        <div className="font-bold text-ink truncate">{f.name}</div>
+                        <div className="text-[10px] text-ink-tertiary font-mono mt-0.5 truncate">{f.id}</div>
+                      </td>
+                      <td className="p-3 uppercase text-[10px] tracking-wider font-bold text-ink-secondary whitespace-nowrap">{f.type}</td>
+                      <td className="p-3 whitespace-nowrap">
+                        <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", f.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-ink/5 text-ink-secondary border-hairline-dark")}>
+                          {f.is_active ? "Active" : "Inactive"}
+                        </span>
+                        {f.is_beta && <span className="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-amber-500/10 text-amber-400 border-amber-500/20">Beta</span>}
+                      </td>
+                      <td className="p-3 text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => startEdit(f)} className="h-7 w-7 p-0 text-ink-secondary hover:bg-mauve/5 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(f.id)} className="h-7 w-7 p-0 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

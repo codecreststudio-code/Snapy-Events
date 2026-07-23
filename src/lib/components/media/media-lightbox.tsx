@@ -233,7 +233,7 @@ export function MediaLightbox({
           </div>
         ) : isVideo(p) && p.url ? (
           <div className="relative max-h-[75vh] w-auto">
-            <video src={p.url} controls autoPlay playsInline className="max-h-[75vh] w-auto rounded-lg">
+            <video src={p.url} controls autoPlay playsInline className="max-h-[75vh] w-auto max-w-full rounded-lg">
               Your browser does not support video playback.
             </video>
             {watermarkEnabled && <WatermarkOverlay dense />}
@@ -248,7 +248,7 @@ export function MediaLightbox({
           </div>
         ) : p.url ? (
           <div className="relative max-h-[75vh] w-auto">
-            <img src={p.url} alt={p.original_filename} className="max-h-[75vh] w-auto object-contain rounded-lg" />
+            <img src={p.url} alt={p.original_filename} className="max-h-[75vh] w-auto max-w-full object-contain rounded-lg" />
             {watermarkEnabled && <WatermarkOverlay dense />}
           </div>
         ) : (
@@ -260,11 +260,11 @@ export function MediaLightbox({
       <div className="w-full md:w-80 bg-[#ffffff] border-t md:border-t-0 md:border-l border-[#e5dfd0] flex flex-col justify-between p-4 gap-4">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#e5dfd0] pb-3">
-          <div>
-            <p className="text-xs font-semibold text-[#b8925a]">{p.uploader_name || "Event Guest"}</p>
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold text-[#b8925a]">{p.uploader_name || "Event Guest"}</p>
             <p className="text-[10px] text-ink-tertiary">{new Date(p.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1">
             {canDownload && (
               <Button variant="ghost" size="icon" disabled={downloading} onClick={handleDownload} title="Download" className="text-ink-secondary hover:text-ink rounded-full disabled:opacity-50">
                 <Download className={`h-4.5 w-4.5 ${downloading ? "animate-pulse" : ""}`} />

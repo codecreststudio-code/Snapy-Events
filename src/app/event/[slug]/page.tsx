@@ -219,8 +219,8 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
     <div className="flex min-h-screen flex-col bg-[#faf6ed] text-ink">
       <GuestCaptureModal eventId={event.id} eventName={event.name} requireJoinCode={!!settings.require_join_code} />
 
-      <header className="sticky top-0 z-50 w-full border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur supports-[backdrop-filter]:bg-[#faf6ed]/80">
-        <div className="container flex h-16 items-center justify-between px-4 sm:px-6">
+      <header className="pt-safe sticky top-0 z-50 w-full border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur supports-[backdrop-filter]:bg-[#faf6ed]/80">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
             {event.user?.branding?.logo_url ? (
               <img

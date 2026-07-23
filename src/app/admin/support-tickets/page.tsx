@@ -147,7 +147,7 @@ export default function AdminSupportTicketsPage() {
           />
         </div>
         
-        <div className="flex items-center gap-1.5 bg-ink/10 p-0.5 rounded-lg text-xs">
+        <div className="flex items-center gap-1.5 flex-wrap bg-ink/10 p-0.5 rounded-lg text-xs">
           {["all", "open", "pending", "resolved", "closed"].map((st) => (
             <button
               key={st}

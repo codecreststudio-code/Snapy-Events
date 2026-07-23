@@ -39,8 +39,8 @@ export function AdminSidebar() {
 
 export function AdminNavbar() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-hairline-dark bg-surface-dark/95 backdrop-blur supports-[backdrop-filter]:bg-surface-dark/60">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="pt-safe sticky top-0 z-50 w-full border-b border-hairline-dark bg-surface-dark/95 backdrop-blur supports-[backdrop-filter]:bg-surface-dark/60">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
         <nav className="hidden md:flex items-center gap-6">
           {navigation.map((item) => (
             <Link

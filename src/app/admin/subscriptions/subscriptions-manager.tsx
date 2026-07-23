@@ -153,38 +153,40 @@ export function SubscriptionsManager() {
             ) : subs.length === 0 ? (
               <div className="p-16 text-center text-ink-tertiary text-xs font-semibold">No subscriptions found.</div>
             ) : (
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-hairline-dark text-ink-tertiary font-bold uppercase tracking-wider bg-ink/5">
-                    <th className="p-4">User</th>
-                    <th className="p-4">Plan</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4">Renews</th>
-                    <th className="p-4 text-right">Edit</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-hairline-dark font-medium text-ink-secondary">
-                  {subs.map(sub => (
-                    <tr key={sub.id} onClick={() => startEditSub(sub)} className={cn("hover:bg-mauve/5 transition-colors cursor-pointer", editingSub?.id === sub.id && "bg-mauve/10")}>
-                      <td className="p-4">
-                        <div className="font-bold text-ink">{sub.user?.full_name || sub.user?.email || "—"}</div>
-                        <div className="text-[10px] text-ink-tertiary mt-0.5 font-semibold">{sub.user_id.slice(0, 8)}…</div>
-                      </td>
-                      <td className="p-4 font-bold text-mauve uppercase">{sub.plan?.name ?? sub.plan_id}</td>
-                      <td className="p-4">
-                        <StatusBadge status={sub.status} />
-                        {sub.cancel_at_period_end && <span className="ml-1 text-[9px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full border border-amber-500/20">Cancels at end</span>}
-                      </td>
-                      <td className="p-4 text-ink-tertiary">
-                        {sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "Per Event"}
-                      </td>
-                      <td className="p-4 text-right">
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-ink-tertiary hover:text-mauve hover:bg-mauve/10 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-hairline-dark text-ink-tertiary font-bold uppercase tracking-wider bg-ink/5">
+                      <th className="p-4">User</th>
+                      <th className="p-4">Plan</th>
+                      <th className="p-4">Status</th>
+                      <th className="p-4">Renews</th>
+                      <th className="p-4 text-right">Edit</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-hairline-dark font-medium text-ink-secondary">
+                    {subs.map(sub => (
+                      <tr key={sub.id} onClick={() => startEditSub(sub)} className={cn("hover:bg-mauve/5 transition-colors cursor-pointer", editingSub?.id === sub.id && "bg-mauve/10")}>
+                        <td className="p-4 min-w-[160px]">
+                          <div className="font-bold text-ink truncate">{sub.user?.full_name || sub.user?.email || "—"}</div>
+                          <div className="text-[10px] text-ink-tertiary mt-0.5 font-semibold">{sub.user_id.slice(0, 8)}…</div>
+                        </td>
+                        <td className="p-4 font-bold text-mauve uppercase whitespace-nowrap">{sub.plan?.name ?? sub.plan_id}</td>
+                        <td className="p-4 whitespace-nowrap">
+                          <StatusBadge status={sub.status} />
+                          {sub.cancel_at_period_end && <span className="ml-1 text-[9px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full border border-amber-500/20">Cancels at end</span>}
+                        </td>
+                        <td className="p-4 text-ink-tertiary whitespace-nowrap">
+                          {sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "Per Event"}
+                        </td>
+                        <td className="p-4 text-right">
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-ink-tertiary hover:text-mauve hover:bg-mauve/10 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </CardContent>
 

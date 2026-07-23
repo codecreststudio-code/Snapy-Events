@@ -143,19 +143,19 @@ export function AutomationRules() {
           <div className="grid grid-cols-1 gap-4">
             {rules.map(r => (
               <Card key={r.id} className="bg-surface-card border-hairline-dark shadow-sm hover:border-hairline-dark">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-extrabold text-ink">{r.name}</h3>
-                      <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded-full border", r.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-ink/5 text-ink-secondary border-hairline-dark")}>
+                <CardContent className="p-4 flex items-center justify-between gap-3">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-extrabold text-ink truncate">{r.name}</h3>
+                      <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded-full border shrink-0", r.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-ink/5 text-ink-secondary border-hairline-dark")}>
                         {r.is_active ? "Active" : "Inactive"}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs font-medium text-ink-secondary">
+                    <div className="flex items-center gap-2 text-xs font-medium text-ink-secondary flex-wrap">
                       <span className="text-ink-tertiary">WHEN</span>
-                      <span className="font-mono bg-ink/5 px-1 rounded">{r.trigger_event}</span>
+                      <span className="font-mono bg-ink/5 px-1 rounded truncate max-w-[160px]">{r.trigger_event}</span>
                       <span className="text-ink-tertiary">THEN</span>
-                      <span className="font-mono bg-mauve/10 text-mauve px-1 rounded">{r.action_type}</span>
+                      <span className="font-mono bg-mauve/10 text-mauve px-1 rounded truncate max-w-[160px]">{r.action_type}</span>
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">

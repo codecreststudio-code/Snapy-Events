@@ -20,7 +20,7 @@ export function DashboardMain({ children }: { children: React.ReactNode }) {
 
   return (
     <main className="lg:pl-72">
-      <div className={cn("py-3 pb-24 md:py-4 px-3 sm:px-6 lg:px-8 lg:pb-8")}>{children}</div>
+      <div className={cn("pt-safe py-3 pb-24 md:py-4 px-3 sm:px-6 lg:px-8 lg:pb-8")}>{children}</div>
     </main>
   )
 }
