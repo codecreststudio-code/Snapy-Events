@@ -15,6 +15,8 @@ import { toast } from "@/lib/components/ui/toaster"
 import { MfaSettings } from "./mfa-settings"
 import { usePushNotifications } from "@/lib/pwa/use-push-notifications"
 import { useAuth } from "@/lib/hooks"
+import { HomeBottomTabs } from "@/lib/components/layout/home-bottom-tabs"
+import Link from "next/link"
 import {
   User as UserIcon,
   Bell,
@@ -22,13 +24,16 @@ import {
   Shield,
   Building2,
   CreditCard,
-  Settings,
+  Settings as SettingsIcon,
   Pencil,
   Globe,
   Mail,
   Tag,
   LogOut,
-  Trash2
+  Trash2,
+  QrCode,
+  Download,
+  ShieldAlert
 } from "lucide-react"
 import type { User } from "@/lib/types"
 
@@ -329,6 +334,43 @@ export default function SettingsPage() {
         </button>
       </div>
 
+      {/* SECTION 4: DESTINATIONS & OPTIONS */}
+      <div className="space-y-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-secondary">DESTINATIONS</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Link
+            href="/dashboard/billing"
+            className="flex items-center gap-3 bg-surface-card border border-hairline-dark p-4 rounded-2xl hover:border-mauve transition text-ink font-semibold text-xs cursor-pointer shadow-sm"
+          >
+            <CreditCard className="h-4 w-4 text-mauve" />
+            <span>Billing & Subscriptions</span>
+          </Link>
+          <Link
+            href="/dashboard/qr"
+            className="flex items-center gap-3 bg-surface-card border border-hairline-dark p-4 rounded-2xl hover:border-mauve transition text-ink font-semibold text-xs cursor-pointer shadow-sm"
+          >
+            <QrCode className="h-4 w-4 text-mauve" />
+            <span>QR Codes & Invites</span>
+          </Link>
+          <Link
+            href="/dashboard/downloads"
+            className="flex items-center gap-3 bg-surface-card border border-hairline-dark p-4 rounded-2xl hover:border-mauve transition text-ink font-semibold text-xs cursor-pointer shadow-sm"
+          >
+            <Download className="h-4 w-4 text-mauve" />
+            <span>Downloads & Exports</span>
+          </Link>
+          {profile?.is_admin && (
+            <Link
+              href="/admin"
+              className="flex items-center gap-3 bg-surface-card border border-mauve/40 p-4 rounded-2xl hover:border-mauve transition text-mauve font-semibold text-xs cursor-pointer shadow-sm"
+            >
+              <Shield className="h-4 w-4 text-mauve" />
+              <span>Admin Portal</span>
+            </Link>
+          )}
+        </div>
+      </div>
+
       {/* SECTION 4: ACCOUNT */}
       <div className="space-y-3">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-secondary">ACCOUNT</p>
@@ -556,6 +598,8 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <HomeBottomTabs />
     </div>
   )
 }

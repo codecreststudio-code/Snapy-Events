@@ -11,7 +11,7 @@ import {
   CreditCard,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { MobileBottomNav } from "./mobile-bottom-nav"
+import { HomeBottomTabs } from "./home-bottom-tabs"
 import { AccountMenu } from "./account-menu"
 import { NotificationCenter } from "@/lib/components/notifications/notification-center"
 import { Logo } from "./logo"
@@ -110,7 +110,7 @@ export function DashboardSidebar() {
         </div>
       </div>
 
-      <MobileBottomNav />
+      <HomeBottomTabs />
 
       <JoinEventModal isOpen={showJoinModal} onClose={() => setShowJoinModal(false)} />
     </>

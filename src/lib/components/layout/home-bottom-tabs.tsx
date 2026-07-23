@@ -4,7 +4,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Camera, Disc } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { AccountMenu } from "./account-menu"
+import { useAuth } from "@/lib/hooks"
+import { Avatar, AvatarFallback, AvatarImage } from "@/lib/components/ui/avatar"
 
 const TABS = [
   { name: "Events", href: "/dashboard/events", icon: Camera },
@@ -17,6 +18,14 @@ function isActivePath(pathname: string, href: string) {
 
 export function HomeBottomTabs() {
   const pathname = usePathname() ?? ""
+  const { user, profile } = useAuth()
+
+  const initials =
+    profile?.full_name?.substring(0, 2).toUpperCase() ||
+    user?.email?.substring(0, 2).toUpperCase() ||
+    "US"
+
+  const isSettingsActive = pathname === "/dashboard/settings"
 
   return (
     <nav
@@ -50,9 +59,25 @@ export function HomeBottomTabs() {
           })}
         </div>
 
-        {/* Far Right Integrated Profile Avatar */}
+        {/* Far Right Integrated Profile Avatar (Navigates directly to /dashboard/settings) */}
         <div className="flex items-center">
-          <AccountMenu variant="compact" />
+          <Link
+            href="/dashboard/settings"
+            aria-label="Account Settings"
+            className={cn(
+              "flex h-9 w-9 items-center justify-center rounded-full border transition-all hover:scale-105 active:scale-95 cursor-pointer",
+              isSettingsActive
+                ? "border-mauve ring-2 ring-mauve/30 bg-mauve/10"
+                : "border-[#e5dfd0] bg-[#ffffff] hover:border-mauve/60"
+            )}
+          >
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={profile?.avatar_url || undefined} />
+              <AvatarFallback className="bg-mauve/15 text-mauve text-xs font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
         </div>
       </div>
     </nav>
