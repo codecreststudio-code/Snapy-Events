@@ -54,199 +54,178 @@ export function PublicNavbar() {
   ]
 
   return (
-    <header className="pt-safe sticky top-0 z-50 w-full bg-surface-dark/85 backdrop-blur-xl border-b border-hairline-dark">
-      <div className="container relative mx-auto flex h-22 sm:h-24 items-center justify-between px-4 sm:px-6 lg:px-8 py-2">
-
-        {/* Left: Brand Logo */}
-        <div className="flex items-center shrink-0">
-          <Link href="/" className="inline-flex items-center gap-2 transition-opacity hover:opacity-90">
+    <>
+      <header className="pt-safe sticky top-0 z-50 w-full bg-surface-dark/85 backdrop-blur-xl border-b border-hairline-dark">
+        <div className="container relative mx-auto flex h-22 sm:h-24 items-center justify-between px-4 sm:px-6 lg:px-8 py-2">
+          {/* Left: Brand Logo */}
+          <Link href="/" className="flex items-center gap-2">
             <Logo />
           </Link>
-        </div>
 
-        {/* Center: Perfectly Centered Desktop Nav */}
-        <nav
-          className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-hairline-dark bg-mauve/5 px-2.5 py-1.5 shadow-sm"
-          onMouseLeave={() => setHoveredPath(null)}
-        >
-          {navLinks.map((item) => {
-            const isActive = pathname === item.href
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="relative px-4 py-1.5 text-xs font-semibold transition-colors rounded-full"
-                onMouseEnter={() => setHoveredPath(item.href)}
-              >
-                <span className={cn("relative z-10", isActive || hoveredPath === item.href ? "text-mauve-strong font-bold" : "text-ink-secondary")}>
-                  {item.label}
-                </span>
-
-                {isActive && (
-                  <motion.div
-                    layoutId="navbar-active"
-                    className="absolute inset-0 rounded-full bg-mauve/10"
-                    transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
-                  />
-                )}
-                {hoveredPath === item.href && !isActive && (
-                  <motion.div
-                    layoutId="navbar-hover"
-                    className="absolute inset-0 rounded-full bg-mauve/5"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                  />
-                )}
-              </Link>
-            )
-          })}
-        </nav>
-
-        {/* Right: Actions (Join Event + Currency Toggle + Sign In + Get Started) */}
-        <div className="hidden md:flex items-center gap-2.5 lg:gap-3.5 shrink-0 ml-auto">
-          {/* 1. Join Event Button */}
-          <button
-            type="button"
-            onClick={() => {
-              setJoinError(null)
-              setShowJoinModal(true)
-            }}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-mauve bg-mauve/10 hover:bg-mauve/20 border border-mauve/30 px-4 py-2 rounded-full transition-all duration-200 shadow-sm active:scale-95 shrink-0"
+          {/* Center: Nav Links */}
+          <nav
+            className="hidden md:flex items-center gap-1 rounded-full border border-hairline-dark bg-surface-card/60 p-1.5 backdrop-blur-md"
+            onMouseLeave={() => setHoveredPath(null)}
           >
-            <QrCode className="h-3.5 w-3.5" />
-            <span>Join Event</span>
-          </button>
+            {navLinks.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="relative px-4 py-1.5 text-xs font-semibold transition-colors rounded-full"
+                  onMouseEnter={() => setHoveredPath(item.href)}
+                >
+                  <span className={cn("relative z-10", isActive || hoveredPath === item.href ? "text-mauve-strong font-bold" : "text-ink-secondary")}>
+                    {item.label}
+                  </span>
 
-          {/* 2. Currency Switcher (INR / USD) */}
-          <div className="shrink-0">
-            <CurrencyToggle />
+                  {isActive && (
+                    <motion.div
+                      layoutId="navbar-active"
+                      className="absolute inset-0 rounded-full bg-mauve/10"
+                      transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                    />
+                  )}
+                  {hoveredPath === item.href && !isActive && (
+                    <motion.div
+                      layoutId="navbar-hover"
+                      className="absolute inset-0 rounded-full bg-mauve/5"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                    />
+                  )}
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* Right: Actions (Join Event + Currency Toggle + Sign In + Get Started) */}
+          <div className="hidden md:flex items-center gap-2.5 lg:gap-3.5 shrink-0 ml-auto">
+            {/* 1. Join Event Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setJoinError(null)
+                setShowJoinModal(true)
+              }}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-mauve bg-mauve/10 hover:bg-mauve/20 border border-mauve/30 px-4 py-2 rounded-full transition-all duration-200 shadow-sm active:scale-95 shrink-0 cursor-pointer"
+            >
+              <QrCode className="h-3.5 w-3.5" />
+              <span>Join Event</span>
+            </button>
+
+            {/* 2. Currency Switcher (INR / USD) */}
+            <div className="shrink-0">
+              <CurrencyToggle />
+            </div>
+
+            {/* 3. Sign In Link */}
+            <Link href="/login" className="text-xs font-semibold text-ink-secondary hover:text-ink transition-colors px-1 shrink-0">
+              Sign in
+            </Link>
+
+            {/* 4. Get Started Button */}
+            <Link href="/signup" className="shrink-0">
+              <Button className="rounded-full bg-mauve px-5 py-2 text-[#faf6ed] text-xs font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+                Get Started
+                <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              </Button>
+            </Link>
           </div>
 
-          {/* 3. Sign In Link */}
-          <Link href="/login" className="text-xs font-semibold text-ink-secondary hover:text-ink transition-colors px-1 shrink-0">
-            Sign in
-          </Link>
-
-          {/* 4. Get Started Button */}
-          <Link href="/signup" className="shrink-0">
-            <Button className="rounded-full bg-mauve px-5 py-2 text-[#faf6ed] text-xs font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
-              Get Started
-              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-            </Button>
-          </Link>
+          {/* Mobile Menu Button */}
+          <div className="flex md:hidden items-center gap-2">
+            <CurrencyToggle />
+            <button
+              type="button"
+              onClick={() => setIsOpen(!isOpen)}
+              className="rounded-full p-2 text-ink hover:bg-mauve/10 transition"
+              aria-label="Toggle menu"
+            >
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Menu Trigger */}
-        <div className="flex items-center gap-2 md:hidden">
-          <button
-            type="button"
-            onClick={() => {
-              setJoinError(null)
-              setShowJoinModal(true)
-            }}
-            className="inline-flex items-center gap-1 text-[11px] font-semibold text-mauve bg-mauve/10 border border-mauve/30 px-3 py-1.5 rounded-full"
-          >
-            <QrCode className="h-3 w-3" />
-            <span>Join</span>
-          </button>
-
-          <motion.button
-            type="button"
-            onClick={() => setIsOpen(!isOpen)}
-            whileTap={{ scale: 0.94 }}
-            className="p-2 rounded-full text-ink-secondary hover:bg-mauve/5 hover:text-ink focus:outline-none"
-            aria-label="Toggle menu"
-          >
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </motion.button>
-        </div>
-
-      </div>
-
-      {/* Mobile Menu Drawer */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="md:hidden border-t border-hairline-dark bg-surface-dark/95 backdrop-blur-xl overflow-hidden"
-          >
-            <div className="px-4 pt-4 pb-6 space-y-4 text-left">
-              {/* Mobile Join Event Quick Form */}
-              <div className="p-4 rounded-2xl bg-surface-card border border-hairline-dark space-y-2">
-                <label className="text-xs font-bold text-ink flex items-center gap-1.5">
-                  <Key className="h-3.5 w-3.5 text-mauve" />
-                  Have an Event Code?
-                </label>
-                <form onSubmit={handleJoinSubmit} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={joinCode}
-                    onChange={(e) => setJoinCode(e.target.value)}
-                    placeholder="e.g. K7XQ9M"
-                    className="flex-1 rounded-full border border-hairline-dark bg-surface-dark px-3 py-2 text-xs text-ink uppercase placeholder:normal-case placeholder:text-ink-tertiary focus:border-mauve focus:outline-none"
-                  />
-                  <Button type="submit" disabled={joinLoading} className="rounded-full bg-mauve text-[#faf6ed] text-xs font-semibold px-4 py-2 shrink-0">
-                    {joinLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Enter"}
-                  </Button>
-                </form>
-                {joinError && <p className="text-[11px] text-red-400 font-light">{joinError}</p>}
-              </div>
-
-              <div className="space-y-1">
-                {navLinks.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setIsOpen(false)}
-                    className="block rounded-full px-4 py-2.5 text-xs font-semibold text-ink-secondary hover:bg-mauve/5 hover:text-ink transition"
+        {/* Mobile Navigation Drawer */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden border-t border-hairline-dark bg-surface-dark/95 backdrop-blur-xl overflow-hidden"
+            >
+              <div className="container mx-auto px-4 py-6 space-y-4">
+                <nav className="flex flex-col space-y-2">
+                  {navLinks.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className={cn(
+                        "px-4 py-3 rounded-2xl text-sm font-semibold transition-colors",
+                        pathname === item.href
+                          ? "bg-mauve/10 text-mauve-strong font-bold"
+                          : "text-ink-secondary hover:bg-mauve/5 hover:text-ink"
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsOpen(false)
+                      setJoinError(null)
+                      setShowJoinModal(true)
+                    }}
+                    className="flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold text-mauve bg-mauve/10 hover:bg-mauve/20 border border-mauve/30 transition text-left"
                   >
-                    {item.label}
+                    <QrCode className="h-4 w-4" />
+                    <span>Join Event</span>
+                  </button>
+                </nav>
+
+                <div className="pt-4 border-t border-hairline-dark space-y-3">
+                  <Link href="/login" onClick={() => setIsOpen(false)}>
+                    <Button variant="outline" className="w-full rounded-full border-hairline-dark text-ink text-xs font-semibold py-2.5">
+                      Sign in
+                    </Button>
                   </Link>
-                ))}
+                  <Link href="/signup" onClick={() => setIsOpen(false)}>
+                    <Button className="w-full rounded-full bg-mauve text-[#faf6ed] text-xs font-semibold py-2.5 hover:bg-mauve-strong shadow-lg shadow-mauve/10">
+                      Get Started
+                      <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                    </Button>
+                  </Link>
+                </div>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
 
-              <div className="pt-3 border-t border-hairline-dark flex flex-col gap-2">
-                <Link
-                  href="/login"
-                  onClick={() => setIsOpen(false)}
-                  className="flex justify-center rounded-full border border-hairline-dark px-4 py-2.5 text-xs font-semibold text-ink hover:bg-mauve/5 transition"
-                >
-                  Sign in
-                </Link>
-                <Link href="/signup" onClick={() => setIsOpen(false)}>
-                  <Button className="w-full rounded-full bg-mauve text-[#faf6ed] text-xs font-semibold py-2.5 hover:bg-mauve-strong shadow-lg shadow-mauve/10">
-                    Get Started
-                    <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Join Event Modal Dialog */}
+      {/* Join Event Modal Dialog (Rendered at root layout level for perfect viewport centering) */}
       <AnimatePresence>
         {showJoinModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 min-h-screen">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowJoinModal(false)}
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/75 backdrop-blur-sm"
             />
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-md bg-surface-card p-6 sm:p-8 rounded-3xl border border-hairline-dark shadow-2xl space-y-6 text-left z-10"
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-surface-card p-6 sm:p-8 rounded-3xl border border-hairline-dark shadow-2xl space-y-6 text-left z-10 my-auto"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -261,7 +240,7 @@ export function PublicNavbar() {
                 <button
                   type="button"
                   onClick={() => setShowJoinModal(false)}
-                  className="rounded-full p-2 text-ink-secondary hover:bg-mauve/10 hover:text-ink transition"
+                  className="rounded-full p-2 text-ink-secondary hover:bg-mauve/10 hover:text-ink transition cursor-pointer"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -278,7 +257,7 @@ export function PublicNavbar() {
                       value={joinCode}
                       onChange={(e) => setJoinCode(e.target.value)}
                       placeholder="e.g. K7XQ9M or sarah-wedding"
-                      className="w-full rounded-2xl border border-hairline-dark bg-surface-dark pl-11 pr-4 py-3 text.sm text-ink uppercase placeholder:normal-case placeholder:text-ink-tertiary focus:border-mauve focus:outline-none"
+                      className="w-full rounded-2xl border border-hairline-dark bg-surface-dark pl-11 pr-4 py-3 text-sm text-ink uppercase placeholder:normal-case placeholder:text-ink-tertiary focus:border-mauve focus:outline-none"
                     />
                   </div>
                   {joinError && (
@@ -315,7 +294,7 @@ export function PublicNavbar() {
           </div>
         )}
       </AnimatePresence>
-    </header>
+    </>
   )
 }
 

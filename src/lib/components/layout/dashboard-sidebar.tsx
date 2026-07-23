@@ -1,28 +1,25 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   Camera,
   LayoutDashboard,
-  Image,
   QrCode,
   Settings,
   CreditCard,
-  Download,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { MobileBottomNav } from "./mobile-bottom-nav"
 import { AccountMenu } from "./account-menu"
 import { NotificationCenter } from "@/lib/components/notifications/notification-center"
 import { Logo } from "./logo"
+import { JoinEventModal } from "@/lib/components/events/join-event-modal"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Events", href: "/dashboard/events", icon: Camera },
-  { name: "Galleries", href: "/dashboard/galleries", icon: Image },
-  { name: "QR Codes", href: "/dashboard/qr", icon: QrCode },
-  { name: "Downloads", href: "/dashboard/downloads", icon: Download },
+  { name: "My Events", href: "/dashboard/events", icon: Camera },
 ]
 
 const secondaryNavigation = [
@@ -32,21 +29,14 @@ const secondaryNavigation = [
 
 export function DashboardSidebar() {
   const pathname = usePathname()
+  const [showJoinModal, setShowJoinModal] = useState(false)
 
-  // The dashboard home page (exactly "/dashboard") owns its own full-bleed,
-  // app-style chrome now — a slim top bar plus the 2-tab HomeBottomTabs bar,
-  // at every screen size, not just mobile — instead of this sidebar. See
-  // src/app/dashboard/page.tsx and home-bottom-tabs.tsx. Every other
-  // /dashboard/* route (Events, Galleries, QR, Settings, Billing, etc.) is
-  // untouched and keeps this sidebar + MobileBottomNav exactly as before.
   if (pathname === "/dashboard") {
     return null
   }
 
   return (
     <>
-      {/* Desktop sidebar (lg+). Phone/tablet get MobileBottomNav instead —
-          see below — rather than a hamburger + slide-in copy of this panel. */}
       <div className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-[#e5dfd0] bg-[#faf6ed] lg:flex">
         <div className="flex h-16 items-center gap-2 border-b border-[#e5dfd0] px-6">
           <Link href="/dashboard" className="inline-flex items-center transition-opacity hover:opacity-90">
@@ -57,7 +47,7 @@ export function DashboardSidebar() {
         <div className="flex-1 overflow-y-auto py-4">
           <nav className="px-4 space-y-1">
             {navigation.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+              const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`))
               return (
                 <Link
                   key={item.name}
@@ -74,6 +64,16 @@ export function DashboardSidebar() {
                 </Link>
               )
             })}
+
+            {/* Join Event Button */}
+            <button
+              type="button"
+              onClick={() => setShowJoinModal(true)}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-mauve bg-mauve/10 hover:bg-mauve/20 transition-colors cursor-pointer"
+            >
+              <QrCode className="h-5 w-5 text-mauve" />
+              <span>Join Event</span>
+            </button>
           </nav>
 
           <div className="mt-6 px-4">
@@ -110,8 +110,9 @@ export function DashboardSidebar() {
         </div>
       </div>
 
-      {/* Phone/tablet bottom tab bar (< lg) */}
       <MobileBottomNav />
+
+      <JoinEventModal isOpen={showJoinModal} onClose={() => setShowJoinModal(false)} />
     </>
   )
 }

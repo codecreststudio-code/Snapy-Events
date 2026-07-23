@@ -21,22 +21,13 @@ import {
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/hooks"
 
-// Native-app-style bottom tab bar for phone/tablet widths (< lg). Mirrors the
-// "Home / Search / raised-center / Cart / Profile" pattern: two tabs on each
-// side of an elevated circular hub button, small active-state indicator dash
-// above the label, everything else tucked behind "More". Desktop (lg+) still
-// gets the full sidebar from DashboardSidebar — this only renders below it.
-const SIDE_TABS_LEFT = [
-  { name: "Events", href: "/dashboard/events", icon: Camera },
-  { name: "Galleries", href: "/dashboard/galleries", icon: ImageIcon },
-]
+import { JoinEventModal } from "@/lib/components/events/join-event-modal"
 
-const SIDE_TABS_RIGHT = [
-  { name: "QR Codes", href: "/dashboard/qr", icon: QrCode },
+const SIDE_TABS_LEFT = [
+  { name: "My Events", href: "/dashboard/events", icon: Camera },
 ]
 
 const MORE_ITEMS = [
-  { name: "Downloads", href: "/dashboard/downloads", icon: Download },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
   { name: "Billing", href: "/dashboard/billing", icon: CreditCard },
 ]
@@ -86,6 +77,7 @@ export function MobileBottomNav() {
   const router = useRouter()
   const { profile, signOut } = useAuth()
   const [moreOpen, setMoreOpen] = React.useState(false)
+  const [showJoinModal, setShowJoinModal] = React.useState(false)
 
   const homeActive = pathname === "/dashboard"
   const moreActive = MORE_ITEMS.some((i) => isActivePath(pathname, i.href))
@@ -115,7 +107,7 @@ export function MobileBottomNav() {
             />
           ))}
 
-          {/* Raised center hub — always returns to the dashboard overview */}
+          {/* Raised center hub — returns to the dashboard overview */}
           <div className="flex flex-1 flex-col items-center justify-end">
             <Link
               href="/dashboard"
@@ -143,15 +135,15 @@ export function MobileBottomNav() {
             </span>
           </div>
 
-          {SIDE_TABS_RIGHT.map((item) => (
-            <TabButton
-              key={item.href}
-              href={item.href}
-              label={item.name}
-              icon={item.icon}
-              active={isActivePath(pathname, item.href)}
-            />
-          ))}
+          {/* Join Event Button Tab */}
+          <button
+            type="button"
+            onClick={() => setShowJoinModal(true)}
+            className="relative flex flex-1 flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium text-mauve focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 rounded-lg cursor-pointer"
+          >
+            <QrCode className="h-5 w-5 text-mauve" />
+            <span className="text-mauve font-semibold">Join</span>
+          </button>
 
           {/* More — opens the overflow sheet */}
           <button
@@ -234,6 +226,8 @@ export function MobileBottomNav() {
           </DialogPrimitive.Content>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
+
+      <JoinEventModal isOpen={showJoinModal} onClose={() => setShowJoinModal(false)} />
     </>
   )
 }
