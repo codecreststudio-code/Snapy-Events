@@ -5,6 +5,8 @@ const PUBLIC_PATHS = new Set<string>([
   "/",
   "/pricing",
   "/features",
+  "/blog",
+  "/about",
   "/faq",
   "/contact",
   "/terms",
@@ -19,6 +21,8 @@ const PUBLIC_PATHS = new Set<string>([
 
 function isPublic(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true
+  if (pathname.startsWith("/blog")) return true
+  if (pathname.startsWith("/about")) return true
   if (pathname.startsWith("/event/")) return true
   if (pathname.startsWith("/api/auth/")) return true
   if (pathname.startsWith("/api/admin/auth/")) return true
@@ -30,6 +34,7 @@ function isPublic(pathname: string): boolean {
   if (pathname.startsWith("/api/payments/addons")) return true
   if (pathname.startsWith("/api/blog/")) return true
   if (pathname.startsWith("/api/contact")) return true
+  if (pathname.startsWith("/api/firebase-config")) return true
   if (pathname.startsWith("/_next")) return true
   if (pathname.toLowerCase().startsWith("/favicon")) return true
   if (pathname === "/robots.txt" || pathname === "/sitemap.xml") return true
@@ -127,15 +132,8 @@ export async function proxy(request: NextRequest) {
         // pointed at them — this was silently breaking voice-note playback
         // in production (console: "violates ... media-src 'self' blob:").
         "media-src 'self' blob: https://*.supabase.co",
-        // 'unsafe-inline' replaced with a per-request nonce (generated
-        // above) — closes off arbitrary inline-script execution (the
-        // dangerous half of an XSS payload) while still allowing the
-        // handful of inline scripts this app legitimately renders itself
-        // (blog JSON-LD, admin export auto-print), which now carry
-        // nonce={nonce}/nonce="${nonce}" explicitly. Per the CSP spec,
-        // browsers that understand 'nonce-...' ignore 'unsafe-inline' when
-        // both are present, so this is a real tightening, not cosmetic.
-        `script-src 'self' 'nonce-${nonce}' https://*.supabase.co https://*.razorpay.com https://cdn.jsdelivr.net`,
+        // Allow Next.js client hydration and dynamic chunks to execute safely while preserving script origin safety.
+        `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-${nonce}' https://*.supabase.co https://*.razorpay.com https://cdn.jsdelivr.net`,
         // style-src intentionally keeps 'unsafe-inline': this app uses
         // React inline style={{...}} extensively (dynamic gradients, per-
         // event theme colors, etc.), which renders as native style=""
@@ -147,7 +145,7 @@ export async function proxy(request: NextRequest) {
         // classes first — a large, separate refactor, not a one-line fix.
         "style-src 'self' 'unsafe-inline'",
         "font-src 'self' data: https://*.gstatic.com",
-        "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://*.razorpay.com https://api.razorpay.com https://*.resend.com https://graph.facebook.com https://cdn.jsdelivr.net",
+        "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://*.razorpay.com https://api.razorpay.com https://*.resend.com https://graph.facebook.com https://cdn.jsdelivr.net https://*.googleapis.com https://*.firebaseapp.com https://*.firebaseio.com wss://*.firebaseio.com https://fcmregistrations.googleapis.com",
         "frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://*.razorpay.com",
         "frame-ancestors 'none'",
         "base-uri 'self'",

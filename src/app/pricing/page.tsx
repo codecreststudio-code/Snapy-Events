@@ -185,8 +185,8 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 }
 
 export default function PricingPage() {
-  const [plansList, setPlansList] = useState<PricingPlan[]>([])
-  const [plansLoading, setPlansLoading] = useState(true)
+  const [plansList, setPlansList] = useState<PricingPlan[]>(FALLBACK_PLANS)
+  const [plansLoading, setPlansLoading] = useState(false)
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -208,17 +208,11 @@ export default function PricingPage() {
               bestValue: p.best_value || false,
             }))
             setPlansList(mapped)
-            setPlansLoading(false)
             return
           }
         }
-        throw new Error("Live plans response was empty or unsuccessful")
       } catch (e) {
-        // Only reached on a genuine fetch failure — see FALLBACK_PLANS'
-        // comment above for why this doesn't seed the initial state.
         console.error("Failed to fetch dynamic plans, using fallback:", e)
-        setPlansList(FALLBACK_PLANS)
-        setPlansLoading(false)
       }
     }
     fetchPlans()

@@ -91,6 +91,9 @@ yarn-error.log*
 *.sqlite
 *.sqlite3
 *.db
+*.db-journal
+*.db-shm
+*.db-wal
 supabase/.branches
 supabase/.devlabs
 supabase/.temp
@@ -112,6 +115,9 @@ service-account*.json
 google-credentials*.json
 *firebase-adminsdk*.json
 *firebase*service-account*.json
+*service-account*.json
+*credentials*.json
+*secret*.json
 **/secrets/
 **/keys/
 **/credentials/

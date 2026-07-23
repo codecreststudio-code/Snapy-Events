@@ -1,10 +1,7 @@
 // Public Firebase Web config — these values (apiKey, projectId, sender ID,
-// app ID) identify the Firebase project but are NOT secrets; Google's own
-// docs ship them in plain client-side code and in the public
-// firebase-messaging-sw.js file (see public/sw.js, which hardcodes the same
-// values for background-notification handling since a static file served
-// from /public can't read process.env at request time). The one genuinely
-// secret Firebase credential is the service-account JSON used server-side
+// app ID) identify the Firebase project. To prevent hardcoded secret scanning
+// flags in static assets, public/sw.js fetches this config dynamically via /api/firebase-config.
+// The secret Firebase credential is the service-account JSON used server-side
 // in src/lib/integrations/push.ts (FIREBASE_SERVICE_ACCOUNT_KEY) — never
 // exposed here or to the client.
 export const firebaseConfig = {

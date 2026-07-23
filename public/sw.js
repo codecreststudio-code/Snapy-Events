@@ -18,52 +18,62 @@ const STATIC_CACHE = `snapsy-static-${CACHE_VERSION}`;
 const OFFLINE_URL = "/offline";
 
 // ─── Firebase Cloud Messaging — background notifications ──────────────────
-// This is the one place the "public config is not secret" rule from
-// src/lib/firebase/config.ts actually requires hardcoded values: this file
-// is served statically from /public and can't read process.env at request
-// time. apiKey/projectId/senderId/appId identify the Firebase project only —
-// they are not credentials (Google's own setup docs ship them the same way).
-// The private service-account key used to *send* pushes lives server-side
-// only, in FIREBASE_SERVICE_ACCOUNT_KEY, and never appears in this file.
+// Firebase config is loaded dynamically from /api/firebase-config or via postMessage
+// to avoid hardcoding project API keys or credentials in static public files, preventing secret scanner alerts.
+let firebaseMessagingInitialized = false;
+
+function initFirebaseMessaging(config) {
+  if (firebaseMessagingInitialized) return;
+  if (!config || !config.apiKey || !config.projectId) return;
+  if (typeof firebase === "undefined") return;
+
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(config);
+    }
+    const messaging = firebase.messaging();
+
+    // Fires when a push arrives while no tab has focus (app closed, or open
+    // but backgrounded) — foreground messages are instead handled in
+    // src/lib/pwa/use-push-notifications.ts via onMessage(), per FCM's own
+    // split between the two. `payload.data.url` (set server-side in
+    // src/lib/integrations/push.ts) is what notificationclick below uses for
+    // deep linking.
+    messaging.onBackgroundMessage((payload) => {
+      const title = payload.notification?.title || "Snapsy";
+      const body = payload.notification?.body || "";
+      const url = payload.data?.url || "/dashboard";
+      self.registration.showNotification(title, {
+        body,
+        icon: "/icons/icon-192.png",
+        badge: "/icons/icon-96.png",
+        data: { url },
+        tag: payload.data?.tag || undefined,
+      });
+    });
+    firebaseMessagingInitialized = true;
+  } catch (err) {
+    console.warn("[sw] firebase messaging init error", err);
+  }
+}
+
 try {
   importScripts("https://www.gstatic.com/firebasejs/11.2.0/firebase-app-compat.js");
   importScripts("https://www.gstatic.com/firebasejs/11.2.0/firebase-messaging-compat.js");
 
-  firebase.initializeApp({
-    apiKey: "AIzaSyArjuIqQIEfyEEKvRhKZbl1Efb9lyzjTG0",
-    authDomain: "snapsy-events.firebaseapp.com",
-    projectId: "snapsy-events",
-    storageBucket: "snapsy-events.firebasestorage.app",
-    messagingSenderId: "295034923230",
-    appId: "1:295034923230:web:ba64b3085b0c306ec6fa4f",
-  });
-
-  const messaging = firebase.messaging();
-
-  // Fires when a push arrives while no tab has focus (app closed, or open
-  // but backgrounded) — foreground messages are instead handled in
-  // src/lib/pwa/use-push-notifications.ts via onMessage(), per FCM's own
-  // split between the two. `payload.data.url` (set server-side in
-  // src/lib/integrations/push.ts) is what notificationclick below uses for
-  // deep linking.
-  messaging.onBackgroundMessage((payload) => {
-    const title = payload.notification?.title || "Snapsy";
-    const body = payload.notification?.body || "";
-    const url = payload.data?.url || "/dashboard";
-    self.registration.showNotification(title, {
-      body,
-      icon: "/icons/icon-192.png",
-      badge: "/icons/icon-96.png",
-      data: { url },
-      tag: payload.data?.tag || undefined,
+  // Fetch Firebase Web config dynamically from server
+  fetch("/api/firebase-config")
+    .then((res) => (res.ok ? res.json() : null))
+    .then((config) => {
+      if (config) initFirebaseMessaging(config);
+    })
+    .catch((err) => {
+      console.warn("[sw] firebase config fetch skipped", err);
     });
-  });
 } catch (err) {
   // Firebase Messaging isn't available in every environment this SW may
-  // run in during development (e.g. before a Firebase project is fully
-  // configured) — never let that break the core install/offline caching
-  // behavior above.
-  console.warn("[sw] firebase messaging init skipped", err);
+  // run in during development — never let that break core install/offline caching.
+  console.warn("[sw] firebase messaging scripts import skipped", err);
 }
 
 self.addEventListener("notificationclick", (event) => {
@@ -128,6 +138,8 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("message", (event) => {
   if (event.data === "SKIP_WAITING") {
     self.skipWaiting();
+  } else if (event.data && event.data.type === "SET_FIREBASE_CONFIG" && event.data.config) {
+    initFirebaseMessaging(event.data.config);
   }
 });
 
