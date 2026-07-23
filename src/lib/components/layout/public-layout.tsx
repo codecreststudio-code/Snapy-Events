@@ -54,11 +54,11 @@ export function PublicNavbar() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-surface-dark/80 backdrop-blur-xl border-b border-hairline-dark">
+    <header className="sticky top-0 z-50 w-full bg-surface-dark/85 backdrop-blur-xl border-b border-hairline-dark">
       <div className="container relative flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
 
         {/* Left: Brand Logo */}
-        <div className="flex items-center">
+        <div className="flex items-center shrink-0">
           <Link href="/" className="inline-flex items-center gap-2 transition-opacity hover:opacity-90">
             <Logo />
           </Link>
@@ -66,7 +66,7 @@ export function PublicNavbar() {
 
         {/* Center: Perfectly Centered Desktop Nav */}
         <nav
-          className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-full border border-hairline-dark bg-mauve/5 px-2 py-1.5 shadow-sm"
+          className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-hairline-dark bg-mauve/5 px-2.5 py-1.5 shadow-sm"
           onMouseLeave={() => setHoveredPath(null)}
         >
           {navLinks.map((item) => {
@@ -78,7 +78,7 @@ export function PublicNavbar() {
                 className="relative px-4 py-1.5 text-xs font-semibold transition-colors rounded-full"
                 onMouseEnter={() => setHoveredPath(item.href)}
               >
-                <span className={cn("relative z-10", isActive || hoveredPath === item.href ? "text-mauve-strong" : "text-ink-secondary")}>
+                <span className={cn("relative z-10", isActive || hoveredPath === item.href ? "text-mauve-strong font-bold" : "text-ink-secondary")}>
                   {item.label}
                 </span>
 
@@ -104,27 +104,33 @@ export function PublicNavbar() {
           })}
         </nav>
 
-        {/* Right: Actions (Join Event + Currency + Auth) */}
-        <div className="hidden md:flex items-center gap-3">
+        {/* Right: Actions (Join Event + Currency Toggle + Sign In + Get Started) */}
+        <div className="hidden md:flex items-center gap-2.5 lg:gap-3.5 shrink-0 ml-auto">
+          {/* 1. Join Event Button */}
           <button
             type="button"
             onClick={() => {
               setJoinError(null)
               setShowJoinModal(true)
             }}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-mauve bg-mauve/10 hover:bg-mauve/20 border border-mauve/30 px-4 py-2 rounded-full transition-all duration-200 shadow-sm active:scale-95"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-mauve bg-mauve/10 hover:bg-mauve/20 border border-mauve/30 px-4 py-2 rounded-full transition-all duration-200 shadow-sm active:scale-95 shrink-0"
           >
             <QrCode className="h-3.5 w-3.5" />
             <span>Join Event</span>
           </button>
 
-          <CurrencyToggle />
+          {/* 2. Currency Switcher (INR / USD) */}
+          <div className="shrink-0">
+            <CurrencyToggle />
+          </div>
 
-          <Link href="/login" className="text-xs font-semibold text-ink-secondary hover:text-ink transition-colors px-1">
+          {/* 3. Sign In Link */}
+          <Link href="/login" className="text-xs font-semibold text-ink-secondary hover:text-ink transition-colors px-1 shrink-0">
             Sign in
           </Link>
 
-          <Link href="/signup">
+          {/* 4. Get Started Button */}
+          <Link href="/signup" className="shrink-0">
             <Button className="rounded-full bg-mauve px-5 py-2 text-[#faf6ed] text-xs font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
               Get Started
               <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
