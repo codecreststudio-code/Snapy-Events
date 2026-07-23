@@ -8,7 +8,6 @@ import { ArrowRight, Menu, X, QrCode, Key, Loader2 } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { Logo } from "./logo"
-import { CurrencyToggle } from "@/lib/components/ui/currency-toggle"
 
 export function PublicNavbar() {
   const pathname = usePathname()
@@ -102,7 +101,7 @@ export function PublicNavbar() {
             })}
           </nav>
 
-          {/* Right: Actions (Join Event + Currency Toggle + Sign In + Get Started) */}
+          {/* Right: Actions (Join Event + Sign In + Get Started) */}
           <div className="hidden md:flex items-center gap-2.5 lg:gap-3.5 shrink-0 ml-auto">
             {/* 1. Join Event Button */}
             <button
@@ -117,17 +116,12 @@ export function PublicNavbar() {
               <span>Join Event</span>
             </button>
 
-            {/* 2. Currency Switcher (INR / USD) */}
-            <div className="shrink-0">
-              <CurrencyToggle />
-            </div>
-
-            {/* 3. Sign In Link */}
+            {/* 2. Sign In Link */}
             <Link href="/login" className="text-xs font-semibold text-ink-secondary hover:text-ink transition-colors px-1 shrink-0">
               Sign in
             </Link>
 
-            {/* 4. Get Started Button */}
+            {/* 3. Get Started Button */}
             <Link href="/signup" className="shrink-0">
               <Button className="rounded-full bg-mauve px-5 py-2 text-[#faf6ed] text-xs font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
                 Get Started
@@ -138,7 +132,6 @@ export function PublicNavbar() {
 
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center gap-2">
-            <CurrencyToggle />
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
