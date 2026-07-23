@@ -1,6 +1,5 @@
-import { notFound } from "next/navigation"
 import Link from "next/link"
-import { Check, X, Sparkles, Shield, QrCode, ArrowRight, Smartphone } from "lucide-react"
+import { Check, X, Sparkles, ArrowRight } from "lucide-react"
 import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
 import { Button } from "@/lib/components/ui/button"
 
@@ -121,10 +120,37 @@ const COMPARISONS_DATA: Record<string, ComparisonData> = {
   },
 }
 
+function getFallbackComparison(slug: string): ComparisonData {
+  const formattedName = slug
+    .replace(/^vs-/, "")
+    .replace(/-review$/, "")
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ")
+
+  return {
+    title: `Snapsy Events vs ${formattedName} Comparison`,
+    subtitle: `Compare features, AI capabilities, and pricing between Snapsy Events and ${formattedName} for weddings and special events.`,
+    metaDescription: `Detailed comparison of Snapsy Events versus ${formattedName}. See why app-free QR scanning and AI face matching win.`,
+    competitorName: formattedName,
+    tableRows: [
+      { feature: "App-Free Web Browser Access", snapsy: true, competitor: "Requires App or Login" },
+      { feature: "Sub-Second AI Selfie Match", snapsy: true, competitor: false },
+      { feature: "Live Venue TV Stream Slideshow", snapsy: true, competitor: false },
+      { feature: "Custom Photographer Watermarking", snapsy: true, competitor: false },
+      { feature: "Full Resolution Export Archive", snapsy: true, competitor: "Compressed Images" },
+    ],
+    highlights: [
+      { title: "100% Guest Participation", detail: "Eliminate app download friction. Guests scan table QR codes and upload photos in seconds." },
+      { title: "Instant AI Selfie Retrieval", detail: "Guests find all their photos in under a second instead of scrolling through thousands of gallery images." },
+      { title: "Complete Host Controls", detail: "Host moderation queues, password locks, and high-resolution export backup archives." },
+    ],
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const data = COMPARISONS_DATA[slug]
-  if (!data) return { title: "Compare | Snapsy Events" }
+  const data = COMPARISONS_DATA[slug] || getFallbackComparison(slug)
 
   return {
     title: `${data.title} | Snapsy Events`,
@@ -134,11 +160,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ComparePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const data = COMPARISONS_DATA[slug]
-
-  if (!data) {
-    notFound()
-  }
+  const data = COMPARISONS_DATA[slug] || getFallbackComparison(slug)
 
   return (
     <div className="flex min-h-screen flex-col bg-surface-dark text-ink font-sans selection:bg-mauve/30">

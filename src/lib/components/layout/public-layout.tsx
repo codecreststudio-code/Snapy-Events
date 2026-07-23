@@ -299,19 +299,19 @@ export function PublicFooter() {
         </div>
 
         {/* Main Footer Grid */}
-        <div className="mb-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
+        <div className="mb-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 text-left">
 
-          {/* Column 1: Brand & Logo (Col-span 2 on lg) */}
+          {/* Column 1: Brand & Logo */}
           <div className="col-span-1 sm:col-span-2 lg:col-span-1 flex flex-col items-start text-left">
             <div className="shrink-0 flex items-center justify-start mb-4">
               <img
                 src="/Logo.png"
                 alt="Snapsy Events Logo"
-                className="h-16 w-auto object-contain"
+                className="h-14 w-auto object-contain"
               />
             </div>
             <p className="text-ink-secondary text-xs leading-relaxed mb-4 font-light">
-              Snapsy Events provides an app-free live photo sharing experience for weddings, corporate summits, and celebrations with QR code scanning and instant AI face search.
+              The modern disposable camera & live photo sharing experience for events, weddings, and parties. Powered by Snapsy Events.
             </p>
             <div className="flex space-x-2 justify-start items-center">
               <a
@@ -347,159 +347,90 @@ export function PublicFooter() {
 
           {/* Column 2: USE CASES */}
           <div>
-            <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-ink">Use Cases</h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/use-cases/weddings" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Weddings
-                </Link>
-              </li>
-              <li>
-                <Link href="/use-cases/wedding-photo-sharing" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Wedding Photo Sharing
-                </Link>
-              </li>
-              <li>
-                <Link href="/use-cases/disposable-camera-alternative" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Disposable Camera Alternative
-                </Link>
-              </li>
-              <li>
-                <Link href="/use-cases/corporate-events" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Corporate Events
-                </Link>
-              </li>
-              <li>
-                <Link href="/use-cases/parties-and-celebrations" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Parties & Celebrations
-                </Link>
-              </li>
-              <li>
-                <Link href="/use-cases/birthdays" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Birthdays
-                </Link>
-              </li>
-              <li>
-                <Link href="/use-cases/baby-showers" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Baby Showers
-                </Link>
-              </li>
-              <li>
-                <Link href="/use-cases/graduations" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Graduations
-                </Link>
-              </li>
+            <h4 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-ink">Use Cases</h4>
+            <div className="text-[9px] font-extrabold uppercase text-mauve tracking-wider mb-2">Weddings</div>
+            <ul className="space-y-1.5 text-xs font-light mb-4">
+              <li><Link href="/use-cases/weddings" className="text-ink-secondary hover:text-mauve transition-colors">Weddings</Link></li>
+              <li><Link href="/use-cases/wedding-photo-app" className="text-ink-secondary hover:text-mauve transition-colors">Wedding Photo App</Link></li>
+              <li><Link href="/use-cases/wedding-disposable-cameras" className="text-ink-secondary hover:text-mauve transition-colors">Wedding Disposable Cameras</Link></li>
+              <li><Link href="/use-cases/wedding-qr-code" className="text-ink-secondary hover:text-mauve transition-colors">Wedding QR Code</Link></li>
+              <li><Link href="/use-cases/wedding-photo-sharing" className="text-ink-secondary hover:text-mauve transition-colors">Wedding Photo Sharing</Link></li>
+              <li><Link href="/use-cases/photography-ideas" className="text-ink-secondary hover:text-mauve transition-colors">Photography Ideas</Link></li>
+              <li><Link href="/use-cases/destination-weddings" className="text-ink-secondary hover:text-mauve transition-colors">Destination Weddings</Link></li>
+            </ul>
+            <div className="text-[9px] font-extrabold uppercase text-mauve tracking-wider mb-2">Events</div>
+            <ul className="space-y-1.5 text-xs font-light">
+              <li><Link href="/use-cases/parties-and-celebrations" className="text-ink-secondary hover:text-mauve transition-colors">Parties</Link></li>
+              <li><Link href="/use-cases/corporate-events" className="text-ink-secondary hover:text-mauve transition-colors">Corporate Events</Link></li>
+              <li><Link href="/use-cases/corporate-photo-booth" className="text-ink-secondary hover:text-mauve transition-colors">Corporate Photo Booth</Link></li>
+              <li><Link href="/use-cases/event-camera-app" className="text-ink-secondary hover:text-mauve transition-colors">Event Camera App</Link></li>
+              <li><Link href="/use-cases/birthdays" className="text-ink-secondary hover:text-mauve transition-colors">Birthdays</Link></li>
+              <li><Link href="/use-cases/baby-showers" className="text-ink-secondary hover:text-mauve transition-colors">Baby Showers</Link></li>
+              <li><Link href="/use-cases/graduations" className="text-ink-secondary hover:text-mauve transition-colors">Graduations</Link></li>
             </ul>
           </div>
 
           {/* Column 3: PRODUCT & RESOURCES */}
           <div>
-            <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-ink">Product</h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/features" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Features Overview
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Pricing Plans
-                </Link>
-              </li>
-              <li>
-                <Link href="/use-cases/photo-booth-alternative" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Photo Booth Alternative
-                </Link>
-              </li>
-              <li>
-                <Link href="/use-cases/digital-guest-book" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Digital Guest Book
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Blog & Photography Guides
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  About Snapsy Events
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  FAQs
-                </Link>
-              </li>
+            <h4 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-ink">Product</h4>
+            <ul className="space-y-1.5 text-xs font-light mb-4">
+              <li><Link href="/#how-it-works" className="text-ink-secondary hover:text-mauve transition-colors">How It Works</Link></li>
+              <li><Link href="/use-cases/ios-app" className="text-ink-secondary hover:text-mauve transition-colors">iOS App</Link></li>
+              <li><Link href="/use-cases/android-app" className="text-ink-secondary hover:text-mauve transition-colors">Android App</Link></li>
+              <li><Link href="/use-cases/disposable-camera-alternative" className="text-ink-secondary hover:text-mauve transition-colors">Disposable Camera App</Link></li>
+              <li><Link href="/use-cases/digital-disposable-camera" className="text-ink-secondary hover:text-mauve transition-colors">Digital Disposable Camera</Link></li>
+              <li><Link href="/use-cases/photo-booth-alternative" className="text-ink-secondary hover:text-mauve transition-colors">Photo Booth Alternative</Link></li>
+            </ul>
+            <div className="text-[9px] font-extrabold uppercase text-mauve tracking-wider mb-2">Guest Books</div>
+            <ul className="space-y-1.5 text-xs font-light mb-4">
+              <li><Link href="/use-cases/guest-book-ideas" className="text-ink-secondary hover:text-mauve transition-colors">Guest Book Ideas</Link></li>
+              <li><Link href="/use-cases/photo-guest-book" className="text-ink-secondary hover:text-mauve transition-colors">Photo Guest Book</Link></li>
+              <li><Link href="/use-cases/digital-guest-book" className="text-ink-secondary hover:text-mauve transition-colors">Digital Guest Book</Link></li>
+            </ul>
+            <div className="text-[9px] font-extrabold uppercase text-mauve tracking-wider mb-2">Sharing</div>
+            <ul className="space-y-1.5 text-xs font-light mb-4">
+              <li><Link href="/use-cases/share-pictures" className="text-ink-secondary hover:text-mauve transition-colors">Share Pictures</Link></li>
+              <li><Link href="/use-cases/share-with-family" className="text-ink-secondary hover:text-mauve transition-colors">Share with Family</Link></li>
+            </ul>
+            <div className="text-[9px] font-extrabold uppercase text-mauve tracking-wider mb-2">Resources</div>
+            <ul className="space-y-1.5 text-xs font-light">
+              <li><Link href="/use-cases/wedding-planning-checklist" className="text-ink-secondary hover:text-mauve transition-colors">Wedding Planning Checklist</Link></li>
+              <li><Link href="/use-cases/wedding-checklist-2026" className="text-ink-secondary hover:text-mauve transition-colors">Wedding Checklist 2026</Link></li>
+              <li><Link href="/use-cases/best-wedding-apps-2026" className="text-ink-secondary hover:text-mauve transition-colors">Best Wedding Apps 2026</Link></li>
+              <li><Link href="/blog" className="text-ink-secondary hover:text-mauve transition-colors">Blog</Link></li>
+              <li><Link href="/about" className="text-ink-secondary hover:text-mauve transition-colors">About</Link></li>
             </ul>
           </div>
 
-          {/* Column 4: COMPARE */}
+          {/* Column 4: COMPARE & REVIEWS */}
           <div>
-            <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-ink">Compare</h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/compare/all-alternatives" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  All Alternatives
-                </Link>
-              </li>
-              <li>
-                <Link href="/compare/vs-pov-camera" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Snapsy vs POV Camera
-                </Link>
-              </li>
-              <li>
-                <Link href="/compare/vs-guestpix" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Snapsy vs GuestPix
-                </Link>
-              </li>
-              <li>
-                <Link href="/compare/vs-weduploader" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Snapsy vs WedUploader
-                </Link>
-              </li>
-              <li>
-                <Link href="/compare/vs-once-film" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Snapsy vs Once Film
-                </Link>
-              </li>
-              <li>
-                <Link href="/compare/vs-disposable-cameras" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Snapsy vs Disposable Cameras
-                </Link>
-              </li>
+            <h4 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-ink">Compare</h4>
+            <ul className="space-y-1.5 text-xs font-light mb-4">
+              <li><Link href="/compare/all-alternatives" className="text-ink-secondary hover:text-mauve transition-colors">All Alternatives</Link></li>
+              <li><Link href="/compare/best-camera-apps-2026" className="text-ink-secondary hover:text-mauve transition-colors">Best Camera Apps 2026</Link></li>
+              <li><Link href="/compare/vs-pov-camera" className="text-ink-secondary hover:text-mauve transition-colors">vs POV Camera</Link></li>
+              <li><Link href="/compare/vs-once-film" className="text-ink-secondary hover:text-mauve transition-colors">vs Once Film</Link></li>
+              <li><Link href="/compare/vs-lense" className="text-ink-secondary hover:text-mauve transition-colors">vs Lense</Link></li>
+              <li><Link href="/compare/vs-weduploader" className="text-ink-secondary hover:text-mauve transition-colors">vs WedUploader</Link></li>
+              <li><Link href="/compare/vs-guestpix" className="text-ink-secondary hover:text-mauve transition-colors">vs GuestPix</Link></li>
+            </ul>
+            <div className="text-[9px] font-extrabold uppercase text-mauve tracking-wider mb-2">Reviews</div>
+            <ul className="space-y-1.5 text-xs font-light">
+              <li><Link href="/compare/pov-camera-review" className="text-ink-secondary hover:text-mauve transition-colors">POV Camera Review</Link></li>
+              <li><Link href="/compare/once-film-review" className="text-ink-secondary hover:text-mauve transition-colors">Once Film Review</Link></li>
+              <li><Link href="/compare/lense-review" className="text-ink-secondary hover:text-mauve transition-colors">Lense Review</Link></li>
+              <li><Link href="/compare/pov-camera-vs-once-film" className="text-ink-secondary hover:text-mauve transition-colors">POV Camera vs Once Film</Link></li>
             </ul>
           </div>
 
-          {/* Column 5: LEGAL & SUPPORT */}
+          {/* Column 5: LEGAL */}
           <div>
-            <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-ink">Legal & Support</h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/privacy" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link href="/refund-policy" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Refund Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Support & Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/delete-data" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
-                  Delete My Data
-                </Link>
-              </li>
+            <h4 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-ink">Legal</h4>
+            <ul className="space-y-1.5 text-xs font-light">
+              <li><Link href="/privacy" className="text-ink-secondary hover:text-mauve transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="text-ink-secondary hover:text-mauve transition-colors">Terms of Service</Link></li>
+              <li><Link href="/contact" className="text-ink-secondary hover:text-mauve transition-colors">Support</Link></li>
+              <li><Link href="/delete-data" className="text-ink-secondary hover:text-mauve transition-colors">Delete Data</Link></li>
             </ul>
           </div>
 
