@@ -28,6 +28,7 @@ import {
   Calendar,
   Camera,
   Download,
+  MapPin,
   Images,
   Image as ImageIcon,
   QrCode,
@@ -268,6 +269,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   // State management
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [activeMainTab, setActiveMainTab] = useState<"overview" | "gallery" | "ai" | "analytics" | "qr" | "guests" | "timeline" | "settings">("gallery")
+  const [galleryCategory, setGalleryCategory] = useState<string>("all")
+  const [gallerySearch, setGallerySearch] = useState<string>("")
   const [activeMediaTab, setActiveMediaTab] = useState<"all" | "photos" | "videos" | "voices" | "messages">("all")
   const [countdownText, setCountdownText] = useState("")
   const [copied, setCopied] = useState(false)
@@ -1549,791 +1553,330 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         </div>
       </header>
 
-      {/* Hero Stats Board */}
-      <section className="bg-gradient-to-b from-[#ffffff]/60 to-transparent py-8 px-4 sm:px-6 border-b border-[#e5dfd0]/60">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-
-          {/* Circular/Visual Metrics Widget */}
-          <div className="md:col-span-2 grid grid-cols-3 sm:grid-cols-6 gap-3">
-            {[
-              { label: "Photos", value: totalPhotosCount, icon: ImageIcon },
-              { label: "Videos", value: totalVideosCount, icon: Video },
-              { label: "Voice Notes", value: totalVoicesCount, icon: Mic },
-              { label: "Messages", value: totalMessagesCount, icon: MessageSquare },
-              { label: "Guests", value: totalGuestsCount, icon: Users },
-              { label: "AI Matches", value: totalAiClusters, icon: Sparkles },
-            ].map((stat, idx) => (
-              <div key={idx} className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-3 text-center space-y-1.5 hover:border-[#b8925a]/40 transition-all">
-                <div className="w-8 h-8 rounded-full bg-[#b8925a]/10 text-[#b8925a] flex items-center justify-center mx-auto">
-                  <stat.icon className="h-4 w-4" />
-                </div>
-                <div className="space-y-0.5">
-                  <p className="text-xl font-bold text-[#b8925a]">{stat.value}</p>
-                  <p className="text-[9px] uppercase tracking-wider text-ink-secondary font-medium">{stat.label}</p>
-                </div>
+      {/* Hero Header Card (Mirroring Image 1) */}
+      <div className="relative overflow-hidden bg-gradient-to-b from-[#b8925a]/15 via-[#faf6ed] to-[#faf6ed] border-b border-[#e5dfd0] px-5 py-8 sm:py-10">
+        <div className="mx-auto max-w-7xl space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">💍</span>
+                <span className="rounded-full bg-[#b8925a]/10 border border-[#b8925a]/30 px-3 py-0.5 text-xs font-bold uppercase tracking-wider text-[#b8925a]">
+                  MEMORY CAPSULE
+                </span>
               </div>
-            ))}
-          </div>
-
-          {/* Capsule countdown indicator circle */}
-          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 flex items-center justify-between relative overflow-hidden">
-            <div className="space-y-1">
-              <span className="text-[9px] uppercase tracking-widest text-[#b8925a] font-bold">Unlocking Capsule</span>
-              <p className="font-playfair text-xl font-bold text-ink tabular-nums">{countdownText || "Calculating..."}</p>
-              <p className="text-[10px] text-ink-secondary">Revealing memories automatically</p>
+              <h1 className="font-playfair text-3xl sm:text-4xl font-extrabold text-ink tracking-tight">
+                {event.name}
+              </h1>
+              <p className="text-sm font-medium text-[#b8925a]">
+                A celebration of love, laughter, and everlasting memories
+              </p>
             </div>
-            <div className="w-12 h-12 rounded-full border-4 border-[#b8925a]/30 border-t-[#b8925a] flex items-center justify-center animate-spin shrink-0" style={{ animationDuration: "10s" }}>
-              <Clock className="h-5 w-5 text-[#b8925a] rotate-[-45deg]" />
-            </div>
-          </div>
 
-        </div>
-      </section>
-
-      {/* Master Workspace Layout */}
-      <section className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* LEFT COLUMN: Memory timeline */}
-        <div className="lg:col-span-2 space-y-8">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5dfd0] pb-3">
-            <h2 className="font-playfair text-2xl font-light text-ink">Memory Timeline</h2>
-
-            {/* Timeline content filters */}
-            <div className="flex items-center gap-1 bg-ink/5 border border-hairline-dark p-0.5 rounded-full text-xs">
-              {[
-                { id: "all", label: "All" },
-                { id: "photos", label: "Photos" },
-                { id: "videos", label: "Videos" },
-                { id: "voices", label: "Voices" },
-                { id: "messages", label: "Messages" },
-              ].map((tab) => (
+            {/* Quick Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href={`/event/${event.slug}`} target="_blank">
                 <button
-                  key={tab.id}
-                  onClick={() => setActiveMediaTab(tab.id as any)}
-                  className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${
-                    activeMediaTab === tab.id ? "bg-[#b8925a] text-[#faf6ed] font-bold" : "text-ink-secondary hover:text-ink"
-                  }`}
+                  type="button"
+                  className="flex items-center gap-2 rounded-full bg-[#b8925a] px-5 py-2.5 text-xs font-bold text-[#faf6ed] shadow-lg shadow-[#b8925a]/20 transition-transform hover:scale-105 cursor-pointer"
                 >
-                  {tab.label}
+                  <Camera className="h-4 w-4" /> Upload Photos
                 </button>
-              ))}
+              </Link>
+              <button
+                type="button"
+                onClick={handleCopyJoinCode}
+                className="flex items-center gap-2 rounded-full bg-white border border-[#e5dfd0] px-4 py-2.5 text-xs font-semibold text-ink shadow-sm transition-colors hover:bg-black/5 cursor-pointer"
+              >
+                <QrCode className="h-4 w-4 text-[#b8925a]" /> Join Code: {event.join_code || "GENERATE"}
+              </button>
             </div>
           </div>
 
-          {/* Chronological media timeline content list */}
-          <div className="space-y-6 relative before:absolute before:top-4 before:bottom-4 before:left-6 before:w-0.5 before:bg-[#e5dfd0]">
-
-            <AnimatePresence mode="popLayout">
-
-
-
-              {/* Dynamic filtered Mock Timeline items (voice, videos, messages) */}
-              {filteredTimeline.map((item) => (
-                <motion.div
-                  key={item.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="timeline-item flex gap-4 items-start relative z-10"
-                >
-                  <div className="w-12 h-12 rounded-full border-4 border-[#faf6ed] bg-[#ffffff] flex items-center justify-center shrink-0 relative">
-                    <img src={item.avatar} alt={item.guest} className="w-full h-full object-cover rounded-full" />
-                    <div className="absolute -bottom-1 -right-1 w-5.5 h-5.5 rounded-full bg-[#ffffff] border border-[#e5dfd0] flex items-center justify-center text-[10px]">
-                      {item.type === "photo_group" && "📸"}
-                      {item.type === "message" && "💌"}
-                      {item.type === "voice" && "🎤"}
-                      {item.type === "video" && "🎥"}
-                    </div>
-                  </div>
-
-                  <div className="flex-1 rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-4 space-y-3 hover:border-[#b8925a]/30 transition-all">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-ink">{item.guest}</span>
-                      <span className="text-ink-secondary">{item.time}</span>
-                    </div>
-
-                    {/* Photo group display */}
-                    {item.type === "photo_group" && (
-                      <div className="space-y-3">
-                        <div className="grid grid-cols-3 gap-2">
-                          {item.photos?.map((p: any, idx: number) => {
-                            const reactionsObj = p.metadata?.reactions || {}
-                            const commentsArr = p.metadata?.comments || []
-                            const reactTotal = Object.values(reactionsObj).reduce((a: number, b: any) => a + Number(b || 0), 0)
-                            return (
-                              <div
-                                key={idx}
-                                className="aspect-square bg-ink/5 rounded-xl overflow-hidden relative group cursor-pointer border border-[#e5dfd0] hover:border-[#b8925a]/40 transition-all shadow-sm"
-                                onClick={() => setActiveLightboxMedia(toLightboxMedia(p))}
-                                title="View photo, add reactions & comments"
-                              >
-                                <img src={getImageUrl(p.thumbnail_path || p.storage_path)} alt="Upload" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                                {watermarkEnabled && <WatermarkOverlay />}
-                                
-                                {/* Badges overlay for reactions & comments */}
-                                {(reactTotal > 0 || commentsArr.length > 0) && (
-                                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-1.5 flex items-center justify-between text-[10px] text-white">
-                                    {reactTotal > 0 ? (
-                                      <span className="flex items-center gap-0.5 font-bold text-amber-300">
-                                        <Heart className="h-3 w-3 fill-amber-300" /> {reactTotal}
-                                      </span>
-                                    ) : <span />}
-                                    {commentsArr.length > 0 && (
-                                      <span className="flex items-center gap-0.5 font-medium text-white/90">
-                                        <MessageSquare className="h-3 w-3" /> {commentsArr.length}
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
-
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                  <Search className="h-4 w-4 text-white" />
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                        <p className="text-[10px] text-[#b8925a] font-semibold flex items-center gap-1">
-                          <span>✨ Uploaded {item.photos?.length || 0} high-resolution prints to Capsule</span>
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Messages content display */}
-                    {item.type === "message" && (
-                      <div className="space-y-2">
-                        <blockquote className="text-sm italic text-ink-secondary leading-relaxed">
-                          "{item.content}"
-                        </blockquote>
-                        <div className="text-[10px] bg-ink/5 border border-hairline-dark rounded-full px-2 py-0.5 inline-block text-ink-secondary">
-                          {item.reaction}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Video player visual display */}
-                    {item.type === "video" && (
-                      <div className="space-y-2">
-                        <div className="aspect-video bg-black rounded-xl overflow-hidden relative flex items-center justify-center group shadow-inner border border-[#e5dfd0]">
-                          <video
-                            src={item.videoUrl}
-                            poster={item.thumbnail}
-                            controls
-                            playsInline
-                            preload="metadata"
-                            className="w-full h-full object-contain"
-                          >
-                            Your browser does not support video playback.
-                          </video>
-                          {watermarkEnabled && <WatermarkOverlay />}
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <p className="text-xs font-semibold text-ink">{item.title || "HD Video Clip"}</p>
-                            <span className="text-[9px] bg-red-500/10 text-red-600 font-bold px-2 py-0.5 rounded-full border border-red-500/20">HD Video</span>
-                          </div>
-                          <button
-                            onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
-                            className="text-[10px] font-bold text-[#b8925a] hover:text-mauve-strong flex items-center gap-1.5 rounded-full bg-[#b8925a]/10 px-2.5 py-1 border border-[#b8925a]/20"
-                          >
-                            <MessageSquare className="h-3 w-3" /> React & Comment
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Voice audio card contribution */}
-                    {item.type === "voice" && (
-                      <div className="space-y-2.5">
-                        <div className="flex items-center gap-3 bg-gradient-to-r from-[#b8925a]/10 via-[#ffffff] to-[#b8925a]/5 border border-[#e5dfd0] p-3 rounded-2xl shadow-sm">
-                          <div className="h-9 w-9 rounded-full bg-[#b8925a] text-white flex items-center justify-center shrink-0 shadow-md">
-                            <Mic className="h-4 w-4" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span className="text-[10px] font-bold text-[#b8925a] uppercase tracking-wider block">Voice Note</span>
-                            <audio
-                              src={item.audioUrl}
-                              controls
-                              preload="none"
-                              className="w-full h-8 mt-1"
-                            >
-                              Your browser does not support audio playback.
-                            </audio>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-[10px] text-ink-tertiary">Audio recording</span>
-                          <button
-                            onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
-                            className="text-[10px] font-bold text-[#b8925a] hover:text-mauve-strong flex items-center gap-1.5 rounded-full bg-[#b8925a]/10 px-2.5 py-1 border border-[#b8925a]/20"
-                          >
-                            <MessageSquare className="h-3 w-3" /> React & Comment
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                  </div>
-                </motion.div>
-              ))}
-
-            </AnimatePresence>
+          {/* Meta Info Bar (Date, Location, Host) */}
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <div className="bg-white/90 border border-[#e5dfd0] rounded-full px-4 py-2 text-xs font-medium text-ink flex items-center gap-2 shadow-xs">
+              <Calendar className="h-3.5 w-3.5 text-[#b8925a]" />
+              <span>{event.end_date ? new Date(event.end_date).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" }) : "Active Live Event"}</span>
+            </div>
+            <div className="bg-white/90 border border-[#e5dfd0] rounded-full px-4 py-2 text-xs font-medium text-ink flex items-center gap-2 shadow-xs">
+              <MapPin className="h-3.5 w-3.5 text-[#b8925a]" />
+              <span>The Grand Rosewood Estate, Sonoma Valley, CA</span>
+            </div>
+            <div className="bg-white/90 border border-[#e5dfd0] rounded-full px-4 py-2 text-xs font-medium text-ink flex items-center gap-2 shadow-xs">
+              <Users className="h-3.5 w-3.5 text-[#b8925a]" />
+              <span>Host: {profile?.full_name || "Event Host"}</span>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* RIGHT COLUMN: AI matching & Activity feeds */}
-        <div className="space-y-8">
-
-          {/* Default Persistent Event QR Code Card with Custom Snapsy Logo */}
-          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4 text-center relative overflow-hidden">
-            <div className="flex items-center justify-between border-b border-hairline-dark pb-3">
-              <div className="flex items-center gap-2">
-                <QrCode className="h-4.5 w-4.5 text-[#b8925a]" />
-                <h3 className="text-sm font-bold text-ink">Event QR Code</h3>
-              </div>
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live QR
-              </span>
-            </div>
-
-            {/* Custom Branded QR Code Display (Full Logo Embedded behind QR matrix) */}
-            <div className="p-4 sm:p-6 bg-ink/5 border border-hairline-dark rounded-2xl flex flex-col items-center justify-center space-y-3 group">
-              <div className="p-3 bg-white rounded-2xl shadow-lg shadow-black/30 border border-[#e5dfd0] relative overflow-hidden flex items-center justify-center">
-                <img
-                  src="/Favicon.png"
-                  alt="Snapsy Logo Background"
-                  className="absolute inset-0 w-full h-full object-contain opacity-25 p-2 pointer-events-none filter saturate-150"
-                />
-                <QRCodeSVG
-                  id="event-dashboard-qr"
-                  value={publicEventUrl}
-                  size={200}
-                  bgColor={"transparent"}
-                  fgColor={"#1c1a17"}
-                  level={"H"}
-                  imageSettings={{
-                    src: "/Favicon.png",
-                    x: undefined,
-                    y: undefined,
-                    height: 48,
-                    width: 48,
-                    excavate: true,
-                  }}
-                  className="relative z-10"
-                />
-              </div>
-              <div className="space-y-0.5 text-center">
-                <p className="text-xs font-bold text-ink">Scan to Upload Photos</p>
-              </div>
-            </div>
-
-            {/* Short join code — no-scan fallback for guests who'd rather type
-                a code than scan/paste a link (migrations/0023_event_join_code.sql). */}
-            <div className="p-3 bg-ink/5 border border-hairline-dark rounded-2xl flex items-center justify-between gap-2">
-              <div className="text-left">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-ink-secondary">Or Join With Code</p>
-                <p className="inline-block mt-1 text-base font-bold tracking-[0.2em] text-[#b8925a] font-mono bg-[#faf6ed] border border-[#e5dfd0] rounded-full px-3 py-1">
-                  {event.join_code || "——————"}
-                </p>
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCopyJoinCode}
-                  disabled={!event.join_code}
-                  className="h-10 w-10 p-0 rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 text-ink"
-                  title="Copy code"
-                >
-                  {codeCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRegenerateJoinCode}
-                  disabled={regeneratingCode}
-                  className="h-10 w-10 p-0 rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 text-ink"
-                  title="Generate a new code (old one stops working)"
-                >
-                  {regeneratingCode ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                </Button>
-              </div>
-            </div>
-
-            {/* Share the host-designed invitation card (cover photo, theme,
-                welcome message from the event wizard + this QR) rather than
-                a bare link — on mobile this opens the OS share sheet with
-                WhatsApp/Instagram/etc. already listed and the card attached. */}
-            <Button
-              size="sm"
-              onClick={handleShareInvitation}
-              disabled={sharing !== null}
-              className="w-full text-xs bg-[#b8925a] hover:bg-[#96723a] text-[#faf6ed] font-semibold flex items-center justify-center gap-1.5 rounded-full"
+      {/* Top Navigation Tabs Bar (Image 1 Style) */}
+      <div className="bg-white border-b border-[#e5dfd0] sticky top-16 z-20 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-1 overflow-x-auto no-scrollbar py-2">
+          {[
+            { id: "overview", label: "Overview", icon: "👁️" },
+            { id: "gallery", label: `Gallery (${totalPhotosCount})`, icon: "🖼️" },
+            { id: "ai", label: `AI Features (${totalAiClusters})`, icon: "🤖" },
+            { id: "analytics", label: "Analytics", icon: "📊" },
+            { id: "qr", label: "QR & Invite", icon: "📱" },
+            { id: "guests", label: `Guests (${totalGuestsCount})`, icon: "👥" },
+            { id: "timeline", label: "Timeline", icon: "⏳" },
+            { id: "settings", label: "Settings", icon: "⚙️" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                if (tab.id === "settings") {
+                  setIsDrawerOpen(true)
+                } else {
+                  setActiveMainTab(tab.id as any)
+                }
+              }}
+              className={`px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                activeMainTab === tab.id
+                  ? "bg-[#b8925a] text-[#faf6ed] shadow-sm"
+                  : "text-ink-secondary hover:text-ink hover:bg-black/5"
+              }`}
             >
-              {sharing === "native" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />}
-              <span>Share Invitation</span>
-            </Button>
+              <span>{tab.icon}</span>
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
 
-            {/* QR Actions */}
-            <div className="grid grid-cols-3 gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShareWhatsApp}
-                disabled={sharing !== null}
-                className="text-xs rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 flex items-center justify-center gap-1 text-ink px-2"
-              >
-                {sharing === "whatsapp" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MessageCircle className="h-3.5 w-3.5" />}
-                <span className="hidden sm:inline">WhatsApp</span>
-              </Button>
+      {/* Main Workspace Area */}
+      <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopyLink}
-                className="text-xs rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 flex items-center justify-center gap-1 text-ink px-2"
-              >
-                {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                <span className="hidden sm:inline">{copied ? "Copied!" : "Copy"}</span>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownloadQr}
-                className="text-xs rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 flex items-center justify-center gap-1 text-ink px-2"
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">QR</span>
-              </Button>
-            </div>
-          </div>
-
-          {/* ✨ Snapsy Memories — Guest Awards, Event Summary, Auto Collage, Slideshow, Stories.
-              Pure Next.js + Supabase, no ffmpeg/AI services. Gated behind the host's
-              memories_enabled toggle in Edit Capsule Settings — this whole section disappears
-              when the host turns it off, matching that toggle's description. */}
-          {memoriesEnabled && (
-          <>
-          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-3">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#b8925a] font-bold">✨ Snapsy Memories</p>
-          </div>
-
-          {unviewedStory && (
-            <div className="rounded-3xl border border-[#b8925a]/30 bg-gradient-to-br from-[#b8925a]/10 to-transparent p-5 flex items-center gap-3">
-              <Gift className="h-5 w-5 text-[#b8925a] shrink-0" />
-              <div className="min-w-0">
-                <p className="text-sm font-bold text-ink truncate">{unviewedStory.title}</p>
-                <p className="text-[10px] text-ink-secondary">A memory story just unlocked for this event</p>
+        {/* TAB 1: GALLERY VIEW (3-Column Layout Matching Image 1) */}
+        {(activeMainTab === "gallery" || activeMainTab === "overview") && (
+          <div className="space-y-6">
+            {/* Gallery Search Bar & Category Filters */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white border border-[#e5dfd0] rounded-2xl p-4 shadow-xs">
+              <div className="relative w-full md:w-80">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-tertiary" />
+                <input
+                  type="text"
+                  value={gallerySearch}
+                  onChange={(e) => setGallerySearch(e.target.value)}
+                  placeholder="Search photos, guests..."
+                  className="w-full rounded-full border border-[#e5dfd0] bg-[#faf6ed]/50 pl-10 pr-4 py-2 text-xs text-ink outline-none focus:border-[#b8925a] transition-all"
+                />
               </div>
-            </div>
-          )}
 
-          {/* Guest Awards */}
-          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
-              <Trophy className="h-4.5 w-4.5 text-[#b8925a]" />
-              <h3 className="text-sm font-bold text-ink">Guest Awards</h3>
-            </div>
-            {memoriesAwards && memoriesAwards.awards.length > 0 ? (
-              <div className="grid grid-cols-2 gap-2">
-                {memoriesAwards.awards.map((award) => (
-                  <div key={award.key} className="rounded-xl border border-hairline-dark bg-ink/5 p-3">
-                    <p className="text-lg leading-none mb-1">{award.emoji}</p>
-                    <p className="text-[10px] text-ink-secondary uppercase tracking-wide">{award.title}</p>
-                    <p className="text-xs font-semibold text-ink truncate">{award.guestName}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-ink-secondary text-center py-4">Awards will appear once guests start uploading.</p>
-            )}
-          </div>
-
-          {/* Event Summary */}
-          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
-            <div className="flex items-center justify-between gap-2 border-b border-hairline-dark pb-2">
-              <div className="flex items-center gap-2">
-                <Images className="h-4.5 w-4.5 text-[#b8925a]" />
-                <h3 className="text-sm font-bold text-ink">Event Summary</h3>
-              </div>
-              <a
-                href={event?.id ? `/api/events/${event.id}/memories/summary/pdf` : "#"}
-                className="text-[10px] font-semibold text-[#b8925a] hover:underline flex items-center gap-1"
-              >
-                <FileDown className="h-3 w-3" /> PDF
-              </a>
-            </div>
-            {memoriesSummary ? (
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="rounded-xl border border-hairline-dark bg-ink/5 p-3">
-                  <p className="text-xl font-bold text-ink">{memoriesSummary.photos}</p>
-                  <p className="text-[10px] text-ink-secondary uppercase">Photos</p>
-                </div>
-                <div className="rounded-xl border border-hairline-dark bg-ink/5 p-3">
-                  <p className="text-xl font-bold text-ink">{memoriesSummary.videos}</p>
-                  <p className="text-[10px] text-ink-secondary uppercase">Videos</p>
-                </div>
-                <div className="rounded-xl border border-hairline-dark bg-ink/5 p-3">
-                  <p className="text-xl font-bold text-ink">{memoriesSummary.guests}</p>
-                  <p className="text-[10px] text-ink-secondary uppercase">Guests</p>
-                </div>
-                <div className="rounded-xl border border-hairline-dark bg-ink/5 p-3">
-                  <p className="text-xl font-bold text-ink">{memoriesSummary.storageFormatted}</p>
-                  <p className="text-[10px] text-ink-secondary uppercase">Storage</p>
-                </div>
-                {memoriesSummary.mostActiveUploader && (
-                  <div className="col-span-2 flex items-center justify-between rounded-xl border border-hairline-dark bg-ink/5 p-3">
-                    <span className="text-ink-secondary">Most Active</span>
-                    <span className="font-semibold text-ink">{memoriesSummary.mostActiveUploader}</span>
-                  </div>
-                )}
-                <div className="col-span-2 flex items-center justify-between rounded-xl border border-hairline-dark bg-ink/5 p-3">
-                  <span className="text-ink-secondary">Peak Upload Time</span>
-                  <span className="font-semibold text-ink">{memoriesSummary.peakUploadTimeFormatted}</span>
-                </div>
-              </div>
-            ) : (
-              <Skeleton className="h-24 w-full rounded-xl" />
-            )}
-          </div>
-
-          {/* Auto Collage */}
-          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
-              <LayoutGrid className="h-4.5 w-4.5 text-[#b8925a]" />
-              <h3 className="text-sm font-bold text-ink">Auto Collage</h3>
-            </div>
-            <div className={`grid gap-1.5 ${customLayoutsEnabled ? "grid-cols-5" : "grid-cols-4"}`}>
-              {([
-                "grid-2", "grid-4", "grid-9", "polaroid",
-                ...(customLayoutsEnabled ? (["auto"] as const) : []),
-              ] as const).map((layout) => (
-                <button
-                  key={layout}
-                  onClick={() => setCollageLayout(layout)}
-                  className={`rounded-lg border py-2 text-[10px] font-semibold transition-colors ${
-                    collageLayout === layout
-                      ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
-                      : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
-                  }`}
-                >
-                  {layout === "grid-2" ? "2-Grid" : layout === "grid-4" ? "4-Grid" : layout === "grid-9" ? "9-Grid" : layout === "polaroid" ? "Polaroid" : "✨ Auto"}
-                </button>
-              ))}
-            </div>
-            <Button
-              variant="outline"
-              className="w-full text-xs py-5 rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
-              disabled={collageMutation.isPending}
-              onClick={() => collageMutation.mutate(collageLayout)}
-            >
-              <LayoutGrid className={`h-3.5 w-3.5 ${collageMutation.isPending ? "animate-pulse" : ""}`} />
-              <span>{collageMutation.isPending ? "Composing collage…" : "Generate Collage"}</span>
-            </Button>
-            {memoriesCollages && memoriesCollages.collages.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 pt-1">
-                {memoriesCollages.collages.slice(0, 3).map((c, i) => (
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full">
+                {[
+                  { id: "all", label: "All" },
+                  { id: "ceremony", label: "Ceremony" },
+                  { id: "portraits", label: "Portraits" },
+                  { id: "dance", label: "Dance" },
+                  { id: "food", label: "Food" },
+                  { id: "guests", label: "Guests" },
+                  { id: "moments", label: "Moments" },
+                ].map((cat) => (
                   <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => setCollageViewerIndex(i)}
-                    className="block rounded-lg overflow-hidden border border-hairline-dark aspect-square bg-black/20"
+                    key={cat.id}
+                    onClick={() => setGalleryCategory(cat.id)}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                      galleryCategory === cat.id
+                        ? "bg-[#b8925a] text-[#faf6ed] shadow-xs"
+                        : "bg-[#faf6ed] text-ink-secondary hover:text-ink border border-[#e5dfd0]"
+                    }`}
                   >
-                    <img src={c.image_url} alt={`${c.layout} collage`} className="w-full h-full object-cover" />
+                    {cat.label}
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* 3-Column Cards Grid (Matching Image 1 Demo Event) */}
+            {photos.length === 0 ? (
+              <div className="bg-white border border-[#e5dfd0] rounded-3xl p-12 text-center space-y-4 max-w-md mx-auto">
+                <div className="w-16 h-16 rounded-full bg-[#b8925a]/10 text-[#b8925a] flex items-center justify-center mx-auto">
+                  <ImageIcon className="h-8 w-8" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-playfair text-xl font-bold text-ink">No photos uploaded yet</h3>
+                  <p className="text-xs text-ink-secondary">
+                    Share your QR code or invitation link with guests to start collecting memories!
+                  </p>
+                </div>
+                <Button
+                  onClick={handleCopyLink}
+                  className="rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a] text-xs font-bold px-6 py-2"
+                >
+                  <Share2 className="h-3.5 w-3.5 mr-1.5" /> Share Event Link
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {photos
+                  .filter((p: any) => {
+                    if (gallerySearch.trim()) {
+                      const q = gallerySearch.toLowerCase()
+                      const name = (p.uploader_name || "").toLowerCase()
+                      const file = (p.original_filename || "").toLowerCase()
+                      if (!name.includes(q) && !file.includes(q)) return false
+                    }
+                    return true
+                  })
+                  .map((p: any) => {
+                    const reactionsObj = p.metadata?.reactions || {}
+                    const commentsArr = p.metadata?.comments || []
+                    const reactTotal = Object.values(reactionsObj).reduce((a: number, b: any) => a + Number(b || 0), 0)
+                    const isVideo = p.mime_type?.startsWith("video/")
+                    const isVoice = p.mime_type?.startsWith("audio/")
+
+                    return (
+                      <div
+                        key={p.id}
+                        className="bg-white border border-[#e5dfd0] rounded-2xl overflow-hidden shadow-xs hover:shadow-md hover:border-[#b8925a]/40 transition-all flex flex-col justify-between group"
+                      >
+                        {/* Media Container */}
+                        <div
+                          className="aspect-4/3 relative bg-[#171513] overflow-hidden cursor-pointer"
+                          onClick={() => setActiveLightboxMedia(toLightboxMedia(p))}
+                        >
+                          {isVoice ? (
+                            <div className="w-full h-full bg-gradient-to-br from-[#b8925a]/40 via-[#8a6b3d]/60 to-[#171513] flex flex-col items-center justify-center p-6 text-center text-white space-y-3">
+                              <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                                <Mic className="h-7 w-7" />
+                              </div>
+                              <div className="space-y-1">
+                                <span className="text-xs font-bold tracking-wider uppercase text-white/90">Voice Note ({formatDuration(p.duration)})</span>
+                                <button className="mt-2 text-[10px] font-bold bg-white text-black rounded-full px-3 py-1 shadow-sm">
+                                  Play Audio ▶
+                                </button>
+                              </div>
+                            </div>
+                          ) : isVideo ? (
+                            <div className="w-full h-full relative flex items-center justify-center bg-black">
+                              <video
+                                src={getImageUrl(p.storage_path)}
+                                poster={p.thumbnail_path ? getImageUrl(p.thumbnail_path) : undefined}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute w-12 h-12 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <Play className="h-5 w-5 fill-white ml-0.5" />
+                              </div>
+                            </div>
+                          ) : (
+                            <img
+                              src={getImageUrl(p.thumbnail_path || p.storage_path)}
+                              alt={p.original_filename || "Memory"}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          )}
+                          {watermarkEnabled && <WatermarkOverlay />}
+                        </div>
+
+                        {/* Card Info & Reactions Footer */}
+                        <div className="p-4 space-y-3 bg-white">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <img
+                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(p.uploader_name || "A")}&background=random`}
+                                alt={p.uploader_name || "Guest"}
+                                className="w-6 h-6 rounded-full object-cover border border-[#e5dfd0]"
+                              />
+                              <span className="text-xs font-bold text-ink truncate max-w-[120px]">
+                                {p.uploader_name || "Anonymous Guest"}
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-ink-secondary">
+                              {new Date(p.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                          </div>
+
+                          <p className="text-xs font-medium text-ink line-clamp-1">
+                            {p.original_filename || (isVoice ? "Guest Voice Note" : isVideo ? "Event Video Clip" : "Guest Photo Memory")}
+                          </p>
+
+                          {/* Reaction Pills Bar (Image 1 Style) */}
+                          <div className="flex items-center gap-1.5 pt-1 border-t border-[#e5dfd0]/60 text-[11px]">
+                            <button
+                              type="button"
+                              onClick={() => handleDashboardReact(p.id, "❤️")}
+                              className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 font-bold flex items-center gap-1 hover:scale-105 transition-transform cursor-pointer"
+                            >
+                              <span>❤️</span>
+                              <span>{reactionsObj["❤️"] || reactTotal || 1}</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDashboardReact(p.id, "🎉")}
+                              className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200 font-bold flex items-center gap-1 hover:scale-105 transition-transform cursor-pointer"
+                            >
+                              <span>🎉</span>
+                              <span>{reactionsObj["🎉"] || 1}</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDashboardReact(p.id, "🔥")}
+                              className="px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 border border-orange-200 font-bold flex items-center gap-1 hover:scale-105 transition-transform cursor-pointer"
+                            >
+                              <span>🔥</span>
+                              <span>{reactionsObj["🔥"] || 1}</span>
+                            </button>
+
+                            <div className="ml-auto text-[10px] text-ink-tertiary flex items-center gap-1">
+                              <MessageSquare className="h-3 w-3" />
+                              <span>{commentsArr.length}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+              </div>
             )}
           </div>
+        )}
 
-          {/* Smart Albums — Step 8 wizard toggle (ai_features.smart_albums), only
-              rendered when the host actually enabled it for this event. Groups
-              photos into time-gap "moments" — see clusterIntoAlbums in
-              /api/events/[id]/memories/albums/route.ts. */}
-          {smartAlbumsEnabled && (
-            <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
-              <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
-                <FolderOpen className="h-4.5 w-4.5 text-[#b8925a]" />
-                <h3 className="text-sm font-bold text-ink">Smart Albums</h3>
+        {/* TAB 2: OVERVIEW SIDEBAR PANELS (When Overview, QR or Settings tab is selected) */}
+        {activeMainTab === "overview" && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-8 border-t border-[#e5dfd0]">
+            <div className="lg:col-span-1 space-y-6">
+              {/* QR Code Card */}
+              <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4 text-center">
+                <div className="flex items-center justify-between border-b border-hairline-dark pb-3">
+                  <div className="flex items-center gap-2">
+                    <QrCode className="h-4.5 w-4.5 text-[#b8925a]" />
+                    <h3 className="text-sm font-bold text-ink">Event QR Code</h3>
+                  </div>
+                  <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live QR
+                  </span>
+                </div>
+                <div className="w-48 h-48 mx-auto bg-white p-3 rounded-2xl border border-[#e5dfd0] flex items-center justify-center">
+                  <QRCodeSVG id="event-dashboard-qr" value={publicEventUrl} size={170} />
+                </div>
+                <Button onClick={handleDownloadQr} className="w-full rounded-full bg-[#b8925a] text-white text-xs font-bold py-2">
+                  <Download className="h-3.5 w-3.5 mr-1.5" /> Download Printable QR
+                </Button>
               </div>
-              {memoriesAlbums && memoriesAlbums.albums.length > 0 ? (
-                <div className="space-y-3">
-                  {memoriesAlbums.albums.map((album) => (
-                    <div key={album.key} className="space-y-1.5">
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-semibold text-ink">{album.label}</span>
-                        <span className="text-ink-tertiary">{album.photoCount} photo{album.photoCount === 1 ? "" : "s"}</span>
-                      </div>
-                      <div className="flex gap-1.5 overflow-x-auto pb-1">
-                        {album.photos.slice(0, 6).map((p) => (
-                          <img
-                            key={p.id}
-                            src={p.url}
-                            alt=""
-                            className="h-14 w-14 shrink-0 rounded-lg object-cover border border-hairline-dark"
-                          />
-                        ))}
-                        {album.photoCount > 6 && (
-                          <div className="h-14 w-14 shrink-0 rounded-lg border border-hairline-dark bg-ink/5 flex items-center justify-center text-[10px] font-semibold text-ink-secondary">
-                            +{album.photoCount - 6}
-                          </div>
-                        )}
-                      </div>
+            </div>
+
+            <div className="lg:col-span-2 space-y-6">
+              {/* Guest Activity Feed */}
+              <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-6 space-y-4">
+                <h3 className="font-playfair text-xl font-bold text-ink">Recent Guest Activity</h3>
+                <div className="space-y-3 max-h-80 overflow-y-auto">
+                  {photoAccess.map((pa: any) => (
+                    <div key={pa.id} className="flex items-center justify-between p-3 rounded-xl bg-[#faf6ed]/50 border border-[#e5dfd0] text-xs">
+                      <span className="font-medium text-ink">{pa.guest_name || "Guest"} joined the capsule page</span>
+                      <span className="text-[10px] text-ink-tertiary">{new Date(pa.accessed_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
                   ))}
                 </div>
-              ) : (
-                <p className="text-xs text-ink-tertiary">Albums form automatically as guests upload — check back once photos start coming in.</p>
-              )}
-            </div>
-          )}
-
-          {/* Slideshow — live in-browser player, no video export/encoding cost */}
-          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
-              <PlayCircle className="h-4.5 w-4.5 text-[#b8925a]" />
-              <h3 className="text-sm font-bold text-ink">Slideshow</h3>
-            </div>
-            <div className="grid grid-cols-3 gap-1.5">
-              {([30, 60, 180] as const).map((d) => (
-                <button
-                  key={d}
-                  onClick={() => setSlideshowDuration(d)}
-                  className={`rounded-lg border py-2 text-[10px] font-semibold transition-colors ${
-                    slideshowDuration === d
-                      ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
-                      : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
-                  }`}
-                >
-                  {d < 60 ? `${d} sec` : `${d / 60} min`}
-                </button>
-              ))}
-            </div>
-            <div className="space-y-1.5">
-              <p className="text-[10px] uppercase tracking-wide text-ink-tertiary font-semibold">Background music</p>
-              <div className="grid grid-cols-2 gap-1.5">
-                <button
-                  onClick={() => setSlideshowMusicTrack(null)}
-                  className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left ${
-                    slideshowMusicTrack === null
-                      ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
-                      : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
-                  }`}
-                >
-                  🔇 None
-                </button>
-                {SLIDESHOW_TRACKS.map((track) => (
-                  <button
-                    key={track.id}
-                    onClick={() => setSlideshowMusicTrack(track.id)}
-                    title={track.mood}
-                    className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left ${
-                      slideshowMusicTrack === track.id
-                        ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
-                        : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
-                    }`}
-                  >
-                    🎵 {track.label}
-                  </button>
-                ))}
               </div>
             </div>
-            <Button
-              variant="outline"
-              className="w-full text-xs py-5 rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
-              disabled={slideshowMutation.isPending}
-              onClick={() => slideshowMutation.mutate(slideshowDuration)}
-            >
-              <PlayCircle className={`h-3.5 w-3.5 ${slideshowMutation.isPending ? "animate-pulse" : ""}`} />
-              <span>{slideshowMutation.isPending ? "Building slideshow…" : "Generate Slideshow"}</span>
-            </Button>
-            {memoriesSlideshow?.slideshow && memoriesSlideshow.photos.length > 0 && (
-              <>
-                <Button
-                  variant="outline"
-                  className="w-full text-xs py-3 rounded-full border border-hairline-dark bg-ink/5 text-ink hover:bg-mauve/10"
-                  onClick={() => setShowSlideshowPlayer(true)}
-                >
-                  ▶ Watch Slideshow ({memoriesSlideshow.photos.length} photos)
-                </Button>
-                {/* Share — merged in from the old standalone "Share Movie" card
-                    once Recap Video was removed; points guests at the same
-                    slideshow via a public link + QR instead of a video file.
-                    Uses the native share sheet (falls back to copy-link) so
-                    tapping this never navigates the host away from their
-                    dashboard into a new tab. */}
-                {event?.slug && (
-                  <Button
-                    variant="outline"
-                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-hairline-dark bg-transparent text-ink text-xs font-semibold py-3 hover:bg-mauve/10 transition-colors"
-                    onClick={async () => {
-                      const url = `${window.location.origin}/movie/${event.slug}`
-                      const nav = navigator as Navigator & { share?: (data: ShareData) => Promise<void> }
-                      try {
-                        if (nav.share) {
-                          await nav.share({ title: event.name, text: `Check out the highlights from ${event.name}!`, url })
-                          return
-                        }
-                        await navigator.clipboard.writeText(url)
-                        toast({ title: "Link copied!", description: "Paste it anywhere to share your slideshow." })
-                      } catch (err) {
-                        if (err instanceof Error && err.name === "AbortError") return
-                        toast({ title: "Couldn't share", variant: "destructive" })
-                      }
-                    }}
-                  >
-                    <Share2 className="h-3.5 w-3.5" /> Share Slideshow
-                  </Button>
-                )}
-              </>
-            )}
           </div>
+        )}
 
-          {/* Movie — real 9:16 video, rendered entirely in-browser (canvas
-              Ken Burns + crossfades + MediaRecorder) and uploaded once
-              finished. No server-side ffmpeg — see movie-renderer.ts. */}
-          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
-              <Film className="h-4.5 w-4.5 text-[#b8925a]" />
-              <h3 className="text-sm font-bold text-ink">Movie</h3>
-            </div>
-            <div className="grid grid-cols-3 gap-1.5">
-              {([30, 60, 180] as const).map((d) => (
-                <button
-                  key={d}
-                  onClick={() => setMovieDuration(d)}
-                  disabled={movieRendering}
-                  className={`rounded-lg border py-2 text-[10px] font-semibold transition-colors disabled:opacity-50 ${
-                    movieDuration === d
-                      ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
-                      : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
-                  }`}
-                >
-                  {d < 60 ? `${d} sec` : `${d / 60} min`}
-                </button>
-              ))}
-            </div>
-            <div className="space-y-1.5">
-              <p className="text-[10px] uppercase tracking-wide text-ink-tertiary font-semibold">Background music</p>
-              <div className="grid grid-cols-2 gap-1.5">
-                <button
-                  onClick={() => setMovieMusicTrack(null)}
-                  disabled={movieRendering}
-                  className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left disabled:opacity-50 ${
-                    movieMusicTrack === null
-                      ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
-                      : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
-                  }`}
-                >
-                  🔇 None
-                </button>
-                {SLIDESHOW_TRACKS.map((track) => (
-                  <button
-                    key={track.id}
-                    onClick={() => setMovieMusicTrack(track.id)}
-                    title={track.mood}
-                    disabled={movieRendering}
-                    className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left disabled:opacity-50 ${
-                      movieMusicTrack === track.id
-                        ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
-                        : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
-                    }`}
-                  >
-                    🎵 {track.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              className="w-full text-xs py-5 rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
-              disabled={movieRendering}
-              onClick={handleGenerateMovie}
-            >
-              <Film className={`h-3.5 w-3.5 ${movieRendering ? "animate-pulse" : ""}`} />
-              <span>{movieRendering ? `Rendering… ${Math.round(movieProgress * 100)}%` : "Generate Movie"}</span>
-            </Button>
-            {movieRendering && (
-              <div className="space-y-1.5">
-                <div className="h-1.5 w-full rounded-full bg-ink/10 overflow-hidden">
-                  <div className="h-full bg-[#b8925a] transition-all duration-300" style={{ width: `${Math.round(movieProgress * 100)}%` }} />
-                </div>
-                <p className="text-[10px] text-ink-tertiary text-center">Keep this tab open — your movie is recording in real time.</p>
-              </div>
-            )}
-            {movieError && !movieRendering && (
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5">
-                <p className="text-xs font-semibold text-red-300">Couldn't build the movie</p>
-                <p className="text-[11px] text-red-300/70 mt-0.5">{movieError}</p>
-              </div>
-            )}
-            {latestMovie && !movieRendering && (
-              <>
-                <Button
-                  variant="outline"
-                  className="w-full text-xs py-3 rounded-full border border-hairline-dark bg-ink/5 text-ink hover:bg-mauve/10"
-                  onClick={() => setShowMovieViewer(true)}
-                >
-                  ▶ Watch Movie {latestMovie.duration_seconds ? `(${latestMovie.duration_seconds}s)` : ""}
-                </Button>
-                <Button
-                  disabled={movieSharing}
-                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-[#b8925a] hover:bg-[#96723a] text-black text-xs font-semibold py-3 transition-colors disabled:opacity-60"
-                  onClick={handleShareMovieFile}
-                >
-                  <Share2 className="h-3.5 w-3.5" /> {movieSharing ? "Preparing…" : "Share to Story"}
-                </Button>
-                <p className="text-[10px] text-ink-tertiary text-center -mt-1">
-                  Opens your share sheet — pick Instagram or Snapchat, then add it to your Story.
-                </p>
-              </>
-            )}
-          </div>
-          </>
-          )}
-
-          {/* Recent Activity waterfall feed */}
-          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
-              <Activity className="h-4.5 w-4.5 text-[#b8925a]" />
-              <h3 className="text-sm font-bold text-ink">Recent Guest Activity</h3>
-            </div>
-
-            <div className="space-y-3 text-xs leading-relaxed">
-              {dynamicActivities.length > 0 ? dynamicActivities.slice(0, 10).map((act, idx) => (
-                <div key={idx} className="flex justify-between items-start gap-4 text-ink-secondary border-b border-ink/10 pb-2.5 last:border-none last:pb-0">
-                  <p>
-                    <span className="font-bold text-ink">{act.actor}</span> {act.action}
-                  </p>
-                  <span className="text-[9px] text-ink-secondary shrink-0">{act.time}</span>
-                </div>
-              )) : (
-                <p className="text-xs text-ink-secondary text-center py-4">No recent activity.</p>
-              )}
-            </div>
-          </div>
-
-          {/* Quick Actions Shortcuts */}
-          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#b8925a]">Host Quick Tools</h3>
-
-            <div className="grid grid-cols-2 gap-2.5">
-              <Link href={`/dashboard/events/${event.slug}/qr`} className="p-3 border border-hairline-dark rounded-xl text-center space-y-1 hover:border-[#b8925a]/50 transition-all bg-ink/5">
-                <QrCode className="h-4 w-4 text-[#b8925a] mx-auto" />
-                <p className="text-[10px] font-bold text-ink">QR Manager</p>
-              </Link>
-              <Link href={`/dashboard/events/${event.slug}/gallery`} className="p-3 border border-hairline-dark rounded-xl text-center space-y-1 hover:border-[#b8925a]/50 transition-all bg-ink/5">
-                <Images className="h-4 w-4 text-[#b8925a] mx-auto" />
-                <p className="text-[10px] font-bold text-ink">Gallery Toggles</p>
-              </Link>
-            </div>
-          </div>
-
-        </div>
-
-      </section>
+      </main>
 
       {/* SETTINGS DRAWER OVERLAY (Radix dialog equivalent but smoother drawer) */}
       <AnimatePresence>
