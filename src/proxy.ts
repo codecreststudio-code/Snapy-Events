@@ -12,6 +12,7 @@ const PUBLIC_PATHS = new Set<string>([
   "/terms",
   "/privacy",
   "/refund-policy",
+  "/manifest.webmanifest",
   "/login",
   "/signup",
   "/forgot-password",
@@ -37,7 +38,7 @@ function isPublic(pathname: string): boolean {
   if (pathname.startsWith("/api/firebase-config")) return true
   if (pathname.startsWith("/_next")) return true
   if (pathname.toLowerCase().startsWith("/favicon")) return true
-  if (pathname === "/robots.txt" || pathname === "/sitemap.xml") return true
+  if (pathname === "/robots.txt" || pathname === "/sitemap.xml" || pathname === "/manifest.webmanifest") return true
 
   // Allow static image extensions
   const lower = pathname.toLowerCase()
@@ -60,15 +61,6 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const reqId = request.headers.get("x-request-id") ?? crypto.randomUUID()
 
-  // Per-request CSP nonce (Next.js's documented pattern for a script-src
-  // that doesn't need 'unsafe-inline' — see the CSP block below). Set on
-  // the *request* headers (not just the response) so it flows through to
-  // Server Components/route handlers via headers().get("x-nonce"), for any
-  // inline <script> our own code renders (e.g. the blog post's JSON-LD tags
-  // and the admin analytics HTML export's auto-print script) to attach it
-  // via nonce={nonce}. Next.js also auto-detects this nonce from the CSP
-  // header value and applies it to its own framework-injected inline
-  // scripts, so no other wiring is needed for those.
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64")
   request.headers.set("x-nonce", nonce)
 
@@ -104,11 +96,6 @@ export async function proxy(request: NextRequest) {
   )
 
   // 3. Trigger session refresh to write updated cookies to response
-  // (debug console.log/error calls that used to sit here — dev-gated, so
-  // never actually reached in production — were removed; this middleware
-  // runs on every single request, and per-request console noise isn't worth
-  // it even in local dev. Use the request's X-Request-Id header to correlate
-  // logs elsewhere if needed.)
   const { data: { user } } = await supabase.auth.getUser()
 
   // 4. Set security headers
@@ -126,26 +113,14 @@ export async function proxy(request: NextRequest) {
       [
         "default-src 'self'",
         "img-src 'self' data: blob: https:",
-        // Voice-note replies and recap videos are served straight from
-        // Supabase Storage's public URL (not proxied through our own
-        // origin), so 'self' alone 404-blocks every <audio>/<video> element
-        // pointed at them — this was silently breaking voice-note playback
-        // in production (console: "violates ... media-src 'self' blob:").
         "media-src 'self' blob: https://*.supabase.co",
-        // Allow Next.js client hydration and dynamic chunks to execute safely while preserving script origin safety.
-        `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-${nonce}' https://*.supabase.co https://*.razorpay.com https://cdn.jsdelivr.net`,
-        // style-src intentionally keeps 'unsafe-inline': this app uses
-        // React inline style={{...}} extensively (dynamic gradients, per-
-        // event theme colors, etc.), which renders as native style=""
-        // attributes — governed by style-src, not nonce-able the way
-        // <script> tags are (a nonce on a style attribute isn't a thing;
-        // only nonces/hashes on <style> *elements* are supported, and CSP
-        // has no per-attribute equivalent). Removing this would require
-        // migrating every dynamic inline style to CSS custom properties/
-        // classes first — a large, separate refactor, not a one-line fix.
+        // 'unsafe-inline' is required for Next.js inline scripts & dynamic chunks.
+        // NOTE: Do NOT include 'nonce-...' here, because W3C CSP specs dictate that when a nonce is present,
+        // browsers MUST ignore 'unsafe-inline', which blocks inline scripts without a nonce attribute.
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://*.razorpay.com https://cdn.jsdelivr.net https://*.gstatic.com https://www.gstatic.com",
         "style-src 'self' 'unsafe-inline'",
         "font-src 'self' data: https://*.gstatic.com",
-        "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://*.razorpay.com https://api.razorpay.com https://*.resend.com https://graph.facebook.com https://cdn.jsdelivr.net https://*.googleapis.com https://*.firebaseapp.com https://*.firebaseio.com wss://*.firebaseio.com https://fcmregistrations.googleapis.com",
+        "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co wss://*.supabase.in https://*.razorpay.com https://api.razorpay.com https://*.resend.com https://graph.facebook.com https://cdn.jsdelivr.net https://*.googleapis.com https://*.firebaseapp.com https://*.firebaseio.com wss://*.firebaseio.com https://fcmregistrations.googleapis.com",
         "frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://*.razorpay.com",
         "frame-ancestors 'none'",
         "base-uri 'self'",
