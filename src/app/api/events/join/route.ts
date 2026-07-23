@@ -23,18 +23,28 @@ export const POST = defineRoute<z.infer<typeof bodySchema>>({
   body: bodySchema,
   rateLimit: { key: "events:join", limit: API_RATE_LIMITS.JOIN_CODE, windowSeconds: 60 },
   handler: async ({ body }) => {
-    const code = body.code.toUpperCase()
+    const rawCode = body.code.trim()
+    const code = rawCode.toUpperCase()
+    const slugQuery = rawCode.toLowerCase()
     const supabase = await createServiceClient()
 
-    const { data: event, error } = await supabase
+    // Try matching join_code first, then slug
+    let { data: event, error } = await supabase
       .from("events")
       .select("slug, status, settings")
       .eq("join_code", code)
       .maybeSingle()
 
-    // Deliberately generic error for both "no such code" and "code exists
-    // but event isn't published" (draft/archived) — distinguishing the two
-    // would let someone probe which codes are "real but not live yet".
+    if (!event) {
+      const slugRes = await supabase
+        .from("events")
+        .select("slug, status, settings")
+        .eq("slug", slugQuery)
+        .maybeSingle()
+      event = slugRes.data
+      error = slugRes.error
+    }
+
     if (error || !event || event.status !== "published") {
       return fail("NOT_FOUND", "That code doesn't match a live event. Double-check it and try again.", 404)
     }
