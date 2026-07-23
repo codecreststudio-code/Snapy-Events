@@ -25,7 +25,7 @@ const THEME_PALETTES: Record<InvitationTheme, {
   panelBg: string
 }> = {
   minimal: { bgFrom: "#FAF9F6", bgTo: "#FAF9F6", title: "#1C1A17", subtext: "#7A756E", accent: "#A58263", panelBg: "#FFFFFF" },
-  luxury: { bgFrom: "#1C1814", bgTo: "#121110", title: "#F5E6C8", subtext: "#C5A059", accent: "#D4AF37", panelBg: "#27211B" },
+  luxury: { bgFrom: "#ffffff", bgTo: "#121110", title: "#F5E6C8", subtext: "#C5A059", accent: "#D4AF37", panelBg: "#27211B" },
   modern: { bgFrom: "#0F172A", bgTo: "#1E1B4B", title: "#FFFFFF", subtext: "#C7D2FE", accent: "#A855F7", panelBg: "#1E1B4B" },
   elegant: { bgFrom: "#FAF5F0", bgTo: "#EFE2D3", title: "#2C221E", subtext: "#8C7665", accent: "#9E5A47", panelBg: "#FFFFFF" },
   glass: { bgFrom: "#1E1B4B", bgTo: "#0F172A", title: "#FFFFFF", subtext: "#E9D5FF", accent: "#F9A8D4", panelBg: "#2A2550" },

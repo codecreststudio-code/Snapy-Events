@@ -86,18 +86,18 @@ export default function AdminSystemHealthPage() {
     <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">System Health</h1>
-          <p className="text-sm text-white/50 mt-1">
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">System Health</h1>
+          <p className="text-sm text-ink-secondary mt-1">
             Live database status, API latency, and infrastructure health checks.
             {lastRefreshed && (
-              <span className="ml-2 text-white/40 text-xs">
+              <span className="ml-2 text-ink-tertiary text-xs">
                 Last checked: {lastRefreshed.toLocaleTimeString()}
               </span>
             )}
           </p>
         </div>
-        <Button onClick={fetchHealth} disabled={loading} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
-          <RefreshCw className={cn("h-4 w-4 text-white/50", loading && "animate-spin")} />
+        <Button onClick={fetchHealth} disabled={loading} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-ink-secondary bg-surface-card hover:bg-mauve/5 font-semibold shadow-sm">
+          <RefreshCw className={cn("h-4 w-4 text-ink-secondary", loading && "animate-spin")} />
           <span>Refresh</span>
         </Button>
       </div>
@@ -119,8 +119,8 @@ export default function AdminSystemHealthPage() {
             <Database className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">DB Latency</span>
-            <span className="text-2xl font-bold text-white mt-1 block">
+            <span className="text-xs text-ink-tertiary font-bold uppercase tracking-wider block">DB Latency</span>
+            <span className="text-2xl font-bold text-ink mt-1 block">
               {loading ? <Loader2 className="h-5 w-5 animate-spin text-mauve" /> : `${dbLatency}ms`}
             </span>
             <span className={cn("text-[10px] font-bold block mt-0.5", dbStatusColor)}>
@@ -134,8 +134,8 @@ export default function AdminSystemHealthPage() {
             <Activity className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Subscriptions</span>
-            <span className="text-2xl font-bold text-white mt-1 block">
+            <span className="text-xs text-ink-tertiary font-bold uppercase tracking-wider block">Subscriptions</span>
+            <span className="text-2xl font-bold text-ink mt-1 block">
               {loading ? "…" : health?.record_counts.subscriptions.toLocaleString() ?? "—"}
             </span>
             <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">● Live count</span>
@@ -147,8 +147,8 @@ export default function AdminSystemHealthPage() {
             <Zap className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Total Events</span>
-            <span className="text-2xl font-bold text-white mt-1 block">
+            <span className="text-xs text-ink-tertiary font-bold uppercase tracking-wider block">Total Events</span>
+            <span className="text-2xl font-bold text-ink mt-1 block">
               {loading ? "…" : health?.record_counts.events.toLocaleString() ?? "—"}
             </span>
             <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">● Live count</span>
@@ -160,8 +160,8 @@ export default function AdminSystemHealthPage() {
             <HardDrive className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Transactions</span>
-            <span className="text-2xl font-bold text-white mt-1 block">
+            <span className="text-xs text-ink-tertiary font-bold uppercase tracking-wider block">Transactions</span>
+            <span className="text-2xl font-bold text-ink mt-1 block">
               {loading ? "…" : health?.record_counts.transactions.toLocaleString() ?? "—"}
             </span>
             <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">● Live count</span>
@@ -171,7 +171,7 @@ export default function AdminSystemHealthPage() {
 
       {/* DB Latency Indicator */}
       <Card className="bg-surface-card border-hairline-dark p-6 shadow-sm">
-        <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4">
+        <h3 className="text-xs font-bold text-ink-tertiary uppercase tracking-wider mb-4">
           Database Response Latency — Live Measurement
         </h3>
         {loading ? (
@@ -181,8 +181,8 @@ export default function AdminSystemHealthPage() {
         ) : (
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-white/60 w-24">DB Query</span>
-              <div className="flex-1 h-3 bg-white/5 rounded-full overflow-hidden">
+              <span className="text-xs font-bold text-ink-secondary w-24">DB Query</span>
+              <div className="flex-1 h-3 bg-ink/5 rounded-full overflow-hidden">
                 <div
                   className={cn(
                     "h-full rounded-full transition-all",
@@ -191,10 +191,10 @@ export default function AdminSystemHealthPage() {
                   style={{ width: `${Math.min(100, (dbLatency / 500) * 100)}%` }}
                 />
               </div>
-              <span className="text-xs font-bold text-white/70 w-16 text-right">{dbLatency}ms</span>
+              <span className="text-xs font-bold text-ink-secondary w-16 text-right">{dbLatency}ms</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-white/60 w-24">API Health</span>
+              <span className="text-xs font-bold text-ink-secondary w-24">API Health</span>
               <div className="flex-1 h-3 bg-emerald-500/10 rounded-full overflow-hidden">
                 <div className="h-full bg-emerald-500 rounded-full" style={{ width: "100%" }} />
               </div>
@@ -206,12 +206,12 @@ export default function AdminSystemHealthPage() {
 
       {/* Service Status Table */}
       <Card className="bg-surface-card border-hairline-dark overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-hairline-dark bg-white/5">
-          <h3 className="font-bold text-white/80 text-sm flex items-center gap-1.5">
+        <div className="p-4 border-b border-hairline-dark bg-ink/5">
+          <h3 className="font-bold text-ink text-sm flex items-center gap-1.5">
             <CheckCircle2 className="h-4 w-4 text-emerald-400" />
             <span>Infrastructure Health Check Matrix</span>
             {health?.checked_at && (
-              <span className="ml-auto text-[10px] text-white/40 font-semibold">
+              <span className="ml-auto text-[10px] text-ink-tertiary font-semibold">
                 as of {new Date(health.checked_at).toLocaleTimeString()}
               </span>
             )}
@@ -221,19 +221,19 @@ export default function AdminSystemHealthPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-white/5">
+                <tr className="border-b border-hairline-dark text-ink-tertiary font-bold uppercase tracking-wider bg-ink/5">
                   <th className="p-4">Service</th>
                   <th className="p-4">Region</th>
                   <th className="p-4">Latency</th>
                   <th className="p-4 text-right">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10 text-white/60 font-medium">
+              <tbody className="divide-y divide-hairline-dark text-ink-secondary font-medium">
                 {nodeRows.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-white/5 transition-colors">
-                    <td className="p-4 font-mono font-bold text-white/80">{row.name}</td>
-                    <td className="p-4 text-white/40 font-semibold">{row.region}</td>
-                    <td className="p-4 text-white/70 font-semibold">{loading ? "…" : row.delay}</td>
+                  <tr key={idx} className="hover:bg-mauve/5 transition-colors">
+                    <td className="p-4 font-mono font-bold text-ink">{row.name}</td>
+                    <td className="p-4 text-ink-tertiary font-semibold">{row.region}</td>
+                    <td className="p-4 text-ink-secondary font-semibold">{loading ? "…" : row.delay}</td>
                     <td className="p-4 text-right">
                       <span className={cn(
                         "px-2 py-0.5 rounded-full text-[10px] font-bold border",

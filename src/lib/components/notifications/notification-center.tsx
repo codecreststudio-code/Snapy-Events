@@ -126,12 +126,12 @@ const BellTrigger = React.forwardRef<
     variant="ghost"
     size="icon"
     aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
-    className="relative h-9 w-9 rounded-lg text-white/60 hover:bg-white/5 hover:text-white"
+    className="relative h-9 w-9 rounded-lg text-ink-secondary hover:bg-mauve/5 hover:text-ink"
     {...props}
   >
     <Bell className="h-5 w-5" />
     {unreadCount > 0 && (
-      <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-mauve px-1 text-[10px] font-bold text-[#141110] ring-2 ring-surface-card">
+      <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-mauve px-1 text-[10px] font-bold text-[#faf6ed] ring-2 ring-surface-card">
         {unreadCount > 99 ? "99+" : unreadCount}
       </span>
     )}
@@ -181,24 +181,24 @@ function NotificationRow({
       transition={reducedMotion ? { duration: 0 } : undefined}
       className={cn(
         "group relative border-b border-hairline-dark/60 transition-colors",
-        unread ? "bg-mauve/[0.06] hover:bg-mauve/10" : "hover:bg-white/5"
+        unread ? "bg-mauve/[0.06] hover:bg-mauve/10" : "hover:bg-mauve/5"
       )}
     >
       <button type="button" onClick={onClick} className="flex w-full gap-3 px-4 py-3 pr-9 text-left">
         {unread && <span aria-hidden className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-mauve" />}
         <div className={cn("min-w-0 flex-1", !unread && "pl-5")}>
-          <p className={cn("truncate text-sm", unread ? "font-semibold text-white" : "text-white/80")}>
+          <p className={cn("truncate text-sm", unread ? "font-semibold text-ink" : "text-ink")}>
             {notification.title}
           </p>
-          <p className="mt-0.5 line-clamp-2 text-xs text-white/50">{notification.body}</p>
-          <p className="mt-1 text-[10px] font-medium text-white/35">{timeAgo(notification.created_at)}</p>
+          <p className="mt-0.5 line-clamp-2 text-xs text-ink-secondary">{notification.body}</p>
+          <p className="mt-1 text-[10px] font-medium text-ink-tertiary">{timeAgo(notification.created_at)}</p>
         </div>
       </button>
       <button
         type="button"
         onClick={onDelete}
         aria-label="Delete notification"
-        className="absolute right-3 top-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white/30 opacity-0 transition-opacity hover:bg-white/10 hover:text-white focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 group-hover:opacity-100"
+        className="absolute right-3 top-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink-tertiary opacity-0 transition-opacity hover:bg-mauve/10 hover:text-ink focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 group-hover:opacity-100"
       >
         <X className="h-3.5 w-3.5" />
       </button>
@@ -227,7 +227,7 @@ function PanelContent({
   return (
     <div className={cn("flex flex-col", isSheet ? "min-h-0 flex-1" : "")}>
       <div className="flex items-center justify-between gap-2 border-b border-hairline-dark px-4 py-3">
-        <span className="font-playfair text-base font-semibold text-white">Notifications</span>
+        <span className="font-playfair text-base font-semibold text-ink">Notifications</span>
         {unreadCount > 0 && (
           <button
             type="button"
@@ -242,14 +242,14 @@ function PanelContent({
 
       <div className="px-4 pt-3">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-tertiary" />
           <input
             type="text"
             value={searchInput}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search notifications"
             aria-label="Search notifications"
-            className="w-full rounded-full border border-hairline-dark bg-white/5 py-2 pl-9 pr-3 text-sm text-white placeholder:text-white/40 focus:border-mauve focus:outline-none focus:ring-1 focus:ring-mauve"
+            className="w-full rounded-full border border-hairline-dark bg-ink/5 py-2 pl-9 pr-3 text-sm text-ink placeholder:text-ink-tertiary focus:border-mauve focus:outline-none focus:ring-1 focus:ring-mauve"
           />
         </div>
       </div>
@@ -266,7 +266,7 @@ function PanelContent({
                 "shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
                 active
                   ? "border-mauve bg-mauve/15 text-mauve"
-                  : "border-hairline-dark bg-transparent text-white/50 hover:border-white/30 hover:text-white"
+                  : "border-hairline-dark bg-transparent text-ink-secondary hover:border-mauve/30 hover:text-ink"
               )}
             >
               {f.label}
@@ -278,14 +278,14 @@ function PanelContent({
       <div className={cn("overflow-y-auto", isSheet ? "min-h-0 flex-1" : "max-h-[26rem]")}>
         {isLoading ? (
           <div className="flex justify-center p-10">
-            <Loader2 className="h-6 w-6 animate-spin text-white/30" />
+            <Loader2 className="h-6 w-6 animate-spin text-ink-tertiary" />
           </div>
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5">
-              <Inbox className="h-5 w-5 text-white/30" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-ink/5">
+              <Inbox className="h-5 w-5 text-ink-tertiary" />
             </div>
-            <p className="text-sm text-white/50">
+            <p className="text-sm text-ink-secondary">
               {searchInput || activeType ? "No matching notifications" : "You're all caught up"}
             </p>
           </div>
@@ -297,7 +297,7 @@ function PanelContent({
           >
             {grouped.map((group) => (
               <div key={group.label}>
-                <div className="sticky top-0 z-10 bg-surface-card-elevated/95 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white/40 backdrop-blur">
+                <div className="sticky top-0 z-10 bg-surface-card-elevated/95 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-ink-tertiary backdrop-blur">
                   {group.label}
                 </div>
                 <AnimatePresence initial={false}>
@@ -322,7 +322,7 @@ function PanelContent({
               type="button"
               onClick={onLoadMore}
               disabled={isLoadingMore}
-              className="w-full rounded-full border border-hairline-dark py-2 text-xs font-semibold text-white/60 transition-colors hover:border-white/30 hover:text-white disabled:opacity-50"
+              className="w-full rounded-full border border-hairline-dark py-2 text-xs font-semibold text-ink-secondary transition-colors hover:border-mauve/30 hover:text-ink disabled:opacity-50"
             >
               {isLoadingMore ? "Loading…" : "Load more"}
             </button>
@@ -522,7 +522,7 @@ export function NotificationCenter() {
               style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
             >
               <DialogPrimitive.Title className="sr-only">Notifications</DialogPrimitive.Title>
-              <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-white/20" />
+              <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-ink/15" />
               <PanelContent {...panelProps} isSheet />
             </DialogPrimitive.Content>
           </DialogPrimitive.Portal>

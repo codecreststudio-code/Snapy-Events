@@ -81,22 +81,22 @@ export default function AdminEventsPage() {
     <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Event Management</h1>
-          <p className="text-sm text-white/50 mt-1">Monitor and moderate photography events running on the platform.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">Event Management</h1>
+          <p className="text-sm text-ink-secondary mt-1">Monitor and moderate photography events running on the platform.</p>
         </div>
-        <Button onClick={fetchEvents} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-white/5 hover:bg-white/10 font-semibold">
-          <RefreshCw className="h-4 w-4 text-white/50" />
+        <Button onClick={fetchEvents} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-ink-secondary bg-ink/5 hover:bg-mauve/10 font-semibold">
+          <RefreshCw className="h-4 w-4 text-ink-secondary" />
           <span>Refresh</span>
         </Button>
       </div>
 
       <div className="flex items-center max-w-sm relative">
-        <Search className="h-4 w-4 absolute left-3 text-white/40" />
+        <Search className="h-4 w-4 absolute left-3 text-ink-tertiary" />
         <Input
           placeholder="Search by event, studio, or venue..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 bg-white/5 border-hairline-dark text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve"
+          className="pl-9 bg-ink/5 border-hairline-dark text-ink placeholder:text-ink-tertiary focus:border-mauve focus:ring-mauve"
         />
       </div>
 
@@ -109,64 +109,64 @@ export default function AdminEventsPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-mauve" />
               </div>
             ) : filteredEvents.length === 0 ? (
-              <div className="p-16 text-center text-white/40 text-sm">
+              <div className="p-16 text-center text-ink-tertiary text-sm">
                 No events found.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-surface-card-elevated">
+                    <tr className="border-b border-hairline-dark text-ink-tertiary font-bold uppercase tracking-wider bg-surface-card-elevated">
                       <th className="p-4">Event details</th>
                       <th className="p-4">Organizer</th>
                       <th className="p-4">Status</th>
                       <th className="p-4 text-right">Event Date</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/10 text-white/60 font-medium">
+                  <tbody className="divide-y divide-hairline-dark text-ink-secondary font-medium">
                     {filteredEvents.map((e) => (
                       <tr
                         key={e.id}
                         className={cn(
-                          "hover:bg-white/5 transition-colors cursor-pointer",
+                          "hover:bg-mauve/5 transition-colors cursor-pointer",
                           selectedEvent?.id === e.id ? "bg-mauve/10" : ""
                         )}
                         onClick={() => setSelectedEvent(e)}
                       >
                         <td className="p-4">
-                          <div className="font-bold text-white/80 text-sm flex items-center gap-1.5">
+                          <div className="font-bold text-ink text-sm flex items-center gap-1.5">
                             <span>{e.name}</span>
                             <a
                               href={`/event/${e.slug}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-white/40 hover:text-mauve"
+                              className="text-ink-tertiary hover:text-mauve"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <LinkIcon className="h-3 w-3" />
                             </a>
                           </div>
-                          <div className="text-[10px] text-white/40 mt-0.5">{e.venue || "No venue"}</div>
+                          <div className="text-[10px] text-ink-tertiary mt-0.5">{e.venue || "No venue"}</div>
                         </td>
                         <td className="p-4">
-                          <div className="text-white/70 font-semibold flex items-center gap-1">
-                            <Building className="h-3.5 w-3.5 text-white/40" />
+                          <div className="text-ink-secondary font-semibold flex items-center gap-1">
+                            <Building className="h-3.5 w-3.5 text-ink-tertiary" />
                             <span>{e.user?.name || "N/A"}</span>
                           </div>
-                          <div className="text-[10px] text-white/40 mt-0.5">Plan: <span className="text-mauve font-bold uppercase">{e.user?.plan}</span></div>
+                          <div className="text-[10px] text-ink-tertiary mt-0.5">Plan: <span className="text-mauve font-bold uppercase">{e.user?.plan}</span></div>
                         </td>
                         <td className="p-4">
                           <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border",
                             e.status === "published"
                               ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                               : e.status === "draft"
-                              ? "bg-white/5 text-white/60 border-hairline-dark"
+                              ? "bg-ink/5 text-ink-secondary border-hairline-dark"
                               : "bg-amber-500/10 text-amber-400 border-amber-500/20"
                           )}>
                             {e.status}
                           </span>
                         </td>
-                        <td className="p-4 text-right text-white/40 font-semibold">
+                        <td className="p-4 text-right text-ink-tertiary font-semibold">
                           {e.event_date ? new Date(e.event_date).toLocaleDateString() : "N/A"}
                         </td>
                       </tr>
@@ -184,7 +184,7 @@ export default function AdminEventsPage() {
             <div className="space-y-6">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-bold text-white/80 text-base">{selectedEvent.name}</h3>
+                  <h3 className="font-bold text-ink text-base">{selectedEvent.name}</h3>
                   <a
                     href={`/event/${selectedEvent.slug}`}
                     target="_blank"
@@ -196,7 +196,7 @@ export default function AdminEventsPage() {
                   </a>
                 </div>
                 <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold border",
-                  selectedEvent.status === "published" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/60 border-hairline-dark"
+                  selectedEvent.status === "published" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-ink/5 text-ink-secondary border-hairline-dark"
                 )}>
                   {selectedEvent.status}
                 </span>
@@ -204,40 +204,40 @@ export default function AdminEventsPage() {
 
               <div className="border-t border-hairline-dark pt-4 space-y-3 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Event ID</span>
-                  <span className="font-mono text-white/70 font-semibold">{selectedEvent.id}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Event ID</span>
+                  <span className="font-mono text-ink-secondary font-semibold">{selectedEvent.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Venue</span>
-                  <span className="text-white/70 font-semibold">{selectedEvent.venue || "No Venue"}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Venue</span>
+                  <span className="text-ink-secondary font-semibold">{selectedEvent.venue || "No Venue"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Organizer</span>
-                  <span className="text-white/70 font-semibold">{selectedEvent.user?.name || "N/A"}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Organizer</span>
+                  <span className="text-ink-secondary font-semibold">{selectedEvent.user?.name || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Organizer Plan</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Organizer Plan</span>
                   <span className="text-mauve font-bold uppercase">{selectedEvent.user?.plan || "free"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Event Date</span>
-                  <span className="text-white/70 font-semibold">
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Event Date</span>
+                  <span className="text-ink-secondary font-semibold">
                     {selectedEvent.event_date ? new Date(selectedEvent.event_date).toLocaleString() : "N/A"}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Created At</span>
-                  <span className="text-white/70 font-semibold">{new Date(selectedEvent.created_at).toLocaleString()}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Created At</span>
+                  <span className="text-ink-secondary font-semibold">{new Date(selectedEvent.created_at).toLocaleString()}</span>
                 </div>
               </div>
 
               <div className="border-t border-hairline-dark pt-4 space-y-2">
-                <h4 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2">Actions</h4>
+                <h4 className="text-xs font-bold text-ink-tertiary uppercase tracking-wider mb-2">Actions</h4>
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     asChild
                     variant="outline"
-                    className="w-full text-xs font-bold text-white/70 border-hairline-dark hover:bg-white/5 cursor-pointer"
+                    className="w-full text-xs font-bold text-ink-secondary border-hairline-dark hover:bg-mauve/5 cursor-pointer"
                   >
                     <a href={`/event/${selectedEvent.slug}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5">
                       <Eye className="h-4 w-4" />
@@ -256,8 +256,8 @@ export default function AdminEventsPage() {
               </div>
             </div>
           ) : (
-            <div className="h-64 flex flex-col justify-center items-center text-center text-white/40">
-              <Calendar className="h-8 w-8 text-white/30 mb-2" />
+            <div className="h-64 flex flex-col justify-center items-center text-center text-ink-tertiary">
+              <Calendar className="h-8 w-8 text-ink-tertiary mb-2" />
               <span className="text-xs font-semibold">Select an event to view complete collection details and moderate options.</span>
             </div>
           )}

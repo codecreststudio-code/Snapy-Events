@@ -68,8 +68,8 @@ export function SettingsClient({
     <main className="px-6 py-8 space-y-6 max-w-5xl bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Platform Controls & Settings</h1>
-          <p className="text-sm text-white/50 mt-1">Configure global variables, toggle feature flags, manage API integrations, and edit templates.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">Platform Controls & Settings</h1>
+          <p className="text-sm text-ink-secondary mt-1">Configure global variables, toggle feature flags, manage API integrations, and edit templates.</p>
         </div>
       </div>
 
@@ -77,51 +77,51 @@ export function SettingsClient({
         {/* Feature Flags */}
         <Card className="bg-surface-card border-hairline-dark shadow-sm">
           <CardHeader>
-            <CardTitle className="text-white/80 flex items-center gap-2 text-base font-bold">
+            <CardTitle className="text-ink flex items-center gap-2 text-base font-bold">
               <Shield className="h-5 w-5 text-mauve" />
               <span>Global Feature Flags</span>
             </CardTitle>
-            <CardDescription className="text-white/40 text-xs font-semibold leading-relaxed">
+            <CardDescription className="text-ink-tertiary text-xs font-semibold leading-relaxed">
               Toggle specific features instantly across all user organizations.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
               <div className="space-y-0.5">
-                <Label className="text-white/80 text-sm font-bold block">Enable Billing & Paid Plans</Label>
-                <p className="text-xs text-white/40 font-semibold leading-relaxed">Require paid checkout redirects for non-free tiers.</p>
+                <Label className="text-ink text-sm font-bold block">Enable Billing & Paid Plans</Label>
+                <p className="text-xs text-ink-tertiary font-semibold leading-relaxed">Require paid checkout redirects for non-free tiers.</p>
               </div>
               <Switch checked={paymentsEnabled} onCheckedChange={setPaymentsEnabled} />
             </div>
 
             <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
               <div className="space-y-0.5">
-                <Label className="text-white/80 text-sm font-bold block">AI Face Search Engine</Label>
-                <p className="text-xs text-white/40 font-semibold leading-relaxed">Run facial vectorization embeddings models on new photo uploads.</p>
+                <Label className="text-ink text-sm font-bold block">AI Face Search Engine</Label>
+                <p className="text-xs text-ink-tertiary font-semibold leading-relaxed">Run facial vectorization embeddings models on new photo uploads.</p>
               </div>
               <Switch checked={aiSearchEnabled} onCheckedChange={setAiSearchEnabled} />
             </div>
 
             <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
               <div className="space-y-0.5">
-                <Label className="text-white/80 text-sm font-bold block">Live Photo Wall Stream</Label>
-                <p className="text-xs text-white/40 font-semibold leading-relaxed">Allows Premium organizers to stream a real-time event photo wall.</p>
+                <Label className="text-ink text-sm font-bold block">Live Photo Wall Stream</Label>
+                <p className="text-xs text-ink-tertiary font-semibold leading-relaxed">Allows Premium organizers to stream a real-time event photo wall.</p>
               </div>
               <Switch checked={liveWallEnabled} onCheckedChange={setLiveWallEnabled} />
             </div>
 
             <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
               <div className="space-y-0.5">
-                <Label className="text-white/80 text-sm font-bold block">Automated Image Watermarking</Label>
-                <p className="text-xs text-white/40 font-semibold leading-relaxed">Apply a default Snapsy branding overlay on guest-downloaded files.</p>
+                <Label className="text-ink text-sm font-bold block">Automated Image Watermarking</Label>
+                <p className="text-xs text-ink-tertiary font-semibold leading-relaxed">Apply a default Snapsy branding overlay on guest-downloaded files.</p>
               </div>
               <Switch checked={watermarkEnabled} onCheckedChange={setWatermarkEnabled} />
             </div>
 
             <div className="flex items-center justify-between py-3">
               <div className="space-y-0.5">
-                <Label className="text-white/80 text-sm font-bold block">White Label Branding Options</Label>
-                <p className="text-xs text-white/40 font-semibold leading-relaxed">Allows Enterprise/Premium accounts to hide Snapsy footer branding.</p>
+                <Label className="text-ink text-sm font-bold block">White Label Branding Options</Label>
+                <p className="text-xs text-ink-tertiary font-semibold leading-relaxed">Allows Enterprise/Premium accounts to hide Snapsy footer branding.</p>
               </div>
               <Switch checked={whiteLabelEnabled} onCheckedChange={setWhiteLabelEnabled} />
             </div>
@@ -131,11 +131,11 @@ export function SettingsClient({
         {/* API Credentials */}
         <Card className="bg-surface-card border-hairline-dark shadow-sm">
           <CardHeader>
-            <CardTitle className="text-white/80 flex items-center gap-2 text-base font-bold">
+            <CardTitle className="text-ink flex items-center gap-2 text-base font-bold">
               <Key className="h-5 w-5 text-mauve" />
               <span>Integration Keys</span>
             </CardTitle>
-            <CardDescription className="text-white/40 text-xs font-semibold leading-relaxed">
+            <CardDescription className="text-ink-tertiary text-xs font-semibold leading-relaxed">
               Credentials for Resend email and Razorpay payment gateway APIs are read from server
               environment variables, not stored here. This panel only shows whether each is configured.
             </CardDescription>
@@ -143,8 +143,8 @@ export function SettingsClient({
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
               <div className="space-y-0.5">
-                <Label className="text-white/80 text-sm font-bold block">Razorpay</Label>
-                <p className="text-xs text-white/40 font-semibold leading-relaxed">RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET</p>
+                <Label className="text-ink text-sm font-bold block">Razorpay</Label>
+                <p className="text-xs text-ink-tertiary font-semibold leading-relaxed">RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET</p>
               </div>
               {integrationStatus.razorpay_configured ? (
                 <span className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold">
@@ -158,8 +158,8 @@ export function SettingsClient({
             </div>
             <div className="flex items-center justify-between py-3">
               <div className="space-y-0.5">
-                <Label className="text-white/80 text-sm font-bold block">Resend</Label>
-                <p className="text-xs text-white/40 font-semibold leading-relaxed">RESEND_API_KEY</p>
+                <Label className="text-ink text-sm font-bold block">Resend</Label>
+                <p className="text-xs text-ink-tertiary font-semibold leading-relaxed">RESEND_API_KEY</p>
               </div>
               {integrationStatus.resend_configured ? (
                 <span className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold">
@@ -171,7 +171,7 @@ export function SettingsClient({
                 </span>
               )}
             </div>
-            <p className="text-xs text-white/40 font-semibold leading-relaxed pt-1">
+            <p className="text-xs text-ink-tertiary font-semibold leading-relaxed pt-1">
               To change these, update the environment variables in your hosting provider (e.g. Vercel project settings) and redeploy.
             </p>
           </CardContent>
@@ -180,29 +180,29 @@ export function SettingsClient({
         {/* Email Templates */}
         <Card className="bg-surface-card border-hairline-dark shadow-sm">
           <CardHeader>
-            <CardTitle className="text-white/80 flex items-center gap-2 text-base font-bold">
+            <CardTitle className="text-ink flex items-center gap-2 text-base font-bold">
               <Mail className="h-5 w-5 text-mauve" />
               <span>Email Templates Config</span>
             </CardTitle>
-            <CardDescription className="text-white/40 text-xs font-semibold leading-relaxed">
+            <CardDescription className="text-ink-tertiary text-xs font-semibold leading-relaxed">
               Customize subject lines and layouts for outbound transaction notifications.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <Label className="text-white/50 text-xs font-bold uppercase tracking-wider">Welcome Email Subject</Label>
+              <Label className="text-ink-secondary text-xs font-bold uppercase tracking-wider">Welcome Email Subject</Label>
               <Input
                 value={welcomeSubject}
                 onChange={(e) => setWelcomeSubject(e.target.value)}
-                className="bg-surface-card border-hairline-dark text-white/80 shadow-sm"
+                className="bg-surface-card border-hairline-dark text-ink shadow-sm"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white/50 text-xs font-bold uppercase tracking-wider">Photo Activity Notification Subject</Label>
+              <Label className="text-ink-secondary text-xs font-bold uppercase tracking-wider">Photo Activity Notification Subject</Label>
               <Input
                 value={notifySubject}
                 onChange={(e) => setNotifySubject(e.target.value)}
-                className="bg-surface-card border-hairline-dark text-white/80 shadow-sm"
+                className="bg-surface-card border-hairline-dark text-ink shadow-sm"
               />
             </div>
           </CardContent>
@@ -213,7 +213,7 @@ export function SettingsClient({
           <Button
             type="submit"
             disabled={saving}
-            className="bg-mauve hover:bg-mauve-strong text-[#141110] font-bold px-8 py-5 rounded-xl flex items-center gap-1.5 shadow-md transition-shadow"
+            className="bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold px-8 py-5 rounded-xl flex items-center gap-1.5 shadow-md transition-shadow"
           >
             <Save className="h-4 w-4" />
             <span>{saving ? "Saving Changes..." : "Save Configuration"}</span>

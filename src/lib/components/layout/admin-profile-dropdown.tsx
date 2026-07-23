@@ -40,32 +40,32 @@ export function AdminProfileDropdown({ user }: AdminProfileProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-mauve font-bold text-[#141110] hover:bg-mauve-strong ring-2 ring-mauve/20 transition-colors">
+        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-mauve font-bold text-[#faf6ed] hover:bg-mauve-strong ring-2 ring-mauve/20 transition-colors">
           {initial}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64 bg-surface-card-elevated border border-hairline-dark shadow-md rounded-xl p-1">
         <div className="px-3 py-2.5">
-          <p className="text-sm font-bold text-white truncate">{user.full_name || "Admin User"}</p>
-          <p className="text-xs text-white/50 truncate mt-0.5">{user.email}</p>
+          <p className="text-sm font-bold text-ink truncate">{user.full_name || "Admin User"}</p>
+          <p className="text-xs text-ink-secondary truncate mt-0.5">{user.email}</p>
         </div>
-        <DropdownMenuSeparator className="bg-white/10" />
+        <DropdownMenuSeparator className="bg-hairline-dark" />
         <DropdownMenuItem asChild>
-          <a href="/admin/profile" className="flex items-center gap-2.5 text-white/70 focus:bg-white/5 rounded-lg px-3 py-2 text-sm cursor-pointer">
-            <User className="h-4 w-4 text-white/40" />
+          <a href="/admin/profile" className="flex items-center gap-2.5 text-ink-secondary focus:bg-mauve/5 rounded-lg px-3 py-2 text-sm cursor-pointer">
+            <User className="h-4 w-4 text-ink-tertiary" />
             <span>My Profile</span>
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <a href="/admin/security" className="flex items-center gap-2.5 text-white/70 focus:bg-white/5 rounded-lg px-3 py-2 text-sm cursor-pointer">
-            <Shield className="h-4 w-4 text-white/40" />
+          <a href="/admin/security" className="flex items-center gap-2.5 text-ink-secondary focus:bg-mauve/5 rounded-lg px-3 py-2 text-sm cursor-pointer">
+            <Shield className="h-4 w-4 text-ink-tertiary" />
             <span>Security & 2FA</span>
           </a>
         </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-white/10" />
+        <DropdownMenuSeparator className="bg-hairline-dark" />
         <DropdownMenuItem asChild>
-          <a href="/admin/settings" className="flex items-center gap-2.5 text-white/70 focus:bg-white/5 rounded-lg px-3 py-2 text-sm cursor-pointer">
-            <Settings className="h-4 w-4 text-white/40" />
+          <a href="/admin/settings" className="flex items-center gap-2.5 text-ink-secondary focus:bg-mauve/5 rounded-lg px-3 py-2 text-sm cursor-pointer">
+            <Settings className="h-4 w-4 text-ink-tertiary" />
             <span>Platform Settings</span>
           </a>
         </DropdownMenuItem>

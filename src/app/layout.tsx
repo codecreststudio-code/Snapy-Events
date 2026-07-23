@@ -78,7 +78,7 @@ export const metadata: Metadata = {
   },
   other: {
     "mobile-web-app-capable": "yes",
-    "msapplication-TileColor": "#141110",
+    "msapplication-TileColor": "#faf6ed",
     "msapplication-config": "/browserconfig.xml",
   },
   twitter: {
@@ -105,8 +105,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#141110",
-  colorScheme: "dark",
+  themeColor: "#faf6ed",
+  colorScheme: "light",
 }
 
 import { Toaster } from "@/lib/components/ui/toaster"
@@ -139,7 +139,7 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en" suppressHydrationWarning className="dark selection:bg-mauve/30 selection:text-white">
+    <html lang="en" suppressHydrationWarning className="selection:bg-mauve/30 selection:text-ink">
       <head>
         {/* Preconnect to Google Fonts origins to eliminate DNS/TCP overhead */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -149,7 +149,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${inter.variable} ${playfair.variable} ${inter.className} bg-surface-dark text-white antialiased selection:bg-mauve/30 selection:text-white`} suppressHydrationWarning>
+      <body className={`${inter.variable} ${playfair.variable} ${inter.className} bg-surface-dark text-ink antialiased selection:bg-mauve/30 selection:text-ink`} suppressHydrationWarning>
         <QueryProvider>
           <AuthProvider>
             <CurrencyProvider>

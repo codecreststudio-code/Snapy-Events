@@ -105,11 +105,11 @@ export default function AdminModerationQueuePage() {
     <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Moderation Queue</h1>
-          <p className="text-sm text-white/50 mt-1">Review automated safety flag reports, user complaints, and override filters.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">Moderation Queue</h1>
+          <p className="text-sm text-ink-secondary mt-1">Review automated safety flag reports, user complaints, and override filters.</p>
         </div>
-        <Button onClick={fetchModerationItems} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
-          <RefreshCw className="h-4 w-4 text-white/50" />
+        <Button onClick={fetchModerationItems} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-ink-secondary bg-surface-card hover:bg-mauve/5 font-semibold shadow-sm">
+          <RefreshCw className="h-4 w-4 text-ink-secondary" />
           <span>Refresh</span>
         </Button>
       </div>
@@ -121,14 +121,14 @@ export default function AdminModerationQueuePage() {
               <Loader2 className="h-8 w-8 animate-spin text-mauve" />
             </div>
           ) : items.length === 0 ? (
-            <div className="p-16 text-center text-white/40 text-sm font-semibold">
+            <div className="p-16 text-center text-ink-tertiary text-sm font-semibold">
               No pending reports in moderation queue.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-white/5">
+                  <tr className="border-b border-hairline-dark text-ink-tertiary font-bold uppercase tracking-wider bg-ink/5">
                     <th className="p-4">Report Details</th>
                     <th className="p-4">Content Type</th>
                     <th className="p-4">Content ID</th>
@@ -136,18 +136,18 @@ export default function AdminModerationQueuePage() {
                     <th className="p-4 text-right">Moderation Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/10 text-white/60 font-medium">
+                <tbody className="divide-y divide-hairline-dark text-ink-secondary font-medium">
                   {items.map((item) => (
-                    <tr key={item.id} className="hover:bg-white/5 transition-colors">
+                    <tr key={item.id} className="hover:bg-mauve/5 transition-colors">
                       <td className="p-4">
-                        <div className="font-bold text-white/80 text-sm flex items-center gap-1.5">
+                        <div className="font-bold text-ink text-sm flex items-center gap-1.5">
                           <AlertTriangle className="h-4 w-4 text-amber-500" />
                           <span>{item.reason}</span>
                         </div>
                       </td>
-                      <td className="p-4 uppercase text-[10px] font-extrabold text-white/40">{item.resource_type}</td>
-                      <td className="p-4 font-mono text-white/70">{item.resource_id.substring(0, 16)}...</td>
-                      <td className="p-4 text-white/40 font-semibold">{new Date(item.created_at).toLocaleString()}</td>
+                      <td className="p-4 uppercase text-[10px] font-extrabold text-ink-tertiary">{item.resource_type}</td>
+                      <td className="p-4 font-mono text-ink-secondary">{item.resource_id.substring(0, 16)}...</td>
+                      <td className="p-4 text-ink-tertiary font-semibold">{new Date(item.created_at).toLocaleString()}</td>
                       <td className="p-4 text-right space-x-1.5">
                         <Button
                           onClick={() => handleResolve(item.id, "approve")}

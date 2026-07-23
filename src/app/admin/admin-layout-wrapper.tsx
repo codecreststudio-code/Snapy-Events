@@ -36,7 +36,7 @@ export function AdminLayoutWrapper({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-surface-dark text-white">
+    <div className="flex h-screen overflow-hidden bg-surface-dark text-ink">
       <AdminNav />
       <div className="flex flex-1 flex-col overflow-hidden">
         <AdminTopNav

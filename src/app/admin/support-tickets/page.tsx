@@ -127,34 +127,34 @@ export default function AdminSupportTicketsPage() {
     <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Support Center</h1>
-          <p className="text-sm text-white/50 mt-1">Review customer tickets, reply to inquiries, and manage resolution lifecycles.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">Support Center</h1>
+          <p className="text-sm text-ink-secondary mt-1">Review customer tickets, reply to inquiries, and manage resolution lifecycles.</p>
         </div>
-        <Button onClick={fetchTickets} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
-          <RefreshCw className="h-4 w-4 text-white/50" />
+        <Button onClick={fetchTickets} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-ink-secondary bg-surface-card hover:bg-mauve/5 font-semibold shadow-sm">
+          <RefreshCw className="h-4 w-4 text-ink-secondary" />
           <span>Refresh</span>
         </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 items-center">
         <div className="flex items-center max-w-sm w-full relative">
-          <Search className="h-4 w-4 absolute left-3 text-white/40" />
+          <Search className="h-4 w-4 absolute left-3 text-ink-tertiary" />
           <Input
             placeholder="Filter by subject, keyword, studio..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-surface-card border-hairline-dark text-white/80 shadow-sm"
+            className="pl-9 bg-surface-card border-hairline-dark text-ink shadow-sm"
           />
         </div>
         
-        <div className="flex items-center gap-1.5 bg-white/10 p-0.5 rounded-lg text-xs">
+        <div className="flex items-center gap-1.5 bg-ink/10 p-0.5 rounded-lg text-xs">
           {["all", "open", "pending", "resolved", "closed"].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
               className={cn(
                 "px-2.5 py-1.5 rounded-md capitalize transition-all cursor-pointer font-semibold",
-                statusFilter === st ? "bg-surface-card text-white/80 shadow-sm" : "text-white/50 hover:text-white/80"
+                statusFilter === st ? "bg-surface-card text-ink shadow-sm" : "text-ink-secondary hover:text-ink"
               )}
             >
               {st}
@@ -172,14 +172,14 @@ export default function AdminSupportTicketsPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-mauve" />
               </div>
             ) : filteredTickets.length === 0 ? (
-              <div className="p-16 text-center text-white/40 text-sm">
+              <div className="p-16 text-center text-ink-tertiary text-sm">
                 No tickets matching criteria.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-white/5">
+                    <tr className="border-b border-hairline-dark text-ink-tertiary font-bold uppercase tracking-wider bg-ink/5">
                       <th className="p-4">Ticket Info</th>
                       <th className="p-4">Tenant / Studio</th>
                       <th className="p-4">Priority</th>
@@ -187,23 +187,23 @@ export default function AdminSupportTicketsPage() {
                       <th className="p-4 text-right">Last Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/10 text-white/60 font-medium">
+                  <tbody className="divide-y divide-hairline-dark text-ink-secondary font-medium">
                     {filteredTickets.map((t) => (
                       <tr 
                         key={t.id} 
                         className={cn(
-                          "hover:bg-white/5 transition-colors cursor-pointer",
+                          "hover:bg-mauve/5 transition-colors cursor-pointer",
                           selectedTicket?.id === t.id ? "bg-mauve/10" : ""
                         )}
                         onClick={() => setSelectedTicket(t)}
                       >
                         <td className="p-4">
-                          <div className="font-bold text-white/80 text-sm">{t.subject}</div>
-                          <div className="text-[10px] text-white/40 mt-0.5 truncate max-w-[200px]">{t.description}</div>
+                          <div className="font-bold text-ink text-sm">{t.subject}</div>
+                          <div className="text-[10px] text-ink-tertiary mt-0.5 truncate max-w-[200px]">{t.description}</div>
                         </td>
                         <td className="p-4">
-                          <div className="text-white/70 font-semibold flex items-center gap-1">
-                            <Building2 className="h-3.5 w-3.5 text-white/40" />
+                          <div className="text-ink-secondary font-semibold flex items-center gap-1">
+                            <Building2 className="h-3.5 w-3.5 text-ink-tertiary" />
                             <span>{t.user?.name || "Independent"}</span>
                           </div>
                         </td>
@@ -212,7 +212,7 @@ export default function AdminSupportTicketsPage() {
                             t.priority === "urgent" ? "bg-red-500/10 text-red-400 border-red-500/20" :
                             t.priority === "high" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
                             t.priority === "normal" ? "bg-mauve/10 text-mauve border-mauve/20" :
-                            "bg-white/5 text-white/55 border-hairline-dark"
+                            "bg-ink/5 text-ink-secondary border-hairline-dark"
                           )}>
                             {t.priority}
                           </span>
@@ -222,12 +222,12 @@ export default function AdminSupportTicketsPage() {
                             t.status === "open" ? "bg-red-500/10 text-red-400 border-red-500/20" :
                             t.status === "pending" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
                             t.status === "resolved" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                            "bg-white/5 text-white/60 border-hairline-dark"
+                            "bg-ink/5 text-ink-secondary border-hairline-dark"
                           )}>
                             {t.status}
                           </span>
                         </td>
-                        <td className="p-4 text-right text-white/40 font-semibold">
+                        <td className="p-4 text-right text-ink-tertiary font-semibold">
                           {new Date(t.updated_at).toLocaleDateString()}
                         </td>
                       </tr>
@@ -246,8 +246,8 @@ export default function AdminSupportTicketsPage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-bold text-white/80 text-base">{selectedTicket.subject}</h3>
-                    <span className="text-xs text-white/40 block mt-0.5">Org: {selectedTicket.user?.name || "N/A"}</span>
+                    <h3 className="font-bold text-ink text-base">{selectedTicket.subject}</h3>
+                    <span className="text-xs text-ink-tertiary block mt-0.5">Org: {selectedTicket.user?.name || "N/A"}</span>
                   </div>
                   <div className="flex flex-col items-end gap-1.5">
                     <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border",
@@ -258,8 +258,8 @@ export default function AdminSupportTicketsPage() {
                   </div>
                 </div>
 
-                <div className="bg-white/5 border border-hairline-dark rounded-xl p-3 text-xs text-white/60">
-                  <p className="font-semibold text-white/70 mb-1">Issue Description:</p>
+                <div className="bg-ink/5 border border-hairline-dark rounded-xl p-3 text-xs text-ink-secondary">
+                  <p className="font-semibold text-ink-secondary mb-1">Issue Description:</p>
                   {selectedTicket.description}
                 </div>
 
@@ -271,7 +271,7 @@ export default function AdminSupportTicketsPage() {
                       className={cn("p-2 rounded-xl text-xs max-w-[85%] space-y-1.5",
                         msg.author === "Support Agent" 
                           ? "bg-mauve/10 text-mauve ml-auto border border-mauve/20" 
-                          : "bg-white/5 text-white/70 mr-auto border border-hairline-dark"
+                          : "bg-ink/5 text-ink-secondary mr-auto border border-hairline-dark"
                       )}
                     >
                       <p className="font-semibold text-[9px] opacity-75">{msg.author}</p>
@@ -289,12 +289,12 @@ export default function AdminSupportTicketsPage() {
                     placeholder="Type support agent message..."
                     value={replyMessage}
                     onChange={(e) => setReplyMessage(e.target.value)}
-                    className="h-9 text-xs bg-surface-card border-hairline-dark text-white/80"
+                    className="h-9 text-xs bg-surface-card border-hairline-dark text-ink"
                   />
                   <Button
                     type="submit"
                     disabled={actioningId === selectedTicket.id || !replyMessage.trim()}
-                    className="h-9 px-3 bg-mauve hover:bg-mauve-strong text-[#141110] font-bold rounded-lg shadow-sm"
+                    className="h-9 px-3 bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold rounded-lg shadow-sm"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
@@ -321,8 +321,8 @@ export default function AdminSupportTicketsPage() {
               </div>
             </div>
           ) : (
-            <div className="h-64 flex flex-col justify-center items-center text-center text-white/40">
-              <Inbox className="h-8 w-8 text-white/30 mb-2" />
+            <div className="h-64 flex flex-col justify-center items-center text-center text-ink-tertiary">
+              <Inbox className="h-8 w-8 text-ink-tertiary mb-2" />
               <span className="text-xs font-semibold">Select a support ticket from the list to view conversations, assign priority states, and send replies.</span>
             </div>
           )}

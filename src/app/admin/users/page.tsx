@@ -184,22 +184,22 @@ export default function AdminUsersPage() {
     <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">User Management</h1>
-          <p className="text-sm text-white/50 mt-1">Monitor registered photographers, reset passwords, change tiers, or delete accounts.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">User Management</h1>
+          <p className="text-sm text-ink-secondary mt-1">Monitor registered photographers, reset passwords, change tiers, or delete accounts.</p>
         </div>
-        <Button onClick={fetchUsers} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-white/5 hover:bg-white/10 font-semibold">
-          <RefreshCw className="h-4 w-4 text-white/50" />
+        <Button onClick={fetchUsers} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-ink-secondary bg-ink/5 hover:bg-mauve/10 font-semibold">
+          <RefreshCw className="h-4 w-4 text-ink-secondary" />
           <span>Refresh</span>
         </Button>
       </div>
 
       <div className="flex items-center max-w-sm relative">
-        <Search className="h-4 w-4 absolute left-3 text-white/40" />
+        <Search className="h-4 w-4 absolute left-3 text-ink-tertiary" />
         <Input
           placeholder="Search by name, email, or studio..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 bg-white/5 border-hairline-dark text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve"
+          className="pl-9 bg-ink/5 border-hairline-dark text-ink placeholder:text-ink-tertiary focus:border-mauve focus:ring-mauve"
         />
       </div>
 
@@ -212,14 +212,14 @@ export default function AdminUsersPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-mauve" />
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="p-16 text-center text-white/40 text-sm">
+              <div className="p-16 text-center text-ink-tertiary text-sm">
                 No users registered matching search criteria.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-surface-card-elevated">
+                    <tr className="border-b border-hairline-dark text-ink-tertiary font-bold uppercase tracking-wider bg-surface-card-elevated">
                       <th className="p-4">User Info</th>
                       <th className="p-4">Joined Date</th>
                       <th className="p-4">Role</th>
@@ -228,29 +228,29 @@ export default function AdminUsersPage() {
                       <th className="p-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                    <tbody className="divide-y divide-white/10 text-white/60 font-medium">
+                    <tbody className="divide-y divide-hairline-dark text-ink-secondary font-medium">
                       {filteredUsers.map((u) => (
                         <tr
                           key={u.id}
                           className={cn(
-                            "hover:bg-white/5 transition-colors cursor-pointer",
+                            "hover:bg-mauve/5 transition-colors cursor-pointer",
                             selectedUser?.id === u.id ? "bg-mauve/10" : ""
                           )}
                           onClick={() => setSelectedUser(u)}
                         >
                           <td className="p-4">
-                            <div className="font-bold text-white/80 text-sm">{u.full_name || "N/A"}</div>
-                            <div className="text-[10px] text-white/40 mt-0.5">{u.email}</div>
+                            <div className="font-bold text-ink text-sm">{u.full_name || "N/A"}</div>
+                            <div className="text-[10px] text-ink-tertiary mt-0.5">{u.email}</div>
                           </td>
                           <td className="p-4">
-                            <div className="text-white/70 font-semibold">{new Date(u.created_at).toLocaleDateString()}</div>
+                            <div className="text-ink-secondary font-semibold">{new Date(u.created_at).toLocaleDateString()}</div>
                           </td>
                           <td className="p-4" onClick={(e) => e.stopPropagation()}>
                             <select
                               value={u.role || "member"}
                               onChange={(e) => handleRoleChange(u.id, e.target.value)}
                               disabled={actioningId === u.id}
-                              className="bg-white/5 border border-hairline-dark rounded-lg px-2.5 py-1 text-xs text-white/70 focus:outline-none focus:ring-1 focus:ring-mauve/50 font-semibold capitalize"
+                              className="bg-ink/5 border border-hairline-dark rounded-lg px-2.5 py-1 text-xs text-ink-secondary focus:outline-none focus:ring-1 focus:ring-mauve/50 font-semibold capitalize"
                             >
                               <option value="owner">Owner</option>
                               <option value="admin">Admin</option>
@@ -263,7 +263,7 @@ export default function AdminUsersPage() {
                             value={getActivePlan(u)}
                             onChange={(e) => handlePlanChange(u.id, e.target.value)}
                             disabled={actioningId === u.id}
-                            className="bg-white/5 border border-hairline-dark rounded-lg px-2.5 py-1 text-xs text-white/70 focus:outline-none focus:ring-1 focus:ring-mauve/50 font-semibold"
+                            className="bg-ink/5 border border-hairline-dark rounded-lg px-2.5 py-1 text-xs text-ink-secondary focus:outline-none focus:ring-1 focus:ring-mauve/50 font-semibold"
                           >
                             <option value="free">Free</option>
                             <option value="starter">Starter</option>
@@ -296,7 +296,7 @@ export default function AdminUsersPage() {
                             disabled={actioningId === u.id}
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 text-white/50 hover:bg-white/10 rounded-lg"
+                            className="h-8 w-8 p-0 text-ink-secondary hover:bg-mauve/10 rounded-lg"
                             title="Reset Password"
                           >
                             <Key className="h-4 w-4" />
@@ -330,46 +330,46 @@ export default function AdminUsersPage() {
                   {selectedUser.full_name?.charAt(0) || "U"}
                 </div>
                 <div>
-                  <h3 className="font-bold text-white/80 text-base">{selectedUser.full_name || "N/A"}</h3>
-                  <span className="text-xs text-white/40 block mt-0.5">{selectedUser.email}</span>
+                  <h3 className="font-bold text-ink text-base">{selectedUser.full_name || "N/A"}</h3>
+                  <span className="text-xs text-ink-tertiary block mt-0.5">{selectedUser.email}</span>
                 </div>
               </div>
 
               <div className="border-t border-hairline-dark pt-4 space-y-3 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">User ID</span>
-                  <span className="font-mono text-white/70 font-semibold">{selectedUser.id}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">User ID</span>
+                  <span className="font-mono text-ink-secondary font-semibold">{selectedUser.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Role</span>
-                  <span className="text-white/70 capitalize font-semibold">{selectedUser.role}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Role</span>
+                  <span className="text-ink-secondary capitalize font-semibold">{selectedUser.role}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Plan Tier</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Plan Tier</span>
                   <span className="text-mauve font-bold uppercase">{getActivePlan(selectedUser)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Join Date</span>
-                  <span className="text-white/70 font-semibold">{new Date(selectedUser.created_at).toLocaleString()}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Join Date</span>
+                  <span className="text-ink-secondary font-semibold">{new Date(selectedUser.created_at).toLocaleString()}</span>
                 </div>
               </div>
 
 
 
               <div className="border-t border-hairline-dark pt-4 space-y-2">
-                <h4 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2">Account Actions</h4>
+                <h4 className="text-xs font-bold text-ink-tertiary uppercase tracking-wider mb-2">Account Actions</h4>
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     onClick={() => handleStatusChange(selectedUser.id, selectedUser.is_active !== false)}
                     variant="outline"
-                    className="w-full text-xs font-bold text-white/70 border-hairline-dark hover:bg-white/5"
+                    className="w-full text-xs font-bold text-ink-secondary border-hairline-dark hover:bg-mauve/5"
                   >
                     {selectedUser.is_active !== false ? "Suspend Account" : "Activate Account"}
                   </Button>
                   <Button
                     onClick={() => handleResetPassword(selectedUser.id)}
                     variant="outline"
-                    className="w-full text-xs font-bold text-white/70 border-hairline-dark hover:bg-white/5"
+                    className="w-full text-xs font-bold text-ink-secondary border-hairline-dark hover:bg-mauve/5"
                   >
                     Reset Password
                   </Button>
@@ -383,8 +383,8 @@ export default function AdminUsersPage() {
               </div>
             </div>
           ) : (
-            <div className="h-64 flex flex-col justify-center items-center text-center text-white/40">
-              <Mail className="h-8 w-8 text-white/30 mb-2" />
+            <div className="h-64 flex flex-col justify-center items-center text-center text-ink-tertiary">
+              <Mail className="h-8 w-8 text-ink-tertiary mb-2" />
               <span className="text-xs font-semibold">Select a user to view full profile details and execute account operations.</span>
             </div>
           )}

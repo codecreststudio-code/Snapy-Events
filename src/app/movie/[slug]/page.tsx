@@ -57,8 +57,8 @@ export default function SharePage({ params }: { params: Promise<{ slug: string }
   if (status === "not_found" || !data) {
     return (
       <div className="min-h-screen bg-surface-dark flex flex-col items-center justify-center gap-3 px-6 text-center">
-        <Film className="h-10 w-10 text-white/30" />
-        <p className="text-white/70 font-medium">This memory couldn&apos;t be found.</p>
+        <Film className="h-10 w-10 text-ink-tertiary" />
+        <p className="text-ink-secondary font-medium">This memory couldn&apos;t be found.</p>
       </div>
     )
   }
@@ -68,7 +68,7 @@ export default function SharePage({ params }: { params: Promise<{ slug: string }
   const hasSlideshow = !!data.slideshow && data.slideshow.photos.length > 0
 
   return (
-    <div className="min-h-screen bg-surface-dark text-white">
+    <div className="min-h-screen bg-surface-dark text-ink">
       <div className="max-w-lg mx-auto px-6 py-10 space-y-8">
         <div className="text-center space-y-1">
           <p className="text-[10px] uppercase tracking-[0.2em] text-mauve font-bold">✨ Snapsy Memories</p>
@@ -94,19 +94,19 @@ export default function SharePage({ params }: { params: Promise<{ slug: string }
                     url: pageUrl,
                   })
                 }
-                className="w-full flex items-center justify-center gap-2 rounded-full bg-mauve text-[#141110] font-semibold py-3 text-sm hover:bg-mauve-strong transition-colors"
+                className="w-full flex items-center justify-center gap-2 rounded-full bg-mauve text-[#faf6ed] font-semibold py-3 text-sm hover:bg-mauve-strong transition-colors"
               >
                 <Share2 className="h-4 w-4" /> Share
               </button>
             )}
 
             <div className="grid grid-cols-4 gap-2 text-center text-xs">
-              <a href={`https://wa.me/?text=${shareText}%20${encodedUrl}`} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-hairline-dark bg-white/5 py-3 hover:bg-white/10 transition-colors">WhatsApp</a>
-              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-hairline-dark bg-white/5 py-3 hover:bg-white/10 transition-colors">Facebook</a>
-              <a href={`https://t.me/share/url?url=${encodedUrl}&text=${shareText}`} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-hairline-dark bg-white/5 py-3 hover:bg-white/10 transition-colors">Telegram</a>
+              <a href={`https://wa.me/?text=${shareText}%20${encodedUrl}`} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-hairline-dark bg-mauve/5 py-3 hover:bg-mauve/10 transition-colors">WhatsApp</a>
+              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-hairline-dark bg-mauve/5 py-3 hover:bg-mauve/10 transition-colors">Facebook</a>
+              <a href={`https://t.me/share/url?url=${encodedUrl}&text=${shareText}`} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-hairline-dark bg-mauve/5 py-3 hover:bg-mauve/10 transition-colors">Telegram</a>
               <button
                 onClick={() => navigator.clipboard?.writeText(pageUrl)}
-                className="rounded-xl border border-hairline-dark bg-white/5 py-3 hover:bg-white/10 transition-colors"
+                className="rounded-xl border border-hairline-dark bg-mauve/5 py-3 hover:bg-mauve/10 transition-colors"
                 title="Instagram doesn't support direct link-sharing — copy the link and paste it into your Story or bio instead."
               >
                 Copy Link
@@ -117,14 +117,14 @@ export default function SharePage({ params }: { params: Promise<{ slug: string }
               <div className="p-3 bg-white rounded-2xl">
                 <QRCodeSVG value={pageUrl} size={140} bgColor="transparent" fgColor="#1c1a17" level="H" />
               </div>
-              <p className="text-[11px] text-white/40">Scan to watch on another device</p>
+              <p className="text-[11px] text-ink-tertiary">Scan to watch on another device</p>
             </div>
           </>
         ) : (
           <div className="rounded-2xl border border-hairline-dark bg-surface-card p-8 text-center space-y-2">
-            <Film className="h-8 w-8 text-white/30 mx-auto" />
-            <p className="text-white/70 text-sm font-medium">No slideshow is ready yet.</p>
-            <p className="text-white/40 text-xs">Check back soon — the host is still putting it together.</p>
+            <Film className="h-8 w-8 text-ink-tertiary mx-auto" />
+            <p className="text-ink-secondary text-sm font-medium">No slideshow is ready yet.</p>
+            <p className="text-ink-tertiary text-xs">Check back soon — the host is still putting it together.</p>
           </div>
         )}
       </div>

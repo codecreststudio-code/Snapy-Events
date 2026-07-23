@@ -82,7 +82,7 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
             variants={prefersReducedMotion ? undefined : fadeInUp}
             role="status"
             aria-live="polite"
-            className="fixed inset-x-4 bottom-4 z-[100] mx-auto flex max-w-sm items-center gap-3 rounded-2xl border border-[#3D332A] bg-[#1C1814] px-4 py-3 shadow-2xl sm:inset-x-auto sm:right-4"
+            className="fixed inset-x-4 bottom-4 z-[100] mx-auto flex max-w-sm items-center gap-3 rounded-2xl border border-[#e5dfd0] bg-[#ffffff] px-4 py-3 shadow-2xl sm:inset-x-auto sm:right-4"
           >
             <div className="flex-1 text-sm text-white">
               <p className="font-medium">Update available</p>
@@ -91,7 +91,7 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={applyUpdate}
-              className="flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[#B28DAE] px-3 py-2 text-xs font-bold text-[#141110] transition-transform hover:scale-[1.02] hover:bg-[#a468a0] active:scale-[0.98]"
+              className="flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[#b8925a] px-3 py-2 text-xs font-bold text-[#faf6ed] transition-transform hover:scale-[1.02] hover:bg-[#96723a] active:scale-[0.98]"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               Refresh

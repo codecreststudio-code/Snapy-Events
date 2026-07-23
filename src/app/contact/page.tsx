@@ -18,7 +18,7 @@ const inter = Inter({
 
 export default function ContactPage() {
   return (
-    <div className={`flex min-h-screen flex-col bg-surface-dark text-white selection:bg-mauve/30 ${inter.className}`}>
+    <div className={`flex min-h-screen flex-col bg-surface-dark text-ink selection:bg-mauve/30 ${inter.className}`}>
       <PublicNavbar />
 
       <main className="flex-1 bg-surface-dark overflow-hidden relative py-12 md:py-20">
@@ -41,7 +41,7 @@ export default function ContactPage() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className={`text-4xl font-light tracking-tight md:text-6xl text-white leading-tight ${playfair.className}`}
+            className={`text-4xl font-light tracking-tight md:text-6xl text-ink leading-tight ${playfair.className}`}
           >
             Let's start a <span className="italic font-light bg-gradient-to-r from-mauve to-mauve-strong bg-clip-text text-transparent">conversation</span>
           </motion.h1>
@@ -50,7 +50,7 @@ export default function ContactPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-md text-white/60 max-w-xl mx-auto font-light leading-relaxed"
+            className="text-md text-ink-secondary max-w-xl mx-auto font-light leading-relaxed"
           >
             Have questions about custom event volumes, features, or integrations? We'll get back to you within 24 hours.
           </motion.p>
@@ -66,8 +66,8 @@ export default function ContactPage() {
                     <Mail className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-sm">General Support</h3>
-                    <p className="text-xs text-white/60 font-light mt-1">Get fast help with event creation or uploader sessions.</p>
+                    <h3 className="font-bold text-ink text-sm">General Support</h3>
+                    <p className="text-xs text-ink-secondary font-light mt-1">Get fast help with event creation or uploader sessions.</p>
                     <span className="text-xs font-bold text-mauve block mt-2 hover:underline cursor-pointer">support@snapsy.events</span>
                   </div>
                 </div>
@@ -77,8 +77,8 @@ export default function ContactPage() {
                     <Sparkles className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-sm">Sales & Enterprise</h3>
-                    <p className="text-xs text-white/60 font-light mt-1">Custom quotes, SLA agreements, or photographer bundle deals.</p>
+                    <h3 className="font-bold text-ink text-sm">Sales & Enterprise</h3>
+                    <p className="text-xs text-ink-secondary font-light mt-1">Custom quotes, SLA agreements, or photographer bundle deals.</p>
                     <span className="text-xs font-bold text-red-400 block mt-2 hover:underline cursor-pointer">sales@snapsy.events</span>
                   </div>
                 </div>
@@ -88,8 +88,8 @@ export default function ContactPage() {
                     <Shield className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-sm">Press & Inquiries</h3>
-                    <p className="text-xs text-white/60 font-light mt-1">For media files, logos, interviews, and partnership deals.</p>
+                    <h3 className="font-bold text-ink text-sm">Press & Inquiries</h3>
+                    <p className="text-xs text-ink-secondary font-light mt-1">For media files, logos, interviews, and partnership deals.</p>
                     <span className="text-xs font-bold text-emerald-400 block mt-2 hover:underline cursor-pointer">press@snapsy.events</span>
                   </div>
                 </div>

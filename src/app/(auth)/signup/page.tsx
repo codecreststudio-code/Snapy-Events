@@ -136,13 +136,13 @@ function SignupPricingCard({
   let selectedClasses = "border-hairline-dark hover:border-mauve/40 hover:shadow-xl"
   if (isSelected) {
     if (plan.id === "free") {
-      selectedClasses = "border-white/30 ring-2 ring-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.25)]"
+      selectedClasses = "border-ink/30 ring-2 ring-ink/10 shadow-[0_15px_40px_rgba(0,0,0,0.1)]"
     } else if (plan.id === "starter") {
-      selectedClasses = "border-mauve ring-2 ring-mauve/15 shadow-[0_15px_40px_rgba(178,141,174,0.15)]"
+      selectedClasses = "border-mauve ring-2 ring-mauve/15 shadow-[0_15px_40px_rgba(184, 146, 90,0.15)]"
     } else if (plan.id === "standard") {
-      selectedClasses = "border-mauve ring-2 ring-mauve/25 shadow-[0_20px_50px_rgba(178,141,174,0.2)] md:scale-[1.03] z-10"
+      selectedClasses = "border-mauve ring-2 ring-mauve/25 shadow-[0_20px_50px_rgba(184, 146, 90,0.2)] md:scale-[1.03] z-10"
     } else if (plan.id === "premium") {
-      selectedClasses = "border-mauve-strong ring-2 ring-mauve-strong/25 shadow-[0_20px_50px_rgba(164,104,160,0.2)] md:scale-[1.03] z-10"
+      selectedClasses = "border-mauve-strong ring-2 ring-mauve-strong/25 shadow-[0_20px_50px_rgba(150, 114, 58,0.2)] md:scale-[1.03] z-10"
     }
   } else {
     if (isPopular) {
@@ -169,12 +169,12 @@ function SignupPricingCard({
             style={{
               background: `radial-gradient(320px circle at ${coords.x}px ${coords.y}px, ${
                 isPopular
-                  ? "rgba(178, 141, 174, 0.12)"
+                  ? "rgba(184, 146, 90, 0.12)"
                   : isPremium
-                  ? "rgba(164, 104, 160, 0.12)"
+                  ? "rgba(150, 114, 58, 0.12)"
                   : plan.id === "starter"
-                  ? "rgba(178, 141, 174, 0.08)"
-                  : "rgba(255, 255, 255, 0.05)"
+                  ? "rgba(184, 146, 90, 0.08)"
+                  : "rgba(42, 36, 28, 0.04)"
               }, transparent 80%)`,
             }}
           />
@@ -183,13 +183,13 @@ function SignupPricingCard({
 
       {/* Badges Container */}
       {isPopular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-mauve px-4 py-1.5 text-[9px] font-bold text-[#141110] tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-mauve px-4 py-1.5 text-[9px] font-bold text-[#faf6ed] tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
           <Sparkles className="h-3 w-3" />
           POPULAR
         </div>
       )}
       {isPremium && (
-        <div className="absolute -top-3 right-4 rounded-full bg-mauve-strong px-3 py-1.5 text-[9px] font-bold text-[#141110] tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
+        <div className="absolute -top-3 right-4 rounded-full bg-mauve-strong px-3 py-1.5 text-[9px] font-bold text-[#faf6ed] tracking-widest uppercase shadow-md flex items-center gap-1 z-20">
           <Crown className="h-3.5 w-3.5" />
           BEST VALUE
         </div>
@@ -198,8 +198,8 @@ function SignupPricingCard({
       <div className="relative z-10">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-lg font-bold text-white">{plan.name}</h3>
-            <p className="mt-1.5 text-xs text-white/50 leading-relaxed font-light min-h-[32px]">
+            <h3 className="text-lg font-bold text-ink">{plan.name}</h3>
+            <p className="mt-1.5 text-xs text-ink-secondary leading-relaxed font-light min-h-[32px]">
               {plan.description}
             </p>
           </div>
@@ -216,24 +216,24 @@ function SignupPricingCard({
         </div>
 
         <div className="mt-4 flex items-baseline gap-1">
-          <span className="text-3xl font-extrabold text-white">₹{plan.price}</span>
-          <span className="text-white/40 text-xs font-light">/ {plan.period}</span>
+          <span className="text-3xl font-extrabold text-ink">₹{plan.price}</span>
+          <span className="text-ink-tertiary text-xs font-light">/ {plan.period}</span>
         </div>
 
         <ul className="mt-5 space-y-3 border-t border-hairline-dark pt-5">
           {plan.features.map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-2.5 text-xs text-white/60 font-light">
+            <li key={idx} className="flex items-start gap-2.5 text-xs text-ink-secondary font-light">
               <Check
                 className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
                   isSelected
                     ? plan.id === "free"
-                      ? "text-white"
+                      ? "text-ink"
                       : plan.id === "starter"
                       ? "text-mauve"
                       : isPopular
                       ? "text-mauve"
                       : "text-mauve-strong"
-                    : "text-white/30"
+                    : "text-ink-tertiary"
                 }`}
               />
               <span>{feature}</span>
@@ -248,13 +248,13 @@ function SignupPricingCard({
           className={`w-full font-bold py-2.5 rounded-xl transition-all active:scale-[0.98] text-xs border-none ${
             isSelected
               ? plan.id === "free"
-                ? "bg-white/10 text-white shadow-md"
+                ? "bg-ink/10 text-ink shadow-md"
                 : plan.id === "starter"
-                ? "bg-mauve text-[#141110] shadow-md shadow-mauve/10"
+                ? "bg-mauve text-[#faf6ed] shadow-md shadow-mauve/10"
                 : isPopular
-                ? "bg-mauve text-[#141110] shadow-lg shadow-mauve/20"
-                : "bg-mauve-strong text-[#141110] shadow-lg shadow-mauve-strong/20"
-              : "bg-white/5 text-white/70 hover:bg-white/10"
+                ? "bg-mauve text-[#faf6ed] shadow-lg shadow-mauve/20"
+                : "bg-mauve-strong text-[#faf6ed] shadow-lg shadow-mauve-strong/20"
+              : "bg-mauve/5 text-ink-secondary hover:bg-mauve/10"
           }`}
         >
           {isSelected ? "Selected" : `Choose ${plan.name}`}
@@ -415,7 +415,7 @@ export default function SignupPage() {
       border: "border-mauve-strong/30",
       badge: "bg-mauve-strong",
       hover: "hover:border-mauve-strong/50",
-      buttonActive: "bg-mauve-strong/10 border-mauve-strong text-mauve-strong shadow-[0_0_10px_rgba(164,104,160,0.15)]",
+      buttonActive: "bg-mauve-strong/10 border-mauve-strong text-mauve-strong shadow-[0_0_10px_rgba(150, 114, 58,0.15)]",
       icon: "text-mauve-strong"
     }
     // free, starter, and standard all share the primary mauve accent
@@ -425,13 +425,13 @@ export default function SignupPage() {
       border: "border-mauve/30",
       badge: "bg-mauve",
       hover: "hover:border-mauve/50",
-      buttonActive: "bg-mauve/10 border-mauve text-mauve shadow-[0_0_10px_rgba(178,141,174,0.15)]",
+      buttonActive: "bg-mauve/10 border-mauve text-mauve shadow-[0_0_10px_rgba(184, 146, 90,0.15)]",
       icon: "text-mauve"
     }
   }
 
   const getContinueButtonClass = () => {
-    const base = "w-full sm:w-auto font-bold px-8 py-6 rounded-2xl flex items-center justify-center gap-2 text-base transition-all active:scale-[0.98] border-none text-[#141110] "
+    const base = "w-full sm:w-auto font-bold px-8 py-6 rounded-2xl flex items-center justify-center gap-2 text-base transition-all active:scale-[0.98] border-none text-[#faf6ed] "
     if (selectedPlan === "premium") {
       return base + "bg-mauve-strong hover:scale-[1.01] shadow-lg shadow-mauve-strong/20"
     }
@@ -448,17 +448,17 @@ export default function SignupPage() {
 
   if (step === 1) {
     return (
-      <div className={`min-h-screen bg-surface-dark text-white py-12 px-4 sm:px-6 lg:px-8 flex flex-col justify-between selection:bg-mauve/30 ${inter.className}`}>
+      <div className={`min-h-screen bg-surface-dark text-ink py-12 px-4 sm:px-6 lg:px-8 flex flex-col justify-between selection:bg-mauve/30 ${inter.className}`}>
         <div className="max-w-6xl mx-auto w-full">
           {/* Header */}
           <div className="text-center mb-12">
             <Link href="/" className="inline-flex items-center justify-center mb-4">
               <Logo />
             </Link>
-            <h1 className={`text-4xl font-light tracking-tight sm:text-5xl text-white font-playfair ${playfair.className}`}>
+            <h1 className={`text-4xl font-light tracking-tight sm:text-5xl text-ink font-playfair ${playfair.className}`}>
               Choose Your Perfect Plan
             </h1>
-            <p className="mt-4 text-md text-white/50 max-w-2xl mx-auto font-light leading-relaxed">
+            <p className="mt-4 text-md text-ink-secondary max-w-2xl mx-auto font-light leading-relaxed">
               Select a tier that matches your event size. Instantly collect photos, boost limits, and enable premium features.
             </p>
           </div>
@@ -488,7 +488,7 @@ export default function SignupPage() {
               <div className="flex items-center justify-between border-b border-hairline-dark pb-4 mb-6">
                 <div className="flex items-center gap-2.5">
                   <Sparkles className={`h-5 w-5 ${accent.icon} animate-pulse`} />
-                  <h3 className="text-lg font-bold text-white">
+                  <h3 className="text-lg font-bold text-ink">
                     Customize Limits with Add-Ons
                   </h3>
                 </div>
@@ -505,9 +505,9 @@ export default function SignupPage() {
                 <div className="space-y-8">
                   {/* Guest Limit Boost */}
                   <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-white/70 flex items-center gap-2">
+                    <Label className="text-sm font-semibold text-ink-secondary flex items-center gap-2">
                       <span>🚀 Boost Guest Limit</span>
-                      <span className="text-xs text-white/40 font-normal">(Base: {baseGuestLimitStr})</span>
+                      <span className="text-xs text-ink-tertiary font-normal">(Base: {baseGuestLimitStr})</span>
                     </Label>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                       {guestBoostsList.map((boost) => (
@@ -518,7 +518,7 @@ export default function SignupPage() {
                           className={`py-3 px-3 rounded-2xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
                             guestBoost === boost.value
                               ? accent.buttonActive
-                              : "bg-white/5 border-hairline-dark text-white/50 hover:border-mauve/30 hover:bg-white/10"
+                              : "bg-mauve/5 border-hairline-dark text-ink-secondary hover:border-mauve/30 hover:bg-mauve/10"
                           }`}
                         >
                           <span>{boost.label}</span>
@@ -532,9 +532,9 @@ export default function SignupPage() {
 
                   {/* Shots Limit Boost */}
                   <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-white/70 flex items-center gap-2">
+                    <Label className="text-sm font-semibold text-ink-secondary flex items-center gap-2">
                       <span>📸 Boost Shots Per Guest</span>
-                      <span className="text-xs text-white/40 font-normal">(Base: {baseShotLimitStr})</span>
+                      <span className="text-xs text-ink-tertiary font-normal">(Base: {baseShotLimitStr})</span>
                     </Label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {shotBoostsList.map((boost) => (
@@ -545,7 +545,7 @@ export default function SignupPage() {
                           className={`py-3 px-3 rounded-2xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
                             shotBoost === boost.value
                               ? accent.buttonActive
-                              : "bg-white/5 border-hairline-dark text-white/50 hover:border-mauve/30 hover:bg-white/10"
+                              : "bg-mauve/5 border-hairline-dark text-ink-secondary hover:border-mauve/30 hover:bg-mauve/10"
                           }`}
                         >
                           <span>{boost.label}</span>
@@ -564,14 +564,14 @@ export default function SignupPage() {
           {/* Pricing Overview & Next button */}
           <div className="flex flex-col sm:flex-row items-center justify-between glass-panel border border-hairline-dark rounded-3xl p-8 max-w-4xl mx-auto gap-6">
             <div className="text-center sm:text-left">
-              <span className="text-xs text-white/40 uppercase tracking-widest font-semibold">Total Price</span>
+              <span className="text-xs text-ink-tertiary uppercase tracking-widest font-semibold">Total Price</span>
               <div className="flex items-baseline gap-1.5 justify-center sm:justify-start mt-1">
-                <span className="text-3xl font-extrabold text-white">₹{totalPrice}</span>
-                <span className="text-sm text-white/50 font-light">
+                <span className="text-3xl font-extrabold text-ink">₹{totalPrice}</span>
+                <span className="text-sm text-ink-secondary font-light">
                   {selectedPlan === "free" ? "forever" : "per event"}
                 </span>
               </div>
-              <p className="text-xs text-white/40 mt-1.5 font-light">
+              <p className="text-xs text-ink-tertiary mt-1.5 font-light">
                 {selectedPlan !== "free" && (
                   <>
                     Base ₹{basePrice}
@@ -597,7 +597,7 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <footer className="text-center text-xs text-white/40 py-6 mt-12">
+        <footer className="text-center text-xs text-ink-tertiary py-6 mt-12">
           © {new Date().getFullYear()} Snapsy Inc. All rights reserved.
         </footer>
       </div>
@@ -606,14 +606,14 @@ export default function SignupPage() {
 
   // Step 2: Sign Up Details Form
   return (
-    <div className={`min-h-screen bg-surface-dark text-white flex items-center justify-center px-4 py-12 selection:bg-mauve/30 ${inter.className}`}>
+    <div className={`min-h-screen bg-surface-dark text-ink flex items-center justify-center px-4 py-12 selection:bg-mauve/30 ${inter.className}`}>
       <Card className="glass-panel w-full max-w-md border-hairline-dark shadow-xl rounded-3xl overflow-hidden p-2">
         <CardHeader className="text-center space-y-1 pt-6 px-6">
           <Link href="/signup" onClick={() => setStep(1)} className={`inline-flex items-center gap-1.5 mb-3 ${accent.text} hover:opacity-80 text-xs font-semibold mr-auto`}>
             <span>← Change Plan</span>
           </Link>
-          <CardTitle className="text-2xl font-playfair text-white font-light">Create your account</CardTitle>
-          <CardDescription className="text-white/50 text-sm font-light">
+          <CardTitle className="text-2xl font-playfair text-ink font-light">Create your account</CardTitle>
+          <CardDescription className="text-ink-secondary text-sm font-light">
             Sign up for the <strong className={`font-semibold ${accent.text}`}>{activePlanDetails.name}</strong> plan (₹{totalPrice})
           </CardDescription>
         </CardHeader>
@@ -627,7 +627,7 @@ export default function SignupPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-white/70 text-xs font-semibold">Full Name</Label>
+              <Label htmlFor="fullName" className="text-ink-secondary text-xs font-semibold">Full Name</Label>
               <Input
                 id="fullName"
                 type="text"
@@ -636,13 +636,13 @@ export default function SignupPage() {
                 onChange={(e) => setFullName(e.target.value)}
                 required
                 disabled={isLoading}
-                className={`bg-white/5 border-hairline-dark text-white placeholder:text-white/40 rounded-xl py-5 focus-visible:ring-0 ${getInputFocusClass()}`}
+                className={`bg-mauve/5 border-hairline-dark text-ink placeholder:text-ink-tertiary rounded-xl py-5 focus-visible:ring-0 ${getInputFocusClass()}`}
               />
             </div>
 
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/70 text-xs font-semibold">Email Address</Label>
+              <Label htmlFor="email" className="text-ink-secondary text-xs font-semibold">Email Address</Label>
               <Input
                 id="email"
                 type="email"
@@ -651,12 +651,12 @@ export default function SignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
-                className={`bg-white/5 border-hairline-dark text-white placeholder:text-white/40 rounded-xl py-5 focus-visible:ring-0 ${getInputFocusClass()}`}
+                className={`bg-mauve/5 border-hairline-dark text-ink placeholder:text-ink-tertiary rounded-xl py-5 focus-visible:ring-0 ${getInputFocusClass()}`}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-white/70 text-xs font-semibold">Password</Label>
+              <Label htmlFor="password" className="text-ink-secondary text-xs font-semibold">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -666,18 +666,18 @@ export default function SignupPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  className={`pr-10 bg-white/5 border-hairline-dark text-white placeholder:text-white/40 rounded-xl py-5 focus-visible:ring-0 ${getInputFocusClass()}`}
+                  className={`pr-10 bg-mauve/5 border-hairline-dark text-ink placeholder:text-ink-tertiary rounded-xl py-5 focus-visible:ring-0 ${getInputFocusClass()}`}
                   minLength={8}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-tertiary hover:text-ink-secondary"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="text-[10px] text-white/40 font-light">
+              <p className="text-[10px] text-ink-tertiary font-light">
                 Must be at least 8 characters with uppercase, lowercase, and numbers
               </p>
             </div>
@@ -686,7 +686,7 @@ export default function SignupPage() {
           <CardFooter className="flex flex-col space-y-4 pb-6 px-6">
             <Button
               type="submit"
-              className={`w-full font-bold py-6 rounded-2xl transition-all active:scale-[0.98] border-none text-[#141110] hover:scale-[1.01] active:scale-[0.99] ${
+              className={`w-full font-bold py-6 rounded-2xl transition-all active:scale-[0.98] border-none text-[#faf6ed] hover:scale-[1.01] active:scale-[0.99] ${
                 selectedPlan === "premium"
                   ? "bg-mauve-strong shadow-lg shadow-mauve-strong/20"
                   : "bg-mauve hover:bg-mauve-strong shadow-lg shadow-mauve/10"
@@ -702,17 +702,17 @@ export default function SignupPage() {
 
             <div className="relative w-full my-2">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-white/10" />
+                <span className="w-full border-t border-hairline-dark" />
               </div>
               <div className="relative flex justify-center text-[10px] uppercase tracking-wider font-semibold">
-                <span className="bg-surface-card px-3 text-white/40">Or continue with</span>
+                <span className="bg-surface-card px-3 text-ink-tertiary">Or continue with</span>
               </div>
             </div>
 
             <Button
               type="button"
               variant="outline"
-              className="w-full border-white/15 text-white hover:bg-white/5 rounded-2xl py-6"
+              className="w-full border-hairline-dark text-ink hover:bg-mauve/5 rounded-2xl py-6"
               onClick={handleGoogleSignIn}
               disabled={isLoading}
             >
@@ -722,7 +722,7 @@ export default function SignupPage() {
               Sign up with Google
             </Button>
 
-            <p className="text-xs text-white/40 text-center font-light pt-2">
+            <p className="text-xs text-ink-tertiary text-center font-light pt-2">
               Already have an account?{" "}
               <Link href="/login" className={`hover:underline font-semibold ${accent.text}`}>
                 Sign in

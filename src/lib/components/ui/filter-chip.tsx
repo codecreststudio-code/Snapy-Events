@@ -15,7 +15,7 @@ const filterChipVariants = cva(
     variants: {
       active: {
         true: "border-transparent bg-mauve text-surface-dark",
-        false: "border-hairline-dark bg-surface-card text-white/70 hover:border-mauve/40 hover:text-white",
+        false: "border-hairline-dark bg-surface-card text-ink-secondary hover:border-mauve/40 hover:text-ink",
       },
     },
     defaultVariants: { active: false },

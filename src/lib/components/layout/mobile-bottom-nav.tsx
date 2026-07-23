@@ -71,10 +71,10 @@ function TabButton({
       <Icon
         className={cn(
           "h-5 w-5 transition-colors duration-200",
-          active ? "text-mauve" : "text-white/50"
+          active ? "text-mauve" : "text-ink-secondary"
         )}
       />
-      <span className={cn("transition-colors duration-200", active ? "text-mauve" : "text-white/50")}>
+      <span className={cn("transition-colors duration-200", active ? "text-mauve" : "text-ink-secondary")}>
         {label}
       </span>
     </Link>
@@ -136,7 +136,7 @@ export function MobileBottomNav() {
             <span
               className={cn(
                 "mt-1 text-[10px] font-medium transition-colors",
-                homeActive ? "text-mauve" : "text-white/50"
+                homeActive ? "text-mauve" : "text-ink-secondary"
               )}
             >
               Home
@@ -165,8 +165,8 @@ export function MobileBottomNav() {
                 moreActive ? "opacity-100 scale-100" : "opacity-0 scale-50"
               )}
             />
-            <MoreHorizontal className={cn("h-5 w-5", moreActive ? "text-mauve" : "text-white/50")} />
-            <span className={cn(moreActive ? "text-mauve" : "text-white/50")}>More</span>
+            <MoreHorizontal className={cn("h-5 w-5", moreActive ? "text-mauve" : "text-ink-secondary")} />
+            <span className={cn(moreActive ? "text-mauve" : "text-ink-secondary")}>More</span>
           </button>
         </div>
       </nav>

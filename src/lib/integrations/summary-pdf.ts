@@ -11,7 +11,7 @@ import { jsPDF } from "jspdf"
 import type { EventSummaryStats } from "./memories"
 import { formatBytes, formatHour } from "./memories"
 
-const MAUVE = "#A468A0"
+const MAUVE = "#96723a"
 const INK = "#211B22"
 const MUTED = "#6B6470"
 

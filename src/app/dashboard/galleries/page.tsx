@@ -97,11 +97,11 @@ function GalleryCard({
 
   return (
     <>
-      <Card className="overflow-hidden rounded-2xl border border-[#3D332A] bg-[#1C1814] hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300 group flex flex-col justify-between">
+      <Card className="overflow-hidden rounded-2xl border border-[#e5dfd0] bg-[#ffffff] hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300 group flex flex-col justify-between">
         <div>
           {/* Gallery Cover Image */}
           <div
-            className="aspect-video bg-white/5 relative overflow-hidden"
+            className="aspect-video bg-ink/5 relative overflow-hidden"
             style={!coverImage && coverGradient ? { backgroundImage: coverGradient } : undefined}
           >
             {coverImage ? (
@@ -112,7 +112,7 @@ function GalleryCard({
               />
             ) : coverGradient ? null : (
               <div className="absolute inset-0 bg-gradient-to-br from-mauve/10 to-mauve-strong/5 flex items-center justify-center">
-                <Images className="h-10 w-10 text-white/20 group-hover:text-mauve/60 transition-colors" />
+                <Images className="h-10 w-10 text-ink-tertiary group-hover:text-mauve/60 transition-colors" />
               </div>
             )}
 
@@ -127,13 +127,13 @@ function GalleryCard({
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem asChild className="gap-2 cursor-pointer">
                     <Link href={`/dashboard/events/${(gallery as any)?.event?.slug}/gallery`}>
-                      <Edit className="h-4 w-4 text-white/50" />
+                      <Edit className="h-4 w-4 text-ink-secondary" />
                       Edit Settings
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="gap-2 cursor-pointer">
                     <Link href={`/event/${(gallery as any)?.event?.slug}/g/${gallery.slug}`} target="_blank">
-                      <Eye className="h-4 w-4 text-white/50" />
+                      <Eye className="h-4 w-4 text-ink-secondary" />
                       View Public Gallery
                     </Link>
                   </DropdownMenuItem>
@@ -153,12 +153,12 @@ function GalleryCard({
           <div className="p-5 space-y-3">
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-1">
-                <h3 className="font-semibold text-base leading-snug text-white group-hover:text-mauve transition-colors truncate">
+                <h3 className="font-semibold text-base leading-snug text-ink group-hover:text-mauve transition-colors truncate">
                   {gallery.name}
                 </h3>
                 {(gallery as any)?.event && (
-                  <p className="text-xs text-white/50 truncate flex items-center gap-1">
-                    <span className="font-medium text-white/40">Event:</span>
+                  <p className="text-xs text-ink-secondary truncate flex items-center gap-1">
+                    <span className="font-medium text-ink-tertiary">Event:</span>
                     {(gallery as any)?.event?.name}
                   </p>
                 )}
@@ -166,7 +166,7 @@ function GalleryCard({
             </div>
 
             {gallery.description && (
-              <p className="text-xs text-white/50 line-clamp-2 leading-relaxed bg-white/[0.03] p-2.5 rounded border border-[#3D332A]">
+              <p className="text-xs text-ink-secondary line-clamp-2 leading-relaxed bg-ink/[0.03] p-2.5 rounded border border-[#e5dfd0]">
                 {gallery.description}
               </p>
             )}
@@ -174,9 +174,9 @@ function GalleryCard({
         </div>
 
         {/* Footer Metrics */}
-        <div className="px-5 py-4 border-t border-[#3D332A] bg-white/[0.02] flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs text-white/50">
-            <ImageIcon className="h-4 w-4 text-white/40" />
+        <div className="px-5 py-4 border-t border-[#e5dfd0] bg-ink/[0.02] flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-xs text-ink-secondary">
+            <ImageIcon className="h-4 w-4 text-ink-tertiary" />
             <span>{gallery.photo_count || 0} photos</span>
           </div>
 
@@ -187,13 +187,13 @@ function GalleryCard({
                 Public
               </span>
             ) : (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase border bg-white/5 border-white/15 text-white/50 flex items-center gap-1">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase border bg-ink/5 border-hairline-dark text-ink-secondary flex items-center gap-1">
                 <Lock className="h-3 w-3" />
                 Private
               </span>
             )}
             {gallery.reveal_enabled && gallery.reveal_at && (
-              <span className="text-[10px] text-white/40 font-medium">
+              <span className="text-[10px] text-ink-tertiary font-medium">
                 Delayed Reveal
               </span>
             )}
@@ -279,16 +279,16 @@ export default function GalleriesPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h1 className="font-playfair text-3xl font-light text-white">Galleries</h1>
-            <p className="text-white/50 text-sm">Manage your photo directories</p>
+            <h1 className="font-playfair text-3xl font-light text-ink">Galleries</h1>
+            <p className="text-ink-secondary text-sm">Manage your photo directories</p>
           </div>
-          <Button disabled className="rounded-full bg-mauve text-[#141110] font-semibold">
+          <Button disabled className="rounded-full bg-mauve text-[#faf6ed] font-semibold">
             <Plus className="mr-2 h-4 w-4" /> Create Gallery
           </Button>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-72 w-full rounded-2xl border border-[#3D332A] bg-white/5 animate-pulse" />
+            <div key={i} className="h-72 w-full rounded-2xl border border-[#e5dfd0] bg-ink/5 animate-pulse" />
           ))}
         </div>
       </div>
@@ -298,17 +298,17 @@ export default function GalleriesPage() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#3D332A] pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#e5dfd0] pb-6">
         <div>
-          <h1 className="font-playfair text-3xl font-light text-white">
+          <h1 className="font-playfair text-3xl font-light text-ink">
             Your Galleries
           </h1>
-          <p className="text-white/50 mt-1 text-sm">
+          <p className="text-ink-secondary mt-1 text-sm">
             Manage public client galleries, download bounds, and visibility rules.
           </p>
         </div>
         <Link href="/dashboard/events">
-          <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+          <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
             <Plus className="mr-2 h-4 w-4" />
             Create from Event
           </Button>
@@ -316,27 +316,27 @@ export default function GalleriesPage() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between border-b border-[#3D332A] pb-6">
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between border-b border-[#e5dfd0] pb-6">
         <div className="relative w-full sm:max-w-md">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-white/40" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-ink-tertiary" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search galleries or events..."
-            className="pl-9 bg-white/5 border-[#3D332A] text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve"
+            className="pl-9 bg-ink/5 border-[#e5dfd0] text-ink placeholder:text-ink-tertiary focus:border-mauve focus:ring-mauve"
           />
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Filter className="h-4 w-4 text-white/40" />
+          <Filter className="h-4 w-4 text-ink-tertiary" />
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="flex h-10 w-full sm:w-44 rounded-md border border-[#3D332A] bg-white/5 px-3 py-2 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 focus-visible:ring-offset-2"
+            className="flex h-10 w-full sm:w-44 rounded-md border border-[#e5dfd0] bg-ink/5 px-3 py-2 text-sm text-ink ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 focus-visible:ring-offset-2"
           >
-            <option value="all" className="bg-[#1C1814] text-white">All Galleries</option>
-            <option value="public" className="bg-[#1C1814] text-white">Public Only</option>
-            <option value="private" className="bg-[#1C1814] text-white">Private Only</option>
+            <option value="all" className="bg-[#ffffff] text-ink">All Galleries</option>
+            <option value="public" className="bg-[#ffffff] text-ink">Public Only</option>
+            <option value="private" className="bg-[#ffffff] text-ink">Private Only</option>
           </select>
         </div>
       </div>
@@ -353,13 +353,13 @@ export default function GalleriesPage() {
           ))}
         </div>
       ) : (
-        <Card className="rounded-2xl border border-dashed border-[#3D332A] bg-white/[0.02] py-20">
+        <Card className="rounded-2xl border border-dashed border-[#e5dfd0] bg-ink/[0.02] py-20">
           <CardContent className="flex flex-col items-center justify-center text-center">
-            <div className="p-4 bg-white/5 rounded-full mb-4 border border-[#3D332A] shadow-inner">
-              <Images className="h-10 w-10 text-white/30" />
+            <div className="p-4 bg-ink/5 rounded-full mb-4 border border-[#e5dfd0] shadow-inner">
+              <Images className="h-10 w-10 text-ink-tertiary" />
             </div>
-            <h3 className="text-xl font-bold tracking-tight text-white">No galleries found</h3>
-            <p className="text-sm text-white/50 mt-2 max-w-sm">
+            <h3 className="text-xl font-bold tracking-tight text-ink">No galleries found</h3>
+            <p className="text-sm text-ink-secondary mt-2 max-w-sm">
               {searchQuery || filterType !== "all"
                 ? "We couldn't find any galleries matching your search criteria. Try resetting them."
                 : "Galleries organize where guests store photos. Go to an event dashboard to establish a new gallery."}
@@ -367,7 +367,7 @@ export default function GalleriesPage() {
             {!searchQuery && filterType === "all" && (
               <div className="mt-6">
                 <Link href="/dashboard/events">
-                  <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+                  <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
                     Go to Events
                   </Button>
                 </Link>

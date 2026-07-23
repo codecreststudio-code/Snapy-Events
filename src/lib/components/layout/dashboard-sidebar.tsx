@@ -46,13 +46,13 @@ export function DashboardSidebar() {
     <>
       {/* Desktop sidebar (lg+). Phone/tablet get MobileBottomNav instead —
           see below — rather than a hamburger + slide-in copy of this panel. */}
-      <div className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-[#3D332A] bg-[#141110] lg:flex">
-        <div className="flex h-16 items-center gap-2 border-b border-[#3D332A] px-6">
+      <div className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-[#e5dfd0] bg-[#faf6ed] lg:flex">
+        <div className="flex h-16 items-center gap-2 border-b border-[#e5dfd0] px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-mauve">
-              <Camera className="h-5 w-5 text-[#141110]" />
+              <Camera className="h-5 w-5 text-[#faf6ed]" />
             </div>
-            <span className="font-playfair font-semibold text-lg text-white">Snapsy</span>
+            <span className="font-playfair font-semibold text-lg text-ink">Snapsy</span>
           </Link>
         </div>
 
@@ -67,8 +67,8 @@ export function DashboardSidebar() {
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-mauve/10 text-mauve"
-                      : "text-white/50 hover:bg-white/5 hover:text-white"
+                      ? "bg-mauve/10 text-mauve-strong"
+                      : "text-ink-secondary hover:bg-mauve/5 hover:text-mauve-strong"
                   )}
                 >
                   <item.icon className="h-5 w-5" />
@@ -79,7 +79,7 @@ export function DashboardSidebar() {
           </nav>
 
           <div className="mt-6 px-4">
-            <div className="h-px bg-[#3D332A]" />
+            <div className="h-px bg-[#e5dfd0]" />
           </div>
 
           <nav className="px-4 mt-6 space-y-1">
@@ -92,8 +92,8 @@ export function DashboardSidebar() {
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-mauve/10 text-mauve"
-                      : "text-white/50 hover:bg-white/5 hover:text-white"
+                      ? "bg-mauve/10 text-mauve-strong"
+                      : "text-ink-secondary hover:bg-mauve/5 hover:text-mauve-strong"
                   )}
                 >
                   <item.icon className="h-5 w-5" />
@@ -104,7 +104,7 @@ export function DashboardSidebar() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-2 border-t border-[#3D332A] p-4">
+        <div className="flex items-center gap-2 border-t border-[#e5dfd0] p-4">
           <div className="min-w-0 flex-1">
             <AccountMenu variant="sidebar" />
           </div>

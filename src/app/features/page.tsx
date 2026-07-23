@@ -79,7 +79,7 @@ export default function FeaturesPage() {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
 
   return (
-    <div className={`flex min-h-screen flex-col bg-surface-dark text-white selection:bg-mauve/30 ${inter.className}`}>
+    <div className={`flex min-h-screen flex-col bg-surface-dark text-ink selection:bg-mauve/30 ${inter.className}`}>
       <PublicNavbar />
 
       <main className="flex-1 bg-surface-dark overflow-hidden relative py-12 md:py-20">
@@ -102,7 +102,7 @@ export default function FeaturesPage() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className={`text-4xl font-light tracking-tight md:text-6xl text-white leading-tight ${playfair.className}`}
+            className={`text-4xl font-light tracking-tight md:text-6xl text-ink leading-tight ${playfair.className}`}
           >
             Everything you need for <br />
             a <span className="italic font-light bg-gradient-to-r from-mauve to-mauve-strong bg-clip-text text-transparent">modern</span> photo event
@@ -112,7 +112,7 @@ export default function FeaturesPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-md text-white/60 max-w-xl mx-auto font-light leading-relaxed"
+            className="text-md text-ink-secondary max-w-xl mx-auto font-light leading-relaxed"
           >
             Built for weddings, conferences, school reunions, community celebrations, and corporate launches.
           </motion.p>
@@ -137,17 +137,17 @@ export default function FeaturesPage() {
                     <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${group.color}`}>
                       <group.icon className="h-5 w-5" />
                     </div>
-                    <h2 className="text-xl font-bold text-white">{group.title}</h2>
+                    <h2 className="text-xl font-bold text-ink">{group.title}</h2>
                   </div>
 
                   <ul className="space-y-5 text-sm">
                     {group.items.map((item) => (
                       <li key={item.name} className="space-y-1 text-left">
-                        <h3 className="font-bold text-white flex items-center gap-2">
+                        <h3 className="font-bold text-ink flex items-center gap-2">
                           <span className="h-1.5 w-1.5 rounded-full bg-mauve/60" />
                           {item.name}
                         </h3>
-                        <p className="text-xs text-white/60 font-light leading-relaxed pl-3.5">
+                        <p className="text-xs text-ink-secondary font-light leading-relaxed pl-3.5">
                           {item.desc}
                         </p>
                       </li>

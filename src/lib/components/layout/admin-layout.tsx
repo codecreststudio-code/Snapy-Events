@@ -31,7 +31,7 @@ export function AdminSidebar() {
   return (
     <div className="flex h-16 items-center gap-2 border-b border-hairline-dark px-6 bg-surface-card">
       <Link href="/admin" className="flex items-center gap-2">
-        <span className="font-playfair font-light text-lg text-white">Admin Panel</span>
+        <span className="font-playfair font-light text-lg text-ink">Admin Panel</span>
       </Link>
     </div>
   )
@@ -46,7 +46,7 @@ export function AdminNavbar() {
             <Link
               key={item.name}
               href={item.href}
-              className="flex items-center gap-2 text-sm font-medium text-white/60 hover:text-white"
+              className="flex items-center gap-2 text-sm font-medium text-ink-secondary hover:text-ink"
             >
               <item.icon className="h-4 w-4" />
               {item.name}
@@ -56,7 +56,7 @@ export function AdminNavbar() {
 
         <div className="flex items-center gap-4">
           <Link href="/">
-            <Button variant="outline" size="sm" className="rounded-full border-hairline-dark text-white/80 hover:bg-white/5">
+            <Button variant="outline" size="sm" className="rounded-full border-hairline-dark text-ink hover:bg-mauve/5">
               View Site
             </Button>
           </Link>

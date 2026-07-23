@@ -131,13 +131,13 @@ export function VoiceNoteRecorder({ maxDuration = 30, onCapture, onClose }: Voic
 
   return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-[#1C1814] border border-[#3D332A] rounded-3xl p-6 sm:p-8 max-w-sm w-full flex flex-col items-center gap-6 relative shadow-2xl">
+      <div className="bg-[#ffffff] border border-[#e5dfd0] rounded-3xl p-6 sm:p-8 max-w-sm w-full flex flex-col items-center gap-6 relative shadow-2xl">
         {/* Top Header */}
         <div className="w-full flex items-center justify-between">
           <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-bold">
             Voice Note Recorder
           </span>
-          <Button variant="ghost" size="icon" onClick={onClose} className="text-white/70 hover:text-white rounded-full">
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-ink-secondary hover:text-ink rounded-full">
             <X className="h-5 w-5" />
           </Button>
         </div>
@@ -149,22 +149,22 @@ export function VoiceNoteRecorder({ maxDuration = 30, onCapture, onClose }: Voic
               isRecording
                 ? "bg-red-500/20 border-2 border-red-500 animate-pulse scale-105"
                 : previewUrl
-                ? "bg-[#B28DAE]/20 border-2 border-[#B28DAE]"
-                : "bg-white/5 border border-white/10"
+                ? "bg-[#b8925a]/20 border-2 border-[#b8925a]"
+                : "bg-ink/5 border border-ink/10"
             }`}
           >
             {previewUrl ? (
-              <Volume2 className="h-12 w-12 text-[#B28DAE]" />
+              <Volume2 className="h-12 w-12 text-[#b8925a]" />
             ) : (
-              <Mic className={`h-12 w-12 ${isRecording ? "text-red-500" : "text-white/60"}`} />
+              <Mic className={`h-12 w-12 ${isRecording ? "text-red-500" : "text-ink-secondary"}`} />
             )}
           </div>
         </div>
 
         {/* Timer */}
         <div className="text-center space-y-1">
-          <p className="text-3xl font-mono font-bold text-white tracking-wider">
-            {formatTime(recordingTime)} <span className="text-xs font-normal text-white/50">/ {formatTime(maxDuration)}</span>
+          <p className="text-3xl font-mono font-bold text-ink tracking-wider">
+            {formatTime(recordingTime)} <span className="text-xs font-normal text-ink-secondary">/ {formatTime(maxDuration)}</span>
           </p>
           <p className="text-xs text-[#C5A059]">
             {isRecording
@@ -206,19 +206,19 @@ export function VoiceNoteRecorder({ maxDuration = 30, onCapture, onClose }: Voic
             )
           ) : (
             <div className="flex items-center justify-between w-full px-4">
-              <Button variant="ghost" onClick={handleRetake} className="text-white/80 hover:text-white flex items-center gap-2">
+              <Button variant="ghost" onClick={handleRetake} className="text-ink-secondary hover:text-ink flex items-center gap-2">
                 <RefreshCw className="h-4 w-4" />
                 <span className="text-xs font-semibold">Re-record</span>
               </Button>
 
               <button
                 onClick={togglePlayback}
-                className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
+                className="w-12 h-12 rounded-full bg-mauve/10 hover:bg-mauve/20 text-ink flex items-center justify-center transition"
               >
                 {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
               </button>
 
-              <Button onClick={handleConfirm} className="bg-[#B28DAE] hover:bg-[#A468A0] text-black font-bold flex items-center gap-1.5 rounded-full px-5 py-2">
+              <Button onClick={handleConfirm} className="bg-[#b8925a] hover:bg-[#96723a] text-black font-bold flex items-center gap-1.5 rounded-full px-5 py-2">
                 <Check className="h-4 w-4" />
                 <span className="text-xs">Send</span>
               </Button>

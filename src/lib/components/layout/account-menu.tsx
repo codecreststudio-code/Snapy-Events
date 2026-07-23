@@ -78,7 +78,7 @@ export function AccountMenu({ variant = "sidebar" }: { variant?: "sidebar" | "co
           <button
             type="button"
             aria-label="Account menu"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[#3D332A] bg-[#1C1814] hover:border-mauve/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e5dfd0] bg-[#ffffff] hover:border-mauve/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50"
           >
             <Avatar className="h-9 w-9">
               <AvatarImage src={profile?.avatar_url || undefined} />
@@ -96,18 +96,18 @@ export function AccountMenu({ variant = "sidebar" }: { variant?: "sidebar" | "co
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="w-full justify-start gap-3 h-auto py-2 text-white hover:bg-white/5 hover:text-white">
+        <Button variant="ghost" className="w-full justify-start gap-3 h-auto py-2 text-ink hover:bg-mauve/5 hover:text-ink">
           <Avatar className="h-8 w-8">
             <AvatarImage src={profile?.avatar_url || undefined} />
             <AvatarFallback className="bg-mauve/10 text-mauve">{initials}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col items-start text-sm overflow-hidden">
-            <span className="font-medium truncate max-w-[150px] text-white">
+            <span className="font-medium truncate max-w-[150px] text-ink">
               {profile?.full_name || user?.email?.split("@")[0] || "User"}
             </span>
-            <span className="text-xs text-white/50 truncate max-w-[150px]">{user?.email || ""}</span>
+            <span className="text-xs text-ink-secondary truncate max-w-[150px]">{user?.email || ""}</span>
           </div>
-          <ChevronDown className="h-4 w-4 ml-auto flex-shrink-0 text-white/50" />
+          <ChevronDown className="h-4 w-4 ml-auto flex-shrink-0 text-ink-secondary" />
         </Button>
       </DropdownMenuTrigger>
       {menuContent}

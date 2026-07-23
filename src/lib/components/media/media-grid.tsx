@@ -24,13 +24,13 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: GridPhoto; watermarkEnable
 
   if (isMessage(p)) {
     return (
-      <div className="aspect-square bg-gradient-to-br from-[#B28DAE]/10 to-[#3D332A]/40 p-4 flex flex-col justify-between border border-[#B28DAE]/20 rounded-lg">
+      <div className="aspect-square bg-gradient-to-br from-[#b8925a]/10 to-[#e5dfd0]/40 p-4 flex flex-col justify-between border border-[#b8925a]/20 rounded-lg">
         <div className="flex items-center gap-2 min-w-0">
-          <MessageCircle className="h-4 w-4 shrink-0 text-[#B28DAE]" />
-          <span className="min-w-0 truncate text-xs font-semibold text-[#B28DAE]">{p.uploader_name || "Guest Wish"}</span>
+          <MessageCircle className="h-4 w-4 shrink-0 text-[#b8925a]" />
+          <span className="min-w-0 truncate text-xs font-semibold text-[#b8925a]">{p.uploader_name || "Guest Wish"}</span>
         </div>
-        <p className="font-playfair text-xs italic text-white/80 line-clamp-3 my-auto">"{p.metadata?.text || p.original_filename}"</p>
-        <span className="text-[10px] text-white/40">Written Note</span>
+        <p className="font-playfair text-xs italic text-ink line-clamp-3 my-auto">"{p.metadata?.text || p.original_filename}"</p>
+        <span className="text-[10px] text-ink-tertiary">Written Note</span>
       </div>
     )
   }
@@ -56,9 +56,9 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: GridPhoto; watermarkEnable
 
   if (isAudio(p)) {
     return (
-      <div className="aspect-square bg-gradient-to-br from-[#B28DAE]/20 to-[#3D332A]/60 flex flex-col items-center justify-center p-3 gap-2 relative">
-        <Volume2 className="h-10 w-10 text-[#B28DAE]" />
-        <span className="text-xs text-white/80 font-medium line-clamp-1">{p.uploader_name || "Voice Note"}</span>
+      <div className="aspect-square bg-gradient-to-br from-[#b8925a]/20 to-[#e5dfd0]/60 flex flex-col items-center justify-center p-3 gap-2 relative">
+        <Volume2 className="h-10 w-10 text-[#b8925a]" />
+        <span className="text-xs text-ink font-medium line-clamp-1">{p.uploader_name || "Voice Note"}</span>
       </div>
     )
   }
@@ -75,7 +75,7 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: GridPhoto; watermarkEnable
       />
       {watermarkEnabled && <WatermarkOverlay />}
       {p.is_best_shot && (
-        <div className="absolute top-2 left-2 bg-[#B28DAE]/90 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
+        <div className="absolute top-2 left-2 bg-[#b8925a]/90 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
           <span>✨</span> Highlight
         </div>
       )}
@@ -95,7 +95,7 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: GridPhoto; watermarkEnable
       )}
     </div>
   ) : (
-    <div className="aspect-square bg-gradient-to-br from-[#B28DAE]/20 to-[#3D332A]/60" />
+    <div className="aspect-square bg-gradient-to-br from-[#b8925a]/20 to-[#e5dfd0]/60" />
   )
 }
 
@@ -243,7 +243,7 @@ export function MediaGrid({
   return (
     <>
       {photos.length === 0 ? (
-        <Card className="mt-6 rounded-2xl border border-[#3D332A] bg-[#1C1814] p-8 text-center text-sm text-white/60">
+        <Card className="mt-6 rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-8 text-center text-sm text-ink-secondary">
           {emptyMessage}
         </Card>
       ) : (
@@ -252,7 +252,7 @@ export function MediaGrid({
             <button
               key={p.id}
               onClick={() => setActive(p)}
-              className="mb-4 block w-full break-inside-avoid overflow-hidden rounded-xl border border-[#3D332A] bg-[#1C1814] shadow-sm hover:border-[#B28DAE]/40 hover:shadow-md transition-all text-left cursor-pointer"
+              className="mb-4 block w-full break-inside-avoid overflow-hidden rounded-xl border border-[#e5dfd0] bg-[#ffffff] shadow-sm hover:border-[#b8925a]/40 hover:shadow-md transition-all text-left cursor-pointer"
             >
               <MediaThumbnail p={p} watermarkEnabled={watermarkEnabled} />
             </button>

@@ -116,20 +116,20 @@ export default function DashboardPage() {
   const albums = data?.albums ?? []
 
   return (
-    <div className="min-h-screen bg-surface-dark text-white pb-28">
+    <div className="min-h-screen bg-surface-dark text-ink pb-28">
       {/* Top bar */}
-      <div className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-[#3D332A] bg-[#141110]/95 px-5 py-4 backdrop-blur-lg">
+      <div className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-[#e5dfd0] bg-[#faf6ed]/95 px-5 py-4 backdrop-blur-lg">
         <Link href="/dashboard" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-mauve">
-            <Camera className="h-5 w-5 text-[#141110]" />
+            <Camera className="h-5 w-5 text-[#faf6ed]" />
           </div>
-          <span className="font-playfair text-lg font-semibold text-white">Snapsy</span>
+          <span className="font-playfair text-lg font-semibold text-ink">Snapsy</span>
         </Link>
         <div className="flex items-center gap-2">
           <Link href="/dashboard/events/new">
             <button
               type="button"
-              className="flex items-center gap-1.5 rounded-full bg-mauve px-4 py-2 text-xs font-bold text-[#141110] shadow-lg shadow-mauve/20 transition-all hover:bg-mauve-strong hover:scale-[1.02] active:scale-[0.98]"
+              className="flex items-center gap-1.5 rounded-full bg-mauve px-4 py-2 text-xs font-bold text-[#faf6ed] shadow-lg shadow-mauve/20 transition-all hover:bg-mauve-strong hover:scale-[1.02] active:scale-[0.98]"
             >
               <Plus className="h-3.5 w-3.5" />
               New
@@ -149,16 +149,16 @@ export default function DashboardPage() {
           <>
             {/* ACTIVE */}
             <section>
-              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-white/40">Active</h2>
+              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-ink-tertiary">Active</h2>
 
               {activeEvents.length === 0 ? (
                 <div className="flex flex-col items-center gap-5 py-10 text-center">
-                  <div className="h-2.5 w-2.5 rounded-full bg-white/20" />
-                  <p className="text-sm text-white/40">No active events</p>
+                  <div className="h-2.5 w-2.5 rounded-full bg-ink/15" />
+                  <p className="text-sm text-ink-tertiary">No active events</p>
                   <Link href="/dashboard/events/new">
                     <button
                       type="button"
-                      className="flex items-center gap-2 rounded-full bg-mauve px-6 py-3 text-sm font-bold text-[#141110] shadow-lg shadow-mauve/20 transition-all hover:bg-mauve-strong hover:scale-[1.02] active:scale-[0.98]"
+                      className="flex items-center gap-2 rounded-full bg-mauve px-6 py-3 text-sm font-bold text-[#faf6ed] shadow-lg shadow-mauve/20 transition-all hover:bg-mauve-strong hover:scale-[1.02] active:scale-[0.98]"
                     >
                       <Plus className="h-4 w-4" />
                       Create Event
@@ -171,18 +171,18 @@ export default function DashboardPage() {
                     <Link
                       key={event.id}
                       href={`/dashboard/events/${event.slug}`}
-                      className="flex items-center justify-between gap-4 rounded-2xl border border-[#3D332A] bg-[#1C1814] p-4 transition-all hover:border-mauve/40"
+                      className="flex items-center justify-between gap-4 rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-4 transition-all hover:border-mauve/40"
                     >
                       <div className="flex items-center gap-3 overflow-hidden">
                         <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-mauve/10">
                           <Camera className="h-5 w-5 text-mauve" />
                         </div>
                         <div className="overflow-hidden">
-                          <h3 className="truncate text-sm font-semibold text-white">{event.name}</h3>
-                          <p className="text-xs text-white/50">Live · {event.photo_count} photos</p>
+                          <h3 className="truncate text-sm font-semibold text-ink">{event.name}</h3>
+                          <p className="text-xs text-ink-secondary">Live · {event.photo_count} photos</p>
                         </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 flex-shrink-0 text-white/40" />
+                      <ChevronRight className="h-4 w-4 flex-shrink-0 text-ink-tertiary" />
                     </Link>
                   ))}
                 </div>
@@ -191,10 +191,10 @@ export default function DashboardPage() {
 
             {/* ALBUMS */}
             <section>
-              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-white/40">Albums</h2>
+              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-ink-tertiary">Albums</h2>
 
               {albums.length === 0 ? (
-                <p className="text-sm text-white/40">No albums yet — create your first event to get started.</p>
+                <p className="text-sm text-ink-tertiary">No albums yet — create your first event to get started.</p>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {albums.map((event) => {
@@ -203,7 +203,7 @@ export default function DashboardPage() {
                       <Link
                         key={event.id}
                         href={`/dashboard/events/${event.slug}`}
-                        className="group relative block aspect-[16/10] overflow-hidden rounded-2xl border border-[#3D332A] bg-gradient-to-br from-mauve/20 to-[#1C1814] transition-all hover:border-mauve/40"
+                        className="group relative block aspect-[16/10] overflow-hidden rounded-2xl border border-[#e5dfd0] bg-gradient-to-br from-mauve/20 to-[#ffffff] transition-all hover:border-mauve/40"
                       >
                         {event.cover_image_url && (
                           <img

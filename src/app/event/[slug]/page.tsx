@@ -216,10 +216,10 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#141110] text-white/90">
+    <div className="flex min-h-screen flex-col bg-[#faf6ed] text-ink">
       <GuestCaptureModal eventId={event.id} eventName={event.name} requireJoinCode={!!settings.require_join_code} />
 
-      <header className="sticky top-0 z-50 w-full border-b border-[#3D332A] bg-[#141110]/95 backdrop-blur supports-[backdrop-filter]:bg-[#141110]/80">
+      <header className="sticky top-0 z-50 w-full border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur supports-[backdrop-filter]:bg-[#faf6ed]/80">
         <div className="container flex h-16 items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
             {event.user?.branding?.logo_url ? (
@@ -237,7 +237,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
               <Button
                 asChild
                 size="sm"
-                className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-[#B28DAE]"
+                className="rounded-full border border-ink/15 bg-transparent text-ink hover:bg-mauve/10 hover:text-[#b8925a]"
               >
                 <Link href={`/event/${event.slug}/upload`}>
                   <Upload className="h-4 w-4" />
@@ -250,14 +250,14 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
       </header>
 
       <main className="flex-1">
-        <section className="relative overflow-hidden border-b border-[#3D332A]">
+        <section className="relative overflow-hidden border-b border-[#e5dfd0]">
           {event.cover_image_url && (
             <div
               className="absolute inset-0 -z-20 bg-cover bg-center opacity-30"
               style={{ backgroundImage: `url(${event.cover_image_url})` }}
             />
           )}
-          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#141110]/30 via-[#141110]/70 to-[#141110]" />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#faf6ed]/30 via-[#faf6ed]/70 to-[#faf6ed]" />
           <div className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 sm:py-20">
             {/* Server Component hero — can't reach for Framer Motion hooks here,
                 so the staggered entrance is pure CSS (existing keyframe
@@ -271,18 +271,18 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                 className="animate-slide-up mx-auto mb-4 h-10"
               />
             )}
-            <p className="animate-slide-up text-sm uppercase tracking-widest text-[#B28DAE]">
+            <p className="animate-slide-up text-sm uppercase tracking-widest text-[#b8925a]">
               {event.user?.name ?? "Event"}
             </p>
-            <h1 className="animate-slide-up animate-delay-1 font-playfair mt-2 text-4xl font-medium tracking-tight text-white sm:text-5xl">
+            <h1 className="animate-slide-up animate-delay-1 font-playfair mt-2 text-4xl font-medium tracking-tight text-ink sm:text-5xl">
               {event.name}
             </h1>
             {event.description && (
-              <p className="animate-slide-up animate-delay-2 mx-auto mt-3 max-w-2xl text-pretty text-white/60">
+              <p className="animate-slide-up animate-delay-2 mx-auto mt-3 max-w-2xl text-pretty text-ink-secondary">
                 {event.description}
               </p>
             )}
-            <div className="animate-slide-up animate-delay-2 mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-white/60">
+            <div className="animate-slide-up animate-delay-2 mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-ink-secondary">
               {event.event_date && (
                 <span className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
@@ -301,7 +301,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                 <Button
                   asChild
                   size="lg"
-                  className="rounded-full bg-[#B28DAE] px-6 text-[#141110] transition-transform hover:scale-[1.02] hover:bg-[#a468a0] active:scale-[0.98]"
+                  className="rounded-full bg-[#b8925a] px-6 text-[#faf6ed] transition-transform hover:scale-[1.02] hover:bg-[#96723a] active:scale-[0.98]"
                 >
                   <Link href={`/event/${event.slug}/upload`}>
                     <Camera className="mr-2 h-4 w-4" />
@@ -319,7 +319,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                 asChild
                 size="lg"
                 variant="outline"
-                className="rounded-full border border-white/15 bg-transparent text-white transition-transform hover:scale-[1.02] hover:bg-white/10 hover:text-white active:scale-[0.98]"
+                className="rounded-full border border-ink/15 bg-transparent text-ink transition-transform hover:scale-[1.02] hover:bg-mauve/10 hover:text-mauve-strong active:scale-[0.98]"
               >
                 <Link href={`/event/${event.slug}/qr`}>
                   <QrCode className="mr-2 h-4 w-4" />
@@ -331,10 +331,10 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
         </section>
 
         <section className="animate-fade-in mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-          <h2 className="font-playfair text-2xl font-medium tracking-tight text-white">
+          <h2 className="font-playfair text-2xl font-medium tracking-tight text-ink">
             {!checkedIn ? "Private Memory Capsule" : isRevealed ? "Photos" : "Coming Soon"}
           </h2>
-          <p className="mt-1 text-white/60">
+          <p className="mt-1 text-ink-secondary">
             {!checkedIn
               ? "Check in above with your name and contact details to view and share photos."
               : isRevealed
@@ -343,12 +343,12 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
           </p>
 
           {!checkedIn ? (
-            <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-[#3D332A] bg-[#1C1814] px-4 py-16 text-center">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/5">
-                <Lock className="h-8 w-8 text-[#B28DAE]" />
+            <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-[#e5dfd0] bg-[#ffffff] px-4 py-16 text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-ink/5">
+                <Lock className="h-8 w-8 text-[#b8925a]" />
               </div>
-              <h3 className="font-playfair mt-4 text-lg font-medium text-white">Check In to Continue</h3>
-              <p className="mt-2 max-w-md text-sm text-white/60">
+              <h3 className="font-playfair mt-4 text-lg font-medium text-ink">Check In to Continue</h3>
+              <p className="mt-2 max-w-md text-sm text-ink-secondary">
                 {settings.require_join_code
                   ? "This event is private to invited guests. Complete check-in above with the event code your host shared with you to view galleries and share your own photos."
                   : "This event is private to invited guests. Complete the check-in above to view galleries and share your own photos."}
@@ -361,8 +361,8 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                   <div key={gallery.id}>
                     {visibleGalleries.length > 1 && (
                       <div className="mb-1">
-                        <h3 className="font-playfair text-lg font-medium text-white">{gallery.name}</h3>
-                        {gallery.description && <p className="text-sm text-white/60">{gallery.description}</p>}
+                        <h3 className="font-playfair text-lg font-medium text-ink">{gallery.name}</h3>
+                        {gallery.description && <p className="text-sm text-ink-secondary">{gallery.description}</p>}
                       </div>
                     )}
                     <MediaGrid
@@ -381,12 +381,12 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
               )}
             </div>
           ) : (
-            <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-[#3D332A] bg-[#1C1814] px-4 py-16 text-center">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/5">
-                <Lock className="h-8 w-8 text-[#B28DAE]" />
+            <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-[#e5dfd0] bg-[#ffffff] px-4 py-16 text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-ink/5">
+                <Lock className="h-8 w-8 text-[#b8925a]" />
               </div>
-              <h3 className="font-playfair mt-4 text-lg font-medium text-white">Photos Coming Soon</h3>
-              <p className="mt-2 max-w-md text-sm text-white/60">
+              <h3 className="font-playfair mt-4 text-lg font-medium text-ink">Photos Coming Soon</h3>
+              <p className="mt-2 max-w-md text-sm text-ink-secondary">
                 {settings.enable_countdown && settings.countdown_date
                   ? `Photos will be revealed on ${formatEventDate(settings.countdown_date)}`
                   : "Photos will be available shortly. Check back soon!"}

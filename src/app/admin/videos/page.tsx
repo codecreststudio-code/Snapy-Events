@@ -84,22 +84,22 @@ export default function AdminVideosPage() {
     <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Video Management</h1>
-          <p className="text-sm text-white/50 mt-1">Review guest video uploads, monitor durations, and manage storage consumption.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">Video Management</h1>
+          <p className="text-sm text-ink-secondary mt-1">Review guest video uploads, monitor durations, and manage storage consumption.</p>
         </div>
-        <Button onClick={fetchVideos} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
-          <RefreshCw className="h-4 w-4 text-white/50" />
+        <Button onClick={fetchVideos} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-ink-secondary bg-surface-card hover:bg-mauve/5 font-semibold shadow-sm">
+          <RefreshCw className="h-4 w-4 text-ink-secondary" />
           <span>Refresh</span>
         </Button>
       </div>
 
       <div className="flex items-center max-w-sm relative">
-        <Search className="h-4 w-4 absolute left-3 text-white/40" />
+        <Search className="h-4 w-4 absolute left-3 text-ink-tertiary" />
         <Input
           placeholder="Filter by filename, event, or uploader..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 bg-surface-card border-hairline-dark text-white/80 shadow-sm"
+          className="pl-9 bg-surface-card border-hairline-dark text-ink shadow-sm"
         />
       </div>
 
@@ -112,7 +112,7 @@ export default function AdminVideosPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-mauve" />
               </div>
             ) : filteredVideos.length === 0 ? (
-              <div className="p-12 text-center text-white/40 text-sm font-semibold">
+              <div className="p-12 text-center text-ink-tertiary text-sm font-semibold">
                 No videos found in the database.
               </div>
             ) : (
@@ -125,23 +125,23 @@ export default function AdminVideosPage() {
                       key={v.id}
                       onClick={() => setSelectedVideo(v)}
                       className={cn(
-                        "group border rounded-xl overflow-hidden cursor-pointer bg-white/5 hover:border-mauve/30 transition-all flex flex-col justify-between",
+                        "group border rounded-xl overflow-hidden cursor-pointer bg-ink/5 hover:border-mauve/30 transition-all flex flex-col justify-between",
                         selectedVideo?.id === v.id ? "ring-2 ring-mauve/50 border-transparent" : "border-hairline-dark"
                       )}
                     >
-                      <div className="h-32 bg-surface-dark flex items-center justify-center text-white relative">
-                        <Play className="h-8 w-8 opacity-70 group-hover:opacity-100 transition-opacity z-10 text-white" />
-                        <span className="text-[9px] font-mono text-white absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/60 shadow-sm flex items-center gap-0.5">
+                      <div className="h-32 bg-surface-dark flex items-center justify-center text-ink relative">
+                        <Play className="h-8 w-8 opacity-70 group-hover:opacity-100 transition-opacity z-10 text-ink" />
+                        <span className="text-[9px] font-mono text-ink absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/60 shadow-sm flex items-center gap-0.5">
                           <Clock className="h-2.5 w-2.5" />
                           <span>{duration}s</span>
                         </span>
-                        <span className="text-[9px] uppercase font-bold text-white absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/40">
+                        <span className="text-[9px] uppercase font-bold text-ink absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/40">
                           {fileSizeMb} MB
                         </span>
                       </div>
-                      <div className="p-3 text-[10px] space-y-1 bg-surface-card border-t border-white/10">
-                        <p className="font-bold text-white/80 truncate">{v.original_filename || "video.mp4"}</p>
-                        <p className="text-white/40 truncate">Event: {v.event?.name || "N/A"}</p>
+                      <div className="p-3 text-[10px] space-y-1 bg-surface-card border-t border-hairline-dark">
+                        <p className="font-bold text-ink truncate">{v.original_filename || "video.mp4"}</p>
+                        <p className="text-ink-tertiary truncate">Event: {v.event?.name || "N/A"}</p>
                       </div>
                     </div>
                   )
@@ -155,48 +155,48 @@ export default function AdminVideosPage() {
         <Card className="bg-surface-card border-hairline-dark shadow-sm p-6 sticky top-6">
           {selectedVideo ? (
             <div className="space-y-6">
-              <div className="h-44 bg-surface-dark border border-hairline-dark rounded-xl flex flex-col items-center justify-center text-white relative overflow-hidden">
-                <Play className="h-10 w-10 text-white opacity-80" />
-                <span className="text-xs font-semibold text-white/30 mt-2">Video File Selected</span>
-                <span className="text-[10px] font-mono text-white/45 mt-1 truncate max-w-[220px]">{selectedVideo.storage_path}</span>
+              <div className="h-44 bg-surface-dark border border-hairline-dark rounded-xl flex flex-col items-center justify-center text-ink relative overflow-hidden">
+                <Play className="h-10 w-10 text-ink opacity-80" />
+                <span className="text-xs font-semibold text-ink-tertiary mt-2">Video File Selected</span>
+                <span className="text-[10px] font-mono text-ink-tertiary mt-1 truncate max-w-[220px]">{selectedVideo.storage_path}</span>
               </div>
 
               <div className="border-t border-hairline-dark pt-4 space-y-3.5 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Video ID</span>
-                  <span className="font-mono text-white/70 font-semibold">{selectedVideo.id}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Video ID</span>
+                  <span className="font-mono text-ink-secondary font-semibold">{selectedVideo.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Filename</span>
-                  <span className="text-white/70 font-semibold truncate max-w-[150px]">{selectedVideo.original_filename || "N/A"}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Filename</span>
+                  <span className="text-ink-secondary font-semibold truncate max-w-[150px]">{selectedVideo.original_filename || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Event Name</span>
-                  <span className="text-white/70 font-semibold">{selectedVideo.event?.name || "N/A"}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Event Name</span>
+                  <span className="text-ink-secondary font-semibold">{selectedVideo.event?.name || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Uploader Email</span>
-                  <span className="text-white/70 font-semibold">{selectedVideo.uploader?.email || "N/A"}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Uploader Email</span>
+                  <span className="text-ink-secondary font-semibold">{selectedVideo.uploader?.email || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Duration</span>
-                  <span className="text-white/70 font-semibold">{selectedVideo.metadata?.duration || "10"} seconds</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Duration</span>
+                  <span className="text-ink-secondary font-semibold">{selectedVideo.metadata?.duration || "10"} seconds</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Size</span>
-                  <span className="text-white/70 font-semibold flex items-center gap-0.5">
-                    <HardDrive className="h-3.5 w-3.5 text-white/40" />
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Size</span>
+                  <span className="text-ink-secondary font-semibold flex items-center gap-0.5">
+                    <HardDrive className="h-3.5 w-3.5 text-ink-tertiary" />
                     <span>{(selectedVideo.file_size ? selectedVideo.file_size / (1024 * 1024) : 0).toFixed(2)} MB</span>
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Upload Date</span>
-                  <span className="text-white/70 font-semibold">{new Date(selectedVideo.created_at).toLocaleString()}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Upload Date</span>
+                  <span className="text-ink-secondary font-semibold">{new Date(selectedVideo.created_at).toLocaleString()}</span>
                 </div>
               </div>
 
               <div className="border-t border-hairline-dark pt-4 space-y-2">
-                <h4 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2">Controls</h4>
+                <h4 className="text-xs font-bold text-ink-tertiary uppercase tracking-wider mb-2">Controls</h4>
                 <Button
                   onClick={() => handleDelete(selectedVideo.id)}
                   disabled={actioningId === selectedVideo.id}
@@ -208,8 +208,8 @@ export default function AdminVideosPage() {
               </div>
             </div>
           ) : (
-            <div className="h-64 flex flex-col justify-center items-center text-center text-white/40">
-              <Film className="h-8 w-8 text-white/30 mb-2" />
+            <div className="h-64 flex flex-col justify-center items-center text-center text-ink-tertiary">
+              <Film className="h-8 w-8 text-ink-tertiary mb-2" />
               <span className="text-xs font-semibold">Select any video card to review duration metadata, associated events, and execute deletion.</span>
             </div>
           )}

@@ -32,11 +32,11 @@ function FAQItem({ item, isOpen, onClick }: { item: typeof faqs[0]; isOpen: bool
         onClick={onClick}
         className="w-full flex justify-between items-center p-6 text-left focus:outline-none"
       >
-        <span className="font-bold text-white text-sm md:text-base">{item.q}</span>
+        <span className="font-bold text-ink text-sm md:text-base">{item.q}</span>
         <motion.span
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
-          className="text-white/50"
+          className="text-ink-secondary"
         >
           <ChevronDown className="h-4.5 w-4.5" />
         </motion.span>
@@ -50,7 +50,7 @@ function FAQItem({ item, isOpen, onClick }: { item: typeof faqs[0]; isOpen: bool
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
           >
-            <div className="px-6 pb-6 pt-1 border-t border-hairline-dark text-white/60 font-light text-xs md:text-sm leading-relaxed">
+            <div className="px-6 pb-6 pt-1 border-t border-hairline-dark text-ink-secondary font-light text-xs md:text-sm leading-relaxed">
               {item.a}
             </div>
           </motion.div>
@@ -64,7 +64,7 @@ export default function FAQPage() {
   const [openIdx, setOpenIdx] = useState<number | null>(null)
 
   return (
-    <div className={`flex min-h-screen flex-col bg-surface-dark text-white selection:bg-mauve/30 ${inter.className}`}>
+    <div className={`flex min-h-screen flex-col bg-surface-dark text-ink selection:bg-mauve/30 ${inter.className}`}>
       <PublicNavbar />
 
       <main className="flex-1 bg-surface-dark overflow-hidden relative py-12 md:py-20">
@@ -87,7 +87,7 @@ export default function FAQPage() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className={`text-4xl font-light tracking-tight md:text-6xl text-white leading-tight ${playfair.className}`}
+            className={`text-4xl font-light tracking-tight md:text-6xl text-ink leading-tight ${playfair.className}`}
           >
             Frequently asked <span className="italic font-light bg-gradient-to-r from-mauve to-mauve-strong bg-clip-text text-transparent">questions</span>
           </motion.h1>
@@ -96,7 +96,7 @@ export default function FAQPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-md text-white/60 max-w-xl mx-auto font-light leading-relaxed"
+            className="text-md text-ink-secondary max-w-xl mx-auto font-light leading-relaxed"
           >
             Everything you need to know about Snapsy galleries, uploads, and security details.
           </motion.p>

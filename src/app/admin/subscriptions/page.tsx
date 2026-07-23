@@ -27,8 +27,8 @@ export default function AdminSubscriptionsPage() {
     <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Subscription Control Center</h1>
-          <p className="text-sm text-white/50 mt-1">Manage all plans, features, quotas, promotions, and logic dynamically.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">Subscription Control Center</h1>
+          <p className="text-sm text-ink-secondary mt-1">Manage all plans, features, quotas, promotions, and logic dynamically.</p>
         </div>
       </div>
 
@@ -40,8 +40,8 @@ export default function AdminSubscriptionsPage() {
             className={cn(
               "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200",
               activeTab === tab.id
-                ? "bg-mauve text-[#141110]"
-                : "text-white/50 hover:text-white/80 hover:bg-white/5"
+                ? "bg-mauve text-[#faf6ed]"
+                : "text-ink-secondary hover:text-ink hover:bg-mauve/5"
             )}
           >
             <tab.icon className="h-3.5 w-3.5" />

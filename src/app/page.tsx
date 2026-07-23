@@ -102,7 +102,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
       className={`relative rounded-3xl border bg-surface-card p-8 flex flex-col justify-between transition-all duration-300 ${
         plan.popular
-          ? "border-mauve shadow-[0_20px_50px_rgba(178,141,174,0.15)] ring-1 ring-mauve md:scale-[1.04] z-10"
+          ? "border-mauve shadow-[0_20px_50px_rgba(184, 146, 90,0.15)] ring-1 ring-mauve md:scale-[1.04] z-10"
           : "border-hairline-dark hover:border-mauve/40 hover:shadow-xl"
       }`}
     >
@@ -113,7 +113,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
             className="absolute -inset-px transition duration-300 opacity-100"
             style={{
               background: `radial-gradient(350px circle at ${coords.x}px ${coords.y}px, ${
-                plan.popular ? "rgba(178, 141, 174, 0.14)" : "rgba(178, 141, 174, 0.07)"
+                plan.popular ? "rgba(184, 146, 90, 0.14)" : "rgba(184, 146, 90, 0.07)"
               }, transparent 80%)`,
             }}
           />
@@ -122,14 +122,14 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 
       {/* Badges Container */}
       {plan.popular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-mauve px-4 py-1.5 text-[10px] font-bold text-[#141110] tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-mauve px-4 py-1.5 text-[10px] font-bold text-[#faf6ed] tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
           <Sparkles className="h-3 w-3" />
           POPULAR
         </div>
       )}
 
       {plan.bestValue && (
-        <div className="absolute -top-4 right-6 rounded-full bg-mauve-strong px-3 py-1.5 text-[10px] font-bold text-white tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
+        <div className="absolute -top-4 right-6 rounded-full bg-mauve-strong px-3 py-1.5 text-[10px] font-bold text-[#faf6ed] tracking-widest uppercase shadow-md flex items-center gap-1.5 z-20">
           <Crown className="h-3.5 w-3.5" />
           BEST VALUE
         </div>
@@ -139,8 +139,8 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       <div className="relative z-10">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-            <p className="mt-2 text-xs text-white/60 leading-relaxed font-light min-h-[32px]">
+            <h3 className="text-xl font-bold text-ink">{plan.name}</h3>
+            <p className="mt-2 text-xs text-ink-secondary leading-relaxed font-light min-h-[32px]">
               {plan.description}
             </p>
           </div>
@@ -152,14 +152,14 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
         </div>
 
         <div className="mt-6 flex items-baseline gap-1">
-          <span className="text-4xl font-extrabold text-white">₹{plan.price}</span>
-          <span className="text-white/50 text-xs font-light">/ {plan.period}</span>
+          <span className="text-4xl font-extrabold text-ink">₹{plan.price}</span>
+          <span className="text-ink-secondary text-xs font-light">/ {plan.period}</span>
         </div>
 
         <ul className="mt-6 space-y-4 border-t border-hairline-dark pt-6">
           {plan.features.map((feature) => (
-            <li key={feature} className="flex items-start gap-3 text-xs text-white/70 font-light">
-              <Check className={`h-4 w-4 flex-shrink-0 ${plan.popular ? "text-mauve" : "text-white/40"}`} />
+            <li key={feature} className="flex items-start gap-3 text-xs text-ink-secondary font-light">
+              <Check className={`h-4 w-4 flex-shrink-0 ${plan.popular ? "text-mauve" : "text-ink-tertiary"}`} />
               <span>{feature}</span>
             </li>
           ))}
@@ -171,8 +171,8 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
           <Button
             className={`w-full font-bold py-5 rounded-full transition-all active:scale-[0.99] ${
               plan.popular
-                ? "bg-mauve hover:bg-mauve-strong text-[#141110] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
-                : "border border-white/15 text-white hover:bg-white/5"
+                ? "bg-mauve hover:bg-mauve-strong text-[#faf6ed] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
+                : "border border-hairline-dark text-ink hover:bg-mauve/5"
             }`}
           >
             Get Started
@@ -226,7 +226,7 @@ function JoinEventCodeBox() {
       transition={{ duration: 0.8, delay: 0.4 }}
       className="mx-auto flex w-full max-w-sm flex-col items-center gap-2"
     >
-      <div className="flex w-full items-stretch gap-2 rounded-full border border-white/15 bg-white/5 backdrop-blur p-1.5">
+      <div className="flex w-full items-stretch gap-2 rounded-full border border-hairline-dark bg-mauve/5 backdrop-blur p-1.5">
         <input
           value={code}
           onChange={(e) => {
@@ -236,13 +236,13 @@ function JoinEventCodeBox() {
           placeholder="Have a code? e.g. K7XQ9M"
           maxLength={12}
           aria-label="Event join code"
-          className="min-w-0 flex-1 bg-transparent px-4 text-sm font-medium tracking-wider text-white placeholder:text-white/40 placeholder:tracking-normal focus:outline-none"
+          className="min-w-0 flex-1 bg-transparent px-4 text-sm font-medium tracking-wider text-ink placeholder:text-ink-tertiary placeholder:tracking-normal focus:outline-none"
         />
         <Button
           type="submit"
           disabled={loading || !code.trim()}
           size="sm"
-          className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold px-5 disabled:opacity-50"
+          className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-5 disabled:opacity-50"
         >
           {loading ? "Joining..." : "Join Event"}
         </Button>
@@ -276,12 +276,12 @@ function BentoCard({
     >
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-mauve/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-white/70 group-hover:bg-mauve group-hover:text-[#141110] transition-colors duration-300 mb-6">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-mauve/5 text-ink-secondary group-hover:bg-mauve group-hover:text-[#faf6ed] transition-colors duration-300 mb-6">
         <Icon className="h-5 w-5" />
       </div>
 
-      <h3 className="text-lg font-bold text-white group-hover:text-mauve transition-colors duration-300">{title}</h3>
-      <p className="mt-2 text-sm text-white/60 font-light leading-relaxed mb-6">{description}</p>
+      <h3 className="text-lg font-bold text-ink group-hover:text-mauve transition-colors duration-300">{title}</h3>
+      <p className="mt-2 text-sm text-ink-secondary font-light leading-relaxed mb-6">{description}</p>
       
       {children && <div className="relative mt-auto w-full pt-4">{children}</div>}
     </motion.div>
@@ -589,7 +589,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className={`flex min-h-screen flex-col bg-surface-dark text-white selection:bg-mauve/30 font-sans`}>
+    <div className={`flex min-h-screen flex-col bg-surface-dark text-ink selection:bg-mauve/30 font-sans`}>
       <PublicNavbar />
 
       <main className="flex-1 overflow-hidden">
@@ -604,7 +604,7 @@ export default function HomePage() {
             })
           }}
         >
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,rgba(178,141,174,0.20),transparent_18%),radial-gradient(circle_at_20%_20%,rgba(164,104,160,0.14),transparent_20%),radial-gradient(circle_at_bottom_left,rgba(178,141,174,0.08),transparent_25%),linear-gradient(180deg,rgba(20,17,16,0.94),rgba(28,24,20,0.9))]" />
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,rgba(184, 146, 90,0.20),transparent_18%),radial-gradient(circle_at_20%_20%,rgba(150, 114, 58,0.14),transparent_20%),radial-gradient(circle_at_bottom_left,rgba(184, 146, 90,0.08),transparent_25%),linear-gradient(180deg,rgba(250,246,237,0.94),rgba(255,255,255,0.9))]" />
           <div className="absolute inset-0 -z-10 overflow-hidden">
             <motion.div
               animate={{ x: pointer.x * 24, y: pointer.y * 24 }}
@@ -619,18 +619,18 @@ export default function HomePage() {
             <motion.div
               animate={{ y: scrollY * 0.08 }}
               transition={{ ease: "easeOut", duration: 0.4 }}
-              className="absolute left-1/2 top-1/4 h-[420px] w-[420px] -translate-x-1/2 rounded-full border border-white/10 bg-white/[0.02] shadow-[0_0_120px_rgba(178,141,174,0.12)]"
+              className="absolute left-1/2 top-1/4 h-[420px] w-[420px] -translate-x-1/2 rounded-full border border-ink/10 bg-ink/[0.02] shadow-[0_0_120px_rgba(184, 146, 90,0.12)]"
             />
             <div className="pointer-events-none absolute inset-0">
               <motion.div
                 animate={{ opacity: [0, 0.4, 0], x: [0, 10, 0], y: [0, -10, 0] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute left-16 top-24 h-2 w-2 rounded-full bg-white/60 blur-sm"
+                className="absolute left-16 top-24 h-2 w-2 rounded-full bg-mauve/50 blur-sm"
               />
               <motion.div
                 animate={{ opacity: [0, 0.35, 0], x: [0, -10, 0], y: [0, 12, 0] }}
                 transition={{ duration: 7.2, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute right-20 top-32 h-2 w-2 rounded-full bg-white/40 blur-sm"
+                className="absolute right-20 top-32 h-2 w-2 rounded-full bg-mauve/40 blur-sm"
               />
               <motion.div
                 animate={{ opacity: [0, 0.4, 0], x: [0, 14, 0], y: [0, 8, 0] }}
@@ -661,7 +661,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className={`relative overflow-hidden text-5xl font-light tracking-tight md:text-8xl text-white leading-[1.05] font-playfair`}
+              className={`relative overflow-hidden text-5xl font-light tracking-tight md:text-8xl text-ink leading-[1.05] font-playfair`}
             >
               Capture Every Moment. <br />
               <span className="italic font-light bg-gradient-to-r from-mauve via-mauve-strong to-mauve bg-clip-text text-transparent">Reveal Together.</span>
@@ -670,7 +670,7 @@ export default function HomePage() {
                 initial={{ x: -200, opacity: 0 }}
                 animate={{ x: 200, opacity: [0, 0.6, 0] }}
                 transition={{ delay: 0.6, duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                className="pointer-events-none absolute left-0 top-0 h-full w-20 bg-gradient-to-r from-white/0 via-white/70 to-white/0"
+                className="pointer-events-none absolute left-0 top-0 h-full w-20 bg-gradient-to-r from-mauve/0 via-mauve/30 to-mauve/0"
               />
             </motion.h1>
 
@@ -678,7 +678,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-lg text-white/60 max-w-xl mx-auto leading-relaxed font-light"
+              className="text-lg text-ink-secondary max-w-xl mx-auto leading-relaxed font-light"
             >
               Collect, organize and share event photos with QR codes, real-time uploads and AI magic. Your memories, beautifully organized.
             </motion.p>
@@ -689,17 +689,17 @@ export default function HomePage() {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="flex flex-wrap justify-center items-center gap-4 pt-4"
             >
-              <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold px-8 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10">
+              <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-8 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10">
                 <Link href="/signup">Get Started Free</Link>
               </Button>
               <Button
                 onClick={handleScrollToHowItWorks}
                 variant="ghost"
                 size="lg"
-                className="rounded-full font-medium hover:bg-white/5 text-white border border-white/15"
+                className="rounded-full font-medium hover:bg-mauve/5 text-ink border border-hairline-dark"
               >
                 See How It Works
-                <Play className="ml-2 h-4 w-4 text-white" />
+                <Play className="ml-2 h-4 w-4 text-ink" />
               </Button>
             </motion.div>
 
@@ -707,7 +707,7 @@ export default function HomePage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.8 }}
               transition={{ duration: 1, delay: 0.5 }}
-              className="pt-10 flex flex-wrap justify-center gap-x-8 gap-y-3 text-xs text-white/50 font-light"
+              className="pt-10 flex flex-wrap justify-center gap-x-8 gap-y-3 text-xs text-ink-secondary font-light"
             >
               <span>✓ No App Required</span>
               <span>•</span>
@@ -778,7 +778,7 @@ export default function HomePage() {
         <section className="py-16 border-y border-hairline-dark bg-surface-card relative">
           <div className="container px-6 mx-auto max-w-7xl">
             <div className="text-center space-y-2 mb-10">
-              <span className="text-[10px] font-bold text-white/50 tracking-[0.2em] uppercase block">
+              <span className="text-[10px] font-bold text-ink-secondary tracking-[0.2em] uppercase block">
                 TRUSTED BY THOUSANDS OF HOSTS WORLDWIDE
               </span>
             </div>
@@ -788,40 +788,40 @@ export default function HomePage() {
                 <div className="mx-auto h-8 w-8 rounded-full bg-mauve/15 text-mauve flex items-center justify-center">
                   <Calendar className="h-4 w-4" />
                 </div>
-                <h4 className="text-3xl font-extrabold text-white">
+                <h4 className="text-3xl font-extrabold text-ink">
                   <CountUp value={10} suffix="K+" />
                 </h4>
-                <p className="text-xs text-white/50 font-light">Events Hosted</p>
+                <p className="text-xs text-ink-secondary font-light">Events Hosted</p>
               </div>
 
               <div className="bg-surface-card-elevated p-6 rounded-2xl border border-hairline-dark text-center space-y-2">
                 <div className="mx-auto h-8 w-8 rounded-full bg-mauve/15 text-mauve flex items-center justify-center">
                   <Camera className="h-4 w-4" />
                 </div>
-                <h4 className="text-3xl font-extrabold text-white">
+                <h4 className="text-3xl font-extrabold text-ink">
                   <CountUp value={25} suffix="M+" />
                 </h4>
-                <p className="text-xs text-white/50 font-light">Photos Shared</p>
+                <p className="text-xs text-ink-secondary font-light">Photos Shared</p>
               </div>
 
               <div className="bg-surface-card-elevated p-6 rounded-2xl border border-hairline-dark text-center space-y-2">
                 <div className="mx-auto h-8 w-8 rounded-full bg-mauve/15 text-mauve flex items-center justify-center">
                   <Users className="h-4 w-4" />
                 </div>
-                <h4 className="text-3xl font-extrabold text-white">
+                <h4 className="text-3xl font-extrabold text-ink">
                   <CountUp value={500} suffix="K+" />
                 </h4>
-                <p className="text-xs text-white/50 font-light">Happy Guests</p>
+                <p className="text-xs text-ink-secondary font-light">Happy Guests</p>
               </div>
 
               <div className="bg-surface-card-elevated p-6 rounded-2xl border border-hairline-dark text-center space-y-2">
                 <div className="mx-auto h-8 w-8 rounded-full bg-mauve/15 text-mauve flex items-center justify-center">
                   <Shield className="h-4 w-4" />
                 </div>
-                <h4 className="text-3xl font-extrabold text-white">
+                <h4 className="text-3xl font-extrabold text-ink">
                   <CountUp value={99} suffix=".9%" />
                 </h4>
-                <p className="text-xs text-white/50 font-light">Platform Uptime</p>
+                <p className="text-xs text-ink-secondary font-light">Platform Uptime</p>
               </div>
             </div>
           </div>
@@ -832,10 +832,10 @@ export default function HomePage() {
           <div className="container px-6 mx-auto max-w-7xl flex flex-col items-center">
             <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
               <span className="text-xs font-semibold text-mauve tracking-wider uppercase block">SIGNATURE EXPERIENCE</span>
-              <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-white font-playfair`}>
+              <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-ink font-playfair`}>
                 Interactive Memory Orbit
               </h2>
-              <p className="text-white/60 font-light max-w-md mx-auto text-sm leading-relaxed">
+              <p className="text-ink-secondary font-light max-w-md mx-auto text-sm leading-relaxed">
                 Hover over photos to zoom in. A beautiful visual universe revolving around your unique event gallery.
               </p>
             </div>
@@ -843,8 +843,8 @@ export default function HomePage() {
             {/* Orbit Container */}
             <div className="relative w-full h-[480px] md:h-[580px] flex items-center justify-center">
               {/* Outer orbit path rings */}
-              <div className="absolute h-[340px] w-[340px] md:h-[440px] md:w-[440px] border border-dashed border-white/15 rounded-full -z-10" />
-              <div className="absolute h-[220px] w-[220px] md:h-[280px] md:w-[280px] border border-dashed border-white/10 rounded-full -z-10" />
+              <div className="absolute h-[340px] w-[340px] md:h-[440px] md:w-[440px] border border-dashed border-ink/15 rounded-full -z-10" />
+              <div className="absolute h-[220px] w-[220px] md:h-[280px] md:w-[280px] border border-dashed border-ink/10 rounded-full -z-10" />
 
               {/* Center Focal Card (QR Mockup) */}
               <motion.div
@@ -852,12 +852,12 @@ export default function HomePage() {
                 transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
                 className="z-20 w-[140px] md:w-[170px] bg-surface-card-elevated p-5 rounded-2xl shadow-2xl border border-hairline-dark text-center space-y-3"
               >
-                <div className="bg-white/5 p-3 rounded-xl border border-white/10 flex items-center justify-center">
-                  <QrCode className="h-16 w-16 text-white" />
+                <div className="bg-mauve/5 p-3 rounded-xl border border-hairline-dark flex items-center justify-center">
+                  <QrCode className="h-16 w-16 text-ink" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-[10px] font-bold text-white/50 uppercase tracking-widest">SCAN TO ACCESS</h4>
-                  <p className="text-[11px] font-bold text-white">Kate & Leo's Gallery</p>
+                  <h4 className="text-[10px] font-bold text-ink-secondary uppercase tracking-widest">SCAN TO ACCESS</h4>
+                  <p className="text-[11px] font-bold text-ink">Kate & Leo's Gallery</p>
                 </div>
               </motion.div>
 
@@ -906,10 +906,10 @@ export default function HomePage() {
           <div className="container px-6 mx-auto max-w-7xl">
             <div className="text-center max-w-2xl mx-auto space-y-4 mb-20">
               <span className="text-xs font-semibold text-mauve tracking-wider uppercase block">POWERFUL CAPABILITIES</span>
-              <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-white font-playfair`}>
+              <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-ink font-playfair`}>
                 Everything you need for perfect events
               </h2>
-              <p className="text-white/60 font-light max-w-lg mx-auto text-sm leading-relaxed">
+              <p className="text-ink-secondary font-light max-w-lg mx-auto text-sm leading-relaxed">
                 A seamless photography experience packed with client watermarking, real-time feedback, and automated delivery.
               </p>
             </div>
@@ -922,15 +922,15 @@ export default function HomePage() {
                 icon={QrCode}
                 className="md:col-span-2"
               >
-                <div className="relative w-full h-[140px] bg-white/5 rounded-2xl border border-white/10 p-4 flex items-center justify-center overflow-hidden">
+                <div className="relative w-full h-[140px] bg-mauve/5 rounded-2xl border border-hairline-dark p-4 flex items-center justify-center overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-tr from-mauve/10 to-mauve-strong/5" />
                   <motion.div
                     animate={{ y: [0, -8, 0] }}
                     transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
                     className="bg-surface-card-elevated p-3 rounded-xl shadow-md border border-hairline-dark flex flex-col items-center gap-2"
                   >
-                    <QrCode className="h-14 w-14 text-white" />
-                    <span className="text-[8px] font-bold text-white/50 uppercase tracking-widest">SCAN TO UPLOAD</span>
+                    <QrCode className="h-14 w-14 text-ink" />
+                    <span className="text-[8px] font-bold text-ink-secondary uppercase tracking-widest">SCAN TO UPLOAD</span>
                   </motion.div>
                   <div className="absolute h-24 w-24 border border-dashed border-mauve/30 rounded-full animate-[spin_20s_linear_infinite]" />
                 </div>
@@ -941,7 +941,7 @@ export default function HomePage() {
                 description="Live, real-time photo uploads. Check progress instantly from any device browser."
                 icon={ImageIcon}
               >
-                <div className="relative w-full h-[140px] bg-white/5 rounded-2xl border border-white/10 p-4 flex items-center justify-center overflow-hidden">
+                <div className="relative w-full h-[140px] bg-mauve/5 rounded-2xl border border-hairline-dark p-4 flex items-center justify-center overflow-hidden">
                   <motion.div
                     animate={{ scale: [1, 1.04, 1] }}
                     transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
@@ -951,7 +951,7 @@ export default function HomePage() {
                       <ImageIcon className="h-4 w-4" />
                     </div>
                     <div className="text-left">
-                      <span className="text-[10px] font-bold text-white block">live_feed_active</span>
+                      <span className="text-[10px] font-bold text-ink block">live_feed_active</span>
                       <span className="text-[9px] text-emerald-400 font-medium">● 4 photos uploading</span>
                     </div>
                   </motion.div>
@@ -963,16 +963,16 @@ export default function HomePage() {
                 description="Find photos of anyone in seconds. Guests take a quick selfie to index and isolate matching shots instantly."
                 icon={Sparkles}
               >
-                <div className="relative w-full h-[140px] bg-white/5 rounded-2xl border border-white/10 p-4 flex items-center justify-center overflow-hidden">
+                <div className="relative w-full h-[140px] bg-mauve/5 rounded-2xl border border-hairline-dark p-4 flex items-center justify-center overflow-hidden">
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80" className="h-12 w-12 rounded-full object-cover border-2 border-mauve shadow-md" />
-                      <div className="absolute -bottom-1 -right-1 bg-mauve text-[#141110] rounded-full p-0.5 shadow">
+                      <div className="absolute -bottom-1 -right-1 bg-mauve text-[#faf6ed] rounded-full p-0.5 shadow">
                         <Sparkles className="h-2.5 w-2.5" />
                       </div>
                     </div>
                     <div className="space-y-1.5 text-left">
-                      <div className="h-1 w-20 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-1 w-20 bg-ink/10 rounded-full overflow-hidden">
                         <motion.div
                           animate={{ x: [-80, 80] }}
                           transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
@@ -993,7 +993,7 @@ export default function HomePage() {
                 icon={Lock}
                 className="md:col-span-2"
               >
-                <div className="relative w-full h-[140px] bg-white/5 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center">
+                <div className="relative w-full h-[140px] bg-mauve/5 rounded-2xl border border-hairline-dark overflow-hidden flex items-center justify-center">
                   <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=200&q=80" className="absolute inset-0 h-full w-full object-cover blur-[2px] opacity-30" />
                   <div className="absolute inset-0 bg-surface-dark/60 backdrop-blur-[1px]" />
                   <div className="relative bg-surface-card-elevated p-3 rounded-xl shadow-lg border border-hairline-dark flex items-center gap-3">
@@ -1001,8 +1001,8 @@ export default function HomePage() {
                       <Lock className="h-4 w-4" />
                     </div>
                     <div className="text-left">
-                      <div className="text-[10px] font-bold text-white">Secure Vault</div>
-                      <div className="text-[8px] text-white/50 font-light">Custom Watermarking</div>
+                      <div className="text-[10px] font-bold text-ink">Secure Vault</div>
+                      <div className="text-[8px] text-ink-secondary font-light">Custom Watermarking</div>
                     </div>
                   </div>
                 </div>
@@ -1032,10 +1032,10 @@ export default function HomePage() {
           <div className="container px-6 mx-auto max-w-7xl">
             <div className="text-center max-w-2xl mx-auto space-y-4 mb-20">
               <span className="text-xs font-semibold text-mauve tracking-wider uppercase block">SIMPLE PROCESS</span>
-              <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-white font-playfair`}>
+              <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-ink font-playfair`}>
                 How Snapsy Works
               </h2>
-              <p className="text-white/60 font-light max-w-md mx-auto text-sm leading-relaxed">
+              <p className="text-ink-secondary font-light max-w-md mx-auto text-sm leading-relaxed">
                 Four simple steps to capture raw emotion and deliver beautiful real-time galleries.
               </p>
             </div>
@@ -1053,19 +1053,19 @@ export default function HomePage() {
                       className={`w-full text-left flex items-start gap-4 p-5 rounded-2xl border transition-all duration-300 ${
                         isActive
                           ? "bg-mauve/10 border-mauve/30 shadow-sm"
-                          : "bg-transparent border-transparent hover:bg-white/5"
+                          : "bg-transparent border-transparent hover:bg-mauve/5"
                       }`}
                     >
                       <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-bold text-sm transition-colors ${
-                        isActive ? "bg-mauve text-[#141110]" : "bg-white/10 text-white/50"
+                        isActive ? "bg-mauve text-[#faf6ed]" : "bg-ink/10 text-ink-secondary"
                       }`}>
                         {step.num}
                       </div>
                       <div className="space-y-1">
-                        <h4 className={`font-bold text-sm transition-colors ${isActive ? "text-mauve" : "text-white/80"}`}>
+                        <h4 className={`font-bold text-sm transition-colors ${isActive ? "text-mauve" : "text-ink"}`}>
                           {step.title}
                         </h4>
-                        <p className="text-xs text-white/50 font-light">{step.subtitle}</p>
+                        <p className="text-xs text-ink-secondary font-light">{step.subtitle}</p>
                       </div>
                     </button>
                   )
@@ -1087,25 +1087,25 @@ export default function HomePage() {
                       className="w-full max-w-md bg-surface-card-elevated border border-hairline-dark rounded-2xl shadow-xl p-6 space-y-4"
                     >
                       <div className="flex items-center justify-between border-b border-hairline-dark pb-4">
-                        <h4 className="font-bold text-white text-sm">Dashboard / Event Settings</h4>
+                        <h4 className="font-bold text-ink text-sm">Dashboard / Event Settings</h4>
                         <span className="text-[10px] bg-mauve/15 text-mauve font-bold px-2 py-0.5 rounded border border-mauve/20">Live</span>
                       </div>
                       <div className="space-y-3">
                         <div className="space-y-1">
-                          <span className="text-[10px] text-white/50 font-bold uppercase">Subdomain Link</span>
-                          <div className="bg-white/5 px-3 py-2 rounded-lg border border-white/10 text-xs text-white/70 font-mono">
+                          <span className="text-[10px] text-ink-secondary font-bold uppercase">Subdomain Link</span>
+                          <div className="bg-mauve/5 px-3 py-2 rounded-lg border border-hairline-dark text-xs text-ink-secondary font-mono">
                             snapsy.events/kate-and-leo
                           </div>
                         </div>
                         <div className="flex items-center justify-between py-2 border-y border-hairline-dark">
-                          <span className="text-xs text-white/70">Watermark Protection</span>
+                          <span className="text-xs text-ink-secondary">Watermark Protection</span>
                           <div className="h-5 w-9 rounded-full bg-mauve p-0.5 flex justify-end items-center cursor-pointer">
                             <div className="h-4 w-4 rounded-full bg-white shadow-sm" />
                           </div>
                         </div>
                         <div className="flex items-center justify-between py-2 border-b border-hairline-dark">
-                          <span className="text-xs text-white/70">Auto-Approve Uploads</span>
-                          <div className="h-5 w-9 rounded-full bg-white/10 p-0.5 flex justify-start items-center cursor-pointer">
+                          <span className="text-xs text-ink-secondary">Auto-Approve Uploads</span>
+                          <div className="h-5 w-9 rounded-full bg-ink/10 p-0.5 flex justify-start items-center cursor-pointer">
                             <div className="h-4 w-4 rounded-full bg-white shadow-sm" />
                           </div>
                         </div>
@@ -1122,16 +1122,16 @@ export default function HomePage() {
                       transition={{ duration: 0.3 }}
                       className="w-full max-w-sm bg-surface-card-elevated border border-hairline-dark rounded-2xl shadow-xl p-8 text-center space-y-4"
                     >
-                      <div className="border-2 border-dashed border-white/15 p-4 rounded-xl space-y-4">
-                        <span className="text-[10px] text-white/50 font-bold uppercase tracking-widest">TABLE TENT CARD</span>
-                        <h4 className={`text-xl font-light leading-tight font-playfair text-white`}>
+                      <div className="border-2 border-dashed border-hairline-dark p-4 rounded-xl space-y-4">
+                        <span className="text-[10px] text-ink-secondary font-bold uppercase tracking-widest">TABLE TENT CARD</span>
+                        <h4 className={`text-xl font-light leading-tight font-playfair text-ink`}>
                           Help us capture <br />
                           the <span className="italic font-light text-mauve">magic</span>
                         </h4>
-                        <div className="bg-white/5 p-4 rounded-lg inline-block border border-white/10">
-                          <QrCode className="h-28 w-28 text-white" />
+                        <div className="bg-mauve/5 p-4 rounded-lg inline-block border border-hairline-dark">
+                          <QrCode className="h-28 w-28 text-ink" />
                         </div>
-                        <p className="text-[9px] text-white/50 font-light">Scan code to upload your snapshots</p>
+                        <p className="text-[9px] text-ink-secondary font-light">Scan code to upload your snapshots</p>
                       </div>
                     </motion.div>
                   )}
@@ -1143,30 +1143,30 @@ export default function HomePage() {
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: -10 }}
                       transition={{ duration: 0.3 }}
-                      className="w-full max-w-[280px] bg-surface-card-elevated text-white border border-hairline-dark rounded-3xl shadow-xl p-5 space-y-4 relative"
+                      className="w-full max-w-[280px] bg-surface-card-elevated text-ink border border-hairline-dark rounded-3xl shadow-xl p-5 space-y-4 relative"
                     >
                       <div className="h-4 w-20 bg-black rounded-full mx-auto -mt-2 mb-2 flex items-center justify-center" />
-                      <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                      <div className="flex items-center justify-between border-b border-hairline-dark pb-3">
                         <span className="text-xs font-bold flex items-center gap-1.5"><Camera className="h-3.5 w-3.5 text-mauve" /> Web Gallery</span>
-                        <span className="text-[9px] text-white/50 font-mono">Upload active</span>
+                        <span className="text-[9px] text-ink-secondary font-mono">Upload active</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        <div className="aspect-square bg-white/5 rounded-lg overflow-hidden relative border border-white/5">
+                        <div className="aspect-square bg-mauve/5 rounded-lg overflow-hidden relative border border-hairline-dark">
                           <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=150&q=80" className="h-full w-full object-cover opacity-80" alt="Wedding snapshot" />
                           <div className="absolute inset-0 bg-surface-dark/40 flex items-center justify-center">
                             <span className="text-[9px] font-mono">100%</span>
                           </div>
                         </div>
-                        <div className="aspect-square bg-white/5 rounded-lg overflow-hidden relative border border-white/5">
+                        <div className="aspect-square bg-mauve/5 rounded-lg overflow-hidden relative border border-hairline-dark">
                           <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=150&q=80" className="h-full w-full object-cover opacity-60 animate-pulse" alt="Birthday blowout" />
                           <div className="absolute inset-0 bg-surface-dark/60 flex items-center justify-center">
-                            <div className="h-1 w-12 bg-white/20 rounded-full overflow-hidden">
+                            <div className="h-1 w-12 bg-ink/20 rounded-full overflow-hidden">
                               <div className="h-full w-2/3 bg-mauve" />
                             </div>
                           </div>
                         </div>
                       </div>
-                      <div className="text-[10px] text-center text-white/50 font-light pt-2">No app install required for guests.</div>
+                      <div className="text-[10px] text-center text-ink-secondary font-light pt-2">No app install required for guests.</div>
                     </motion.div>
                   )}
 
@@ -1180,21 +1180,21 @@ export default function HomePage() {
                       className="w-full max-w-sm bg-surface-card-elevated border border-hairline-dark rounded-2xl shadow-xl p-6 space-y-4"
                     >
                       <div className="flex items-center gap-3">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&q=80" className="h-10 w-10 rounded-full object-cover border border-white/15" alt="Guest avatar" />
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&q=80" className="h-10 w-10 rounded-full object-cover border border-hairline-dark" alt="Guest avatar" />
                         <div className="text-left">
-                          <h5 className="text-xs font-bold text-white">Kate's Selfie Search</h5>
-                          <p className="text-[9px] text-white/50">Indexed across 1,200 photos</p>
+                          <h5 className="text-xs font-bold text-ink">Kate's Selfie Search</h5>
+                          <p className="text-[9px] text-ink-secondary">Indexed across 1,200 photos</p>
                         </div>
                       </div>
                       <div className="border-t border-hairline-dark pt-4">
                         <div className="grid grid-cols-3 gap-2">
-                          <div className="aspect-square bg-white/5 rounded-lg overflow-hidden border border-white/10">
+                          <div className="aspect-square bg-mauve/5 rounded-lg overflow-hidden border border-hairline-dark">
                             <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=100&q=80" className="h-full w-full object-cover" alt="Matched photo 1" />
                           </div>
-                          <div className="aspect-square bg-white/5 rounded-lg overflow-hidden border border-white/10">
+                          <div className="aspect-square bg-mauve/5 rounded-lg overflow-hidden border border-hairline-dark">
                             <img src="https://images.unsplash.com/photo-1523438885200-e635ba2c371e?w=100&q=80" className="h-full w-full object-cover" alt="Matched photo 2" />
                           </div>
-                          <div className="aspect-square bg-white/5 rounded-lg overflow-hidden border border-white/10">
+                          <div className="aspect-square bg-mauve/5 rounded-lg overflow-hidden border border-hairline-dark">
                             <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=100&q=80" className="h-full w-full object-cover" alt="Matched photo 3" />
                           </div>
                         </div>
@@ -1215,10 +1215,10 @@ export default function HomePage() {
           <div className="container px-6 mx-auto max-w-7xl">
             <div className="text-center max-w-2xl mx-auto space-y-4 mb-20">
               <span className="text-xs font-semibold text-mauve tracking-wider uppercase block">EVENT GALLERY</span>
-              <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-white font-playfair`}>
+              <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-ink font-playfair`}>
                 Memories that last forever
               </h2>
-              <p className="text-white/60 font-light max-w-lg mx-auto text-sm leading-relaxed">
+              <p className="text-ink-secondary font-light max-w-lg mx-auto text-sm leading-relaxed">
                 From weddings and concerts to milestone birthdays, explore what communities build with Snapsy.
               </p>
             </div>
@@ -1256,10 +1256,10 @@ export default function HomePage() {
           <div className="container px-6 mx-auto max-w-7xl">
             <div className="text-center max-w-2xl mx-auto space-y-4 mb-20">
               <span className="text-xs font-semibold text-mauve tracking-wider uppercase block">SIMPLE & TRANSPARENT</span>
-              <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-white font-playfair`}>
+              <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-ink font-playfair`}>
                 Choose the perfect plan
               </h2>
-              <p className="text-white/60 font-light max-w-md mx-auto text-sm leading-relaxed">
+              <p className="text-ink-secondary font-light max-w-md mx-auto text-sm leading-relaxed">
                 Transparent flat pricing based on your event capacity. Upgrade or customize bounds at any point.
               </p>
             </div>
@@ -1275,7 +1275,7 @@ export default function HomePage() {
         {/* --- SECTION 8: HIGH IMPACT CTA --- */}
         <section className="py-24 relative overflow-hidden">
           <div className="container px-6 mx-auto max-w-5xl">
-            <div className="relative rounded-3xl bg-surface-card text-white overflow-hidden px-8 py-24 text-center shadow-2xl border border-hairline-dark">
+            <div className="relative rounded-3xl bg-surface-card text-ink overflow-hidden px-8 py-24 text-center shadow-2xl border border-hairline-dark">
               {/* Accent mesh blur */}
               <div className="absolute inset-0 bg-gradient-to-b from-surface-card via-surface-card-elevated to-surface-card -z-10" />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 h-[500px] w-[500px] rounded-full bg-mauve/15 blur-3xl" />
@@ -1297,7 +1297,7 @@ export default function HomePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.8, delay: 0.15 }}
-                  className="text-white/60 max-w-md mx-auto text-sm font-light leading-relaxed"
+                  className="text-ink-secondary max-w-md mx-auto text-sm font-light leading-relaxed"
                 >
                   Join thousands of photographers, event planners, and hosts delivering beautiful real-time galleries with Snapsy.
                 </motion.p>
@@ -1310,7 +1310,7 @@ export default function HomePage() {
                   className="pt-6"
                 >
                   <Link href="/signup">
-                    <Button size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold px-10 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10 border-none">
+                    <Button size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-10 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10 border-none">
                       Start Free Today
                       <ArrowRight className="h-5 w-5 ml-2" />
                     </Button>

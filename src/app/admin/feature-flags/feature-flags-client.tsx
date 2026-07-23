@@ -69,27 +69,27 @@ export function FeatureFlagsClient({ initialFlags }: { initialFlags: Partial<Fea
     <main className="px-6 py-8 space-y-6 max-w-4xl bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Feature Flags control</h1>
-          <p className="text-sm text-white/50 mt-1">Activate beta tests, toggle heavy algorithms execution, or configure customization layers.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">Feature Flags control</h1>
+          <p className="text-sm text-ink-secondary mt-1">Activate beta tests, toggle heavy algorithms execution, or configure customization layers.</p>
         </div>
       </div>
 
       <Card className="bg-surface-card border-hairline-dark shadow-sm">
-        <CardHeader className="border-b border-white/10">
-          <CardTitle className="text-white/80 flex items-center gap-2 text-base font-bold">
+        <CardHeader className="border-b border-hairline-dark">
+          <CardTitle className="text-ink flex items-center gap-2 text-base font-bold">
             <Sliders className="h-5 w-5 text-mauve" />
             <span>Active Release Toggles</span>
           </CardTitle>
-          <CardDescription className="text-white/40 text-xs font-semibold leading-relaxed">
+          <CardDescription className="text-ink-tertiary text-xs font-semibold leading-relaxed">
             Changes are persisted to the platform_settings table immediately on save.
           </CardDescription>
         </CardHeader>
-        <CardContent className="divide-y divide-white/10 p-6">
+        <CardContent className="divide-y divide-hairline-dark p-6">
           {items.map((flag) => (
             <div key={flag.key} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
               <div className="space-y-1 pr-6">
-                <Label className="text-white/80 font-bold text-sm block">{flag.label}</Label>
-                <p className="text-xs text-white/40 font-semibold leading-relaxed">{flag.desc}</p>
+                <Label className="text-ink font-bold text-sm block">{flag.label}</Label>
+                <p className="text-xs text-ink-tertiary font-semibold leading-relaxed">{flag.desc}</p>
               </div>
               <Switch checked={flags[flag.key]} onCheckedChange={() => toggleFlag(flag.key)} />
             </div>
@@ -101,7 +101,7 @@ export function FeatureFlagsClient({ initialFlags }: { initialFlags: Partial<Fea
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="bg-mauve hover:bg-mauve-strong text-[#141110] font-bold h-11 px-8 rounded-xl shadow-md"
+          className="bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold h-11 px-8 rounded-xl shadow-md"
         >
           <Save className="h-4.5 w-4.5 mr-1.5" />
           <span>{saving ? "Saving Changes..." : "Save Feature Flags"}</span>

@@ -117,7 +117,7 @@ export function GuestCaptureModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
-        className="sm:max-w-[425px] rounded-2xl sm:rounded-2xl border border-[#3D332A] bg-[#1C1814] text-white/90 max-h-[90vh] overflow-y-auto"
+        className="sm:max-w-[425px] rounded-2xl sm:rounded-2xl border border-[#e5dfd0] bg-[#ffffff] text-ink max-h-[90vh] overflow-y-auto"
         onInteractOutside={(e) => e.preventDefault()}
       >
         <AnimatePresence mode="wait" initial={false}>
@@ -134,20 +134,20 @@ export function GuestCaptureModal({
                 initial={prefersReducedMotion ? false : { scale: 0.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.05 }}
-                className="flex h-16 w-16 items-center justify-center rounded-full bg-[#B28DAE]/15 border border-[#B28DAE]/30"
+                className="flex h-16 w-16 items-center justify-center rounded-full bg-[#b8925a]/15 border border-[#b8925a]/30"
               >
-                <Check className="h-8 w-8 text-[#B28DAE]" />
+                <Check className="h-8 w-8 text-[#b8925a]" />
               </motion.div>
               <div>
-                <p className="font-playfair text-lg font-medium text-white">You&apos;re checked in</p>
-                <p className="mt-1 text-sm text-white/60">Opening the memory capsule…</p>
+                <p className="font-playfair text-lg font-medium text-ink">You&apos;re checked in</p>
+                <p className="mt-1 text-sm text-ink-secondary">Opening the memory capsule…</p>
               </div>
             </motion.div>
           ) : (
             <motion.div key="form" initial={false} animate="visible" exit={prefersReducedMotion ? undefined : { opacity: 0 }}>
               <DialogHeader>
-                <DialogTitle className="font-playfair text-2xl font-medium text-white">Welcome to {eventName}</DialogTitle>
-                <DialogDescription className="text-white/60">
+                <DialogTitle className="font-playfair text-2xl font-medium text-ink">Welcome to {eventName}</DialogTitle>
+                <DialogDescription className="text-ink-secondary">
                   {requireJoinCode
                     ? "Please check in with your details and the event code your host shared with you."
                     : "Please check in with your details to view the memory capsule and share your photos."}
@@ -162,19 +162,19 @@ export function GuestCaptureModal({
                 variants={staggerContainer(0.06)}
               >
                 <motion.div variants={fadeInUp} className="space-y-2">
-                  <Label htmlFor="guestName" className="text-white/80">Your Name <span className="text-[#B28DAE]">*</span></Label>
+                  <Label htmlFor="guestName" className="text-ink">Your Name <span className="text-[#b8925a]">*</span></Label>
                   <Input
                     id="guestName"
                     placeholder="e.g. John Doe"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="border-white/15 bg-white/5 text-white placeholder:text-white/40 focus-visible:ring-[#B28DAE]"
+                    className="border-[#e5dfd0] bg-[#faf6ed] text-ink placeholder:text-ink-tertiary focus-visible:ring-[#b8925a]"
                   />
                 </motion.div>
 
                 <motion.div variants={fadeInUp} className="space-y-2">
-                  <Label htmlFor="guestMobile" className="text-white/80">Mobile Number <span className="text-[#B28DAE]">*</span></Label>
+                  <Label htmlFor="guestMobile" className="text-ink">Mobile Number <span className="text-[#b8925a]">*</span></Label>
                   <Input
                     id="guestMobile"
                     type="tel"
@@ -182,12 +182,12 @@ export function GuestCaptureModal({
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                     required
-                    className="border-white/15 bg-white/5 text-white placeholder:text-white/40 focus-visible:ring-[#B28DAE]"
+                    className="border-[#e5dfd0] bg-[#faf6ed] text-ink placeholder:text-ink-tertiary focus-visible:ring-[#b8925a]"
                   />
                 </motion.div>
 
                 <motion.div variants={fadeInUp} className="space-y-2">
-                  <Label htmlFor="guestEmail" className="text-white/80">Email Address <span className="text-[#B28DAE]">*</span></Label>
+                  <Label htmlFor="guestEmail" className="text-ink">Email Address <span className="text-[#b8925a]">*</span></Label>
                   <Input
                     id="guestEmail"
                     type="email"
@@ -195,13 +195,13 @@ export function GuestCaptureModal({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="border-white/15 bg-white/5 text-white placeholder:text-white/40 focus-visible:ring-[#B28DAE]"
+                    className="border-[#e5dfd0] bg-[#faf6ed] text-ink placeholder:text-ink-tertiary focus-visible:ring-[#b8925a]"
                   />
                 </motion.div>
 
                 {requireJoinCode && (
                   <motion.div variants={fadeInUp} className="space-y-2">
-                    <Label htmlFor="guestJoinCode" className="text-white/80">Event Code <span className="text-[#B28DAE]">*</span></Label>
+                    <Label htmlFor="guestJoinCode" className="text-ink">Event Code <span className="text-[#b8925a]">*</span></Label>
                     <Input
                       id="guestJoinCode"
                       placeholder="e.g. 8DM6KC"
@@ -212,9 +212,9 @@ export function GuestCaptureModal({
                       autoCapitalize="characters"
                       autoCorrect="off"
                       spellCheck={false}
-                      className="border-white/15 bg-white/5 text-white placeholder:text-white/40 focus-visible:ring-[#B28DAE] font-mono tracking-[0.2em] uppercase"
+                      className="border-[#e5dfd0] bg-[#faf6ed] text-ink placeholder:text-ink-tertiary focus-visible:ring-[#b8925a] font-mono tracking-[0.2em] uppercase"
                     />
-                    <p className="text-xs text-white/40">Ask your host for this event's join code.</p>
+                    <p className="text-xs text-ink-tertiary">Ask your host for this event's join code.</p>
                   </motion.div>
                 )}
 
@@ -222,7 +222,7 @@ export function GuestCaptureModal({
                   <MotionButton
                     type="submit"
                     whileTap={loading ? undefined : tapScaleSubtle}
-                    className="w-full h-11 rounded-full text-base font-semibold bg-[#B28DAE] hover:bg-[#a468a0] text-[#141110]"
+                    className="w-full h-11 rounded-full text-base font-semibold bg-[#b8925a] hover:bg-[#96723a] text-[#faf6ed]"
                     disabled={loading || !name.trim() || !mobile.trim() || !email.trim() || (requireJoinCode && !joinCode.trim())}
                   >
                     {loading ? (

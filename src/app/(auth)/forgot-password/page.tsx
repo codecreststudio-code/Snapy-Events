@@ -41,14 +41,14 @@ export default function ForgotPasswordPage() {
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-mauve/10 mx-auto mb-4">
               <Mail className="h-6 w-6 text-mauve" />
             </div>
-            <CardTitle className="text-2xl font-playfair text-white font-light">Check your email</CardTitle>
-            <CardDescription className="text-white/50">
+            <CardTitle className="text-2xl font-playfair text-ink font-light">Check your email</CardTitle>
+            <CardDescription className="text-ink-secondary">
               We&apos;ve sent a password reset link to {email}
             </CardDescription>
           </CardHeader>
           <CardFooter className="justify-center">
             <Link href="/login">
-              <Button variant="outline" className="border-white/15 text-white hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-mauve/50">Back to Sign In</Button>
+              <Button variant="outline" className="border-hairline-dark text-ink hover:bg-mauve/5 focus-visible:ring-2 focus-visible:ring-mauve/50">Back to Sign In</Button>
             </Link>
           </CardFooter>
         </Card>
@@ -63,8 +63,8 @@ export default function ForgotPasswordPage() {
           <Link href="/" className="flex items-center justify-center mb-4">
             <Logo />
           </Link>
-          <CardTitle className="text-2xl font-playfair text-white font-light">Forgot Password</CardTitle>
-          <CardDescription className="text-white/50">
+          <CardTitle className="text-2xl font-playfair text-ink font-light">Forgot Password</CardTitle>
+          <CardDescription className="text-ink-secondary">
             Enter your email and we&apos;ll send you a reset link
           </CardDescription>
         </CardHeader>
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/70">Email</Label>
+              <Label htmlFor="email" className="text-ink-secondary">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
-                className="bg-white/5 border-hairline-dark text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve"
+                className="bg-mauve/5 border-hairline-dark text-ink placeholder:text-ink-tertiary focus:border-mauve focus:ring-mauve"
               />
             </div>
           </CardContent>
@@ -95,13 +95,13 @@ export default function ForgotPasswordPage() {
           <CardFooter className="flex flex-col space-y-4">
             <Button
               type="submit"
-              className="w-full rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all focus-visible:ring-2 focus-visible:ring-mauve/50"
+              className="w-full rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all focus-visible:ring-2 focus-visible:ring-mauve/50"
               disabled={isLoading}
             >
               {isLoading ? "Sending..." : "Send Reset Link"}
             </Button>
 
-            <p className="text-sm text-white/50 text-center">
+            <p className="text-sm text-ink-secondary text-center">
               Remember your password?{" "}
               <Link href="/login" className="text-mauve hover:underline">
                 Sign in

@@ -18,12 +18,12 @@ export function GalleryGallery({
   voiceNoteDurationLimit?: number
 }) {
   return (
-    <div className="min-h-screen bg-[#141110] px-4 py-8 sm:px-6 sm:py-10">
+    <div className="min-h-screen bg-[#faf6ed] px-4 py-8 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-6xl">
-        <p className="text-xs font-semibold uppercase tracking-wider text-[#B28DAE]">{eventName}</p>
-        <h1 className="font-playfair mt-1 text-3xl font-medium tracking-tight text-white">{galleryName}</h1>
-        {galleryDescription && <p className="mt-2 text-sm text-white/60">{galleryDescription}</p>}
-        <p className="mt-1 text-xs text-white/40">{photos.length} items</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-[#b8925a]">{eventName}</p>
+        <h1 className="font-playfair mt-1 text-3xl font-medium tracking-tight text-ink">{galleryName}</h1>
+        {galleryDescription && <p className="mt-2 text-sm text-ink-secondary">{galleryDescription}</p>}
+        <p className="mt-1 text-xs text-ink-tertiary">{photos.length} items</p>
 
         <MediaGrid
           photos={photos}

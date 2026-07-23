@@ -52,21 +52,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 function PostCard({ post }: { post: BlogPost }) {
   return (
     <Link href={`/blog/${post.slug}`} className="group flex gap-4 items-start py-4 border-b border-hairline-dark last:border-0">
-      <div className="h-16 w-24 rounded-xl overflow-hidden bg-white/5 shrink-0">
+      <div className="h-16 w-24 rounded-xl overflow-hidden bg-ink/5 shrink-0">
         {post.cover_image_url ? (
           <img src={post.cover_image_url} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center"><BookOpen className="h-5 w-5 text-white/30" /></div>
+          <div className="w-full h-full flex items-center justify-center"><BookOpen className="h-5 w-5 text-ink-tertiary" /></div>
         )}
       </div>
       <div className="flex-1 min-w-0">
         {post.category && (
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: post.category.color ?? "#B28DAE" }}>
+          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: post.category.color ?? "#b8925a" }}>
             {post.category.emoji} {post.category.name}
           </span>
         )}
-        <h3 className="text-sm font-bold text-white leading-snug mt-1 group-hover:text-mauve transition-colors line-clamp-2">{post.title}</h3>
-        <p className="text-[10px] text-white/50 mt-1 flex items-center gap-1">
+        <h3 className="text-sm font-bold text-ink leading-snug mt-1 group-hover:text-mauve transition-colors line-clamp-2">{post.title}</h3>
+        <p className="text-[10px] text-ink-secondary mt-1 flex items-center gap-1">
           <Clock className="h-3 w-3" />{post.read_time_minutes} min read
         </p>
       </div>
@@ -81,7 +81,7 @@ export default async function AuthorPage({ params }: Props) {
   const posts = await getAuthorPosts(a.id)
 
   return (
-    <div className={`flex min-h-screen flex-col bg-surface-dark text-white ${inter.className}`}>
+    <div className={`flex min-h-screen flex-col bg-surface-dark text-ink ${inter.className}`}>
       <PublicNavbar />
       <main className="flex-1">
         {/* Hero */}
@@ -91,9 +91,9 @@ export default async function AuthorPage({ params }: Props) {
               <img src={a.avatar_url} alt={a.name} className="h-20 w-20 rounded-2xl object-cover mx-auto mb-5 ring-4 ring-hairline-dark shadow-lg" />
             )}
             <div className="inline-block rounded-full bg-mauve/10 border border-mauve/20 px-3 py-1 text-xs font-bold text-mauve mb-3">AUTHOR</div>
-            <h1 className={`text-3xl md:text-4xl font-light tracking-tight text-white mb-3 ${playfair.className}`}>{a.name}</h1>
-            <p className="text-white/60 font-light max-w-lg mx-auto text-sm">{a.bio}</p>
-            <p className="mt-4 text-xs text-white/50">{posts.length} articles</p>
+            <h1 className={`text-3xl md:text-4xl font-light tracking-tight text-ink mb-3 ${playfair.className}`}>{a.name}</h1>
+            <p className="text-ink-secondary font-light max-w-lg mx-auto text-sm">{a.bio}</p>
+            <p className="mt-4 text-xs text-ink-secondary">{posts.length} articles</p>
           </div>
         </section>
 
@@ -103,8 +103,8 @@ export default async function AuthorPage({ params }: Props) {
             <div>{posts.map((p) => <PostCard key={p.id} post={p} />)}</div>
           ) : (
             <div className="py-24 text-center">
-              <BookOpen className="h-10 w-10 text-white/30 mx-auto mb-4" />
-              <p className="text-white/60">No articles yet.</p>
+              <BookOpen className="h-10 w-10 text-ink-tertiary mx-auto mb-4" />
+              <p className="text-ink-secondary">No articles yet.</p>
               <Link href="/blog" className="mt-4 inline-flex items-center gap-1 text-mauve text-sm font-semibold hover:underline">
                 Browse all articles <ArrowRight className="h-4 w-4" />
               </Link>

@@ -87,8 +87,8 @@ export default function AdminAiUsagePage() {
                 <Search className="h-6 w-6" />
               </div>
               <div>
-                <span className="text-xs text-white/50 font-medium block">Total Face Searches</span>
-                <span className="text-2xl font-bold text-white">{stats.totalSearches.toLocaleString()}</span>
+                <span className="text-xs text-ink-secondary font-medium block">Total Face Searches</span>
+                <span className="text-2xl font-bold text-ink">{stats.totalSearches.toLocaleString()}</span>
               </div>
             </Card>
 
@@ -97,8 +97,8 @@ export default function AdminAiUsagePage() {
                 <Image className="h-6 w-6" />
               </div>
               <div>
-                <span className="text-xs text-white/50 font-medium block">Vectorized Faces</span>
-                <span className="text-2xl font-bold text-white">{stats.activeEmbeddings.toLocaleString()}</span>
+                <span className="text-xs text-ink-secondary font-medium block">Vectorized Faces</span>
+                <span className="text-2xl font-bold text-ink">{stats.activeEmbeddings.toLocaleString()}</span>
               </div>
             </Card>
 
@@ -107,8 +107,8 @@ export default function AdminAiUsagePage() {
                 <Cpu className="h-6 w-6" />
               </div>
               <div>
-                <span className="text-xs text-white/50 font-medium block">GPU Vector Index Queue</span>
-                <span className="text-lg font-bold text-white">{stats.queueStatus}</span>
+                <span className="text-xs text-ink-secondary font-medium block">GPU Vector Index Queue</span>
+                <span className="text-lg font-bold text-ink">{stats.queueStatus}</span>
               </div>
             </Card>
           </div>
@@ -116,24 +116,24 @@ export default function AdminAiUsagePage() {
           <Card className="bg-surface-card border-hairline-dark overflow-hidden">
             <CardContent className="p-0">
               <div className="p-4 border-b border-hairline-dark">
-                <h3 className="font-bold text-white">Recent Guest Search Requests</h3>
+                <h3 className="font-bold text-ink">Recent Guest Search Requests</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-hairline-dark text-white/40 font-medium">
+                    <tr className="border-b border-hairline-dark text-ink-tertiary font-medium">
                       <th className="p-4">Search ID</th>
                       <th className="p-4">Trigger Time</th>
                       <th className="p-4">Processing Latency</th>
                       <th className="p-4">Matching Results</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/10 text-white/60">
+                  <tbody className="divide-y divide-hairline-dark text-ink-secondary">
                     {stats.recentSearches.map((log) => (
-                      <tr key={log.id} className="hover:bg-white/5 transition-colors">
-                        <td className="p-4 font-mono text-white/50">{log.id}</td>
-                        <td className="p-4 text-white/40">{new Date(log.timestamp).toLocaleString()}</td>
-                        <td className="p-4 font-semibold text-white/70">{log.durationMs} ms</td>
+                      <tr key={log.id} className="hover:bg-mauve/5 transition-colors">
+                        <td className="p-4 font-mono text-ink-secondary">{log.id}</td>
+                        <td className="p-4 text-ink-tertiary">{new Date(log.timestamp).toLocaleString()}</td>
+                        <td className="p-4 font-semibold text-ink-secondary">{log.durationMs} ms</td>
                         <td className="p-4 font-bold text-orange-400">{log.resultCount} photos</td>
                       </tr>
                     ))}

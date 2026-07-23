@@ -111,8 +111,8 @@ export function FeatureManager() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       <div className="lg:col-span-2 space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-bold text-white/80">Feature Manager</h2>
-          <Button onClick={startAdd} className="h-8 bg-mauve hover:bg-mauve-strong text-[#141110] text-xs font-bold gap-1">
+          <h2 className="text-lg font-bold text-ink">Feature Manager</h2>
+          <Button onClick={startAdd} className="h-8 bg-mauve hover:bg-mauve-strong text-[#faf6ed] text-xs font-bold gap-1">
             <Plus className="h-3.5 w-3.5" /> New Feature
           </Button>
         </div>
@@ -120,36 +120,36 @@ export function FeatureManager() {
         {loading ? (
           <div className="p-16 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-mauve" /></div>
         ) : features.length === 0 ? (
-          <div className="p-16 border border-dashed border-hairline-dark bg-surface-card text-white/40 text-center rounded-2xl text-xs font-semibold">
+          <div className="p-16 border border-dashed border-hairline-dark bg-surface-card text-ink-tertiary text-center rounded-2xl text-xs font-semibold">
             No features configured yet.
           </div>
         ) : (
           <div className="bg-surface-card border border-hairline-dark rounded-xl overflow-hidden shadow-sm">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-hairline-dark bg-white/5 text-white/50 font-bold uppercase tracking-wider">
+                <tr className="border-b border-hairline-dark bg-ink/5 text-ink-secondary font-bold uppercase tracking-wider">
                   <th className="p-3">Feature</th>
                   <th className="p-3">Type</th>
                   <th className="p-3">Status</th>
                   <th className="p-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10 font-medium text-white/70">
+              <tbody className="divide-y divide-hairline-dark font-medium text-ink-secondary">
                 {features.map(f => (
-                  <tr key={f.id} className="hover:bg-white/5 transition-colors">
+                  <tr key={f.id} className="hover:bg-mauve/5 transition-colors">
                     <td className="p-3">
-                      <div className="font-bold text-white/80">{f.name}</div>
-                      <div className="text-[10px] text-white/40 font-mono mt-0.5">{f.id}</div>
+                      <div className="font-bold text-ink">{f.name}</div>
+                      <div className="text-[10px] text-ink-tertiary font-mono mt-0.5">{f.id}</div>
                     </td>
-                    <td className="p-3 uppercase text-[10px] tracking-wider font-bold text-white/50">{f.type}</td>
+                    <td className="p-3 uppercase text-[10px] tracking-wider font-bold text-ink-secondary">{f.type}</td>
                     <td className="p-3">
-                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", f.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/50 border-hairline-dark")}>
+                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", f.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-ink/5 text-ink-secondary border-hairline-dark")}>
                         {f.is_active ? "Active" : "Inactive"}
                       </span>
                       {f.is_beta && <span className="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-amber-500/10 text-amber-400 border-amber-500/20">Beta</span>}
                     </td>
                     <td className="p-3 text-right flex justify-end gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => startEdit(f)} className="h-7 w-7 p-0 text-white/50 hover:bg-white/5 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => startEdit(f)} className="h-7 w-7 p-0 text-ink-secondary hover:bg-mauve/5 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
                       <Button variant="ghost" size="sm" onClick={() => handleDelete(f.id)} className="h-7 w-7 p-0 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
                     </td>
                   </tr>
@@ -166,7 +166,7 @@ export function FeatureManager() {
             <CardHeader className="pb-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-base text-white/80 font-bold">{isAdding ? "Create Feature" : "Edit Feature"}</CardTitle>
+                  <CardTitle className="text-base text-ink font-bold">{isAdding ? "Create Feature" : "Edit Feature"}</CardTitle>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => { setIsAdding(false); setEditingFeature(null) }} className="h-7 w-7 p-0 rounded-lg"><X className="h-4 w-4" /></Button>
               </div>
@@ -174,19 +174,19 @@ export function FeatureManager() {
             <CardContent>
               <form onSubmit={handleSave} className="space-y-4">
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-white/50">Feature ID / Slug</Label>
+                  <Label className="text-xs font-bold text-ink-secondary">Feature ID / Slug</Label>
                   <Input value={formId} onChange={e => setFormId(e.target.value)} disabled={!isAdding} required className="h-8 text-xs font-medium" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-white/50">Name</Label>
+                  <Label className="text-xs font-bold text-ink-secondary">Name</Label>
                   <Input value={formName} onChange={e => setFormName(e.target.value)} required className="h-8 text-xs font-medium" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-white/50">Description</Label>
+                  <Label className="text-xs font-bold text-ink-secondary">Description</Label>
                   <Input value={formDesc} onChange={e => setFormDesc(e.target.value)} className="h-8 text-xs font-medium" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-white/50">Type</Label>
+                  <Label className="text-xs font-bold text-ink-secondary">Type</Label>
                   <select value={formType} onChange={e => setFormType(e.target.value as any)} className="w-full h-8 px-2 rounded-md border border-hairline-dark text-xs font-medium">
                     <option value="boolean">Boolean (Toggle)</option>
                     <option value="quota">Quota (Number limit)</option>
@@ -196,11 +196,11 @@ export function FeatureManager() {
                 <div className="flex items-center gap-4 py-2 border-t border-b border-hairline-dark">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-mauve focus:ring-mauve h-3.5 w-3.5" />
-                    <span className="text-xs font-bold text-white/70">Active</span>
+                    <span className="text-xs font-bold text-ink-secondary">Active</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={formBeta} onChange={e => setFormBeta(e.target.checked)} className="rounded text-mauve focus:ring-mauve h-3.5 w-3.5" />
-                    <span className="text-xs font-bold text-white/70">Beta</span>
+                    <span className="text-xs font-bold text-ink-secondary">Beta</span>
                   </label>
                 </div>
                 <Button type="submit" disabled={actioning} className="w-full h-8 bg-mauve hover:bg-mauve-strong font-bold text-xs">
@@ -211,7 +211,7 @@ export function FeatureManager() {
             </CardContent>
           </Card>
         ) : (
-          <div className="p-8 border border-dashed border-hairline-dark bg-white/5 text-white/40 text-center rounded-xl text-xs font-semibold">
+          <div className="p-8 border border-dashed border-hairline-dark bg-ink/5 text-ink-tertiary text-center rounded-xl text-xs font-semibold">
             Select a feature to edit or create a new one.
           </div>
         )}

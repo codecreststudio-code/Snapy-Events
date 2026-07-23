@@ -1260,19 +1260,19 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
   if (authLoading || eventLoading) {
     return (
-      <div className="min-h-screen bg-[#141110] p-8 space-y-6 flex flex-col justify-center items-center">
-        <Skeleton className="h-12 w-64 rounded-xl !bg-white/10" />
-        <Skeleton className="h-64 w-full max-w-4xl rounded-2xl !bg-white/10" />
+      <div className="min-h-screen bg-[#faf6ed] p-8 space-y-6 flex flex-col justify-center items-center">
+        <Skeleton className="h-12 w-64 rounded-xl !bg-ink/10" />
+        <Skeleton className="h-64 w-full max-w-4xl rounded-2xl !bg-ink/10" />
       </div>
     )
   }
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-[#141110] flex flex-col items-center justify-center p-6 text-center space-y-4">
-        <Camera className="h-12 w-12 text-[#B28DAE]" />
-        <h2 className="font-playfair text-2xl font-light text-white/90">Experience Capsule Not Found</h2>
-        <Button asChild className="rounded-full bg-[#B28DAE] hover:bg-[#a468a0] text-[#141110] font-semibold">
+      <div className="min-h-screen bg-[#faf6ed] flex flex-col items-center justify-center p-6 text-center space-y-4">
+        <Camera className="h-12 w-12 text-[#b8925a]" />
+        <h2 className="font-playfair text-2xl font-light text-ink">Experience Capsule Not Found</h2>
+        <Button asChild className="rounded-full bg-[#b8925a] hover:bg-[#96723a] text-[#faf6ed] font-semibold">
           <Link href="/dashboard/events">Return to Dashboard</Link>
         </Button>
       </div>
@@ -1475,18 +1475,18 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   }
 
   return (
-    <div className="min-h-screen bg-[#141110] text-white/90 flex flex-col font-sans selection:bg-[#B28DAE]/30 pb-16">
+    <div className="min-h-screen bg-[#faf6ed] text-ink flex flex-col font-sans selection:bg-[#b8925a]/30 pb-16">
 
       {/* Top Banner Navigation */}
-      <header className="px-4 py-4 sm:px-6 bg-[#1C1814] border-b border-[#3D332A] sticky top-0 z-30">
+      <header className="px-4 py-4 sm:px-6 bg-[#ffffff] border-b border-[#e5dfd0] sticky top-0 z-30">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-4">
-            <Link href="/dashboard/events" className="shrink-0 p-2 hover:bg-white/5 rounded-full transition-colors">
-              <ArrowLeft className="h-5 w-5 text-white/70" />
+            <Link href="/dashboard/events" className="shrink-0 p-2 hover:bg-mauve/5 rounded-full transition-colors">
+              <ArrowLeft className="h-5 w-5 text-ink-secondary" />
             </Link>
             <div className="min-w-0">
-              <span className="text-[10px] uppercase tracking-widest text-[#B28DAE] font-bold block">Memory Capsule</span>
-              <h1 className="font-playfair text-xl md:text-2xl font-light text-white truncate">{event.name}</h1>
+              <span className="text-[10px] uppercase tracking-widest text-[#b8925a] font-bold block">Memory Capsule</span>
+              <h1 className="font-playfair text-xl md:text-2xl font-light text-ink truncate">{event.name}</h1>
             </div>
           </div>
 
@@ -1496,7 +1496,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 variant="outline"
                 onClick={handleDownloadZip}
                 disabled={isDownloadingZip}
-                className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/5 text-xs flex items-center gap-1"
+                className="rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/5 text-xs flex items-center gap-1"
                 title="Download all approved photos as a print-ready ZIP"
               >
                 {isDownloadingZip ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
@@ -1508,16 +1508,16 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 disabled
                 aria-disabled="true"
                 title={featureAccess?.print_ready_downloads?.reason || "Print-ready downloads require a paid plan"}
-                className="rounded-full border border-[#B28DAE]/40 bg-[#B28DAE]/10 text-[#B28DAE]/70 text-xs flex items-center gap-1.5 cursor-not-allowed opacity-80 hover:bg-[#B28DAE]/10"
+                className="rounded-full border border-[#b8925a]/40 bg-[#b8925a]/10 text-[#b8925a]/70 text-xs flex items-center gap-1.5 cursor-not-allowed opacity-80 hover:bg-[#b8925a]/10"
               >
                 <Download className="h-3.5 w-3.5" />
                 <span>Download All</span>
-                <span className="text-[9px] font-bold uppercase tracking-wide border border-[#B28DAE]/40 bg-[#B28DAE]/10 text-[#B28DAE] rounded-full px-1.5 py-0.5 ml-0.5">
+                <span className="text-[9px] font-bold uppercase tracking-wide border border-[#b8925a]/40 bg-[#b8925a]/10 text-[#b8925a] rounded-full px-1.5 py-0.5 ml-0.5">
                   Upgrade
                 </span>
               </Button>
             )}
-            <Button asChild variant="outline" className="rounded-full border border-white/15 bg-transparent text-white hover:bg-white/5 text-xs">
+            <Button asChild variant="outline" className="rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/5 text-xs">
               <Link href={`/event/${event.slug}`} target="_blank" className="flex items-center gap-1">
                 <span>Live Portal</span>
                 <ExternalLink className="h-3 w-3" />
@@ -1525,7 +1525,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </Button>
             <Button
               onClick={() => setIsDrawerOpen(true)}
-              className="rounded-full bg-[#B28DAE] text-[#141110] hover:bg-[#a468a0] text-xs font-semibold flex items-center gap-1 border-none cursor-pointer"
+              className="rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a] text-xs font-semibold flex items-center gap-1 border-none cursor-pointer"
             >
               <Settings className="h-4 w-4" />
               <span>Settings</span>
@@ -1535,7 +1535,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       </header>
 
       {/* Hero Stats Board */}
-      <section className="bg-gradient-to-b from-[#1C1814]/60 to-transparent py-8 px-4 sm:px-6 border-b border-[#3D332A]/60">
+      <section className="bg-gradient-to-b from-[#ffffff]/60 to-transparent py-8 px-4 sm:px-6 border-b border-[#e5dfd0]/60">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
 
           {/* Circular/Visual Metrics Widget */}
@@ -1548,27 +1548,27 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               { label: "Guests", value: totalGuestsCount, icon: Users },
               { label: "AI Matches", value: totalAiClusters, icon: Sparkles },
             ].map((stat, idx) => (
-              <div key={idx} className="rounded-2xl border border-[#3D332A] bg-[#1C1814] p-3 text-center space-y-1.5 hover:border-[#B28DAE]/40 transition-all">
-                <div className="w-8 h-8 rounded-full bg-[#B28DAE]/10 text-[#B28DAE] flex items-center justify-center mx-auto">
+              <div key={idx} className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-3 text-center space-y-1.5 hover:border-[#b8925a]/40 transition-all">
+                <div className="w-8 h-8 rounded-full bg-[#b8925a]/10 text-[#b8925a] flex items-center justify-center mx-auto">
                   <stat.icon className="h-4 w-4" />
                 </div>
                 <div className="space-y-0.5">
-                  <p className="text-xl font-bold text-[#B28DAE]">{stat.value}</p>
-                  <p className="text-[9px] uppercase tracking-wider text-white/60 font-medium">{stat.label}</p>
+                  <p className="text-xl font-bold text-[#b8925a]">{stat.value}</p>
+                  <p className="text-[9px] uppercase tracking-wider text-ink-secondary font-medium">{stat.label}</p>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Capsule countdown indicator circle */}
-          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 flex items-center justify-between relative overflow-hidden">
+          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 flex items-center justify-between relative overflow-hidden">
             <div className="space-y-1">
-              <span className="text-[9px] uppercase tracking-widest text-[#B28DAE] font-bold">Unlocking Capsule</span>
-              <p className="font-playfair text-xl font-bold text-white tabular-nums">{countdownText || "Calculating..."}</p>
-              <p className="text-[10px] text-white/60">Revealing memories automatically</p>
+              <span className="text-[9px] uppercase tracking-widest text-[#b8925a] font-bold">Unlocking Capsule</span>
+              <p className="font-playfair text-xl font-bold text-ink tabular-nums">{countdownText || "Calculating..."}</p>
+              <p className="text-[10px] text-ink-secondary">Revealing memories automatically</p>
             </div>
-            <div className="w-12 h-12 rounded-full border-4 border-[#B28DAE]/30 border-t-[#B28DAE] flex items-center justify-center animate-spin shrink-0" style={{ animationDuration: "10s" }}>
-              <Clock className="h-5 w-5 text-[#B28DAE] rotate-[-45deg]" />
+            <div className="w-12 h-12 rounded-full border-4 border-[#b8925a]/30 border-t-[#b8925a] flex items-center justify-center animate-spin shrink-0" style={{ animationDuration: "10s" }}>
+              <Clock className="h-5 w-5 text-[#b8925a] rotate-[-45deg]" />
             </div>
           </div>
 
@@ -1580,11 +1580,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
         {/* LEFT COLUMN: Memory timeline */}
         <div className="lg:col-span-2 space-y-8">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#3D332A] pb-3">
-            <h2 className="font-playfair text-2xl font-light text-white">Memory Timeline</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5dfd0] pb-3">
+            <h2 className="font-playfair text-2xl font-light text-ink">Memory Timeline</h2>
 
             {/* Timeline content filters */}
-            <div className="flex items-center gap-1 bg-white/5 border border-white/10 p-0.5 rounded-full text-xs">
+            <div className="flex items-center gap-1 bg-ink/5 border border-hairline-dark p-0.5 rounded-full text-xs">
               {[
                 { id: "all", label: "All" },
                 { id: "photos", label: "Photos" },
@@ -1596,7 +1596,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   key={tab.id}
                   onClick={() => setActiveMediaTab(tab.id as any)}
                   className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${
-                    activeMediaTab === tab.id ? "bg-[#B28DAE] text-[#141110] font-bold" : "text-white/60 hover:text-white"
+                    activeMediaTab === tab.id ? "bg-[#b8925a] text-[#faf6ed] font-bold" : "text-ink-secondary hover:text-ink"
                   }`}
                 >
                   {tab.label}
@@ -1606,7 +1606,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           </div>
 
           {/* Chronological media timeline content list */}
-          <div className="space-y-6 relative before:absolute before:top-4 before:bottom-4 before:left-6 before:w-0.5 before:bg-[#3D332A]">
+          <div className="space-y-6 relative before:absolute before:top-4 before:bottom-4 before:left-6 before:w-0.5 before:bg-[#e5dfd0]">
 
             <AnimatePresence mode="popLayout">
 
@@ -1622,9 +1622,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="timeline-item flex gap-4 items-start relative z-10"
                 >
-                  <div className="w-12 h-12 rounded-full border-4 border-[#141110] bg-[#1C1814] flex items-center justify-center shrink-0 relative">
+                  <div className="w-12 h-12 rounded-full border-4 border-[#faf6ed] bg-[#ffffff] flex items-center justify-center shrink-0 relative">
                     <img src={item.avatar} alt={item.guest} className="w-full h-full object-cover rounded-full" />
-                    <div className="absolute -bottom-1 -right-1 w-5.5 h-5.5 rounded-full bg-[#1C1814] border border-[#3D332A] flex items-center justify-center text-[10px]">
+                    <div className="absolute -bottom-1 -right-1 w-5.5 h-5.5 rounded-full bg-[#ffffff] border border-[#e5dfd0] flex items-center justify-center text-[10px]">
                       {item.type === "photo_group" && "📸"}
                       {item.type === "message" && "💌"}
                       {item.type === "voice" && "🎤"}
@@ -1632,10 +1632,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     </div>
                   </div>
 
-                  <div className="flex-1 rounded-2xl border border-[#3D332A] bg-[#1C1814] p-4 space-y-3 hover:border-[#B28DAE]/30 transition-all">
+                  <div className="flex-1 rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-4 space-y-3 hover:border-[#b8925a]/30 transition-all">
                     <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-white/90">{item.guest}</span>
-                      <span className="text-white/50">{item.time}</span>
+                      <span className="font-bold text-ink">{item.guest}</span>
+                      <span className="text-ink-secondary">{item.time}</span>
                     </div>
 
                     {/* Photo group display */}
@@ -1645,7 +1645,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           {item.photos?.map((p: any, idx: number) => (
                             <div
                               key={idx}
-                              className="aspect-square bg-white/5 rounded-lg overflow-hidden relative group cursor-pointer"
+                              className="aspect-square bg-ink/5 rounded-lg overflow-hidden relative group cursor-pointer"
                               onClick={() => setActiveLightboxMedia(toLightboxMedia(p))}
                               title="View & react"
                             >
@@ -1657,17 +1657,17 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                             </div>
                           ))}
                         </div>
-                        <p className="text-[10px] text-[#B28DAE] font-semibold">Uploaded {item.photos?.length || 0} high-resolution prints to Capsule</p>
+                        <p className="text-[10px] text-[#b8925a] font-semibold">Uploaded {item.photos?.length || 0} high-resolution prints to Capsule</p>
                       </div>
                     )}
 
                     {/* Messages content display */}
                     {item.type === "message" && (
                       <div className="space-y-2">
-                        <blockquote className="text-sm italic text-white/70 leading-relaxed">
+                        <blockquote className="text-sm italic text-ink-secondary leading-relaxed">
                           "{item.content}"
                         </blockquote>
-                        <div className="text-[10px] bg-white/5 border border-white/10 rounded-full px-2 py-0.5 inline-block text-white/70">
+                        <div className="text-[10px] bg-ink/5 border border-hairline-dark rounded-full px-2 py-0.5 inline-block text-ink-secondary">
                           {item.reaction}
                         </div>
                       </div>
@@ -1690,10 +1690,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           {watermarkEnabled && <WatermarkOverlay />}
                         </div>
                         <div className="flex items-center justify-between">
-                          <p className="text-xs font-semibold text-white/90">{item.title}</p>
+                          <p className="text-xs font-semibold text-ink">{item.title}</p>
                           <button
                             onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
-                            className="text-[10px] font-bold text-[#B28DAE] hover:text-white flex items-center gap-1"
+                            className="text-[10px] font-bold text-[#b8925a] hover:text-mauve-strong flex items-center gap-1"
                           >
                             <MessageSquare className="h-3 w-3" /> React & Comment
                           </button>
@@ -1704,7 +1704,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     {/* Voice audio card contribution */}
                     {item.type === "voice" && (
                       <div className="space-y-2.5">
-                        <div className="flex items-center gap-3 bg-white/5 border border-white/10 p-3 rounded-xl">
+                        <div className="flex items-center gap-3 bg-ink/5 border border-hairline-dark p-3 rounded-xl">
                           <audio
                             src={item.audioUrl}
                             controls
@@ -1716,7 +1716,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                         </div>
                         <button
                           onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
-                          className="text-[10px] font-bold text-[#B28DAE] hover:text-white flex items-center gap-1"
+                          className="text-[10px] font-bold text-[#b8925a] hover:text-mauve-strong flex items-center gap-1"
                         >
                           <MessageSquare className="h-3 w-3" /> React & Comment
                         </button>
@@ -1735,11 +1735,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         <div className="space-y-8">
 
           {/* Default Persistent Event QR Code Card with Custom Snapsy Logo */}
-          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4 text-center relative overflow-hidden">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4 text-center relative overflow-hidden">
+            <div className="flex items-center justify-between border-b border-hairline-dark pb-3">
               <div className="flex items-center gap-2">
-                <QrCode className="h-4.5 w-4.5 text-[#B28DAE]" />
-                <h3 className="text-sm font-bold text-white/90">Event QR Code</h3>
+                <QrCode className="h-4.5 w-4.5 text-[#b8925a]" />
+                <h3 className="text-sm font-bold text-ink">Event QR Code</h3>
               </div>
               <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live QR
@@ -1747,8 +1747,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </div>
 
             {/* Custom Branded QR Code Display (Full Logo Embedded behind QR matrix) */}
-            <div className="p-4 sm:p-6 bg-white/5 border border-white/10 rounded-2xl flex flex-col items-center justify-center space-y-3 group">
-              <div className="p-3 bg-white rounded-2xl shadow-lg shadow-black/30 border border-[#3D332A] relative overflow-hidden flex items-center justify-center">
+            <div className="p-4 sm:p-6 bg-ink/5 border border-hairline-dark rounded-2xl flex flex-col items-center justify-center space-y-3 group">
+              <div className="p-3 bg-white rounded-2xl shadow-lg shadow-black/30 border border-[#e5dfd0] relative overflow-hidden flex items-center justify-center">
                 <img
                   src="/Favicon.png"
                   alt="Snapsy Logo Background"
@@ -1773,16 +1773,16 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 />
               </div>
               <div className="space-y-0.5 text-center">
-                <p className="text-xs font-bold text-white/90">Scan to Upload Photos</p>
+                <p className="text-xs font-bold text-ink">Scan to Upload Photos</p>
               </div>
             </div>
 
             {/* Short join code — no-scan fallback for guests who'd rather type
                 a code than scan/paste a link (migrations/0023_event_join_code.sql). */}
-            <div className="p-3 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between gap-2">
+            <div className="p-3 bg-ink/5 border border-hairline-dark rounded-2xl flex items-center justify-between gap-2">
               <div className="text-left">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-white/50">Or Join With Code</p>
-                <p className="inline-block mt-1 text-base font-bold tracking-[0.2em] text-[#B28DAE] font-mono bg-[#141110] border border-[#3D332A] rounded-full px-3 py-1">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-ink-secondary">Or Join With Code</p>
+                <p className="inline-block mt-1 text-base font-bold tracking-[0.2em] text-[#b8925a] font-mono bg-[#faf6ed] border border-[#e5dfd0] rounded-full px-3 py-1">
                   {event.join_code || "——————"}
                 </p>
               </div>
@@ -1792,7 +1792,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   size="sm"
                   onClick={handleCopyJoinCode}
                   disabled={!event.join_code}
-                  className="h-10 w-10 p-0 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white"
+                  className="h-10 w-10 p-0 rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 text-ink"
                   title="Copy code"
                 >
                   {codeCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
@@ -1802,7 +1802,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   size="sm"
                   onClick={handleRegenerateJoinCode}
                   disabled={regeneratingCode}
-                  className="h-10 w-10 p-0 rounded-full border border-white/15 bg-transparent hover:bg-white/10 text-white"
+                  className="h-10 w-10 p-0 rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 text-ink"
                   title="Generate a new code (old one stops working)"
                 >
                   {regeneratingCode ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
@@ -1818,7 +1818,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               size="sm"
               onClick={handleShareInvitation}
               disabled={sharing !== null}
-              className="w-full text-xs bg-[#B28DAE] hover:bg-[#a468a0] text-[#141110] font-semibold flex items-center justify-center gap-1.5 rounded-full"
+              className="w-full text-xs bg-[#b8925a] hover:bg-[#96723a] text-[#faf6ed] font-semibold flex items-center justify-center gap-1.5 rounded-full"
             >
               {sharing === "native" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />}
               <span>Share Invitation</span>
@@ -1831,7 +1831,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 size="sm"
                 onClick={handleShareWhatsApp}
                 disabled={sharing !== null}
-                className="text-xs rounded-full border border-white/15 bg-transparent hover:bg-white/10 flex items-center justify-center gap-1 text-white px-2"
+                className="text-xs rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 flex items-center justify-center gap-1 text-ink px-2"
               >
                 {sharing === "whatsapp" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MessageCircle className="h-3.5 w-3.5" />}
                 <span className="hidden sm:inline">WhatsApp</span>
@@ -1841,7 +1841,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 variant="outline"
                 size="sm"
                 onClick={handleCopyLink}
-                className="text-xs rounded-full border border-white/15 bg-transparent hover:bg-white/10 flex items-center justify-center gap-1 text-white px-2"
+                className="text-xs rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 flex items-center justify-center gap-1 text-ink px-2"
               >
                 {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                 <span className="hidden sm:inline">{copied ? "Copied!" : "Copy"}</span>
@@ -1851,7 +1851,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 variant="outline"
                 size="sm"
                 onClick={handleDownloadQr}
-                className="text-xs rounded-full border border-white/15 bg-transparent hover:bg-white/10 flex items-center justify-center gap-1 text-white px-2"
+                className="text-xs rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 flex items-center justify-center gap-1 text-ink px-2"
               >
                 <Download className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">QR</span>
@@ -1865,82 +1865,82 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               when the host turns it off, matching that toggle's description. */}
           {memoriesEnabled && (
           <>
-          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-3">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#B28DAE] font-bold">✨ Snapsy Memories</p>
+          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-3">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#b8925a] font-bold">✨ Snapsy Memories</p>
           </div>
 
           {unviewedStory && (
-            <div className="rounded-3xl border border-[#B28DAE]/30 bg-gradient-to-br from-[#B28DAE]/10 to-transparent p-5 flex items-center gap-3">
-              <Gift className="h-5 w-5 text-[#B28DAE] shrink-0" />
+            <div className="rounded-3xl border border-[#b8925a]/30 bg-gradient-to-br from-[#b8925a]/10 to-transparent p-5 flex items-center gap-3">
+              <Gift className="h-5 w-5 text-[#b8925a] shrink-0" />
               <div className="min-w-0">
-                <p className="text-sm font-bold text-white/90 truncate">{unviewedStory.title}</p>
-                <p className="text-[10px] text-white/50">A memory story just unlocked for this event</p>
+                <p className="text-sm font-bold text-ink truncate">{unviewedStory.title}</p>
+                <p className="text-[10px] text-ink-secondary">A memory story just unlocked for this event</p>
               </div>
             </div>
           )}
 
           {/* Guest Awards */}
-          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-              <Trophy className="h-4.5 w-4.5 text-[#B28DAE]" />
-              <h3 className="text-sm font-bold text-white/90">Guest Awards</h3>
+          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
+              <Trophy className="h-4.5 w-4.5 text-[#b8925a]" />
+              <h3 className="text-sm font-bold text-ink">Guest Awards</h3>
             </div>
             {memoriesAwards && memoriesAwards.awards.length > 0 ? (
               <div className="grid grid-cols-2 gap-2">
                 {memoriesAwards.awards.map((award) => (
-                  <div key={award.key} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                  <div key={award.key} className="rounded-xl border border-hairline-dark bg-ink/5 p-3">
                     <p className="text-lg leading-none mb-1">{award.emoji}</p>
-                    <p className="text-[10px] text-white/50 uppercase tracking-wide">{award.title}</p>
-                    <p className="text-xs font-semibold text-white/90 truncate">{award.guestName}</p>
+                    <p className="text-[10px] text-ink-secondary uppercase tracking-wide">{award.title}</p>
+                    <p className="text-xs font-semibold text-ink truncate">{award.guestName}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-white/50 text-center py-4">Awards will appear once guests start uploading.</p>
+              <p className="text-xs text-ink-secondary text-center py-4">Awards will appear once guests start uploading.</p>
             )}
           </div>
 
           {/* Event Summary */}
-          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
-            <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2">
+          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
+            <div className="flex items-center justify-between gap-2 border-b border-hairline-dark pb-2">
               <div className="flex items-center gap-2">
-                <Images className="h-4.5 w-4.5 text-[#B28DAE]" />
-                <h3 className="text-sm font-bold text-white/90">Event Summary</h3>
+                <Images className="h-4.5 w-4.5 text-[#b8925a]" />
+                <h3 className="text-sm font-bold text-ink">Event Summary</h3>
               </div>
               <a
                 href={event?.id ? `/api/events/${event.id}/memories/summary/pdf` : "#"}
-                className="text-[10px] font-semibold text-[#B28DAE] hover:underline flex items-center gap-1"
+                className="text-[10px] font-semibold text-[#b8925a] hover:underline flex items-center gap-1"
               >
                 <FileDown className="h-3 w-3" /> PDF
               </a>
             </div>
             {memoriesSummary ? (
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-                  <p className="text-xl font-bold text-white">{memoriesSummary.photos}</p>
-                  <p className="text-[10px] text-white/50 uppercase">Photos</p>
+                <div className="rounded-xl border border-hairline-dark bg-ink/5 p-3">
+                  <p className="text-xl font-bold text-ink">{memoriesSummary.photos}</p>
+                  <p className="text-[10px] text-ink-secondary uppercase">Photos</p>
                 </div>
-                <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-                  <p className="text-xl font-bold text-white">{memoriesSummary.videos}</p>
-                  <p className="text-[10px] text-white/50 uppercase">Videos</p>
+                <div className="rounded-xl border border-hairline-dark bg-ink/5 p-3">
+                  <p className="text-xl font-bold text-ink">{memoriesSummary.videos}</p>
+                  <p className="text-[10px] text-ink-secondary uppercase">Videos</p>
                 </div>
-                <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-                  <p className="text-xl font-bold text-white">{memoriesSummary.guests}</p>
-                  <p className="text-[10px] text-white/50 uppercase">Guests</p>
+                <div className="rounded-xl border border-hairline-dark bg-ink/5 p-3">
+                  <p className="text-xl font-bold text-ink">{memoriesSummary.guests}</p>
+                  <p className="text-[10px] text-ink-secondary uppercase">Guests</p>
                 </div>
-                <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-                  <p className="text-xl font-bold text-white">{memoriesSummary.storageFormatted}</p>
-                  <p className="text-[10px] text-white/50 uppercase">Storage</p>
+                <div className="rounded-xl border border-hairline-dark bg-ink/5 p-3">
+                  <p className="text-xl font-bold text-ink">{memoriesSummary.storageFormatted}</p>
+                  <p className="text-[10px] text-ink-secondary uppercase">Storage</p>
                 </div>
                 {memoriesSummary.mostActiveUploader && (
-                  <div className="col-span-2 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-3">
-                    <span className="text-white/60">Most Active</span>
-                    <span className="font-semibold text-white">{memoriesSummary.mostActiveUploader}</span>
+                  <div className="col-span-2 flex items-center justify-between rounded-xl border border-hairline-dark bg-ink/5 p-3">
+                    <span className="text-ink-secondary">Most Active</span>
+                    <span className="font-semibold text-ink">{memoriesSummary.mostActiveUploader}</span>
                   </div>
                 )}
-                <div className="col-span-2 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-3">
-                  <span className="text-white/60">Peak Upload Time</span>
-                  <span className="font-semibold text-white">{memoriesSummary.peakUploadTimeFormatted}</span>
+                <div className="col-span-2 flex items-center justify-between rounded-xl border border-hairline-dark bg-ink/5 p-3">
+                  <span className="text-ink-secondary">Peak Upload Time</span>
+                  <span className="font-semibold text-ink">{memoriesSummary.peakUploadTimeFormatted}</span>
                 </div>
               </div>
             ) : (
@@ -1949,10 +1949,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           </div>
 
           {/* Auto Collage */}
-          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-              <LayoutGrid className="h-4.5 w-4.5 text-[#B28DAE]" />
-              <h3 className="text-sm font-bold text-white/90">Auto Collage</h3>
+          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
+              <LayoutGrid className="h-4.5 w-4.5 text-[#b8925a]" />
+              <h3 className="text-sm font-bold text-ink">Auto Collage</h3>
             </div>
             <div className={`grid gap-1.5 ${customLayoutsEnabled ? "grid-cols-5" : "grid-cols-4"}`}>
               {([
@@ -1964,8 +1964,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   onClick={() => setCollageLayout(layout)}
                   className={`rounded-lg border py-2 text-[10px] font-semibold transition-colors ${
                     collageLayout === layout
-                      ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
-                      : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                      ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                      : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                   }`}
                 >
                   {layout === "grid-2" ? "2-Grid" : layout === "grid-4" ? "4-Grid" : layout === "grid-9" ? "9-Grid" : layout === "polaroid" ? "Polaroid" : "✨ Auto"}
@@ -1974,7 +1974,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </div>
             <Button
               variant="outline"
-              className="w-full text-xs py-5 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
+              className="w-full text-xs py-5 rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
               disabled={collageMutation.isPending}
               onClick={() => collageMutation.mutate(collageLayout)}
             >
@@ -1988,7 +1988,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     key={c.id}
                     type="button"
                     onClick={() => setCollageViewerIndex(i)}
-                    className="block rounded-lg overflow-hidden border border-white/10 aspect-square bg-black/20"
+                    className="block rounded-lg overflow-hidden border border-hairline-dark aspect-square bg-black/20"
                   >
                     <img src={c.image_url} alt={`${c.layout} collage`} className="w-full h-full object-cover" />
                   </button>
@@ -2002,18 +2002,18 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               photos into time-gap "moments" — see clusterIntoAlbums in
               /api/events/[id]/memories/albums/route.ts. */}
           {smartAlbumsEnabled && (
-            <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
-              <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-                <FolderOpen className="h-4.5 w-4.5 text-[#B28DAE]" />
-                <h3 className="text-sm font-bold text-white/90">Smart Albums</h3>
+            <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
+              <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
+                <FolderOpen className="h-4.5 w-4.5 text-[#b8925a]" />
+                <h3 className="text-sm font-bold text-ink">Smart Albums</h3>
               </div>
               {memoriesAlbums && memoriesAlbums.albums.length > 0 ? (
                 <div className="space-y-3">
                   {memoriesAlbums.albums.map((album) => (
                     <div key={album.key} className="space-y-1.5">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-semibold text-white/80">{album.label}</span>
-                        <span className="text-white/40">{album.photoCount} photo{album.photoCount === 1 ? "" : "s"}</span>
+                        <span className="font-semibold text-ink">{album.label}</span>
+                        <span className="text-ink-tertiary">{album.photoCount} photo{album.photoCount === 1 ? "" : "s"}</span>
                       </div>
                       <div className="flex gap-1.5 overflow-x-auto pb-1">
                         {album.photos.slice(0, 6).map((p) => (
@@ -2021,11 +2021,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                             key={p.id}
                             src={p.url}
                             alt=""
-                            className="h-14 w-14 shrink-0 rounded-lg object-cover border border-white/10"
+                            className="h-14 w-14 shrink-0 rounded-lg object-cover border border-hairline-dark"
                           />
                         ))}
                         {album.photoCount > 6 && (
-                          <div className="h-14 w-14 shrink-0 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-[10px] font-semibold text-white/60">
+                          <div className="h-14 w-14 shrink-0 rounded-lg border border-hairline-dark bg-ink/5 flex items-center justify-center text-[10px] font-semibold text-ink-secondary">
                             +{album.photoCount - 6}
                           </div>
                         )}
@@ -2034,16 +2034,16 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-white/40">Albums form automatically as guests upload — check back once photos start coming in.</p>
+                <p className="text-xs text-ink-tertiary">Albums form automatically as guests upload — check back once photos start coming in.</p>
               )}
             </div>
           )}
 
           {/* Slideshow — live in-browser player, no video export/encoding cost */}
-          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-              <PlayCircle className="h-4.5 w-4.5 text-[#B28DAE]" />
-              <h3 className="text-sm font-bold text-white/90">Slideshow</h3>
+          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
+              <PlayCircle className="h-4.5 w-4.5 text-[#b8925a]" />
+              <h3 className="text-sm font-bold text-ink">Slideshow</h3>
             </div>
             <div className="grid grid-cols-3 gap-1.5">
               {([30, 60, 180] as const).map((d) => (
@@ -2052,8 +2052,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   onClick={() => setSlideshowDuration(d)}
                   className={`rounded-lg border py-2 text-[10px] font-semibold transition-colors ${
                     slideshowDuration === d
-                      ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
-                      : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                      ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                      : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                   }`}
                 >
                   {d < 60 ? `${d} sec` : `${d / 60} min`}
@@ -2061,14 +2061,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               ))}
             </div>
             <div className="space-y-1.5">
-              <p className="text-[10px] uppercase tracking-wide text-white/40 font-semibold">Background music</p>
+              <p className="text-[10px] uppercase tracking-wide text-ink-tertiary font-semibold">Background music</p>
               <div className="grid grid-cols-2 gap-1.5">
                 <button
                   onClick={() => setSlideshowMusicTrack(null)}
                   className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left ${
                     slideshowMusicTrack === null
-                      ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
-                      : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                      ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                      : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                   }`}
                 >
                   🔇 None
@@ -2080,8 +2080,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     title={track.mood}
                     className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left ${
                       slideshowMusicTrack === track.id
-                        ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
-                        : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                        ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                        : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                     }`}
                   >
                     🎵 {track.label}
@@ -2091,7 +2091,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </div>
             <Button
               variant="outline"
-              className="w-full text-xs py-5 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
+              className="w-full text-xs py-5 rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
               disabled={slideshowMutation.isPending}
               onClick={() => slideshowMutation.mutate(slideshowDuration)}
             >
@@ -2102,7 +2102,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               <>
                 <Button
                   variant="outline"
-                  className="w-full text-xs py-3 rounded-full border border-white/15 bg-white/5 text-white/80 hover:bg-white/10"
+                  className="w-full text-xs py-3 rounded-full border border-hairline-dark bg-ink/5 text-ink hover:bg-mauve/10"
                   onClick={() => setShowSlideshowPlayer(true)}
                 >
                   ▶ Watch Slideshow ({memoriesSlideshow.photos.length} photos)
@@ -2116,7 +2116,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 {event?.slug && (
                   <Button
                     variant="outline"
-                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-white/15 bg-transparent text-white text-xs font-semibold py-3 hover:bg-white/10 transition-colors"
+                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-hairline-dark bg-transparent text-ink text-xs font-semibold py-3 hover:bg-mauve/10 transition-colors"
                     onClick={async () => {
                       const url = `${window.location.origin}/movie/${event.slug}`
                       const nav = navigator as Navigator & { share?: (data: ShareData) => Promise<void> }
@@ -2143,10 +2143,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           {/* Movie — real 9:16 video, rendered entirely in-browser (canvas
               Ken Burns + crossfades + MediaRecorder) and uploaded once
               finished. No server-side ffmpeg — see movie-renderer.ts. */}
-          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-              <Film className="h-4.5 w-4.5 text-[#B28DAE]" />
-              <h3 className="text-sm font-bold text-white/90">Movie</h3>
+          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
+              <Film className="h-4.5 w-4.5 text-[#b8925a]" />
+              <h3 className="text-sm font-bold text-ink">Movie</h3>
             </div>
             <div className="grid grid-cols-3 gap-1.5">
               {([30, 60, 180] as const).map((d) => (
@@ -2156,8 +2156,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   disabled={movieRendering}
                   className={`rounded-lg border py-2 text-[10px] font-semibold transition-colors disabled:opacity-50 ${
                     movieDuration === d
-                      ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
-                      : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                      ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                      : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                   }`}
                 >
                   {d < 60 ? `${d} sec` : `${d / 60} min`}
@@ -2165,15 +2165,15 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               ))}
             </div>
             <div className="space-y-1.5">
-              <p className="text-[10px] uppercase tracking-wide text-white/40 font-semibold">Background music</p>
+              <p className="text-[10px] uppercase tracking-wide text-ink-tertiary font-semibold">Background music</p>
               <div className="grid grid-cols-2 gap-1.5">
                 <button
                   onClick={() => setMovieMusicTrack(null)}
                   disabled={movieRendering}
                   className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left disabled:opacity-50 ${
                     movieMusicTrack === null
-                      ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
-                      : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                      ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                      : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                   }`}
                 >
                   🔇 None
@@ -2186,8 +2186,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     disabled={movieRendering}
                     className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left disabled:opacity-50 ${
                       movieMusicTrack === track.id
-                        ? "border-[#B28DAE] bg-[#B28DAE]/15 text-[#B28DAE]"
-                        : "border-white/15 bg-white/5 text-white/60 hover:border-white/30"
+                        ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                        : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                     }`}
                   >
                     🎵 {track.label}
@@ -2197,7 +2197,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </div>
             <Button
               variant="outline"
-              className="w-full text-xs py-5 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
+              className="w-full text-xs py-5 rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/10 flex items-center justify-center gap-1.5 disabled:opacity-50"
               disabled={movieRendering}
               onClick={handleGenerateMovie}
             >
@@ -2206,10 +2206,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </Button>
             {movieRendering && (
               <div className="space-y-1.5">
-                <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-                  <div className="h-full bg-[#B28DAE] transition-all duration-300" style={{ width: `${Math.round(movieProgress * 100)}%` }} />
+                <div className="h-1.5 w-full rounded-full bg-ink/10 overflow-hidden">
+                  <div className="h-full bg-[#b8925a] transition-all duration-300" style={{ width: `${Math.round(movieProgress * 100)}%` }} />
                 </div>
-                <p className="text-[10px] text-white/40 text-center">Keep this tab open — your movie is recording in real time.</p>
+                <p className="text-[10px] text-ink-tertiary text-center">Keep this tab open — your movie is recording in real time.</p>
               </div>
             )}
             {movieError && !movieRendering && (
@@ -2222,19 +2222,19 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               <>
                 <Button
                   variant="outline"
-                  className="w-full text-xs py-3 rounded-full border border-white/15 bg-white/5 text-white/80 hover:bg-white/10"
+                  className="w-full text-xs py-3 rounded-full border border-hairline-dark bg-ink/5 text-ink hover:bg-mauve/10"
                   onClick={() => setShowMovieViewer(true)}
                 >
                   ▶ Watch Movie {latestMovie.duration_seconds ? `(${latestMovie.duration_seconds}s)` : ""}
                 </Button>
                 <Button
                   disabled={movieSharing}
-                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-[#B28DAE] hover:bg-[#A468A0] text-black text-xs font-semibold py-3 transition-colors disabled:opacity-60"
+                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-[#b8925a] hover:bg-[#96723a] text-black text-xs font-semibold py-3 transition-colors disabled:opacity-60"
                   onClick={handleShareMovieFile}
                 >
                   <Share2 className="h-3.5 w-3.5" /> {movieSharing ? "Preparing…" : "Share to Story"}
                 </Button>
-                <p className="text-[10px] text-white/40 text-center -mt-1">
+                <p className="text-[10px] text-ink-tertiary text-center -mt-1">
                   Opens your share sheet — pick Instagram or Snapchat, then add it to your Story.
                 </p>
               </>
@@ -2244,38 +2244,38 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           )}
 
           {/* Recent Activity waterfall feed */}
-          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-              <Activity className="h-4.5 w-4.5 text-[#B28DAE]" />
-              <h3 className="text-sm font-bold text-white/90">Recent Guest Activity</h3>
+          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
+              <Activity className="h-4.5 w-4.5 text-[#b8925a]" />
+              <h3 className="text-sm font-bold text-ink">Recent Guest Activity</h3>
             </div>
 
             <div className="space-y-3 text-xs leading-relaxed">
               {dynamicActivities.length > 0 ? dynamicActivities.slice(0, 10).map((act, idx) => (
-                <div key={idx} className="flex justify-between items-start gap-4 text-white/70 border-b border-white/5 pb-2.5 last:border-none last:pb-0">
+                <div key={idx} className="flex justify-between items-start gap-4 text-ink-secondary border-b border-ink/10 pb-2.5 last:border-none last:pb-0">
                   <p>
-                    <span className="font-bold text-white/90">{act.actor}</span> {act.action}
+                    <span className="font-bold text-ink">{act.actor}</span> {act.action}
                   </p>
-                  <span className="text-[9px] text-white/50 shrink-0">{act.time}</span>
+                  <span className="text-[9px] text-ink-secondary shrink-0">{act.time}</span>
                 </div>
               )) : (
-                <p className="text-xs text-white/50 text-center py-4">No recent activity.</p>
+                <p className="text-xs text-ink-secondary text-center py-4">No recent activity.</p>
               )}
             </div>
           </div>
 
           {/* Quick Actions Shortcuts */}
-          <div className="rounded-3xl border border-[#3D332A] bg-[#1C1814] p-5 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#B28DAE]">Host Quick Tools</h3>
+          <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#b8925a]">Host Quick Tools</h3>
 
             <div className="grid grid-cols-2 gap-2.5">
-              <Link href={`/dashboard/events/${event.slug}/qr`} className="p-3 border border-white/10 rounded-xl text-center space-y-1 hover:border-[#B28DAE]/50 transition-all bg-white/5">
-                <QrCode className="h-4 w-4 text-[#B28DAE] mx-auto" />
-                <p className="text-[10px] font-bold text-white/80">QR Manager</p>
+              <Link href={`/dashboard/events/${event.slug}/qr`} className="p-3 border border-hairline-dark rounded-xl text-center space-y-1 hover:border-[#b8925a]/50 transition-all bg-ink/5">
+                <QrCode className="h-4 w-4 text-[#b8925a] mx-auto" />
+                <p className="text-[10px] font-bold text-ink">QR Manager</p>
               </Link>
-              <Link href={`/dashboard/events/${event.slug}/gallery`} className="p-3 border border-white/10 rounded-xl text-center space-y-1 hover:border-[#B28DAE]/50 transition-all bg-white/5">
-                <Images className="h-4 w-4 text-[#B28DAE] mx-auto" />
-                <p className="text-[10px] font-bold text-white/80">Gallery Toggles</p>
+              <Link href={`/dashboard/events/${event.slug}/gallery`} className="p-3 border border-hairline-dark rounded-xl text-center space-y-1 hover:border-[#b8925a]/50 transition-all bg-ink/5">
+                <Images className="h-4 w-4 text-[#b8925a] mx-auto" />
+                <p className="text-[10px] font-bold text-ink">Gallery Toggles</p>
               </Link>
             </div>
           </div>
@@ -2302,25 +2302,25 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.35, ease: "easeInOut" }}
-              className="absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#181412] text-white border-l border-[#3D332A] shadow-2xl p-6 overflow-y-auto flex flex-col justify-between z-50"
+              className="absolute top-0 right-0 bottom-0 w-full max-w-md bg-surface-card-elevated text-ink border-l border-hairline-dark shadow-2xl p-6 overflow-y-auto flex flex-col justify-between z-50"
             >
               <div className="space-y-6">
-                <div className="sticky top-0 bg-[#181412] z-20 flex justify-between items-center border-b border-white/10 pb-4 mb-2 pt-1">
-                  <h3 className="font-playfair text-xl font-semibold text-white tracking-wide">Edit Capsule Settings</h3>
-                  <button type="button" onClick={() => setIsDrawerOpen(false)} className="p-1.5 hover:bg-white/10 rounded-full transition-colors text-white/70 hover:text-white">
+                <div className="sticky top-0 bg-surface-card-elevated z-20 flex justify-between items-center border-b border-hairline-dark pb-4 mb-2 pt-1">
+                  <h3 className="font-playfair text-xl font-semibold text-ink tracking-wide">Edit Capsule Settings</h3>
+                  <button type="button" onClick={() => setIsDrawerOpen(false)} className="p-1.5 hover:bg-mauve/10 rounded-full transition-colors text-ink-secondary hover:text-ink">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
 
                 <form onSubmit={handleUpdateSave} className="space-y-5">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-bold text-white/60">Cover Photo</Label>
+                    <Label className="text-xs font-bold text-ink-secondary">Cover Photo</Label>
                     <div className="flex items-center gap-3">
                       <div
                         className="h-16 w-16 shrink-0 rounded-xl bg-cover bg-center border border-hairline-dark bg-surface-dark"
                         style={{ backgroundImage: editCoverImage ? `url(${editCoverImage})` : undefined }}
                       />
-                      <label className="flex-1 cursor-pointer rounded-lg border border-dashed border-hairline-dark bg-white/5 px-3 py-2.5 text-center text-xs font-medium text-white/70 hover:border-mauve/40 hover:text-white transition-colors">
+                      <label className="flex-1 cursor-pointer rounded-lg border border-dashed border-hairline-dark bg-mauve/5 px-3 py-2.5 text-center text-xs font-medium text-ink-secondary hover:border-mauve/40 hover:text-ink transition-colors">
                         {uploadingCover ? "Uploading…" : "Change cover photo"}
                         <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} disabled={uploadingCover} />
                       </label>
@@ -2328,72 +2328,72 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="name" className="text-xs font-bold text-white/60">Event Name</Label>
+                    <Label htmlFor="name" className="text-xs font-bold text-ink-secondary">Event Name</Label>
                     <Input
                       id="name"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="!bg-[#221C19] border-white/15 !text-white placeholder:!text-white/30 focus-visible:!ring-[#B28DAE] focus:border-[#B28DAE]"
+                      className="!bg-white border-hairline-dark !text-ink placeholder:!text-ink-tertiary focus-visible:!ring-[#b8925a] focus:border-[#b8925a]"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="end_date" className="text-xs font-bold text-white/60">Countdown Ends Lock Date</Label>
+                    <Label htmlFor="end_date" className="text-xs font-bold text-ink-secondary">Countdown Ends Lock Date</Label>
                     <Input
                       id="end_date"
                       type="datetime-local"
                       value={editEndDate}
                       onChange={(e) => setEditEndDate(e.target.value)}
-                      className="!bg-[#221C19] border-white/15 !text-white placeholder:!text-white/30 focus-visible:!ring-[#B28DAE] focus:border-[#B28DAE] [color-scheme:dark]"
+                      className="!bg-white border-hairline-dark !text-ink placeholder:!text-ink-tertiary focus-visible:!ring-[#b8925a] focus:border-[#b8925a] [color-scheme:light]"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="status" className="text-xs font-bold text-white/60">Event Status</Label>
+                    <Label htmlFor="status" className="text-xs font-bold text-ink-secondary">Event Status</Label>
                     <select
                       id="status"
                       value={editStatus}
                       onChange={(e) => setEditStatus(e.target.value as EventStatus)}
-                      className="w-full h-10 rounded-xl border border-white/15 bg-[#221C19] text-white px-3 py-2 text-sm focus:border-[#B28DAE] focus:ring-1 focus:ring-[#B28DAE] outline-none cursor-pointer [color-scheme:dark]"
+                      className="w-full h-10 rounded-xl border border-hairline-dark bg-white text-ink px-3 py-2 text-sm focus:border-[#b8925a] focus:ring-1 focus:ring-[#b8925a] outline-none cursor-pointer [color-scheme:light]"
                     >
-                      <option value="draft" className="bg-[#1C1814] text-white py-1.5 px-3">Draft</option>
-                      <option value="published" className="bg-[#1C1814] text-white py-1.5 px-3">Published (Live)</option>
-                      <option value="completed" className="bg-[#1C1814] text-white py-1.5 px-3">Completed</option>
-                      <option value="archived" className="bg-[#1C1814] text-white py-1.5 px-3">Archived</option>
+                      <option value="draft" className="bg-white text-ink py-1.5 px-3">Draft</option>
+                      <option value="published" className="bg-white text-ink py-1.5 px-3">Published (Live)</option>
+                      <option value="completed" className="bg-white text-ink py-1.5 px-3">Completed</option>
+                      <option value="archived" className="bg-white text-ink py-1.5 px-3">Archived</option>
                     </select>
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="reveal" className="text-xs font-bold text-white/60">When guests see the memories</Label>
+                    <Label htmlFor="reveal" className="text-xs font-bold text-ink-secondary">When guests see the memories</Label>
                     <select
                       id="reveal"
                       value={editRevealExperience}
                       onChange={(e) => setEditRevealExperience(e.target.value)}
-                      className="w-full h-10 rounded-xl border border-white/15 bg-[#221C19] text-white px-3 py-2 text-sm focus:border-[#B28DAE] focus:ring-1 focus:ring-[#B28DAE] outline-none cursor-pointer [color-scheme:dark]"
+                      className="w-full h-10 rounded-xl border border-hairline-dark bg-white text-ink px-3 py-2 text-sm focus:border-[#b8925a] focus:ring-1 focus:ring-[#b8925a] outline-none cursor-pointer [color-scheme:light]"
                     >
-                      <option value="immediately" className="bg-[#1C1814] text-white py-1.5 px-3">Immediately</option>
-                      <option value="during" className="bg-[#1C1814] text-white py-1.5 px-3">During Event</option>
-                      <option value="after" className="bg-[#1C1814] text-white py-1.5 px-3">After Event Ends</option>
-                      <option value="24h" className="bg-[#1C1814] text-white py-1.5 px-3">24 Hours Later</option>
-                      <option value="7d" className="bg-[#1C1814] text-white py-1.5 px-3">7 Days Later</option>
-                      <option value="custom" className="bg-[#1C1814] text-white py-1.5 px-3">Custom Date</option>
+                      <option value="immediately" className="bg-white text-ink py-1.5 px-3">Immediately</option>
+                      <option value="during" className="bg-white text-ink py-1.5 px-3">During Event</option>
+                      <option value="after" className="bg-white text-ink py-1.5 px-3">After Event Ends</option>
+                      <option value="24h" className="bg-white text-ink py-1.5 px-3">24 Hours Later</option>
+                      <option value="7d" className="bg-white text-ink py-1.5 px-3">7 Days Later</option>
+                      <option value="custom" className="bg-white text-ink py-1.5 px-3">Custom Date</option>
                     </select>
                     {(editRevealExperience === "after" || editRevealExperience === "24h" || editRevealExperience === "7d" || editRevealExperience === "custom") && (
-                      <p className="text-[10px] text-white/50">Uses the Countdown Ends Lock Date above as the reveal moment.</p>
+                      <p className="text-[10px] text-ink-tertiary">Uses the Countdown Ends Lock Date above as the reveal moment.</p>
                     )}
                   </div>
 
-                  <div className="rounded-xl border border-white/10 bg-[#221C19] p-4 space-y-2">
+                  <div className="rounded-xl border border-hairline-dark bg-white p-4 space-y-2">
                     <p className="text-[10px] uppercase tracking-wider text-mauve font-bold">Capacity</p>
-                    <div className="flex items-center justify-between text-xs text-white/80">
+                    <div className="flex items-center justify-between text-xs text-ink-secondary">
                       <span>Guests plan</span>
-                      <span className="font-semibold text-white">
+                      <span className="font-semibold text-ink">
                         {settings.guest_count_plan || "free"}{(settings.guests_boost ?? 0) > 0 ? ` +${settings.guests_boost} boost` : ""}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-xs text-white/80">
+                    <div className="flex items-center justify-between text-xs text-ink-secondary">
                       <span>Shots per guest boost</span>
-                      <span className="font-semibold text-white">{settings.shots_boost ?? 0}</span>
+                      <span className="font-semibold text-ink">{settings.shots_boost ?? 0}</span>
                     </div>
                     <Link
                       href="/dashboard/billing"
@@ -2404,8 +2404,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-bold text-white/60">Guest Camera Filters</Label>
-                    <p className="text-[10px] text-white/50 mb-2">Select which premium filters guests can use.</p>
+                    <Label className="text-xs font-bold text-ink-secondary">Guest Camera Filters</Label>
+                    <p className="text-[10px] text-ink-tertiary mb-2">Select which premium filters guests can use.</p>
                     <div className="grid grid-cols-2 gap-2">
                       {[
                         { id: "normal", name: "Normal" },
@@ -2429,66 +2429,66 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                                 setEditAllowedFilters(prev => prev.filter(id => id !== filter.id))
                               }
                             }}
-                            className="rounded border-white/20 bg-white/5 text-[#B28DAE] focus:ring-[#B28DAE]"
+                            className="rounded border-hairline-dark bg-white text-[#b8925a] focus:ring-[#b8925a]"
                           />
-                          <Label htmlFor={`filter-${filter.id}`} className="text-xs text-white/80">{filter.name}</Label>
+                          <Label htmlFor={`filter-${filter.id}`} className="text-xs text-ink-secondary">{filter.name}</Label>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Settings toggle display list */}
-                  <div className="border border-white/10 rounded-xl p-4 bg-[#221C19] space-y-4">
-                    <p className="text-[10px] uppercase tracking-wider text-[#B28DAE] font-bold">Capsule Locks & Limits</p>
+                  <div className="border border-hairline-dark rounded-xl p-4 bg-white space-y-4">
+                    <p className="text-[10px] uppercase tracking-wider text-[#b8925a] font-bold">Capsule Locks & Limits</p>
 
-                    <div className="flex items-center justify-between text-xs text-white/80">
+                    <div className="flex items-center justify-between text-xs text-ink-secondary">
                       <span>Auto face cluster indexing</span>
-                      <span className="font-semibold text-white/60">{settings.ai_features?.face_search ? "Active" : "Inactive"}</span>
+                      <span className="font-semibold text-ink-secondary">{settings.ai_features?.face_search ? "Active" : "Inactive"}</span>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs gap-4 text-white/80">
+                    <div className="flex items-center justify-between text-xs gap-4 text-ink-secondary">
                       <span className="shrink-0">Video durations allowed</span>
                       <select
                         value={editVideoDuration}
                         onChange={(e) => setEditVideoDuration(Number(e.target.value))}
-                        className="rounded-lg border border-white/15 bg-[#181412] px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-[#B28DAE] cursor-pointer [color-scheme:dark]"
+                        className="rounded-lg border border-hairline-dark bg-white px-2.5 py-1 text-xs font-semibold text-ink focus:outline-none focus:ring-1 focus:ring-[#b8925a] cursor-pointer [color-scheme:light]"
                       >
-                        <option value={5} className="bg-[#1C1814] text-white">5 seconds</option>
-                        <option value={10} className="bg-[#1C1814] text-white">10 seconds</option>
-                        <option value={15} className="bg-[#1C1814] text-white">15 seconds</option>
-                        <option value={20} className="bg-[#1C1814] text-white">20 seconds</option>
-                        <option value={30} className="bg-[#1C1814] text-white">30 seconds</option>
-                        <option value={60} className="bg-[#1C1814] text-white">60 seconds</option>
+                        <option value={5} className="bg-white text-ink">5 seconds</option>
+                        <option value={10} className="bg-white text-ink">10 seconds</option>
+                        <option value={15} className="bg-white text-ink">15 seconds</option>
+                        <option value={20} className="bg-white text-ink">20 seconds</option>
+                        <option value={30} className="bg-white text-ink">30 seconds</option>
+                        <option value={60} className="bg-white text-ink">60 seconds</option>
                       </select>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs gap-4 text-white/80">
+                    <div className="flex items-center justify-between text-xs gap-4 text-ink-secondary">
                       <span className="shrink-0">Vocal note greetings allowed</span>
                       <select
                         value={editVoiceDuration}
                         onChange={(e) => setEditVoiceDuration(Number(e.target.value))}
-                        className="rounded-lg border border-white/15 bg-[#181412] px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-[#B28DAE] cursor-pointer [color-scheme:dark]"
+                        className="rounded-lg border border-hairline-dark bg-white px-2.5 py-1 text-xs font-semibold text-ink focus:outline-none focus:ring-1 focus:ring-[#b8925a] cursor-pointer [color-scheme:light]"
                       >
-                        <option value={5} className="bg-[#1C1814] text-white">5 seconds</option>
-                        <option value={10} className="bg-[#1C1814] text-white">10 seconds</option>
-                        <option value={15} className="bg-[#1C1814] text-white">15 seconds</option>
-                        <option value={20} className="bg-[#1C1814] text-white">20 seconds</option>
-                        <option value={30} className="bg-[#1C1814] text-white">30 seconds</option>
-                        <option value={60} className="bg-[#1C1814] text-white">60 seconds</option>
+                        <option value={5} className="bg-white text-ink">5 seconds</option>
+                        <option value={10} className="bg-white text-ink">10 seconds</option>
+                        <option value={15} className="bg-white text-ink">15 seconds</option>
+                        <option value={20} className="bg-white text-ink">20 seconds</option>
+                        <option value={30} className="bg-white text-ink">30 seconds</option>
+                        <option value={60} className="bg-white text-ink">60 seconds</option>
                       </select>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-white/80 pt-1 border-t border-white/10">
+                    <div className="flex items-center justify-between text-xs text-ink-secondary pt-1 border-t border-hairline-dark">
                       <div>
                         <span className="block">✨ Snapsy Memories</span>
-                        <span className="block text-[10px] text-white/40">Auto highlight movie, stories, collages &amp; awards</span>
+                        <span className="block text-[10px] text-ink-tertiary">Auto highlight movie, stories, collages &amp; awards</span>
                       </div>
                       <label className="inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
                           checked={editMemoriesEnabled}
                           onChange={(e) => setEditMemoriesEnabled(e.target.checked)}
-                          className="rounded border-white/20 bg-white/5 text-[#B28DAE] focus:ring-[#B28DAE] h-4 w-4"
+                          className="rounded border-hairline-dark bg-white text-[#b8925a] focus:ring-[#b8925a] h-4 w-4"
                         />
                       </label>
                     </div>
@@ -2499,17 +2499,17 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                         With it on, guests must enter the exact code shown
                         above before check-in succeeds (enforced server-side
                         in src/app/actions/guest.ts, not just this toggle). */}
-                    <div className="flex items-center justify-between text-xs text-white/80 pt-1 border-t border-white/10">
+                    <div className="flex items-center justify-between text-xs text-ink-secondary pt-1 border-t border-hairline-dark">
                       <div>
                         <span className="block">🔒 Require join code to enter</span>
-                        <span className="block text-[10px] text-white/40">Guests must enter the code above before they can check in</span>
+                        <span className="block text-[10px] text-ink-tertiary">Guests must enter the code above before they can check in</span>
                       </div>
                       <label className="inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
                           checked={editRequireJoinCode}
                           onChange={(e) => setEditRequireJoinCode(e.target.checked)}
-                          className="rounded border-white/20 bg-white/5 text-[#B28DAE] focus:ring-[#B28DAE] h-4 w-4"
+                          className="rounded border-hairline-dark bg-white text-[#b8925a] focus:ring-[#b8925a] h-4 w-4"
                         />
                       </label>
                     </div>
@@ -2519,27 +2519,27 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                         guest upload page unconditionally claimed "Photos
                         will be reviewed before appearing in the gallery" —
                         a real toggle now backs that copy. */}
-                    <div className="flex items-center justify-between text-xs text-white/80 pt-1 border-t border-white/10">
+                    <div className="flex items-center justify-between text-xs text-ink-secondary pt-1 border-t border-hairline-dark">
                       <div>
                         <span className="block">🛡️ Review photos before they're visible</span>
-                        <span className="block text-[10px] text-white/40">Guest uploads wait for your approval instead of appearing instantly</span>
+                        <span className="block text-[10px] text-ink-tertiary">Guest uploads wait for your approval instead of appearing instantly</span>
                       </div>
                       <label className="inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
                           checked={editRequirePhotoApproval}
                           onChange={(e) => setEditRequirePhotoApproval(e.target.checked)}
-                          className="rounded border-white/20 bg-white/5 text-[#B28DAE] focus:ring-[#B28DAE] h-4 w-4"
+                          className="rounded border-hairline-dark bg-white text-[#b8925a] focus:ring-[#b8925a] h-4 w-4"
                         />
                       </label>
                     </div>
                   </div>
 
-                  <div className="pt-4 flex gap-3 border-t border-white/10">
-                    <Button type="button" variant="outline" onClick={() => setIsDrawerOpen(false)} className="flex-1 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10">
+                  <div className="pt-4 flex gap-3 border-t border-hairline-dark">
+                    <Button type="button" variant="outline" onClick={() => setIsDrawerOpen(false)} className="flex-1 rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/5">
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={updateMutation.isPending} className="flex-1 bg-[#B28DAE] text-[#141110] font-semibold hover:bg-[#a468a0] rounded-full border-none">
+                    <Button type="submit" disabled={updateMutation.isPending} className="flex-1 bg-[#b8925a] text-[#faf6ed] font-semibold hover:bg-[#96723a] rounded-full border-none">
                       {updateMutation.isPending ? "Saving..." : "Save Settings"}
                     </Button>
                   </div>
@@ -2554,7 +2554,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       <button
                         onClick={handleArchive}
                         disabled={updateMutation.isPending}
-                        className="w-full py-3 bg-white/5 text-white/80 border border-hairline-dark rounded-full text-xs font-bold hover:bg-white/10 hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
+                        className="w-full py-3 bg-white text-ink-secondary border border-hairline-dark rounded-full text-xs font-bold hover:bg-mauve/5 hover:text-ink transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
                       >
                         <Images className="h-4 w-4" />
                         <span>{updateMutation.isPending ? "Archiving…" : "Archive Memory Capsule"}</span>
@@ -2562,7 +2562,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     )}
                     <button
                       onClick={() => setIsDeleteOpen(true)}
-                      className="w-full py-3 bg-red-500/10 text-red-400 rounded-full text-xs font-bold hover:bg-red-500/20 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                      className="w-full py-3 bg-red-500/10 text-red-600 rounded-full text-xs font-bold hover:bg-red-500/20 transition-colors flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Trash2 className="h-4 w-4" />
                       <span>Delete Memory Capsule</span>
@@ -2570,10 +2570,10 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                   </>
                 ) : (
                   <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 space-y-3">
-                    <p className="text-xs font-bold text-red-400">Are you absolutely sure?</p>
-                    <p className="text-[10px] text-red-300/80">This action permanently deletes all photos, messages, audio and event configuration files. It is irreversible.</p>
+                    <p className="text-xs font-bold text-red-600">Are you absolutely sure?</p>
+                    <p className="text-[10px] text-red-500/80">This action permanently deletes all photos, messages, audio and event configuration files. It is irreversible.</p>
                     <div className="flex gap-2">
-                      <Button onClick={() => setIsDeleteOpen(false)} variant="outline" className="flex-1 text-xs py-1 rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10">
+                      <Button onClick={() => setIsDeleteOpen(false)} variant="outline" className="flex-1 text-xs py-1 rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/5">
                         Cancel
                       </Button>
                       <Button

@@ -117,10 +117,10 @@ export function AdminNav() {
   }
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-hairline-dark bg-surface-card text-white md:flex md:flex-col h-screen overflow-y-auto sticky top-0">
+    <aside className="hidden w-64 shrink-0 border-r border-hairline-dark bg-surface-card text-ink md:flex md:flex-col h-screen overflow-y-auto sticky top-0">
       {/* Brand Header */}
       <div className="flex h-16 items-center border-b border-hairline-dark px-6 shrink-0 gap-2">
-        <Link href="/admin" className="text-white" aria-label="Admin home">
+        <Link href="/admin" className="text-ink" aria-label="Admin home">
           <Logo />
         </Link>
         <span className="rounded bg-mauve/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-mauve border border-mauve/20">
@@ -132,7 +132,7 @@ export function AdminNav() {
       <nav className="flex-1 space-y-6 px-4 py-6" aria-label="Admin">
         {NAV_GROUPS.map((group) => (
           <div key={group.title} className="space-y-1.5">
-            <h4 className="px-3 text-[10px] font-bold uppercase tracking-widest text-white/40">
+            <h4 className="px-3 text-[10px] font-bold uppercase tracking-widest text-ink-tertiary">
               {group.title}
             </h4>
             <div className="space-y-0.5">
@@ -145,11 +145,11 @@ export function AdminNav() {
                     className={cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-250",
                       active
-                        ? "bg-mauve/10 text-mauve border-l-2 border-mauve"
-                        : "text-white/60 hover:bg-white/5 hover:text-white"
+                        ? "bg-mauve/10 text-mauve-strong border-l-2 border-mauve"
+                        : "text-ink-secondary hover:bg-mauve/5 hover:text-ink"
                     )}
                   >
-                    <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-mauve" : "text-white/40")} />
+                    <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-mauve-strong" : "text-ink-tertiary")} />
                     <span>{item.label}</span>
                   </Link>
                 )
@@ -165,9 +165,9 @@ export function AdminNav() {
           onClick={signOut}
           disabled={signingOut}
           variant="ghost"
-          className="w-full justify-start gap-2.5 text-xs font-bold text-white/60 hover:bg-white/5 hover:text-white"
+          className="w-full justify-start gap-2.5 text-xs font-bold text-ink-secondary hover:bg-mauve/5 hover:text-ink"
         >
-          <LogOut className="h-4 w-4 text-white/40" />
+          <LogOut className="h-4 w-4 text-ink-tertiary" />
           <span>{signingOut ? "Signing out…" : "Sign out"}</span>
         </Button>
       </div>

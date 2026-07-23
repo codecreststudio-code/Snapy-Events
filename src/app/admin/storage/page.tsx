@@ -98,11 +98,11 @@ export default function AdminStoragePage() {
     <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Storage Analytics</h1>
-          <p className="text-sm text-white/50 mt-1">Review file uploads, quota consumption, and per-user disk usage.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">Storage Analytics</h1>
+          <p className="text-sm text-ink-secondary mt-1">Review file uploads, quota consumption, and per-user disk usage.</p>
         </div>
-        <Button onClick={() => fetchStorageData(page)} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
-          <RefreshCw className="h-4 w-4 text-white/50" />
+        <Button onClick={() => fetchStorageData(page)} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-ink-secondary bg-surface-card hover:bg-mauve/5 font-semibold shadow-sm">
+          <RefreshCw className="h-4 w-4 text-ink-secondary" />
           <span>Refresh</span>
         </Button>
       </div>
@@ -114,11 +114,11 @@ export default function AdminStoragePage() {
             <HardDrive className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Total Storage Used</span>
-            <span className="text-2xl font-bold text-white mt-1 block">
+            <span className="text-xs text-ink-tertiary font-bold uppercase tracking-wider block">Total Storage Used</span>
+            <span className="text-2xl font-bold text-ink mt-1 block">
               {totalUsedGb < 1 ? `${(totalUsedGb * 1024).toFixed(1)} MB` : `${totalUsedGb.toFixed(2)} GB`}
             </span>
-            <span className="text-[10px] text-white/40 font-semibold">across {rows.length} users</span>
+            <span className="text-[10px] text-ink-tertiary font-semibold">across {rows.length} users</span>
           </div>
         </Card>
 
@@ -127,9 +127,9 @@ export default function AdminStoragePage() {
             <Layers className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Total Photos Stored</span>
-            <span className="text-2xl font-bold text-white mt-1 block">{totalPhotos.toLocaleString()}</span>
-            <span className="text-[10px] text-white/40 font-semibold">live in storage buckets</span>
+            <span className="text-xs text-ink-tertiary font-bold uppercase tracking-wider block">Total Photos Stored</span>
+            <span className="text-2xl font-bold text-ink mt-1 block">{totalPhotos.toLocaleString()}</span>
+            <span className="text-[10px] text-ink-tertiary font-semibold">live in storage buckets</span>
           </div>
         </Card>
 
@@ -140,11 +140,11 @@ export default function AdminStoragePage() {
             <AlertTriangle className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Near Quota (&gt;80%)</span>
-            <span className={cn("text-2xl font-bold mt-1 block", nearCapacity.length > 0 ? "text-amber-400" : "text-white")}>
+            <span className="text-xs text-ink-tertiary font-bold uppercase tracking-wider block">Near Quota (&gt;80%)</span>
+            <span className={cn("text-2xl font-bold mt-1 block", nearCapacity.length > 0 ? "text-amber-400" : "text-ink")}>
               {nearCapacity.length} users
             </span>
-            <span className="text-[10px] text-white/40 font-semibold">approaching their storage limit</span>
+            <span className="text-[10px] text-ink-tertiary font-semibold">approaching their storage limit</span>
           </div>
         </Card>
       </div>
@@ -153,11 +153,11 @@ export default function AdminStoragePage() {
       <Card className="bg-surface-card border-hairline-dark overflow-hidden shadow-sm">
         <CardContent className="p-0">
           <div className="p-4 border-b border-hairline-dark flex items-center justify-between">
-            <h3 className="font-bold text-white/80 text-sm flex items-center gap-1.5">
+            <h3 className="font-bold text-ink text-sm flex items-center gap-1.5">
               <Database className="h-4 w-4 text-mauve" />
               Per-User Storage Breakdown
             </h3>
-            <span className="text-[10px] text-white/40 font-semibold">{rows.length} records</span>
+            <span className="text-[10px] text-ink-tertiary font-semibold">{rows.length} records</span>
           </div>
 
           {loading ? (
@@ -165,14 +165,14 @@ export default function AdminStoragePage() {
               <Loader2 className="h-8 w-8 animate-spin text-mauve" />
             </div>
           ) : rows.length === 0 ? (
-            <div className="p-16 text-white/40 text-center text-xs font-semibold">
+            <div className="p-16 text-ink-tertiary text-center text-xs font-semibold">
               No storage usage records found. Usage is tracked after the first photo upload.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-white/5">
+                  <tr className="border-b border-hairline-dark text-ink-tertiary font-bold uppercase tracking-wider bg-ink/5">
                     <th className="p-4">User</th>
                     <th className="p-4">Plan</th>
                     <th className="p-4">Photos</th>
@@ -181,7 +181,7 @@ export default function AdminStoragePage() {
                     <th className="p-4 text-right">Usage</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/10 text-white/60 font-medium">
+                <tbody className="divide-y divide-hairline-dark text-ink-secondary font-medium">
                   {rows.map((row) => {
                     const usedGb = bytesToGb(row.total_bytes)
                     const activePlan = getActivePlan(row)
@@ -192,12 +192,12 @@ export default function AdminStoragePage() {
 
                     return (
                       <tr key={row.id} className={cn(
-                        "hover:bg-white/5 transition-colors",
+                        "hover:bg-mauve/5 transition-colors",
                         isCritical ? "bg-red-500/10" : isWarning ? "bg-amber-500/10" : ""
                       )}>
                         <td className="p-4">
-                          <div className="font-bold text-white/80">{row.user?.full_name ?? "—"}</div>
-                          <div className="text-[10px] text-white/40 mt-0.5">
+                          <div className="font-bold text-ink">{row.user?.full_name ?? "—"}</div>
+                          <div className="text-[10px] text-ink-tertiary mt-0.5">
                             {row.user?.email || (row.user_id ? row.user_id.slice(0, 8) + "…" : "Unassigned")}
                           </div>
                         </td>
@@ -206,19 +206,19 @@ export default function AdminStoragePage() {
                             activePlan === "premium" ? "bg-mauve/10 text-mauve border-mauve/20" :
                             activePlan === "standard" ? "bg-mauve/10 text-mauve border-mauve/20" :
                             activePlan === "starter" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                            "bg-white/5 text-white/50 border-hairline-dark"
+                            "bg-ink/5 text-ink-secondary border-hairline-dark"
                           )}>
                             {activePlan}
                           </span>
                         </td>
-                        <td className="p-4 font-bold text-white/70">{(row.photo_count || 0).toLocaleString()}</td>
-                        <td className="p-4 font-semibold text-white/70">
+                        <td className="p-4 font-bold text-ink-secondary">{(row.photo_count || 0).toLocaleString()}</td>
+                        <td className="p-4 font-semibold text-ink-secondary">
                           {usedGb < 1 ? `${(usedGb * 1024).toFixed(0)} MB` : `${usedGb.toFixed(2)} GB`}
                         </td>
-                        <td className="p-4 text-white/40 font-semibold">{limitGb >= 1000 ? "1 TB" : `${limitGb} GB`}</td>
+                        <td className="p-4 text-ink-tertiary font-semibold">{limitGb >= 1000 ? "1 TB" : `${limitGb} GB`}</td>
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <div className="w-20 h-2 bg-white/5 rounded-full overflow-hidden">
+                            <div className="w-20 h-2 bg-ink/5 rounded-full overflow-hidden">
                               <div
                                 className={cn("h-full rounded-full transition-all",
                                   isCritical ? "bg-red-500/10" : isWarning ? "bg-amber-400" : "bg-mauve"
@@ -227,7 +227,7 @@ export default function AdminStoragePage() {
                               />
                             </div>
                             <span className={cn("text-[10px] font-bold w-8",
-                              isCritical ? "text-red-400" : isWarning ? "text-amber-400" : "text-white/40"
+                              isCritical ? "text-red-400" : isWarning ? "text-amber-400" : "text-ink-tertiary"
                             )}>
                               {usagePct.toFixed(0)}%
                             </span>
@@ -244,7 +244,7 @@ export default function AdminStoragePage() {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="p-4 border-t border-hairline-dark flex items-center justify-between">
-              <span className="text-xs text-white/40 font-semibold">Page {page} of {totalPages}</span>
+              <span className="text-xs text-ink-tertiary font-semibold">Page {page} of {totalPages}</span>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="h-7 text-xs border-hairline-dark">Prev</Button>
                 <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="h-7 text-xs border-hairline-dark">Next</Button>

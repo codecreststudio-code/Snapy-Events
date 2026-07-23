@@ -213,59 +213,59 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      <div className="border-b border-[#3D332A] pb-6">
-        <h1 className="font-playfair text-3xl font-light text-white">Settings</h1>
-        <p className="text-white/50 mt-1 text-sm">Manage your account and preferences</p>
+      <div className="border-b border-[#e5dfd0] pb-6">
+        <h1 className="font-playfair text-3xl font-light text-ink">Settings</h1>
+        <p className="text-ink-secondary mt-1 text-sm">Manage your account and preferences</p>
       </div>
 
       <div className="space-y-6">
 
-        <Card className="rounded-2xl border border-[#3D332A] bg-[#1C1814]">
+        <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff]">
           <CardHeader>
             <div className="flex items-center gap-2">
               <UserIcon className="h-5 w-5 text-mauve" />
-              <CardTitle className="text-white">Profile</CardTitle>
+              <CardTitle className="text-ink">Profile</CardTitle>
             </div>
-            <CardDescription className="text-white/50">Your personal information</CardDescription>
+            <CardDescription className="text-ink-secondary">Your personal information</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/70">Email</Label>
-              <Input id="email" value={profile?.email || ""} disabled className="bg-white/5 border-[#3D332A] text-white/50" />
+              <Label htmlFor="email" className="text-ink-secondary">Email</Label>
+              <Input id="email" value={profile?.email || ""} disabled className="bg-ink/5 border-[#e5dfd0] text-ink-secondary" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="full-name" className="text-white/70">Full Name</Label>
+              <Label htmlFor="full-name" className="text-ink-secondary">Full Name</Label>
               <Input
                 id="full-name"
                 value={profileForm.full_name}
                 onChange={(e) => setProfileForm((prev) => ({ ...prev, full_name: e.target.value }))}
                 placeholder="John Smith"
-                className="bg-white/5 border-[#3D332A] text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve"
+                className="bg-ink/5 border-[#e5dfd0] text-ink placeholder:text-ink-tertiary focus:border-mauve focus:ring-mauve"
               />
             </div>
             <Button
               onClick={() => profileMutation.mutate()}
               disabled={profileMutation.isPending}
-              className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all"
+              className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all"
             >
               {profileMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-[#3D332A] bg-[#1C1814]">
+        <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff]">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Bell className="h-5 w-5 text-mauve" />
-              <CardTitle className="text-white">Notifications</CardTitle>
+              <CardTitle className="text-ink">Notifications</CardTitle>
             </div>
-            <CardDescription className="text-white/50">Choose what you want to be notified about</CardDescription>
+            <CardDescription className="text-ink-secondary">Choose what you want to be notified about</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-white">New Photos Uploaded</Label>
-                <p className="text-sm text-white/50">
+                <Label className="text-ink">New Photos Uploaded</Label>
+                <p className="text-sm text-ink-secondary">
                   Get notified when new photos are uploaded to your events
                 </p>
               </div>
@@ -276,11 +276,11 @@ export default function SettingsPage() {
                 }
               />
             </div>
-            <Separator className="bg-[#3D332A]" />
+            <Separator className="bg-[#e5dfd0]" />
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-white">Guest Uploads</Label>
-                <p className="text-sm text-white/50">
+                <Label className="text-ink">Guest Uploads</Label>
+                <p className="text-sm text-ink-secondary">
                   Get notified when guests upload photos
                 </p>
               </div>
@@ -291,11 +291,11 @@ export default function SettingsPage() {
                 }
               />
             </div>
-            <Separator className="bg-[#3D332A]" />
+            <Separator className="bg-[#e5dfd0]" />
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-white">Event Reminders</Label>
-                <p className="text-sm text-white/50">
+                <Label className="text-ink">Event Reminders</Label>
+                <p className="text-sm text-ink-secondary">
                   Get reminders before your events start
                 </p>
               </div>
@@ -306,11 +306,11 @@ export default function SettingsPage() {
                 }
               />
             </div>
-            <Separator className="bg-[#3D332A]" />
+            <Separator className="bg-[#e5dfd0]" />
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-white">WhatsApp Updates</Label>
-                <p className="text-sm text-white/50">
+                <Label className="text-ink">WhatsApp Updates</Label>
+                <p className="text-sm text-ink-secondary">
                   Receive updates via WhatsApp (if configured)
                 </p>
               </div>
@@ -324,28 +324,28 @@ export default function SettingsPage() {
             <Button
               onClick={() => notificationMutation.mutate()}
               disabled={notificationMutation.isPending}
-              className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all"
+              className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all"
             >
               {notificationMutation.isPending ? "Saving..." : "Save Preferences"}
             </Button>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-[#3D332A] bg-[#1C1814]">
+        <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff]">
           <CardHeader>
             <div className="flex items-center gap-2">
               <BellRing className="h-5 w-5 text-mauve" />
-              <CardTitle className="text-white">Push Notifications</CardTitle>
+              <CardTitle className="text-ink">Push Notifications</CardTitle>
             </div>
-            <CardDescription className="text-white/50">
+            <CardDescription className="text-ink-secondary">
               Control what shows up in your notification center and on your device
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between rounded-xl border border-[#3D332A] bg-white/5 px-4 py-3">
+            <div className="flex items-center justify-between rounded-xl border border-[#e5dfd0] bg-ink/5 px-4 py-3">
               <div className="space-y-0.5">
-                <Label className="text-white">Enable push notifications</Label>
-                <p className="text-sm text-white/50">
+                <Label className="text-ink">Enable push notifications</Label>
+                <p className="text-sm text-ink-secondary">
                   {!pushSupported
                     ? "Not supported in this browser"
                     : pushPermission === "granted"
@@ -364,14 +364,14 @@ export default function SettingsPage() {
                   onClick={handleEnablePush}
                   disabled={!pushSupported || pushPermission === "denied" || isEnablingPush}
                   size="sm"
-                  className="rounded-full bg-mauve font-semibold text-[#141110] hover:bg-mauve-strong"
+                  className="rounded-full bg-mauve font-semibold text-[#faf6ed] hover:bg-mauve-strong"
                 >
                   {isEnablingPush ? "Requesting..." : pushPermission === "denied" ? "Blocked" : "Enable"}
                 </Button>
               )}
             </div>
 
-            <Separator className="bg-[#3D332A]" />
+            <Separator className="bg-[#e5dfd0]" />
 
             {pushPrefsLoading ? (
               <div className="space-y-3">
@@ -384,8 +384,8 @@ export default function SettingsPage() {
                 const row = (
                   <div key={field.key} className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label className="text-white">{field.label}</Label>
-                      <p className="text-sm text-white/50">{field.description}</p>
+                      <Label className="text-ink">{field.label}</Label>
+                      <p className="text-sm text-ink-secondary">{field.description}</p>
                     </div>
                     <Switch
                       checked={pushPrefs?.[field.key] ?? false}
@@ -395,31 +395,31 @@ export default function SettingsPage() {
                   </div>
                 )
                 if (idx === NOTIFICATION_PREFERENCE_FIELDS.length - 1) return [row]
-                return [row, <Separator key={`${field.key}-sep`} className="bg-[#3D332A]" />]
+                return [row, <Separator key={`${field.key}-sep`} className="bg-[#e5dfd0]" />]
               })
             )}
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-[#3D332A] bg-[#1C1814]">
+        <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff]">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-mauve" />
-              <CardTitle className="text-white">Security</CardTitle>
+              <CardTitle className="text-ink">Security</CardTitle>
             </div>
-            <CardDescription className="text-white/50">Manage your security settings</CardDescription>
+            <CardDescription className="text-ink-secondary">Manage your security settings</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-white">Password</Label>
-                <p className="text-sm text-white/50">
+                <Label className="text-ink">Password</Label>
+                <p className="text-sm text-ink-secondary">
                   Change your account password
                 </p>
               </div>
-              <Button variant="outline" className="border-[#3D332A] bg-transparent text-white/70 hover:bg-white/5 hover:text-white">Change Password</Button>
+              <Button variant="outline" className="border-[#e5dfd0] bg-transparent text-ink-secondary hover:bg-mauve/5 hover:text-ink">Change Password</Button>
             </div>
-            <Separator className="bg-[#3D332A]" />
+            <Separator className="bg-[#e5dfd0]" />
             <div className="flex flex-col">
               <MfaSettings />
             </div>

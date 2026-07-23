@@ -32,7 +32,7 @@ export function HomeBottomTabs() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#3D332A] bg-[#141110]/95 backdrop-blur-lg"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur-lg"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Primary"
     >
@@ -49,10 +49,10 @@ export function HomeBottomTabs() {
               <item.icon
                 className={cn(
                   "h-5 w-5 transition-colors duration-200",
-                  active ? "text-mauve" : "text-white/50"
+                  active ? "text-mauve" : "text-ink-secondary"
                 )}
               />
-              <span className={cn("transition-colors duration-200", active ? "text-mauve" : "text-white/50")}>
+              <span className={cn("transition-colors duration-200", active ? "text-mauve" : "text-ink-secondary")}>
                 {item.name}
               </span>
             </Link>

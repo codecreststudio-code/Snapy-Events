@@ -25,8 +25,8 @@ export function GlassStatRow({
         <React.Fragment key={s.label}>
           {i > 0 && <div className="h-6 w-px bg-hairline-dark" />}
           <div className="text-center leading-tight">
-            <p className="font-playfair text-base font-medium text-white">{s.value}</p>
-            <p className="text-[10px] uppercase tracking-wide text-white/50">{s.label}</p>
+            <p className="font-playfair text-base font-medium text-ink">{s.value}</p>
+            <p className="text-[10px] uppercase tracking-wide text-ink-secondary">{s.label}</p>
           </div>
         </React.Fragment>
       ))}

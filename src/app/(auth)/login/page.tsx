@@ -53,8 +53,8 @@ export default function LoginPage() {
           <Link href="/" className="flex items-center justify-center mb-4">
             <Logo />
           </Link>
-          <CardTitle className="text-2xl font-playfair text-white font-light">Welcome back</CardTitle>
-          <CardDescription className="text-white/50">Sign in to your Snapsy account</CardDescription>
+          <CardTitle className="text-2xl font-playfair text-ink font-light">Welcome back</CardTitle>
+          <CardDescription className="text-ink-secondary">Sign in to your Snapsy account</CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>
@@ -66,7 +66,7 @@ export default function LoginPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/70">Email</Label>
+              <Label htmlFor="email" className="text-ink-secondary">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -75,13 +75,13 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
-                className="bg-white/5 border-hairline-dark text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve"
+                className="bg-mauve/5 border-hairline-dark text-ink placeholder:text-ink-tertiary focus:border-mauve focus:ring-mauve"
               />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-white/70">Password</Label>
+                <Label htmlFor="password" className="text-ink-secondary">Password</Label>
                 <Link
                   href="/forgot-password"
                   className="text-sm text-mauve hover:underline"
@@ -98,12 +98,12 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="pr-10 bg-white/5 border-hairline-dark text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve"
+                  className="pr-10 bg-mauve/5 border-hairline-dark text-ink placeholder:text-ink-tertiary focus:border-mauve focus:ring-mauve"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-tertiary hover:text-ink-secondary"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -118,7 +118,7 @@ export default function LoginPage() {
           <CardFooter className="flex flex-col space-y-4">
             <Button
               type="submit"
-              className="w-full rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all focus-visible:ring-2 focus-visible:ring-mauve/50"
+              className="w-full rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all focus-visible:ring-2 focus-visible:ring-mauve/50"
               disabled={isLoading}
             >
               {isLoading ? "Signing in..." : "Sign in"}
@@ -126,17 +126,17 @@ export default function LoginPage() {
 
             <div className="relative w-full my-2">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-white/10" />
+                <span className="w-full border-t border-hairline-dark" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-surface-card px-2 text-white/40">Or continue with</span>
+                <span className="bg-surface-card px-2 text-ink-tertiary">Or continue with</span>
               </div>
             </div>
 
             <Button
               type="button"
               variant="outline"
-              className="w-full border-white/15 text-white hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-mauve/50"
+              className="w-full border-hairline-dark text-ink hover:bg-mauve/5 focus-visible:ring-2 focus-visible:ring-mauve/50"
               onClick={handleGoogleSignIn}
               disabled={isLoading}
             >
@@ -146,7 +146,7 @@ export default function LoginPage() {
               Sign in with Google
             </Button>
 
-            <p className="text-sm text-white/50 text-center">
+            <p className="text-sm text-ink-secondary text-center">
               Don&apos;t have an account?{" "}
               <Link href="/signup" className="text-mauve hover:underline">
                 Sign up

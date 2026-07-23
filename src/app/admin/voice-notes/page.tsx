@@ -85,22 +85,22 @@ export default function AdminVoiceNotesPage() {
     <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Voice Note Management</h1>
-          <p className="text-sm text-white/50 mt-1">Review guest voice note uploads, inspect waveforms, and audit audio greetings.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">Voice Note Management</h1>
+          <p className="text-sm text-ink-secondary mt-1">Review guest voice note uploads, inspect waveforms, and audit audio greetings.</p>
         </div>
-        <Button onClick={fetchVoices} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
-          <RefreshCw className="h-4 w-4 text-white/50" />
+        <Button onClick={fetchVoices} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-ink-secondary bg-surface-card hover:bg-mauve/5 font-semibold shadow-sm">
+          <RefreshCw className="h-4 w-4 text-ink-secondary" />
           <span>Refresh</span>
         </Button>
       </div>
 
       <div className="flex items-center max-w-sm relative">
-        <Search className="h-4 w-4 absolute left-3 text-white/40" />
+        <Search className="h-4 w-4 absolute left-3 text-ink-tertiary" />
         <Input
           placeholder="Filter by filename, event, or uploader..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 bg-surface-card border-hairline-dark text-white/80 shadow-sm"
+          className="pl-9 bg-surface-card border-hairline-dark text-ink shadow-sm"
         />
       </div>
 
@@ -113,7 +113,7 @@ export default function AdminVoiceNotesPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-mauve" />
               </div>
             ) : filteredVoices.length === 0 ? (
-              <div className="p-12 text-center text-white/40 text-sm font-semibold">
+              <div className="p-12 text-center text-ink-tertiary text-sm font-semibold">
                 No voice notes found in the database.
               </div>
             ) : (
@@ -127,7 +127,7 @@ export default function AdminVoiceNotesPage() {
                       key={v.id}
                       onClick={() => setSelectedVoice(v)}
                       className={cn(
-                        "p-4 border rounded-xl cursor-pointer hover:bg-white/5 hover:border-mauve/30 transition-all flex items-center justify-between gap-4",
+                        "p-4 border rounded-xl cursor-pointer hover:bg-mauve/5 hover:border-mauve/30 transition-all flex items-center justify-between gap-4",
                         selectedVoice?.id === v.id ? "ring-2 ring-mauve/50 border-transparent bg-mauve/5" : "border-hairline-dark bg-surface-card"
                       )}
                     >
@@ -143,8 +143,8 @@ export default function AdminVoiceNotesPage() {
                         </button>
                         
                         <div className="flex-1 min-w-0 space-y-1">
-                          <p className="font-bold text-white/80 text-sm truncate">{v.original_filename || "audio-greeting.wav"}</p>
-                          <p className="text-white/40 text-[10px] truncate">Event: {v.event?.name || "N/A"}</p>
+                          <p className="font-bold text-ink text-sm truncate">{v.original_filename || "audio-greeting.wav"}</p>
+                          <p className="text-ink-tertiary text-[10px] truncate">Event: {v.event?.name || "N/A"}</p>
                         </div>
                       </div>
 
@@ -163,9 +163,9 @@ export default function AdminVoiceNotesPage() {
                           ))}
                         </div>
                         
-                        <div className="text-right text-[10px] font-semibold text-white/50">
+                        <div className="text-right text-[10px] font-semibold text-ink-secondary">
                           <span className="block">{duration}s</span>
-                          <span className="block text-white/40 font-normal">{fileSizeKb} KB</span>
+                          <span className="block text-ink-tertiary font-normal">{fileSizeKb} KB</span>
                         </div>
                       </div>
                     </div>
@@ -180,47 +180,47 @@ export default function AdminVoiceNotesPage() {
         <Card className="bg-surface-card border-hairline-dark shadow-sm p-6 sticky top-6">
           {selectedVoice ? (
             <div className="space-y-6">
-              <div className="h-32 bg-white/5 border border-hairline-dark rounded-xl flex flex-col items-center justify-center text-white/50 relative overflow-hidden">
-                <Mic className="h-8 w-8 text-white/40" />
-                <span className="text-xs font-semibold text-white/65 mt-2">Voice Recording Inspector</span>
-                <span className="text-[10px] font-mono text-white/40 mt-1 truncate max-w-[220px]">{selectedVoice.storage_path}</span>
+              <div className="h-32 bg-ink/5 border border-hairline-dark rounded-xl flex flex-col items-center justify-center text-ink-secondary relative overflow-hidden">
+                <Mic className="h-8 w-8 text-ink-tertiary" />
+                <span className="text-xs font-semibold text-ink-secondary mt-2">Voice Recording Inspector</span>
+                <span className="text-[10px] font-mono text-ink-tertiary mt-1 truncate max-w-[220px]">{selectedVoice.storage_path}</span>
               </div>
 
               <div className="border-t border-hairline-dark pt-4 space-y-3.5 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Voice ID</span>
-                  <span className="font-mono text-white/70 font-semibold">{selectedVoice.id}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Voice ID</span>
+                  <span className="font-mono text-ink-secondary font-semibold">{selectedVoice.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Filename</span>
-                  <span className="text-white/70 font-semibold truncate max-w-[150px]">{selectedVoice.original_filename || "N/A"}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Filename</span>
+                  <span className="text-ink-secondary font-semibold truncate max-w-[150px]">{selectedVoice.original_filename || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Event Name</span>
-                  <span className="text-white/70 font-semibold">{selectedVoice.event?.name || "N/A"}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Event Name</span>
+                  <span className="text-ink-secondary font-semibold">{selectedVoice.event?.name || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Uploader Email</span>
-                  <span className="text-white/70 font-semibold">{selectedVoice.uploader?.email || "N/A"}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Uploader Email</span>
+                  <span className="text-ink-secondary font-semibold">{selectedVoice.uploader?.email || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Duration</span>
-                  <span className="text-white/70 font-semibold">{selectedVoice.metadata?.duration || "15"} seconds</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Duration</span>
+                  <span className="text-ink-secondary font-semibold">{selectedVoice.metadata?.duration || "15"} seconds</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Size</span>
-                  <span className="text-white/70 font-semibold">
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Size</span>
+                  <span className="text-ink-secondary font-semibold">
                     {(selectedVoice.file_size ? selectedVoice.file_size / 1024 : 0).toFixed(1)} KB
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40 font-bold uppercase tracking-wider">Upload Date</span>
-                  <span className="text-white/70 font-semibold">{new Date(selectedVoice.created_at).toLocaleString()}</span>
+                  <span className="text-ink-tertiary font-bold uppercase tracking-wider">Upload Date</span>
+                  <span className="text-ink-secondary font-semibold">{new Date(selectedVoice.created_at).toLocaleString()}</span>
                 </div>
               </div>
 
               <div className="border-t border-hairline-dark pt-4 space-y-2">
-                <h4 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2">Controls</h4>
+                <h4 className="text-xs font-bold text-ink-tertiary uppercase tracking-wider mb-2">Controls</h4>
                 <Button
                   onClick={() => handleDelete(selectedVoice.id)}
                   disabled={actioningId === selectedVoice.id}
@@ -232,8 +232,8 @@ export default function AdminVoiceNotesPage() {
               </div>
             </div>
           ) : (
-            <div className="h-64 flex flex-col justify-center items-center text-center text-white/40">
-              <Volume2 className="h-8 w-8 text-white/30 mb-2" />
+            <div className="h-64 flex flex-col justify-center items-center text-center text-ink-tertiary">
+              <Volume2 className="h-8 w-8 text-ink-tertiary mb-2" />
               <span className="text-xs font-semibold">Select any audio greeting card to review waveform details, play recording, and perform moderation.</span>
             </div>
           )}

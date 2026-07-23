@@ -19,7 +19,7 @@ export function GuestFaceSearchButton({ galleryId, eventId }: GuestFaceSearchBut
         onClick={() => setIsOpen(true)}
         size="lg"
         variant="outline"
-        className="rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 hover:text-white transition-all shadow-md shadow-amber-500/10"
+        className="rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 hover:text-ink transition-all shadow-md shadow-amber-500/10"
       >
         <Sparkles className="mr-2 h-4 w-4 text-amber-400" />
         Find My Photos (AI)

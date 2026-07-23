@@ -288,7 +288,7 @@ function CheckoutForm() {
           email: user?.email || "",
         },
         theme: {
-          color: "#B28DAE", // mauve brand theme color
+          color: "#b8925a", // mauve brand theme color
         },
         handler: async (response: any) => {
           setInitiating(true)
@@ -387,7 +387,7 @@ function CheckoutForm() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-surface-dark text-white flex items-center justify-center">
+      <div className="min-h-screen bg-surface-dark text-ink flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-mauve" />
       </div>
     )
@@ -395,15 +395,15 @@ function CheckoutForm() {
 
   if (!eventId) {
     return (
-      <div className="min-h-screen bg-surface-dark text-white flex items-center justify-center px-4">
+      <div className="min-h-screen bg-surface-dark text-ink flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center space-y-4">
           <AlertCircle className="h-10 w-10 text-mauve mx-auto" />
-          <h1 className="text-lg font-bold text-white">Missing event</h1>
-          <p className="text-sm text-white/60">
+          <h1 className="text-lg font-bold text-ink">Missing event</h1>
+          <p className="text-sm text-ink-secondary">
             This checkout link is missing its event. Please start checkout from your event creation wizard or dashboard.
           </p>
           <Link href="/dashboard">
-            <Button className="mt-2 bg-mauve hover:bg-mauve-strong text-[#141110] font-bold rounded-xl border-none">
+            <Button className="mt-2 bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold rounded-xl border-none">
               Back to Dashboard
             </Button>
           </Link>
@@ -413,7 +413,7 @@ function CheckoutForm() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-dark text-white flex flex-col justify-between py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-surface-dark text-ink flex flex-col justify-between py-12 px-4 sm:px-6 lg:px-8">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
       <div className="max-w-4xl mx-auto w-full flex flex-col items-center">
@@ -429,8 +429,8 @@ function CheckoutForm() {
               <CardHeader className="p-0 mb-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-xl font-bold text-white">Review your subscription</CardTitle>
-                    <CardDescription className="text-white/60 text-sm">
+                    <CardTitle className="text-xl font-bold text-ink">Review your subscription</CardTitle>
+                    <CardDescription className="text-ink-secondary text-sm">
                       Complete payment to activate limits and features.
                     </CardDescription>
                   </div>
@@ -442,12 +442,12 @@ function CheckoutForm() {
                 {/* Plan Base */}
                 <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                   <div className="space-y-0.5">
-                    <span className="font-semibold text-white">{selectedPlan?.name || plan}</span>
-                    <p className="text-xs text-white/50">
+                    <span className="font-semibold text-ink">{selectedPlan?.name || plan}</span>
+                    <p className="text-xs text-ink-secondary">
                       Base event plan features
                     </p>
                   </div>
-                  <span className="font-bold text-white">
+                  <span className="font-bold text-ink">
                     {symbol}{basePrice}
                   </span>
                 </div>
@@ -456,10 +456,10 @@ function CheckoutForm() {
                 {guests > 0 && (
                   <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                     <div className="space-y-0.5">
-                      <span className="font-semibold text-white">Guest Quota Boost</span>
-                      <p className="text-xs text-white/50">+{guests} guests invite limit</p>
+                      <span className="font-semibold text-ink">Guest Quota Boost</span>
+                      <p className="text-xs text-ink-secondary">+{guests} guests invite limit</p>
                     </div>
-                    <span className="font-bold text-white">{symbol}{guestAddonPrice}</span>
+                    <span className="font-bold text-ink">{symbol}{guestAddonPrice}</span>
                   </div>
                 )}
 
@@ -467,10 +467,10 @@ function CheckoutForm() {
                 {shots > 0 && (
                   <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                     <div className="space-y-0.5">
-                      <span className="font-semibold text-white">Shots Quota Boost</span>
-                      <p className="text-xs text-white/50">+{shots} shots limit per guest</p>
+                      <span className="font-semibold text-ink">Shots Quota Boost</span>
+                      <p className="text-xs text-ink-secondary">+{shots} shots limit per guest</p>
                     </div>
-                    <span className="font-bold text-white">{symbol}{shotAddonPrice}</span>
+                    <span className="font-bold text-ink">{symbol}{shotAddonPrice}</span>
                   </div>
                 )}
 
@@ -478,10 +478,10 @@ function CheckoutForm() {
                 {photoAddonInr > 0 && (
                   <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                     <div className="space-y-0.5">
-                      <span className="font-semibold text-white">Photo Cap Upgrade</span>
-                      <p className="text-xs text-white/50">{photoLimit === -1 ? "Unlimited" : photoLimit} photos per guest</p>
+                      <span className="font-semibold text-ink">Photo Cap Upgrade</span>
+                      <p className="text-xs text-ink-secondary">{photoLimit === -1 ? "Unlimited" : photoLimit} photos per guest</p>
                     </div>
-                    <span className="font-bold text-white">{symbol}{getPrice(photoAddonInr, Math.round(photoAddonInr / 80) || 1)}</span>
+                    <span className="font-bold text-ink">{symbol}{getPrice(photoAddonInr, Math.round(photoAddonInr / 80) || 1)}</span>
                   </div>
                 )}
 
@@ -489,10 +489,10 @@ function CheckoutForm() {
                 {videoAddonInr > 0 && (
                   <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                     <div className="space-y-0.5">
-                      <span className="font-semibold text-white">Videos Add-on</span>
-                      <p className="text-xs text-white/50">Not included in {selectedPlan?.name || plan}</p>
+                      <span className="font-semibold text-ink">Videos Add-on</span>
+                      <p className="text-xs text-ink-secondary">Not included in {selectedPlan?.name || plan}</p>
                     </div>
-                    <span className="font-bold text-white">{symbol}{getPrice(videoAddonInr, Math.round(videoAddonInr / 80) || 1)}</span>
+                    <span className="font-bold text-ink">{symbol}{getPrice(videoAddonInr, Math.round(videoAddonInr / 80) || 1)}</span>
                   </div>
                 )}
 
@@ -500,10 +500,10 @@ function CheckoutForm() {
                 {voiceAddonInr > 0 && (
                   <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
                     <div className="space-y-0.5">
-                      <span className="font-semibold text-white">Voice Notes Add-on</span>
-                      <p className="text-xs text-white/50">Premium-only feature</p>
+                      <span className="font-semibold text-ink">Voice Notes Add-on</span>
+                      <p className="text-xs text-ink-secondary">Premium-only feature</p>
                     </div>
-                    <span className="font-bold text-white">{symbol}{getPrice(voiceAddonInr, Math.round(voiceAddonInr / 80) || 1)}</span>
+                    <span className="font-bold text-ink">{symbol}{getPrice(voiceAddonInr, Math.round(voiceAddonInr / 80) || 1)}</span>
                   </div>
                 )}
               </div>
@@ -519,16 +519,16 @@ function CheckoutForm() {
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                     placeholder="Have a coupon code?"
                     disabled={initiating || !!appliedCoupon}
-                    className="w-full text-xs bg-white/5 border border-white/15 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-mauve disabled:opacity-50"
+                    className="w-full text-xs bg-mauve/5 border border-hairline-dark rounded-lg px-3 py-2 text-ink font-semibold focus:outline-none focus:border-mauve disabled:opacity-50"
                   />
                   {couponError && <p className="text-red-400 text-[10px] mt-1 font-semibold">{couponError}</p>}
                 </div>
                 {!appliedCoupon ? (
-                  <Button onClick={handleApplyCoupon} disabled={!couponCode || couponLoading || initiating} variant="outline" size="sm" className="text-xs h-8 border-white/15 bg-transparent text-white hover:bg-white/5">
+                  <Button onClick={handleApplyCoupon} disabled={!couponCode || couponLoading || initiating} variant="outline" size="sm" className="text-xs h-8 border-hairline-dark bg-transparent text-ink hover:bg-mauve/5">
                     {couponLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Apply"}
                   </Button>
                 ) : (
-                  <Button onClick={() => { setAppliedCoupon(null); setCouponCode(""); setCouponError("") }} disabled={initiating} variant="outline" size="sm" className="text-xs h-8 border-white/15 bg-transparent text-red-400 hover:text-red-300 hover:bg-white/5">
+                  <Button onClick={() => { setAppliedCoupon(null); setCouponCode(""); setCouponError("") }} disabled={initiating} variant="outline" size="sm" className="text-xs h-8 border-hairline-dark bg-transparent text-red-400 hover:text-red-300 hover:bg-mauve/5">
                     Remove
                   </Button>
                 )}
@@ -544,8 +544,8 @@ function CheckoutForm() {
                 </div>
               )}
               <div className="flex items-center justify-between mb-6 pt-2 border-t border-hairline-dark">
-                <span className="text-base font-medium text-white/70">Total Price ({currency})</span>
-                <span className="text-3xl font-extrabold text-white">{symbol}{Math.floor(totalPrice)}</span>
+                <span className="text-base font-medium text-ink-secondary">Total Price ({currency})</span>
+                <span className="text-3xl font-extrabold text-ink">{symbol}{Math.floor(totalPrice)}</span>
               </div>
 
               {error && (
@@ -558,7 +558,7 @@ function CheckoutForm() {
               <Button
                 onClick={totalPrice > 0 ? handlePayment : handleFreeActivation}
                 disabled={initiating}
-                className="w-full bg-mauve hover:bg-mauve-strong text-[#141110] font-bold py-6 rounded-xl shadow-lg shadow-mauve/10 flex items-center justify-center gap-2 border-none hover:scale-[1.01] active:scale-[0.99] transition-all"
+                className="w-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold py-6 rounded-xl shadow-lg shadow-mauve/10 flex items-center justify-center gap-2 border-none hover:scale-[1.01] active:scale-[0.99] transition-all"
               >
                 {initiating ? (
                   <>
@@ -585,16 +585,16 @@ function CheckoutForm() {
             <div className="bg-surface-card border border-hairline-dark rounded-2xl p-6 space-y-4">
               <div className="flex items-center gap-2.5 text-mauve">
                 <ShieldCheck className="h-6 w-6 shrink-0" />
-                <span className="font-bold text-white">Secure Payments</span>
+                <span className="font-bold text-ink">Secure Payments</span>
               </div>
-              <p className="text-xs text-white/60 leading-relaxed">
+              <p className="text-xs text-ink-secondary leading-relaxed">
                 Transactions are securely processed using Razorpay. Snapsy does not store card numbers or other payment credentials.
               </p>
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-sm font-bold text-white/80">Included in your plan:</h4>
-              <ul className="space-y-2.5 text-xs text-white/60">
+              <h4 className="text-sm font-bold text-ink">Included in your plan:</h4>
+              <ul className="space-y-2.5 text-xs text-ink-secondary">
                 <li className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-mauve shrink-0" />
                   <span>Instant event photo collection web app</span>
@@ -619,7 +619,7 @@ function CheckoutForm() {
         </div>
       </div>
 
-      <footer className="text-center text-xs text-white/50 py-6 mt-12">
+      <footer className="text-center text-xs text-ink-secondary py-6 mt-12">
         © {new Date().getFullYear()} Snapsy Inc. All rights reserved.
       </footer>
     </div>
@@ -629,7 +629,7 @@ function CheckoutForm() {
 export default function CheckoutPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-surface-dark text-white flex items-center justify-center">
+      <div className="min-h-screen bg-surface-dark text-ink flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-mauve" />
       </div>
     }>

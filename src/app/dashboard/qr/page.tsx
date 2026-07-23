@@ -182,7 +182,7 @@ function QRCodeCard({ qr, onDelete }: { qr: QRCodeWithEvent; onDelete: (id: stri
   }
 
   return (
-    <Card className="overflow-hidden rounded-2xl border border-[#3D332A] bg-[#1C1814] hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300 group">
+    <Card className="overflow-hidden rounded-2xl border border-[#e5dfd0] bg-[#ffffff] hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300 group">
       <div className="aspect-square bg-white flex flex-col items-center justify-center p-4 relative select-none">
         <div className="p-3 bg-white rounded-2xl shadow-sm border border-[#EAE5DF] relative overflow-hidden flex items-center justify-center">
           <img
@@ -218,17 +218,17 @@ function QRCodeCard({ qr, onDelete }: { qr: QRCodeWithEvent; onDelete: (id: stri
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => copyToClipboard(scanUrl)} className="gap-2 cursor-pointer">
-                <Copy className="h-4 w-4 text-white/50" />
+                <Copy className="h-4 w-4 text-ink-secondary" />
                 Copy Link
               </DropdownMenuItem>
               <DropdownMenuItem onClick={downloadSvgQr} className="gap-2 cursor-pointer">
-                <Download className="h-4 w-4 text-white/50" />
+                <Download className="h-4 w-4 text-ink-secondary" />
                 Download PNG
               </DropdownMenuItem>
               {qr.event && (
                 <DropdownMenuItem asChild className="gap-2 cursor-pointer">
                   <Link href={`/event/${qr.event.slug}`} target="_blank">
-                    <ExternalLink className="h-4 w-4 text-white/50" />
+                    <ExternalLink className="h-4 w-4 text-ink-secondary" />
                     View Public Page
                   </Link>
                 </DropdownMenuItem>
@@ -241,10 +241,10 @@ function QRCodeCard({ qr, onDelete }: { qr: QRCodeWithEvent; onDelete: (id: stri
           </DropdownMenu>
         </div>
       </div>
-      <CardContent className="p-4 bg-white/[0.02] border-t border-[#3D332A]">
-        <h3 className="font-semibold text-sm text-white group-hover:text-mauve transition-colors">{qr.name || "QR Code"}</h3>
+      <CardContent className="p-4 bg-ink/[0.02] border-t border-[#e5dfd0]">
+        <h3 className="font-semibold text-sm text-ink group-hover:text-mauve transition-colors">{qr.name || "QR Code"}</h3>
         <div className="flex items-center justify-between mt-1">
-          <p className="text-xs text-white/50 font-medium">
+          <p className="text-xs text-ink-secondary font-medium">
             {qr.event?.name || "General Code"}
           </p>
           <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20">
@@ -308,7 +308,7 @@ function CreateQRDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2 rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+        <Button className="gap-2 rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
           <Plus className="h-4 w-4" />
           Generate QR Code
         </Button>
@@ -377,7 +377,7 @@ function CreateQRDialog({
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !eventId} className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold">
+            <Button type="submit" disabled={loading || !eventId} className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold">
               {loading ? "Creating..." : "Generate Code"}
             </Button>
           </DialogFooter>
@@ -459,12 +459,12 @@ export default function ConsolidatedQRPage() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#3D332A] pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#e5dfd0] pb-6">
         <div>
-          <h1 className="font-playfair text-3xl font-light text-white">
+          <h1 className="font-playfair text-3xl font-light text-ink">
             QR Codes Manager
           </h1>
-          <p className="text-white/50 mt-1 text-sm">
+          <p className="text-ink-secondary mt-1 text-sm">
             Consolidated QR codes dashboard for all your event checkpoints and directories.
           </p>
         </div>
@@ -479,12 +479,12 @@ export default function ConsolidatedQRPage() {
 
       {/* Analytics Summary */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="rounded-2xl p-6 border border-[#3D332A] bg-[#1C1814] relative overflow-hidden group hover:border-mauve/40 transition-all">
+        <Card className="rounded-2xl p-6 border border-[#e5dfd0] bg-[#ffffff] relative overflow-hidden group hover:border-mauve/40 transition-all">
           <div className="absolute top-0 right-0 w-24 h-24 bg-mauve/5 rounded-full filter blur-xl transform translate-x-4 -translate-y-4" />
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Total QR Codes</p>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-white">{qrCodes?.length || 0}</p>
+              <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider">Total QR Codes</p>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-ink">{qrCodes?.length || 0}</p>
             </div>
             <div className="p-3 bg-mauve/10 rounded-xl text-mauve">
               <QrCode className="h-6 w-6" />
@@ -492,12 +492,12 @@ export default function ConsolidatedQRPage() {
           </div>
         </Card>
 
-        <Card className="rounded-2xl p-6 border border-[#3D332A] bg-[#1C1814] relative overflow-hidden group hover:border-emerald-500/30 transition-all">
+        <Card className="rounded-2xl p-6 border border-[#e5dfd0] bg-[#ffffff] relative overflow-hidden group hover:border-emerald-500/30 transition-all">
           <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full filter blur-xl transform translate-x-4 -translate-y-4" />
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Total Scans</p>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-white">{totalScans}</p>
+              <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider">Total Scans</p>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-ink">{totalScans}</p>
             </div>
             <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400">
               <Camera className="h-6 w-6" />
@@ -505,12 +505,12 @@ export default function ConsolidatedQRPage() {
           </div>
         </Card>
 
-        <Card className="rounded-2xl p-6 border border-[#3D332A] bg-[#1C1814] relative overflow-hidden group hover:border-mauve/40 transition-all">
+        <Card className="rounded-2xl p-6 border border-[#e5dfd0] bg-[#ffffff] relative overflow-hidden group hover:border-mauve/40 transition-all">
           <div className="absolute top-0 right-0 w-24 h-24 bg-mauve/5 rounded-full filter blur-xl transform translate-x-4 -translate-y-4" />
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Active QR Checkpoints</p>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-white">
+              <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider">Active QR Checkpoints</p>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-ink">
                 {qrCodes?.filter((qr) => qr.is_active).length || 0}
               </p>
             </div>
@@ -522,27 +522,27 @@ export default function ConsolidatedQRPage() {
       </div>
 
       {/* Filters & Actions bar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between border-b border-[#3D332A] pb-6">
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between border-b border-[#e5dfd0] pb-6">
         <div className="relative w-full sm:max-w-md">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-white/40" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-ink-tertiary" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search QR codes, codes, or events..."
-            className="pl-9 bg-white/5 border-[#3D332A] text-white placeholder:text-white/40 focus:border-mauve focus:ring-mauve"
+            className="pl-9 bg-ink/5 border-[#e5dfd0] text-ink placeholder:text-ink-tertiary focus:border-mauve focus:ring-mauve"
           />
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Filter className="h-4 w-4 text-white/40" />
+          <Filter className="h-4 w-4 text-ink-tertiary" />
           <select
             value={selectedEventId}
             onChange={(e) => setSelectedEventId(e.target.value)}
-            className="flex h-10 w-full sm:w-56 rounded-md border border-[#3D332A] bg-white/5 px-3 py-2 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 focus-visible:ring-offset-2"
+            className="flex h-10 w-full sm:w-56 rounded-md border border-[#e5dfd0] bg-ink/5 px-3 py-2 text-sm text-ink ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 focus-visible:ring-offset-2"
           >
-            <option value="all" className="bg-[#1C1814] text-white">All Events</option>
+            <option value="all" className="bg-[#ffffff] text-ink">All Events</option>
             {events?.map((evt) => (
-              <option key={evt.id} value={evt.id} className="bg-[#1C1814] text-white">
+              <option key={evt.id} value={evt.id} className="bg-[#ffffff] text-ink">
                 {evt.name}
               </option>
             ))}
@@ -562,13 +562,13 @@ export default function ConsolidatedQRPage() {
           ))}
         </div>
       ) : (
-        <Card className="rounded-2xl border border-dashed border-[#3D332A] bg-white/[0.02] py-20">
+        <Card className="rounded-2xl border border-dashed border-[#e5dfd0] bg-ink/[0.02] py-20">
           <CardContent className="flex flex-col items-center justify-center text-center">
-            <div className="p-4 bg-white/5 rounded-full mb-4 border border-[#3D332A] shadow-inner">
-              <QrCode className="h-10 w-10 text-white/30" />
+            <div className="p-4 bg-ink/5 rounded-full mb-4 border border-[#e5dfd0] shadow-inner">
+              <QrCode className="h-10 w-10 text-ink-tertiary" />
             </div>
-            <h3 className="text-xl font-bold tracking-tight text-white">No QR codes found</h3>
-            <p className="text-sm text-white/50 mt-2 max-w-sm">
+            <h3 className="text-xl font-bold tracking-tight text-ink">No QR codes found</h3>
+            <p className="text-sm text-ink-secondary mt-2 max-w-sm">
               {searchQuery || selectedEventId !== "all"
                 ? "We couldn't find any QR codes matching your search filters. Try resetting them."
                 : "Create a QR code to let guests quickly scan at your event to upload and view photos."}

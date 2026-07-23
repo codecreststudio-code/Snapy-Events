@@ -203,10 +203,10 @@ function PricingCard({
   const isPopular = plan.id === "standard"
   const isPremium = plan.id === "premium"
 
-  let selectedClasses = "border-[#3D332A] hover:border-mauve/40 hover:shadow-xl"
+  let selectedClasses = "border-[#e5dfd0] hover:border-mauve/40 hover:shadow-xl"
   if (isSelected) {
     if (plan.id === "free") {
-      selectedClasses = "border-mauve ring-2 ring-mauve/15 shadow-[0_15px_40px_rgba(178,141,174,0.1)]"
+      selectedClasses = "border-mauve ring-2 ring-mauve/15 shadow-[0_15px_40px_rgba(184, 146, 90,0.1)]"
     } else if (plan.id === "starter") {
       selectedClasses = "border-indigo-500 ring-2 ring-indigo-500/15 shadow-[0_15px_40px_rgba(99,102,241,0.15)]"
     } else if (plan.id === "standard") {
@@ -216,9 +216,9 @@ function PricingCard({
     }
   } else {
     if (isPopular) {
-      selectedClasses = "border-[#3D332A] hover:border-violet-400/50 hover:shadow-lg"
+      selectedClasses = "border-[#e5dfd0] hover:border-violet-400/50 hover:shadow-lg"
     } else if (isPremium) {
-      selectedClasses = "border-[#3D332A] hover:border-orange-400/50 hover:shadow-lg"
+      selectedClasses = "border-[#e5dfd0] hover:border-orange-400/50 hover:shadow-lg"
     }
   }
 
@@ -232,7 +232,7 @@ function PricingCard({
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className={`relative rounded-3xl border bg-[#1C1814] p-6 cursor-pointer flex flex-col justify-between transition-all duration-300 ${selectedClasses}`}
+      className={`relative rounded-3xl border bg-[#ffffff] p-6 cursor-pointer flex flex-col justify-between transition-all duration-300 ${selectedClasses}`}
     >
       {/* Background Spotlight Glow Wrapper */}
       <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
@@ -271,8 +271,8 @@ function PricingCard({
       <div className="relative z-10">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-lg font-bold text-white">{plan.name}</h3>
-            <p className="mt-1.5 text-xs text-white/50 leading-relaxed font-light min-h-[32px]">
+            <h3 className="text-lg font-bold text-ink">{plan.name}</h3>
+            <p className="mt-1.5 text-xs text-ink-secondary leading-relaxed font-light min-h-[32px]">
               {plan.description}
             </p>
           </div>
@@ -289,13 +289,13 @@ function PricingCard({
         </div>
 
         <div className="mt-4 flex items-baseline gap-1">
-          <span className="text-3xl font-extrabold text-white">{symbol}{displayPrice}</span>
-          <span className="text-white/40 text-xs font-light">/ event</span>
+          <span className="text-3xl font-extrabold text-ink">{symbol}{displayPrice}</span>
+          <span className="text-ink-tertiary text-xs font-light">/ event</span>
         </div>
 
-        <ul className="mt-5 space-y-3 border-t border-white/10 pt-5">
+        <ul className="mt-5 space-y-3 border-t border-hairline-dark pt-5">
           {plan.features.map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-2.5 text-xs text-white/70 font-light">
+            <li key={idx} className="flex items-start gap-2.5 text-xs text-ink-secondary font-light">
               <Check
                 className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
                   isSelected
@@ -306,7 +306,7 @@ function PricingCard({
                       : isPopular
                       ? "text-violet-400"
                       : "text-orange-400"
-                    : "text-white/30"
+                    : "text-ink-tertiary"
                 }`}
               />
               <span>{feature}</span>
@@ -321,13 +321,13 @@ function PricingCard({
           className={`w-full font-bold py-2.5 rounded-xl transition-all active:scale-[0.98] text-xs border-none ${
             isSelected
               ? plan.id === "free"
-                ? "bg-mauve text-[#141110] shadow-md shadow-mauve/10"
+                ? "bg-mauve text-[#faf6ed] shadow-md shadow-mauve/10"
                 : plan.id === "starter"
                 ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/10"
                 : isPopular
                 ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/20"
                 : "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/20"
-              : "bg-white/5 text-white/70 hover:bg-white/10"
+              : "bg-mauve/5 text-ink-secondary hover:bg-mauve/10"
           }`}
         >
           {isSelected ? "Selected" : `Choose ${plan.name}`}
@@ -493,7 +493,7 @@ export default function BillingPage() {
       border: "border-mauve/30",
       badge: "bg-mauve",
       hover: "hover:border-mauve/50",
-      buttonActive: "bg-mauve/10 border-mauve text-mauve shadow-[0_0_10px_rgba(178,141,174,0.1)]",
+      buttonActive: "bg-mauve/10 border-mauve text-mauve shadow-[0_0_10px_rgba(184, 146, 90,0.1)]",
       icon: "text-mauve"
     }
   }
@@ -522,7 +522,7 @@ export default function BillingPage() {
   const getContinueButtonClass = () => {
     const base = "w-full sm:w-auto font-bold px-8 py-6 rounded-2xl flex items-center justify-center gap-2 text-base transition-all active:scale-[0.98] border-none "
     if (isFreeNoOp) {
-      return base + "bg-white/5 text-white/40 cursor-not-allowed shadow-none"
+      return base + "bg-ink/5 text-ink-tertiary cursor-not-allowed shadow-none"
     }
     if (selectedPlan === "free") {
       return base + "bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/10"
@@ -577,10 +577,10 @@ export default function BillingPage() {
   return (
     <div className={`space-y-8 pb-16 selection:bg-mauve/20 ${inter.className}`}>
       {/* Title Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#3D332A] pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#e5dfd0] pb-6">
         <div>
-          <h1 className="font-playfair text-3xl font-light text-white">Billing</h1>
-          <p className="text-white/50 mt-1 text-sm">Manage your workspace subscription and limits</p>
+          <h1 className="font-playfair text-3xl font-light text-ink">Billing</h1>
+          <p className="text-ink-secondary mt-1 text-sm">Manage your workspace subscription and limits</p>
         </div>
         <CurrencyToggle />
       </div>
@@ -589,28 +589,28 @@ export default function BillingPage() {
           pay-per-event, so this is never an ongoing/free/already-active
           entitlement for the next event a host creates. */}
       {subscription && (
-        <Card className="rounded-2xl border border-[#3D332A] bg-[#1C1814] shadow-sm overflow-hidden">
-          <CardHeader className="bg-white/[0.02] border-b border-[#3D332A] pb-4">
-            <CardTitle className="text-lg font-bold text-white">Last Purchased Plan</CardTitle>
-            <CardDescription className="text-white/50">
+        <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff] shadow-sm overflow-hidden">
+          <CardHeader className="bg-ink/[0.02] border-b border-[#e5dfd0] pb-4">
+            <CardTitle className="text-lg font-bold text-ink">Last Purchased Plan</CardTitle>
+            <CardDescription className="text-ink-secondary">
               Reference only. Snapsy bills per event, so this reflects your most recent purchase — not an ongoing subscription or a discount on your next event.
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
             <div>
-              <p className="text-xs font-medium text-white/40 uppercase tracking-wider">Plan Tier</p>
-              <p className="text-lg font-bold text-white capitalize mt-1">{subscription.plan_id}</p>
+              <p className="text-xs font-medium text-ink-tertiary uppercase tracking-wider">Plan Tier</p>
+              <p className="text-lg font-bold text-ink capitalize mt-1">{subscription.plan_id}</p>
             </div>
           </CardContent>
         </Card>
       )}
 
       {/* Main Pricing Header */}
-      <div className="text-center py-6 border-t border-[#3D332A] pt-8">
-        <h2 className={`text-3xl font-normal tracking-tight sm:text-4xl text-white font-light ${playfair.className}`}>
+      <div className="text-center py-6 border-t border-[#e5dfd0] pt-8">
+        <h2 className={`text-3xl font-normal tracking-tight sm:text-4xl text-ink font-light ${playfair.className}`}>
           Choose Your Perfect Plan
         </h2>
-        <p className="mt-3 text-sm text-white/50 max-w-xl mx-auto font-light leading-relaxed">
+        <p className="mt-3 text-sm text-ink-secondary max-w-xl mx-auto font-light leading-relaxed">
           Select a tier that matches your event size. Instantly collect photos, boost limits, and enable premium features.
         </p>
       </div>
@@ -629,11 +629,11 @@ export default function BillingPage() {
 
       {/* Add-ons Customization Panel */}
       {selectedPlan !== "free" && (
-        <div className="rounded-2xl border border-[#3D332A] bg-[#1C1814] p-8 max-w-4xl mx-auto shadow-sm transition-all duration-300">
-          <div className="flex items-center justify-between border-b border-[#3D332A] pb-4 mb-6">
+        <div className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-8 max-w-4xl mx-auto shadow-sm transition-all duration-300">
+          <div className="flex items-center justify-between border-b border-[#e5dfd0] pb-4 mb-6">
             <div className="flex items-center gap-2.5">
               <Sparkles className={`h-5 w-5 ${accent.icon} animate-pulse`} />
-              <h3 className="text-lg font-bold text-white">
+              <h3 className="text-lg font-bold text-ink">
                 Customize Limits with Add-Ons
               </h3>
             </div>
@@ -650,9 +650,9 @@ export default function BillingPage() {
             <div className="space-y-8">
               {/* Guest Limit Boost */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold text-white/70 flex items-center gap-2">
+                <Label className="text-sm font-semibold text-ink-secondary flex items-center gap-2">
                   <span>🚀 Boost Guest Limit</span>
-                  <span className="text-xs text-white/40 font-normal">(Base: {baseGuestLimitStr})</span>
+                  <span className="text-xs text-ink-tertiary font-normal">(Base: {baseGuestLimitStr})</span>
                 </Label>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {guestBoostsList.map((boost) => (
@@ -663,7 +663,7 @@ export default function BillingPage() {
                       className={`py-3 px-3 rounded-2xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
                         guestBoost === boost.value
                           ? accent.buttonActive
-                          : "bg-white/[0.03] border-[#3D332A] text-white/50 hover:border-mauve/30 hover:bg-white/5"
+                          : "bg-ink/[0.03] border-[#e5dfd0] text-ink-secondary hover:border-mauve/30 hover:bg-mauve/5"
                       }`}
                     >
                       <span>{boost.label}</span>
@@ -677,9 +677,9 @@ export default function BillingPage() {
 
               {/* Shots Limit Boost */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold text-white/70 flex items-center gap-2">
+                <Label className="text-sm font-semibold text-ink-secondary flex items-center gap-2">
                   <span>📸 Boost Shots Per Guest</span>
-                  <span className="text-xs text-white/40 font-normal">(Base: {baseShotLimitStr})</span>
+                  <span className="text-xs text-ink-tertiary font-normal">(Base: {baseShotLimitStr})</span>
                 </Label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {shotBoostsList.map((boost) => (
@@ -690,7 +690,7 @@ export default function BillingPage() {
                       className={`py-3 px-3 rounded-2xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
                         shotBoost === boost.value
                           ? accent.buttonActive
-                          : "bg-white/[0.03] border-[#3D332A] text-white/50 hover:border-mauve/30 hover:bg-white/5"
+                          : "bg-ink/[0.03] border-[#e5dfd0] text-ink-secondary hover:border-mauve/30 hover:bg-mauve/5"
                       }`}
                     >
                       <span>{boost.label}</span>
@@ -707,23 +707,23 @@ export default function BillingPage() {
       )}
 
       {/* Pricing Overview & Main Action Card */}
-      <div className="flex flex-col sm:flex-row items-center justify-between rounded-2xl border border-[#3D332A] bg-[#1C1814] p-8 max-w-4xl mx-auto gap-6 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-center justify-between rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-8 max-w-4xl mx-auto gap-6 shadow-sm">
         <div className="text-center sm:text-left">
-          <span className="text-xs text-white/40 uppercase tracking-widest font-semibold">Total Price</span>
+          <span className="text-xs text-ink-tertiary uppercase tracking-widest font-semibold">Total Price</span>
           <div className="flex items-baseline gap-1.5 justify-center sm:justify-start mt-1">
-            <span className="text-3xl font-extrabold text-white">
+            <span className="text-3xl font-extrabold text-ink">
               {symbol}{getPrice(totalPrice, Math.round(totalPrice / 80))}
             </span>
-            <span className="text-sm text-white/50 font-light">
+            <span className="text-sm text-ink-secondary font-light">
               {selectedPlan === "free" ? "forever" : "per event"}
             </span>
           </div>
-          <p className="text-xs text-white/40 mt-1.5 font-light">
+          <p className="text-xs text-ink-tertiary mt-1.5 font-light">
             {selectedPlan === "free" ? (
               isFreeNoOp ? (
-                <span className="text-white/50">You&apos;re currently on the Free plan.</span>
+                <span className="text-ink-secondary">You&apos;re currently on the Free plan.</span>
               ) : (
-                <span className="text-white/50">No charge — downgrading resets any paid add-ons.</span>
+                <span className="text-ink-secondary">No charge — downgrading resets any paid add-ons.</span>
               )
             ) : (
               <>
@@ -731,14 +731,14 @@ export default function BillingPage() {
                 {guestBoost > 0 && ` + Guest Boost ${symbol}${getPrice(guestAddOnPrice, Math.round(guestAddOnPrice / 80))}`}
                 {shotBoost > 0 && ` + Shots Boost ${symbol}${getPrice(shotAddOnPrice, Math.round(shotAddOnPrice / 80))}`}
                 {isSamePlan && (
-                  <span className="block text-[11px] text-white/40 mt-1">
+                  <span className="block text-[11px] text-ink-tertiary mt-1">
                     You&apos;ve purchased the {activePlanDetails.name} plan before — this will be a new, full-price purchase for a new event.
                   </span>
                 )}
               </>
             )}
           </p>
-          <p className="text-[11px] text-white/40 mt-2 font-light">
+          <p className="text-[11px] text-ink-tertiary mt-2 font-light">
             Plans are purchased per event — pricing above is a preview. Checkout always happens from Create Event.
           </p>
         </div>

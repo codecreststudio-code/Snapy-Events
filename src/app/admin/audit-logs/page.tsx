@@ -51,11 +51,11 @@ export default function AdminAuditLogsPage() {
     <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Audit Logs</h1>
-          <p className="text-sm text-white/50 mt-1">Monitor administrator actions, credential resets, settings modifications, and IP logins.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">Audit Logs</h1>
+          <p className="text-sm text-ink-secondary mt-1">Monitor administrator actions, credential resets, settings modifications, and IP logins.</p>
         </div>
-        <Button onClick={fetchLogs} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm">
-          <RefreshCw className="h-4 w-4 text-white/50" />
+        <Button onClick={fetchLogs} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-ink-secondary bg-surface-card hover:bg-mauve/5 font-semibold shadow-sm">
+          <RefreshCw className="h-4 w-4 text-ink-secondary" />
           <span>Refresh</span>
         </Button>
       </div>
@@ -67,14 +67,14 @@ export default function AdminAuditLogsPage() {
               <Loader2 className="h-8 w-8 animate-spin text-mauve" />
             </div>
           ) : logs.length === 0 ? (
-            <div className="p-16 text-center text-white/40 text-sm font-semibold">
+            <div className="p-16 text-center text-ink-tertiary text-sm font-semibold">
               No audit logs captured. Logs are created when actions are performed.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-white/5">
+                  <tr className="border-b border-hairline-dark text-ink-tertiary font-bold uppercase tracking-wider bg-ink/5">
                     <th className="p-4">Action</th>
                     <th className="p-4">Admin Email</th>
                     <th className="p-4">Resource Target</th>
@@ -82,24 +82,24 @@ export default function AdminAuditLogsPage() {
                     <th className="p-4 text-right">Timestamp</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/10 text-white/65 font-medium">
+                <tbody className="divide-y divide-hairline-dark text-ink-secondary font-medium">
                   {logs.map((log) => (
-                    <tr key={log.id} className="hover:bg-white/5 transition-colors">
-                      <td className="p-4 font-bold text-white/80 flex items-center gap-1.5">
+                    <tr key={log.id} className="hover:bg-mauve/5 transition-colors">
+                      <td className="p-4 font-bold text-ink flex items-center gap-1.5">
                         <CheckCircle2 className="h-4.5 w-4.5 text-emerald-400" />
                         <span>{log.action}</span>
                       </td>
-                      <td className="p-4 font-semibold text-white/70">{log.user?.email || "Superadmin Session"}</td>
+                      <td className="p-4 font-semibold text-ink-secondary">{log.user?.email || "Superadmin Session"}</td>
                       <td className="p-4">
-                        <span className="uppercase text-[9px] font-extrabold bg-white/5 px-1.5 py-0.5 rounded text-white/50">
+                        <span className="uppercase text-[9px] font-extrabold bg-ink/5 px-1.5 py-0.5 rounded text-ink-secondary">
                           {log.resource_type}
                         </span>
                         {log.resource_id && (
-                          <span className="font-mono text-[10px] text-white/40 ml-2">ID: {log.resource_id.substring(0, 8)}...</span>
+                          <span className="font-mono text-[10px] text-ink-tertiary ml-2">ID: {log.resource_id.substring(0, 8)}...</span>
                         )}
                       </td>
-                      <td className="p-4 font-mono text-white/50">{log.ip_address || "127.0.0.1 (API Direct)"}</td>
-                      <td className="p-4 text-right text-white/40 font-semibold">{new Date(log.created_at).toLocaleString()}</td>
+                      <td className="p-4 font-mono text-ink-secondary">{log.ip_address || "127.0.0.1 (API Direct)"}</td>
+                      <td className="p-4 text-right text-ink-tertiary font-semibold">{new Date(log.created_at).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>

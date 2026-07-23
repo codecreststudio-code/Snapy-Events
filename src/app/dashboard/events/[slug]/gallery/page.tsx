@@ -313,8 +313,8 @@ function GalleryCard({
 
   return (
     <>
-      <Card className="overflow-hidden rounded-2xl border border-[#3D332A] bg-[#1C1814] hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300">
-        <div className="aspect-video bg-white/5 relative">
+      <Card className="overflow-hidden rounded-2xl border border-[#e5dfd0] bg-[#ffffff] hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300">
+        <div className="aspect-video bg-ink/5 relative">
           {gallery.cover_image_url ? (
             <img
               src={gallery.cover_image_url}
@@ -323,7 +323,7 @@ function GalleryCard({
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Image className="h-12 w-12 text-white/20" />
+              <Image className="h-12 w-12 text-ink-tertiary" />
             </div>
           )}
           <div className="absolute top-2 right-2">
@@ -359,27 +359,27 @@ function GalleryCard({
         <CardContent className="p-4">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <h3 className="font-semibold text-white">{gallery.name}</h3>
-              <p className="text-xs text-white/50">
+              <h3 className="font-semibold text-ink">{gallery.name}</h3>
+              <p className="text-xs text-ink-secondary">
                 {gallery.photo_count || 0} photos
               </p>
             </div>
             <div className="flex items-center gap-1">
               {gallery.is_public ? (
-                <Globe className="h-4 w-4 text-white/50" />
+                <Globe className="h-4 w-4 text-ink-secondary" />
               ) : (
-                <Lock className="h-4 w-4 text-white/50" />
+                <Lock className="h-4 w-4 text-ink-secondary" />
               )}
             </div>
           </div>
 
           <div className="mt-3 space-y-2">
-            <div className="flex items-center justify-between text-xs text-white/50">
+            <div className="flex items-center justify-between text-xs text-ink-secondary">
               <span>Uploads {settings?.allow_uploads ? "enabled" : "disabled"}</span>
               <span>Downloads {settings?.allow_downloads ? "enabled" : "disabled"}</span>
             </div>
             {gallery.reveal_enabled && gallery.reveal_at && (
-              <p className="text-xs text-white/40">
+              <p className="text-xs text-ink-tertiary">
                 Reveals at {new Date(gallery.reveal_at).toLocaleString()}
               </p>
             )}
@@ -467,7 +467,7 @@ function CreateGalleryDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+        <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
           <Plus className="h-4 w-4" />
           New Gallery
         </Button>
@@ -637,9 +637,9 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
   if (!event) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
-        <Camera className="h-12 w-12 text-white/30 mb-4" />
-        <h2 className="text-lg font-medium text-white">Event not found</h2>
-        <Button asChild className="mt-4 rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold">
+        <Camera className="h-12 w-12 text-ink-tertiary mb-4" />
+        <h2 className="text-lg font-medium text-ink">Event not found</h2>
+        <Button asChild className="mt-4 rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold">
           <Link href="/dashboard/events">Back to Events</Link>
         </Button>
       </div>
@@ -649,20 +649,20 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" asChild className="text-white/70 hover:bg-white/5 hover:text-white">
+        <Button variant="ghost" asChild className="text-ink-secondary hover:bg-mauve/5 hover:text-ink">
           <Link href={`/dashboard/events/${slug}`}>
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
         <div className="flex-1">
-          <h1 className="font-playfair text-3xl font-light text-white">Galleries</h1>
-          <p className="text-white/50 text-sm">{event.name}</p>
+          <h1 className="font-playfair text-3xl font-light text-ink">Galleries</h1>
+          <p className="text-ink-secondary text-sm">{event.name}</p>
         </div>
       </div>
 
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-ink-secondary">
             {galleries?.length || 0} gallery(s)
           </p>
         </div>
@@ -692,11 +692,11 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
           ))}
         </div>
       ) : (
-        <Card className="rounded-2xl border border-dashed border-[#3D332A] bg-white/[0.02]">
+        <Card className="rounded-2xl border border-dashed border-[#e5dfd0] bg-ink/[0.02]">
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <Image className="h-12 w-12 text-white/30 mb-4" />
-            <h3 className="font-medium mb-2 text-white">No galleries yet</h3>
-            <p className="text-sm text-white/50 mb-4 text-center max-w-md">
+            <Image className="h-12 w-12 text-ink-tertiary mb-4" />
+            <h3 className="font-medium mb-2 text-ink">No galleries yet</h3>
+            <p className="text-sm text-ink-secondary mb-4 text-center max-w-md">
               Create galleries to organize photos from your event. Guests can upload and view
               photos based on your settings.
             </p>

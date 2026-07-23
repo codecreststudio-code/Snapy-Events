@@ -94,11 +94,11 @@ export default function AdminPaymentsPage() {
     <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Payments Ledger</h1>
-          <p className="text-sm text-white/50 mt-1">Review webhook event logs, manage gateway checkouts, and execute customer refunds.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">Payments Ledger</h1>
+          <p className="text-sm text-ink-secondary mt-1">Review webhook event logs, manage gateway checkouts, and execute customer refunds.</p>
         </div>
-        <Button onClick={fetchPayments} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-white/5 hover:bg-white/10 font-semibold">
-          <RefreshCw className="h-4 w-4 text-white/50" />
+        <Button onClick={fetchPayments} variant="outline" className="h-9 gap-1.5 border-hairline-dark text-ink-secondary bg-ink/5 hover:bg-mauve/10 font-semibold">
+          <RefreshCw className="h-4 w-4 text-ink-secondary" />
           <span>Refresh</span>
         </Button>
       </div>
@@ -110,8 +110,8 @@ export default function AdminPaymentsPage() {
             <CheckCircle className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Successful Orders</span>
-            <span className="text-2xl font-bold text-white mt-1 block">{successCount} payments</span>
+            <span className="text-xs text-ink-tertiary font-bold uppercase tracking-wider block">Successful Orders</span>
+            <span className="text-2xl font-bold text-ink mt-1 block">{successCount} payments</span>
           </div>
         </Card>
 
@@ -120,8 +120,8 @@ export default function AdminPaymentsPage() {
             <XCircle className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Failed Invoices</span>
-            <span className="text-2xl font-bold text-white mt-1 block">{failedCount} failed</span>
+            <span className="text-xs text-ink-tertiary font-bold uppercase tracking-wider block">Failed Invoices</span>
+            <span className="text-2xl font-bold text-ink mt-1 block">{failedCount} failed</span>
           </div>
         </Card>
 
@@ -130,20 +130,20 @@ export default function AdminPaymentsPage() {
             <AlertCircle className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Refunded Checkouts</span>
-            <span className="text-2xl font-bold text-white mt-1 block">{refundedCount} refunds</span>
+            <span className="text-xs text-ink-tertiary font-bold uppercase tracking-wider block">Refunded Checkouts</span>
+            <span className="text-2xl font-bold text-ink mt-1 block">{refundedCount} refunds</span>
           </div>
         </Card>
       </div>
 
       {/* Search Input */}
       <div className="flex items-center max-w-sm relative">
-        <Search className="h-4 w-4 absolute left-3 text-white/40" />
+        <Search className="h-4 w-4 absolute left-3 text-ink-tertiary" />
         <input
           placeholder="Filter transactions by order, ID, studio..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex h-10 w-full rounded-lg border border-hairline-dark bg-white/5 px-3 py-2 pl-9 text-xs text-white placeholder:text-white/40 font-semibold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-mauve/50"
+          className="flex h-10 w-full rounded-lg border border-hairline-dark bg-ink/5 px-3 py-2 pl-9 text-xs text-ink placeholder:text-ink-tertiary font-semibold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-mauve/50"
         />
       </div>
 
@@ -155,14 +155,14 @@ export default function AdminPaymentsPage() {
               <Loader2 className="h-8 w-8 animate-spin text-mauve" />
             </div>
           ) : filteredTxs.length === 0 ? (
-            <div className="p-16 text-center text-white/40 text-sm font-semibold">
+            <div className="p-16 text-center text-ink-tertiary text-sm font-semibold">
               No transactions logs matching the filter.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-surface-card-elevated">
+                  <tr className="border-b border-hairline-dark text-ink-tertiary font-bold uppercase tracking-wider bg-surface-card-elevated">
                     <th className="p-4">Razorpay Payment ID</th>
                     <th className="p-4">User</th>
                     <th className="p-4">Amount</th>
@@ -172,21 +172,21 @@ export default function AdminPaymentsPage() {
                     <th className="p-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/10 text-white/60 font-medium">
+                <tbody className="divide-y divide-hairline-dark text-ink-secondary font-medium">
                   {filteredTxs.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-white/5 transition-colors">
+                    <tr key={tx.id} className="hover:bg-mauve/5 transition-colors">
                       <td className="p-4">
-                        <div className="font-mono text-white/80 font-bold">{tx.razorpay_payment_id || "N/A"}</div>
-                        <div className="text-[10px] text-white/40 mt-0.5">Order: {tx.razorpay_order_id || "N/A"}</div>
+                        <div className="font-mono text-ink font-bold">{tx.razorpay_payment_id || "N/A"}</div>
+                        <div className="text-[10px] text-ink-tertiary mt-0.5">Order: {tx.razorpay_order_id || "N/A"}</div>
                       </td>
-                      <td className="p-4 font-semibold text-white/70">{tx.user?.full_name || "N/A"}</td>
-                      <td className="p-4 font-extrabold text-white text-sm">
+                      <td className="p-4 font-semibold text-ink-secondary">{tx.user?.full_name || "N/A"}</td>
+                      <td className="p-4 font-extrabold text-ink text-sm">
                         ₹{(tx.amount / 100).toLocaleString()}
                       </td>
-                      <td className="p-4 uppercase text-white/40 font-bold text-[10px]">
+                      <td className="p-4 uppercase text-ink-tertiary font-bold text-[10px]">
                         {tx.payment_method || "N/A"}
                       </td>
-                      <td className="p-4 text-white/40 font-semibold">
+                      <td className="p-4 text-ink-tertiary font-semibold">
                         {new Date(tx.created_at).toLocaleString()}
                       </td>
                       <td className="p-4">

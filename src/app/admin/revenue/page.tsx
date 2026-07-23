@@ -28,7 +28,7 @@ type DailyRevenue = { date: string; amount: number }
 function RevenueChart({ data, days }: { data: DailyRevenue[]; days: number }) {
   if (!data || data.length === 0) {
     return (
-      <div className="h-48 flex items-center justify-center text-white/30 text-xs font-semibold">
+      <div className="h-48 flex items-center justify-center text-ink-tertiary text-xs font-semibold">
         No revenue data in this period
       </div>
     )
@@ -57,8 +57,8 @@ function RevenueChart({ data, days }: { data: DailyRevenue[]; days: number }) {
         <svg className="w-full h-full" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
           <defs>
             <linearGradient id="revGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="rgba(178, 141, 174, 0.3)" />
-              <stop offset="100%" stopColor="rgba(178, 141, 174, 0)" />
+              <stop offset="0%" stopColor="rgba(184, 146, 90, 0.3)" />
+              <stop offset="100%" stopColor="rgba(184, 146, 90, 0)" />
             </linearGradient>
           </defs>
           <polygon points={fillPath} fill="url(#revGrad)" />
@@ -81,7 +81,7 @@ function RevenueChart({ data, days }: { data: DailyRevenue[]; days: number }) {
           })}
         </svg>
       </div>
-      <div className="flex justify-between text-[10px] text-white/40 font-bold uppercase mt-2 px-1">
+      <div className="flex justify-between text-[10px] text-ink-tertiary font-bold uppercase mt-2 px-1">
         {labels.map((l) => (
           <span key={l.date}>{new Date(l.date + "T00:00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</span>
         ))}
@@ -148,8 +148,8 @@ export default function AdminRevenuePage() {
     <main className="px-6 py-8 space-y-6 bg-surface-dark min-h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-playfair font-light tracking-tight text-white">Revenue Analytics</h1>
-          <p className="text-sm text-white/50 mt-1">Track transaction history, ticket sizes, and payment integrations.</p>
+          <h1 className="text-2xl font-playfair font-light tracking-tight text-ink">Revenue Analytics</h1>
+          <p className="text-sm text-ink-secondary mt-1">Track transaction history, ticket sizes, and payment integrations.</p>
         </div>
         <div className="flex items-center gap-2">
           {/* Period Selector */}
@@ -160,7 +160,7 @@ export default function AdminRevenuePage() {
                 onClick={() => setDays(p.value)}
                 className={cn(
                   "px-3 py-1.5 rounded-md text-xs font-bold transition-all",
-                  days === p.value ? "bg-mauve text-[#141110] shadow-sm" : "text-white/50 hover:text-white/80"
+                  days === p.value ? "bg-mauve text-[#faf6ed] shadow-sm" : "text-ink-secondary hover:text-ink"
                 )}
               >
                 {p.label}
@@ -171,9 +171,9 @@ export default function AdminRevenuePage() {
             onClick={() => fetchRevenueData(days)}
             disabled={loading}
             variant="outline"
-            className="h-9 gap-1.5 border-hairline-dark text-white/70 bg-surface-card hover:bg-white/5 font-semibold shadow-sm"
+            className="h-9 gap-1.5 border-hairline-dark text-ink-secondary bg-surface-card hover:bg-mauve/5 font-semibold shadow-sm"
           >
-            <RefreshCw className={cn("h-4 w-4 text-white/50", loading && "animate-spin")} />
+            <RefreshCw className={cn("h-4 w-4 text-ink-secondary", loading && "animate-spin")} />
             <span>Refresh</span>
           </Button>
         </div>
@@ -186,11 +186,11 @@ export default function AdminRevenuePage() {
             <DollarSign className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Total Revenue</span>
-            <span className="text-2xl font-bold text-white mt-1 block">
+            <span className="text-xs text-ink-tertiary font-bold uppercase tracking-wider block">Total Revenue</span>
+            <span className="text-2xl font-bold text-ink mt-1 block">
               {loading ? "…" : `₹${stats.totalRevenue.toLocaleString("en-IN", { minimumFractionDigits: 0 })}`}
             </span>
-            <span className="text-[10px] text-white/40 font-semibold">last {days} days</span>
+            <span className="text-[10px] text-ink-tertiary font-semibold">last {days} days</span>
           </div>
         </Card>
 
@@ -199,11 +199,11 @@ export default function AdminRevenuePage() {
             <TrendingUp className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Avg. Ticket Size</span>
-            <span className="text-2xl font-bold text-white mt-1 block">
+            <span className="text-xs text-ink-tertiary font-bold uppercase tracking-wider block">Avg. Ticket Size</span>
+            <span className="text-2xl font-bold text-ink mt-1 block">
               {loading ? "…" : `₹${averageTicket.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`}
             </span>
-            <span className="text-[10px] text-white/40 font-semibold">{stats.transactionCount} paid orders</span>
+            <span className="text-[10px] text-ink-tertiary font-semibold">{stats.transactionCount} paid orders</span>
           </div>
         </Card>
 
@@ -212,11 +212,11 @@ export default function AdminRevenuePage() {
             <ShoppingBag className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-white/40 font-bold uppercase tracking-wider block">Active Subscriptions</span>
-            <span className="text-2xl font-bold text-white mt-1 block">
+            <span className="text-xs text-ink-tertiary font-bold uppercase tracking-wider block">Active Subscriptions</span>
+            <span className="text-2xl font-bold text-ink mt-1 block">
               {loading ? "…" : stats.activeSubscriptions}
             </span>
-            <span className="text-[10px] text-white/40 font-semibold">of {stats.totalUsers} registered users</span>
+            <span className="text-[10px] text-ink-tertiary font-semibold">of {stats.totalUsers} registered users</span>
           </div>
         </Card>
       </div>
@@ -224,11 +224,11 @@ export default function AdminRevenuePage() {
       {/* Dynamic Revenue Chart */}
       <Card className="bg-surface-card border-hairline-dark p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-bold text-white/80 flex items-center gap-2">
+          <h3 className="text-base font-bold text-ink flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-mauve" />
             <span>Revenue Trend — Last {days} Days</span>
           </h3>
-          <div className="flex items-center gap-4 text-xs text-white/40 font-semibold">
+          <div className="flex items-center gap-4 text-xs text-ink-tertiary font-semibold">
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-red-400 inline-block" />{stats.failedCount} failed
             </span>
@@ -250,19 +250,19 @@ export default function AdminRevenuePage() {
       <Card className="bg-surface-card border-hairline-dark overflow-hidden shadow-sm">
         <CardContent className="p-0">
           <div className="p-4 border-b border-hairline-dark">
-            <h3 className="font-bold text-white/80 text-sm">Transaction History ({days}-day window)</h3>
+            <h3 className="font-bold text-ink text-sm">Transaction History ({days}-day window)</h3>
           </div>
           {loading ? (
             <div className="p-16 flex justify-center items-center">
               <Loader2 className="h-8 w-8 animate-spin text-mauve" />
             </div>
           ) : txs.length === 0 ? (
-            <div className="p-16 text-white/40 text-center text-xs font-semibold">No payment transactions found in this period.</div>
+            <div className="p-16 text-ink-tertiary text-center text-xs font-semibold">No payment transactions found in this period.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-hairline-dark text-white/40 font-bold uppercase tracking-wider bg-white/5">
+                  <tr className="border-b border-hairline-dark text-ink-tertiary font-bold uppercase tracking-wider bg-ink/5">
                     <th className="p-4">Payment ID</th>
                     <th className="p-4">User</th>
                     <th className="p-4">Amount</th>
@@ -271,17 +271,17 @@ export default function AdminRevenuePage() {
                     <th className="p-4 text-right">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/10 text-white/60 font-medium">
+                <tbody className="divide-y divide-hairline-dark text-ink-secondary font-medium">
                   {txs.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-white/5 transition-colors">
+                    <tr key={tx.id} className="hover:bg-mauve/5 transition-colors">
                       <td className="p-4">
-                        <div className="font-mono text-white/80 font-bold">{tx.razorpay_payment_id || "N/A"}</div>
-                        <div className="text-[10px] text-white/40 mt-0.5">Order: {tx.razorpay_order_id || "N/A"}</div>
+                        <div className="font-mono text-ink font-bold">{tx.razorpay_payment_id || "N/A"}</div>
+                        <div className="text-[10px] text-ink-tertiary mt-0.5">Order: {tx.razorpay_order_id || "N/A"}</div>
                       </td>
-                      <td className="p-4 font-semibold text-white/70">{tx.user?.full_name || "N/A"}</td>
-                      <td className="p-4 font-extrabold text-white/80 text-sm">₹{(tx.amount / 100).toLocaleString("en-IN")}</td>
-                      <td className="p-4 uppercase text-white/40 font-bold text-[10px]">{tx.payment_method || "N/A"}</td>
-                      <td className="p-4 text-white/40 font-semibold">
+                      <td className="p-4 font-semibold text-ink-secondary">{tx.user?.full_name || "N/A"}</td>
+                      <td className="p-4 font-extrabold text-ink text-sm">₹{(tx.amount / 100).toLocaleString("en-IN")}</td>
+                      <td className="p-4 uppercase text-ink-tertiary font-bold text-[10px]">{tx.payment_method || "N/A"}</td>
+                      <td className="p-4 text-ink-tertiary font-semibold">
                         {new Date(tx.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                       </td>
                       <td className="p-4 text-right">

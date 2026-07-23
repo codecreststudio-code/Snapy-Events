@@ -8,15 +8,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-mauve text-[#141110] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/15 hover:shadow-mauve/30",
-        mauve: "bg-mauve text-[#141110] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/20 hover:shadow-mauve/40",
-        glass: "bg-white/5 border border-white/15 text-white backdrop-blur-md hover:bg-white/10 hover:border-white/30 hover:shadow-lg hover:shadow-white/5",
-        gradient: "bg-gradient-to-r from-mauve via-amber-200/80 to-mauve text-[#141110] font-semibold hover:brightness-110 shadow-lg shadow-mauve/25",
-        glow: "bg-mauve text-[#141110] font-semibold shadow-[0_0_20px_rgba(178,141,174,0.4)] hover:shadow-[0_0_30px_rgba(178,141,174,0.6)]",
+        default: "bg-mauve text-[#faf6ed] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/15 hover:shadow-mauve/30",
+        mauve: "bg-mauve text-[#faf6ed] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/20 hover:shadow-mauve/40",
+        glass: "bg-mauve/5 border border-hairline-dark text-ink backdrop-blur-md hover:bg-mauve/10 hover:border-mauve/30 hover:shadow-lg hover:shadow-mauve/5",
+        gradient: "bg-gradient-to-r from-mauve via-amber-200/80 to-mauve text-[#faf6ed] font-semibold hover:brightness-110 shadow-lg shadow-mauve/25",
+        glow: "bg-mauve text-[#faf6ed] font-semibold shadow-[0_0_20px_rgba(184, 146, 90,0.4)] hover:shadow-[0_0_30px_rgba(184, 146, 90,0.6)]",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-md shadow-destructive/20",
-        outline: "border border-hairline-dark bg-surface-card/60 text-white/90 hover:bg-surface-card hover:text-white hover:border-mauve/40",
-        secondary: "bg-white/10 text-white hover:bg-white/15 border border-white/5",
-        ghost: "text-white/70 hover:bg-white/10 hover:text-white",
+        outline: "border border-hairline-dark bg-surface-card/60 text-ink hover:bg-surface-card hover:text-ink hover:border-mauve/40",
+        secondary: "bg-ink/5 text-ink hover:bg-ink/10 border border-hairline-dark",
+        ghost: "text-ink-secondary hover:bg-mauve/5 hover:text-ink",
         link: "text-mauve underline-offset-4 hover:underline",
       },
       size: {

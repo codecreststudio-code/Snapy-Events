@@ -36,7 +36,7 @@ export function PublicNavbar() {
 
         {/* Center: Perfectly Centered Desktop Nav */}
         <nav
-          className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2 py-1.5"
+          className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-hairline-dark bg-mauve/5 px-2 py-1.5"
           onMouseLeave={() => setHoveredPath(null)}
         >
           {navLinks.map((item) => {
@@ -48,21 +48,21 @@ export function PublicNavbar() {
                 className="relative px-4 py-2 text-sm font-medium transition-colors rounded-full"
                 onMouseEnter={() => setHoveredPath(item.href)}
               >
-                <span className={cn("relative z-10", isActive || hoveredPath === item.href ? "text-white" : "text-white/70")}>
+                <span className={cn("relative z-10", isActive || hoveredPath === item.href ? "text-mauve-strong" : "text-ink-secondary")}>
                   {item.label}
                 </span>
 
                 {isActive && (
                   <motion.div
                     layoutId="navbar-active"
-                    className="absolute inset-0 rounded-full bg-white/10"
+                    className="absolute inset-0 rounded-full bg-mauve/10"
                     transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
                   />
                 )}
                 {hoveredPath === item.href && !isActive && (
                   <motion.div
                     layoutId="navbar-hover"
-                    className="absolute inset-0 rounded-full bg-white/5"
+                    className="absolute inset-0 rounded-full bg-mauve/5"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -77,11 +77,11 @@ export function PublicNavbar() {
         {/* Right: Desktop CTAs */}
         <div className="hidden md:flex flex-1 md:flex-none justify-end items-center gap-3">
           <CurrencyToggle />
-          <Link href="/login" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
+          <Link href="/login" className="text-sm font-medium text-ink-secondary hover:text-ink transition-colors">
             Sign in
           </Link>
           <Link href="/signup">
-            <Button className="rounded-full bg-mauve px-7 py-2.5 text-[#141110] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+            <Button className="rounded-full bg-mauve px-7 py-2.5 text-[#faf6ed] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -93,7 +93,7 @@ export function PublicNavbar() {
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           whileTap={{ scale: 0.94 }}
-          className="flex md:hidden p-2 rounded-full text-white/70 hover:bg-white/5 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50"
+          className="flex md:hidden p-2 rounded-full text-ink-secondary hover:bg-mauve/5 hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50"
           aria-label="Toggle menu"
         >
           {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -116,7 +116,7 @@ export function PublicNavbar() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
-                  className="block rounded-full px-4 py-3 text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition"
+                  className="block rounded-full px-4 py-3 text-sm font-medium text-ink-secondary hover:bg-mauve/5 hover:text-ink transition"
                 >
                   {item.label}
                 </Link>
@@ -125,12 +125,12 @@ export function PublicNavbar() {
                 <Link
                   href="/login"
                   onClick={() => setIsOpen(false)}
-                  className="flex justify-center rounded-full border border-white/15 px-4 py-3 text-sm font-semibold text-white hover:bg-white/5 transition"
+                  className="flex justify-center rounded-full border border-hairline-dark px-4 py-3 text-sm font-semibold text-ink hover:bg-mauve/5 transition"
                 >
                   Sign in
                 </Link>
                 <Link href="/signup" onClick={() => setIsOpen(false)}>
-                  <Button className="w-full rounded-full bg-mauve text-[#141110] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/10">
+                  <Button className="w-full rounded-full bg-mauve text-[#faf6ed] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/10">
                     Get Started
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -241,8 +241,8 @@ export function PublicFooter() {
 
   return (
     <footer
-      className="relative w-full border-t border-hairline-dark text-white overflow-hidden pt-20 pb-6 px-4 sm:px-6 lg:px-8 bg-surface-dark"
-      style={{ background: "radial-gradient(100% 80% at 50% 110%, rgba(178, 141, 174, 0.12) 0%, rgba(20, 17, 16, 0.9) 60%, rgba(10, 8, 8, 1) 100%)" }}
+      className="relative w-full border-t border-hairline-dark text-ink overflow-hidden pt-20 pb-6 px-4 sm:px-6 lg:px-8 bg-surface-dark"
+      style={{ background: "radial-gradient(100% 80% at 50% 110%, rgba(184, 146, 90, 0.10) 0%, rgba(250, 246, 237, 0.95) 60%, rgba(255, 255, 255, 1) 100%)" }}
     >
       {/* Background blur decorations */}
       <div className="pointer-events-none absolute top-0 left-0 z-0 h-full w-full overflow-hidden">
@@ -258,10 +258,10 @@ export function PublicFooter() {
           <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-mauve-strong/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="max-w-2xl mx-auto text-center relative z-10 flex flex-col items-center">
-            <h3 className="mb-4 text-2xl font-playfair font-light md:text-3xl tracking-tight text-white">
+            <h3 className="mb-4 text-2xl font-playfair font-light md:text-3xl tracking-tight text-ink">
               Stay ahead with Snapsy.
             </h3>
-            <p className="text-white/60 mb-8 text-sm leading-relaxed max-w-md font-light">
+            <p className="text-ink-secondary mb-8 text-sm leading-relaxed max-w-md font-light">
               Join thousands of event organizers who trust Snapsy for seamless photo sharing and event management.
             </p>
             {submitted ? (
@@ -273,8 +273,8 @@ export function PublicFooter() {
                 <div className="h-10 w-10 rounded-full bg-mauve/20 flex items-center justify-center border border-mauve/30">
                   <span className="text-mauve text-lg">✓</span>
                 </div>
-                <p className="font-semibold text-white text-sm">Thank you for subscribing!</p>
-                <p className="text-xs text-white/60">You are now on our list.</p>
+                <p className="font-semibold text-ink text-sm">Thank you for subscribing!</p>
+                <p className="text-xs text-ink-secondary">You are now on our list.</p>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row w-full max-w-md justify-center">
@@ -284,12 +284,12 @@ export function PublicFooter() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   required
-                  className="w-full border border-white/10 bg-white/5 text-white placeholder-white/40 focus-visible:ring-mauve/50 rounded-full px-5 py-3 text-sm focus:ring-2 focus:outline-none transition-all duration-200"
+                  className="w-full border border-hairline-dark bg-mauve/5 text-ink placeholder:text-ink-tertiary focus-visible:ring-mauve/50 rounded-full px-5 py-3 text-sm focus:ring-2 focus:outline-none transition-all duration-200"
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold rounded-full px-6 py-3 text-sm shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 shrink-0 disabled:opacity-50"
+                  className="bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold rounded-full px-6 py-3 text-sm shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 shrink-0 disabled:opacity-50"
                 >
                   {loading ? "Subscribing…" : "Subscribe Now"}
                 </button>
@@ -313,7 +313,7 @@ export function PublicFooter() {
             </div>
             {/* Text & Socials on the right */}
             <div className="flex flex-col items-start">
-              <p className="text-white/50 text-sm leading-relaxed mb-4 max-w-sm text-left font-light">
+              <p className="text-ink-secondary text-sm leading-relaxed mb-4 max-w-sm text-left font-light">
                 Empowering event organizers with reliable, scalable, and innovative live photo sharing and event management solutions.
               </p>
               <div className="flex space-x-3 justify-start items-center">
@@ -321,7 +321,7 @@ export function PublicFooter() {
                 <a
                   href="#"
                   aria-label="Facebook"
-                  className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-white/50 hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
+                  className="h-9 w-9 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
                 >
                   <FacebookIcon className="h-4.5 w-4.5" />
                 </a>
@@ -329,7 +329,7 @@ export function PublicFooter() {
                 <a
                   href="#"
                   aria-label="Instagram"
-                  className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-white/50 hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
+                  className="h-9 w-9 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
                 >
                   <InstagramIcon className="h-4.5 w-4.5" />
                 </a>
@@ -337,7 +337,7 @@ export function PublicFooter() {
                 <a
                   href="#"
                   aria-label="Twitter"
-                  className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-white/50 hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
+                  className="h-9 w-9 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
                 >
                   <TwitterIcon className="h-4.5 w-4.5" />
                 </a>
@@ -345,7 +345,7 @@ export function PublicFooter() {
                 <a
                   href="#"
                   aria-label="LinkedIn"
-                  className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center text-white/50 hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
+                  className="h-9 w-9 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
                 >
                   <LinkedInIcon className="h-4.5 w-4.5" />
                 </a>
@@ -355,20 +355,20 @@ export function PublicFooter() {
 
           {/* Column 2: Solutions */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/70">Solutions</h4>
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-ink-secondary">Solutions</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/features" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                <Link href="/features" className="text-sm text-ink-secondary hover:text-ink transition-colors duration-200">
                   Features
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                <Link href="/pricing" className="text-sm text-ink-secondary hover:text-ink transition-colors duration-200">
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                <Link href="/faq" className="text-sm text-ink-secondary hover:text-ink transition-colors duration-200">
                   FAQs
                 </Link>
               </li>
@@ -377,20 +377,20 @@ export function PublicFooter() {
 
           {/* Column 3: Company */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/70">Company</h4>
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-ink-secondary">Company</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/about" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                <Link href="/about" className="text-sm text-ink-secondary hover:text-ink transition-colors duration-200">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/blog" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                <Link href="/blog" className="text-sm text-ink-secondary hover:text-ink transition-colors duration-200">
                   Blog
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                <Link href="/contact" className="text-sm text-ink-secondary hover:text-ink transition-colors duration-200">
                   Contact
                 </Link>
               </li>
@@ -400,15 +400,15 @@ export function PublicFooter() {
         </div>
 
         {/* Bottom Row */}
-        <div className="border-t border-white/10 pt-8 flex flex-col items-center justify-between gap-4 md:flex-row">
-          <p className="text-xs text-white/50">
+        <div className="border-t border-hairline-dark pt-8 flex flex-col items-center justify-between gap-4 md:flex-row">
+          <p className="text-xs text-ink-secondary">
             &copy; {new Date().getFullYear()} Snapsy. All rights reserved.
           </p>
           <div className="flex space-x-6">
-            <Link href="/privacy" className="text-xs text-white/50 hover:text-white transition-colors duration-200">
+            <Link href="/privacy" className="text-xs text-ink-secondary hover:text-ink transition-colors duration-200">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="text-xs text-white/50 hover:text-white transition-colors duration-200">
+            <Link href="/terms" className="text-xs text-ink-secondary hover:text-ink transition-colors duration-200">
               Terms of Service
             </Link>
           </div>
@@ -416,7 +416,7 @@ export function PublicFooter() {
 
         {/* Big brand wordmark at the very bottom */}
         <div className="mt-12 text-center select-none pointer-events-none">
-          <span className="block text-[12vw] font-extrabold leading-none tracking-tighter text-white/[0.03] uppercase">
+          <span className="block text-[12vw] font-extrabold leading-none tracking-tighter text-ink/[0.03] uppercase">
             Snapsy
           </span>
         </div>

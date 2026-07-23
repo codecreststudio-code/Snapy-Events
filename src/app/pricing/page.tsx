@@ -120,12 +120,12 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
       className={`relative rounded-3xl border bg-surface-card p-8 cursor-pointer flex flex-col justify-between transition-shadow duration-300 ${
         plan.popular
-          ? "border-mauve ring-2 ring-mauve/20 shadow-[0_20px_50px_rgba(178,141,174,0.15)] md:scale-105 z-10"
+          ? "border-mauve ring-2 ring-mauve/20 shadow-[0_20px_50px_rgba(184, 146, 90,0.15)] md:scale-105 z-10"
           : "border-hairline-dark hover:border-mauve/40 hover:shadow-xl"
       }`}
     >
       {plan.popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-mauve px-4 py-1 text-[10px] font-bold text-[#141110] tracking-widest uppercase shadow-md flex items-center gap-1">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-mauve px-4 py-1 text-[10px] font-bold text-[#faf6ed] tracking-widest uppercase shadow-md flex items-center gap-1">
           <Sparkles className="h-3 w-3" />
           POPULAR
         </div>
@@ -140,8 +140,8 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       <div>
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-            <p className="mt-2 text-xs text-white/60 leading-relaxed font-light min-h-[32px]">
+            <h3 className="text-xl font-bold text-ink">{plan.name}</h3>
+            <p className="mt-2 text-xs text-ink-secondary leading-relaxed font-light min-h-[32px]">
               {plan.description}
             </p>
           </div>
@@ -153,14 +153,14 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
         </div>
 
         <div className="mt-6 flex items-baseline gap-1">
-          <span className="text-4xl font-extrabold text-white">{symbol}{displayPrice}</span>
-          <span className="text-white/50 text-xs font-light">/ {plan.period}</span>
+          <span className="text-4xl font-extrabold text-ink">{symbol}{displayPrice}</span>
+          <span className="text-ink-secondary text-xs font-light">/ {plan.period}</span>
         </div>
 
         <ul className="mt-6 space-y-4 border-t border-hairline-dark pt-6">
           {plan.features.map((feature) => (
-            <li key={feature} className="flex items-start gap-3 text-xs text-white/70 font-light">
-              <Check className={`h-4 w-4 flex-shrink-0 ${plan.popular ? "text-mauve" : "text-white/40"}`} />
+            <li key={feature} className="flex items-start gap-3 text-xs text-ink-secondary font-light">
+              <Check className={`h-4 w-4 flex-shrink-0 ${plan.popular ? "text-mauve" : "text-ink-tertiary"}`} />
               <span>{feature}</span>
             </li>
           ))}
@@ -172,8 +172,8 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
           <Button
             className={`w-full font-bold py-5 rounded-full transition-all active:scale-[0.99] ${
               plan.popular
-                ? "bg-mauve hover:bg-mauve-strong text-[#141110] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
-                : "border border-white/15 text-white hover:bg-white/5"
+                ? "bg-mauve hover:bg-mauve-strong text-[#faf6ed] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
+                : "border border-hairline-dark text-ink hover:bg-mauve/5"
             }`}
           >
             {plan.cta}
@@ -225,7 +225,7 @@ export default function PricingPage() {
   }, [])
 
   return (
-    <div className={`flex min-h-screen flex-col bg-surface-dark text-white selection:bg-mauve/30 ${inter.className}`}>
+    <div className={`flex min-h-screen flex-col bg-surface-dark text-ink selection:bg-mauve/30 ${inter.className}`}>
       <PublicNavbar />
 
       <main className="flex-1 bg-surface-dark overflow-hidden relative py-12 md:py-20">
@@ -247,7 +247,7 @@ export default function PricingPage() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className={`text-4xl font-light tracking-tight md:text-6xl text-white leading-tight ${playfair.className}`}
+            className={`text-4xl font-light tracking-tight md:text-6xl text-ink leading-tight ${playfair.className}`}
           >
             Simple, transparent <span className="italic font-light bg-gradient-to-r from-mauve to-mauve-strong bg-clip-text text-transparent">pricing</span>
           </motion.h1>
@@ -256,7 +256,7 @@ export default function PricingPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-md text-white/60 max-w-xl mx-auto font-light leading-relaxed"
+            className="text-md text-ink-secondary max-w-xl mx-auto font-light leading-relaxed"
           >
             Choose the plan that matches your event volume. Upgrade or adjust bounds at any time.
           </motion.p>
@@ -273,7 +273,7 @@ export default function PricingPage() {
 
         <section className="mx-auto max-w-7xl px-6 pb-24">
           {plansLoading ? (
-            <div className="p-16 text-center text-white/40 text-sm font-semibold">Loading plans…</div>
+            <div className="p-16 text-center text-ink-tertiary text-sm font-semibold">Loading plans…</div>
           ) : (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
               {plansList.map((p) => (

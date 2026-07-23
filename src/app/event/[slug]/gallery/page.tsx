@@ -163,17 +163,17 @@ function PhotoGrid({
 
   if (photos.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-[#3D332A] bg-[#1C1814] py-16">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
-          <ImageIcon className="h-8 w-8 text-white/40" />
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-[#e5dfd0] bg-[#ffffff] py-16">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-ink/5">
+          <ImageIcon className="h-8 w-8 text-ink-tertiary" />
         </div>
-        <h3 className="font-playfair mt-4 font-medium text-white">No photos yet</h3>
-        <p className="mt-2 text-sm text-white/60 text-center max-w-md">
+        <h3 className="font-playfair mt-4 font-medium text-ink">No photos yet</h3>
+        <p className="mt-2 text-sm text-ink-secondary text-center max-w-md">
           Be the first to upload photos to this gallery!
         </p>
         <Button
           asChild
-          className="mt-4 rounded-full bg-[#B28DAE] text-[#141110] hover:bg-[#a468a0]"
+          className="mt-4 rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a]"
         >
           <Link href={`/event/${eventSlug}/upload`}>
             <Camera className="h-4 w-4" />
@@ -198,7 +198,7 @@ function PhotoGrid({
             key={photo.id}
             variants={prefersReducedMotion ? undefined : fadeInUp}
             onClick={() => openLightbox(index)}
-            className="relative aspect-square overflow-hidden rounded-lg bg-[#1C1814] group"
+            className="relative aspect-square overflow-hidden rounded-lg bg-[#ffffff] group"
           >
              {photo.thumbnail_path || photo.storage_path ? (
               <>
@@ -238,7 +238,7 @@ function PhotoGrid({
               </>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
-                <ImageIcon className="h-8 w-8 text-white/40" />
+                <ImageIcon className="h-8 w-8 text-ink-tertiary" />
               </div>
             )}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
@@ -355,7 +355,7 @@ function PhotoGrid({
               {allowDownloads && (
                 <Button
                   size="sm"
-                  className="rounded-full bg-[#B28DAE] text-[#141110] hover:bg-[#a468a0]"
+                  className="rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a]"
                   onClick={() => downloadPhoto(photos[currentIndex])}
                 >
                   <Download className="h-4 w-4" />
@@ -408,18 +408,18 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
 
   if (eventLoading || galleriesLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#141110]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#B28DAE]" />
+      <div className="min-h-screen flex items-center justify-center bg-[#faf6ed]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#b8925a]" />
       </div>
     )
   }
 
   if (!event) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#141110] text-white/90">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#faf6ed] text-ink">
         <h1 className="font-playfair text-2xl font-medium mb-2">Gallery Not Found</h1>
-        <p className="text-white/60 mb-4">The gallery you're looking for doesn't exist.</p>
-        <Button asChild className="rounded-full bg-[#B28DAE] text-[#141110] hover:bg-[#a468a0]">
+        <p className="text-ink-secondary mb-4">The gallery you're looking for doesn't exist.</p>
+        <Button asChild className="rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a]">
           <Link href="/">Go Home</Link>
         </Button>
       </div>
@@ -427,16 +427,16 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#141110] text-white/90">
-      <header className="sticky top-0 z-40 border-b border-[#3D332A] bg-[#141110]/95 backdrop-blur">
+    <div className="min-h-screen flex flex-col bg-[#faf6ed] text-ink">
+      <header className="sticky top-0 z-40 border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur">
         <div className="container flex h-14 items-center justify-between">
           <Link href={`/event/${slug}`} className="flex items-center gap-2">
-            <ImageIcon className="h-5 w-5 text-[#B28DAE]" />
-            <span className="font-playfair font-medium text-white">{event.name}</span>
+            <ImageIcon className="h-5 w-5 text-[#b8925a]" />
+            <span className="font-playfair font-medium text-ink">{event.name}</span>
           </Link>
           <div className="flex items-center gap-2">
             {settings.allow_downloads && (
-              <span className="text-xs text-white/40 hidden sm:inline">
+              <span className="text-xs text-ink-tertiary hidden sm:inline">
                 Downloads enabled
               </span>
             )}
@@ -444,7 +444,7 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
               asChild
               size="sm"
               variant="ghost"
-              className="rounded-full text-white hover:bg-white/10 hover:text-[#B28DAE]"
+              className="rounded-full text-ink hover:bg-mauve/10 hover:text-[#b8925a]"
             >
               <Link href={`/event/${slug}/upload`}>
                 <Camera className="h-4 w-4" />
@@ -464,14 +464,14 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
                 onClick={() => setSelectedGallery(gallery)}
                 className={`relative px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors ${
                   selectedGallery?.id === gallery.id
-                    ? "text-[#141110]"
-                    : "text-white/70 hover:text-white"
+                    ? "text-[#faf6ed]"
+                    : "text-ink-secondary hover:text-ink"
                 }`}
               >
                 {selectedGallery?.id === gallery.id && (
                   <motion.span
                     layoutId="gallery-tab-active-bg"
-                    className="absolute inset-0 rounded-full bg-[#B28DAE]"
+                    className="absolute inset-0 rounded-full bg-[#b8925a]"
                     transition={
                       prefersReducedMotion
                         ? { duration: 0 }
@@ -488,16 +488,16 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
         {selectedGallery && (
           <div>
             <div className="mb-4">
-              <h1 className="font-playfair text-xl font-medium text-white">{selectedGallery.name}</h1>
+              <h1 className="font-playfair text-xl font-medium text-ink">{selectedGallery.name}</h1>
               {selectedGallery.description && (
-                <p className="text-sm text-white/60">{selectedGallery.description}</p>
+                <p className="text-sm text-ink-secondary">{selectedGallery.description}</p>
               )}
             </div>
 
             {photosLoading ? (
               <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
                 {[...Array(8)].map((_, i) => (
-                  <Skeleton key={i} className="aspect-square rounded-lg bg-white/5" />
+                  <Skeleton key={i} className="aspect-square rounded-lg bg-ink/5" />
                 ))}
               </div>
             ) : (
@@ -507,13 +507,13 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
         )}
 
         {visibleGalleries.length === 0 && (
-          <Card className="border-[#3D332A] bg-[#1C1814]">
+          <Card className="border-[#e5dfd0] bg-[#ffffff]">
             <CardContent className="flex flex-col items-center justify-center py-16">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
-                <ImageIcon className="h-8 w-8 text-white/40" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-ink/5">
+                <ImageIcon className="h-8 w-8 text-ink-tertiary" />
               </div>
-              <h3 className="font-playfair mt-4 font-medium text-white">Galleries Coming Soon</h3>
-              <p className="mt-2 text-sm text-white/60 text-center max-w-md">
+              <h3 className="font-playfair mt-4 font-medium text-ink">Galleries Coming Soon</h3>
+              <p className="mt-2 text-sm text-ink-secondary text-center max-w-md">
                 Photos will be available shortly. Check back soon!
               </p>
             </CardContent>
@@ -521,10 +521,10 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
         )}
       </main>
 
-      <footer className="border-t border-[#3D332A] py-4">
-        <div className="container text-center text-xs text-white/40">
+      <footer className="border-t border-[#e5dfd0] py-4">
+        <div className="container text-center text-xs text-ink-tertiary">
           Powered by{" "}
-          <a href="/" className="underline hover:text-white">
+          <a href="/" className="underline hover:text-mauve-strong">
             Snapsy
           </a>
         </div>

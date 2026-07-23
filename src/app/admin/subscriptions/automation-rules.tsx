@@ -126,8 +126,8 @@ export function AutomationRules() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       <div className="lg:col-span-2 space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-bold text-white/80">Automation Engine</h2>
-          <Button onClick={startAdd} className="h-8 bg-mauve hover:bg-mauve-strong text-[#141110] text-xs font-bold gap-1">
+          <h2 className="text-lg font-bold text-ink">Automation Engine</h2>
+          <Button onClick={startAdd} className="h-8 bg-mauve hover:bg-mauve-strong text-[#faf6ed] text-xs font-bold gap-1">
             <Plus className="h-3.5 w-3.5" /> New Rule
           </Button>
         </div>
@@ -135,8 +135,8 @@ export function AutomationRules() {
         {loading ? (
           <div className="p-16 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-mauve" /></div>
         ) : rules.length === 0 ? (
-          <div className="p-16 border border-dashed border-hairline-dark bg-surface-card text-white/40 text-center rounded-2xl text-xs font-semibold">
-            <Bot className="h-8 w-8 mx-auto mb-2 text-white/30" />
+          <div className="p-16 border border-dashed border-hairline-dark bg-surface-card text-ink-tertiary text-center rounded-2xl text-xs font-semibold">
+            <Bot className="h-8 w-8 mx-auto mb-2 text-ink-tertiary" />
             No automation rules configured.
           </div>
         ) : (
@@ -146,20 +146,20 @@ export function AutomationRules() {
                 <CardContent className="p-4 flex items-center justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-extrabold text-white/80">{r.name}</h3>
-                      <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded-full border", r.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/50 border-hairline-dark")}>
+                      <h3 className="font-extrabold text-ink">{r.name}</h3>
+                      <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded-full border", r.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-ink/5 text-ink-secondary border-hairline-dark")}>
                         {r.is_active ? "Active" : "Inactive"}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs font-medium text-white/50">
-                      <span className="text-white/40">WHEN</span>
-                      <span className="font-mono bg-white/5 px-1 rounded">{r.trigger_event}</span>
-                      <span className="text-white/40">THEN</span>
+                    <div className="flex items-center gap-2 text-xs font-medium text-ink-secondary">
+                      <span className="text-ink-tertiary">WHEN</span>
+                      <span className="font-mono bg-ink/5 px-1 rounded">{r.trigger_event}</span>
+                      <span className="text-ink-tertiary">THEN</span>
                       <span className="font-mono bg-mauve/10 text-mauve px-1 rounded">{r.action_type}</span>
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <Button variant="ghost" size="sm" onClick={() => startEdit(r)} className="h-7 w-7 p-0 text-white/50 hover:bg-white/5 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => startEdit(r)} className="h-7 w-7 p-0 text-ink-secondary hover:bg-mauve/5 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
                     <Button variant="ghost" size="sm" onClick={() => handleDelete(r.id)} className="h-7 w-7 p-0 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
                   </div>
                 </CardContent>
@@ -175,7 +175,7 @@ export function AutomationRules() {
             <CardHeader className="pb-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-base text-white/80 font-bold">{isAdding ? "Create Rule" : "Edit Rule"}</CardTitle>
+                  <CardTitle className="text-base text-ink font-bold">{isAdding ? "Create Rule" : "Edit Rule"}</CardTitle>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => { setIsAdding(false); setEditingRule(null) }} className="h-7 w-7 p-0 rounded-lg"><X className="h-4 w-4" /></Button>
               </div>
@@ -183,11 +183,11 @@ export function AutomationRules() {
             <CardContent>
               <form onSubmit={handleSave} className="space-y-4">
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-white/50">Rule Name</Label>
+                  <Label className="text-xs font-bold text-ink-secondary">Rule Name</Label>
                   <Input value={formName} onChange={e => setFormName(e.target.value)} required placeholder="e.g. Downgrade after trial" className="h-8 text-xs font-medium" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-white/50">Trigger Event</Label>
+                  <Label className="text-xs font-bold text-ink-secondary">Trigger Event</Label>
                   <select value={formTrigger} onChange={e => setFormTrigger(e.target.value)} className="w-full h-8 px-2 rounded-md border border-hairline-dark text-xs font-medium">
                     <option value="trial_expired">Trial Expired</option>
                     <option value="subscription_cancelled">Subscription Cancelled</option>
@@ -196,7 +196,7 @@ export function AutomationRules() {
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-white/50">Action to Perform</Label>
+                  <Label className="text-xs font-bold text-ink-secondary">Action to Perform</Label>
                   <select value={formActionType} onChange={e => setFormActionType(e.target.value)} className="w-full h-8 px-2 rounded-md border border-hairline-dark text-xs font-medium">
                     <option value="downgrade_plan">Downgrade Plan</option>
                     <option value="send_email">Send Email Notification</option>
@@ -206,7 +206,7 @@ export function AutomationRules() {
                 
                 {formActionType === "downgrade_plan" && (
                   <div className="space-y-1">
-                    <Label className="text-xs font-bold text-white/50">Target Plan (Fallback)</Label>
+                    <Label className="text-xs font-bold text-ink-secondary">Target Plan (Fallback)</Label>
                     <select value={formTargetPlan} onChange={e => setFormTargetPlan(e.target.value)} className="w-full h-8 px-2 rounded-md border border-hairline-dark text-xs font-medium">
                       <option value="">Select Plan...</option>
                       {plans.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -215,13 +215,13 @@ export function AutomationRules() {
                 )}
                 
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-white/50">Action Payload (JSON)</Label>
+                  <Label className="text-xs font-bold text-ink-secondary">Action Payload (JSON)</Label>
                   <textarea value={formPayload} onChange={e => setFormPayload(e.target.value)} rows={4} className="w-full font-mono rounded-md border border-hairline-dark px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-mauve/50" />
                 </div>
                 
                 <div className="flex items-center gap-2 py-2 border-t border-b border-hairline-dark">
                   <input type="checkbox" checked={formActive} onChange={e => setFormActive(e.target.checked)} className="rounded text-mauve h-3.5 w-3.5" />
-                  <span className="text-xs font-bold text-white/70">Rule Active</span>
+                  <span className="text-xs font-bold text-ink-secondary">Rule Active</span>
                 </div>
                 <Button type="submit" disabled={actioning} className="w-full h-8 bg-mauve hover:bg-mauve-strong font-bold text-xs">
                   {actioning ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
@@ -231,7 +231,7 @@ export function AutomationRules() {
             </CardContent>
           </Card>
         ) : (
-          <div className="p-8 border border-dashed border-hairline-dark bg-white/5 text-white/40 text-center rounded-xl text-xs font-semibold">
+          <div className="p-8 border border-dashed border-hairline-dark bg-ink/5 text-ink-tertiary text-center rounded-xl text-xs font-semibold">
             Select a rule to edit or create a new one.
           </div>
         )}

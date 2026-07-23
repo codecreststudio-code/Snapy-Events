@@ -13,7 +13,7 @@ export default async function GalleryPage({ params }: PageProps<"/event/[slug]/g
   const { slug, gallerySlug } = await params
   const supabase = await createClient()
   const { data: ev } = await supabase.from("events").select("id, name, settings, host_id").eq("slug", slug).neq("status", "archived").single()
-  if (!ev) return <div className="min-h-screen bg-[#141110] p-8 text-center text-sm text-white/60">Event not found.</div>
+  if (!ev) return <div className="min-h-screen bg-[#faf6ed] p-8 text-center text-sm text-ink-secondary">Event not found.</div>
 
   // Real check-in gate — this is the actual photo content, not just the
   // landing page teaser, so it's the most important place to enforce it.
@@ -24,7 +24,7 @@ export default async function GalleryPage({ params }: PageProps<"/event/[slug]/g
   if (!checkedIn) redirect(`/event/${slug}`)
 
   const { data: gallery } = await supabase.from("galleries").select("*").eq("event_id", ev.id).eq("slug", gallerySlug).single()
-  if (!gallery) return <div className="min-h-screen bg-[#141110] p-8 text-center text-sm text-white/60">Gallery not found.</div>
+  if (!gallery) return <div className="min-h-screen bg-[#faf6ed] p-8 text-center text-sm text-ink-secondary">Gallery not found.</div>
 
   const aiFeatures = ((ev.settings as any)?.ai_features as Record<string, boolean>) || {}
   let photosQuery = supabase

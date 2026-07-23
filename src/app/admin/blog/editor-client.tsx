@@ -343,18 +343,18 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
 
   if (loadingPost) {
     return (
-      <div className="min-h-screen bg-white/5 flex items-center justify-center">
+      <div className="min-h-screen bg-ink/5 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-mauve mx-auto mb-3" />
-          <p className="text-sm text-white/50">Loading article…</p>
+          <p className="text-sm text-ink-secondary">Loading article…</p>
         </div>
       </div>
     )
   }
 
   const saveBtnClass = {
-    idle: status === "published" ? "bg-mauve text-[#141110] hover:bg-mauve-strong" : "bg-surface-dark text-white hover:bg-surface-card-elevated",
-    saving: "bg-white/40 text-white cursor-not-allowed",
+    idle: status === "published" ? "bg-mauve text-[#faf6ed] hover:bg-mauve-strong" : "bg-surface-dark text-ink hover:bg-surface-card-elevated",
+    saving: "bg-ink/10 text-ink-tertiary cursor-not-allowed",
     saved: "bg-green-600 text-white",
     error: "bg-red-600 text-white",
   }[saveState]
@@ -367,23 +367,23 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
   }[saveState]
 
   return (
-    <div className="min-h-screen bg-white/5">
+    <div className="min-h-screen bg-ink/5">
       {/* Top bar */}
       <div className="sticky top-0 z-30 bg-surface-card border-b border-hairline-dark px-6 py-3 flex items-center gap-4">
         <Link href="/admin/blog">
-          <button className="flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors">
+          <button className="flex items-center gap-1.5 text-sm text-ink-secondary hover:text-ink transition-colors">
             <ArrowLeft className="h-4 w-4" />
             Back to Blog
           </button>
         </Link>
         <div className="flex-1 truncate">
-          <span className="text-sm text-white/40">{title || "Untitled Article"}</span>
+          <span className="text-sm text-ink-tertiary">{title || "Untitled Article"}</span>
         </div>
         <div className="flex items-center gap-2">
           {isEditing && (
             <>
               <Link href={`/blog/${slug}`} target="_blank">
-                <button className="flex items-center gap-1.5 text-xs text-white/50 hover:text-mauve transition-colors border border-hairline-dark rounded-lg px-3 py-2">
+                <button className="flex items-center gap-1.5 text-xs text-ink-secondary hover:text-mauve transition-colors border border-hairline-dark rounded-lg px-3 py-2">
                   <Eye className="h-3.5 w-3.5" /> Preview
                 </button>
               </Link>
@@ -397,7 +397,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                   >
                     {deleteLoading ? "Deleting…" : "Yes, delete"}
                   </button>
-                  <button onClick={() => setDeleteConfirm(false)} className="text-xs text-white/50 hover:text-white/70">
+                  <button onClick={() => setDeleteConfirm(false)} className="text-xs text-ink-secondary hover:text-ink-secondary">
                     Cancel
                   </button>
                 </div>
@@ -414,7 +414,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="rounded-xl border border-hairline-dark px-3 py-2 text-xs text-white/70 focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
+            className="rounded-xl border border-hairline-dark px-3 py-2 text-xs text-ink-secondary focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
           >
             <option value="draft">Draft</option>
             <option value="published">Published</option>
@@ -462,10 +462,10 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                 value={title}
                 onChange={(e) => handleTitleChange(e.target.value)}
                 placeholder="Article title..."
-                className="w-full text-2xl font-bold text-white placeholder:text-white/30 border-none outline-none resize-none bg-transparent"
+                className="w-full text-2xl font-bold text-ink placeholder:text-ink-tertiary border-none outline-none resize-none bg-transparent"
               />
               <div className="mt-2 flex items-center gap-2">
-                <span className="text-xs text-white/40">Slug:</span>
+                <span className="text-xs text-ink-tertiary">Slug:</span>
                 <input
                   type="text"
                   value={slug}
@@ -478,7 +478,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
             {/* Excerpt */}
             <div className="bg-surface-card rounded-2xl border border-hairline-dark shadow-sm p-6">
               <div className="flex items-center justify-between mb-3">
-                <label className="text-xs font-bold text-white/70 uppercase tracking-wider">Excerpt / Summary</label>
+                <label className="text-xs font-bold text-ink-secondary uppercase tracking-wider">Excerpt / Summary</label>
                 <button
                   onClick={() => handleAiAssist("excerpt")}
                   disabled={aiLoading || !title}
@@ -493,14 +493,14 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                 onChange={(e) => setExcerpt(e.target.value)}
                 placeholder="A brief description of the article..."
                 rows={3}
-                className="w-full text-sm text-white/70 placeholder:text-white/30 border-none outline-none resize-none bg-transparent leading-relaxed"
+                className="w-full text-sm text-ink-secondary placeholder:text-ink-tertiary border-none outline-none resize-none bg-transparent leading-relaxed"
               />
             </div>
 
             {/* Content editor */}
             <div className="bg-surface-card rounded-2xl border border-hairline-dark shadow-sm p-6">
               <div className="flex items-center justify-between mb-4">
-                <label className="text-xs font-bold text-white/70 uppercase tracking-wider">Content (Markdown)</label>
+                <label className="text-xs font-bold text-ink-secondary uppercase tracking-wider">Content (Markdown)</label>
                 <button
                   onClick={() => handleAiAssist("outline")}
                   disabled={aiLoading || !title}
@@ -517,7 +517,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                   <button
                     key={block}
                     onClick={() => setContent((prev) => prev + "\n\n" + CONTENT_BLOCKS[i])}
-                    className="rounded-lg border border-hairline-dark px-3 py-1.5 text-xs text-white/60 hover:border-mauve/30 hover:text-mauve hover:bg-mauve/10 transition-colors font-medium"
+                    className="rounded-lg border border-hairline-dark px-3 py-1.5 text-xs text-ink-secondary hover:border-mauve/30 hover:text-mauve hover:bg-mauve/10 transition-colors font-medium"
                   >
                     {block}
                   </button>
@@ -529,9 +529,9 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={"Write your article content here using Markdown...\n\n## Heading\n\nParagraph text...\n\n- List item"}
                 rows={28}
-                className="w-full text-sm text-white/70 placeholder:text-white/30 border border-hairline-dark rounded-xl p-4 outline-none resize-none bg-white/5 leading-relaxed focus:ring-2 focus:ring-mauve/20 font-mono"
+                className="w-full text-sm text-ink-secondary placeholder:text-ink-tertiary border border-hairline-dark rounded-xl p-4 outline-none resize-none bg-ink/5 leading-relaxed focus:ring-2 focus:ring-mauve/20 font-mono"
               />
-              <p className="text-xs text-white/40 mt-2">{content.length} characters · {content.split(/\s+/).filter(Boolean).length} words</p>
+              <p className="text-xs text-ink-tertiary mt-2">{content.length} characters · {content.split(/\s+/).filter(Boolean).length} words</p>
             </div>
           </div>
 
@@ -540,7 +540,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
 
             {/* AI Assistant */}
             <div className="bg-gradient-to-br from-mauve/10 to-fuchsia-50 rounded-2xl border border-mauve/20 p-5 shadow-sm">
-              <h3 className="text-sm font-bold text-white/80 mb-3 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-ink mb-3 flex items-center gap-2">
                 <Wand2 className="h-4 w-4 text-mauve" />
                 AI Content Assistant
               </h3>
@@ -555,7 +555,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                     key={type}
                     onClick={() => handleAiAssist(type)}
                     disabled={aiLoading || !title}
-                    className="w-full text-left rounded-xl bg-surface-card border border-mauve/20 px-3 py-2.5 text-xs text-white/70 hover:border-mauve/30 hover:bg-mauve/10 transition-colors disabled:opacity-40 font-medium"
+                    className="w-full text-left rounded-xl bg-surface-card border border-mauve/20 px-3 py-2.5 text-xs text-ink-secondary hover:border-mauve/30 hover:bg-mauve/10 transition-colors disabled:opacity-40 font-medium"
                   >
                     {aiLoading ? "Generating…" : label}
                   </button>
@@ -565,20 +565,20 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
 
             {/* Article Settings */}
             <div className="bg-surface-card rounded-2xl border border-hairline-dark shadow-sm p-5">
-              <h3 className="text-sm font-bold text-white/80 mb-4 flex items-center gap-2">
-                <Settings2 className="h-4 w-4 text-white/50" />
+              <h3 className="text-sm font-bold text-ink mb-4 flex items-center gap-2">
+                <Settings2 className="h-4 w-4 text-ink-secondary" />
                 Article Settings
               </h3>
 
               <div className="space-y-4">
                 {/* Category */}
                 <div>
-                  <label className="text-xs font-semibold text-white/60 block mb-1.5">Category</label>
+                  <label className="text-xs font-semibold text-ink-secondary block mb-1.5">Category</label>
                   <div className="flex gap-2">
                     <select
                       value={categoryId}
                       onChange={(e) => setCategoryId(e.target.value)}
-                      className="flex-1 rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/70 focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card min-w-0"
+                      className="flex-1 rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink-secondary focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card min-w-0"
                     >
                       <option value="">Select category…</option>
                       {categories.map((c) => (
@@ -588,7 +588,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                     <button
                       type="button"
                       onClick={() => setShowNewCategoryModal(true)}
-                      className="rounded-xl border border-hairline-dark p-2.5 text-white/50 hover:text-mauve hover:border-mauve/30 transition-colors shrink-0"
+                      className="rounded-xl border border-hairline-dark p-2.5 text-ink-secondary hover:text-mauve hover:border-mauve/30 transition-colors shrink-0"
                       title="Add category"
                     >
                       <Plus className="h-4 w-4" />
@@ -598,12 +598,12 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
 
                 {/* Author */}
                 <div>
-                  <label className="text-xs font-semibold text-white/60 block mb-1.5">Author</label>
+                  <label className="text-xs font-semibold text-ink-secondary block mb-1.5">Author</label>
                   <div className="flex gap-2">
                     <select
                       value={authorId}
                       onChange={(e) => setAuthorId(e.target.value)}
-                      className="flex-1 rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/70 focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card min-w-0"
+                      className="flex-1 rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink-secondary focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card min-w-0"
                     >
                       <option value="">Select author…</option>
                       {authors.map((a) => (
@@ -613,7 +613,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                     <button
                       type="button"
                       onClick={() => setShowNewAuthorModal(true)}
-                      className="rounded-xl border border-hairline-dark p-2.5 text-white/50 hover:text-mauve hover:border-mauve/30 transition-colors shrink-0"
+                      className="rounded-xl border border-hairline-dark p-2.5 text-ink-secondary hover:text-mauve hover:border-mauve/30 transition-colors shrink-0"
                       title="Add author"
                     >
                       <Plus className="h-4 w-4" />
@@ -623,26 +623,26 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
 
                 {/* Read time */}
                 <div>
-                  <label className="text-xs font-semibold text-white/60 block mb-1.5">Read Time (minutes)</label>
+                  <label className="text-xs font-semibold text-ink-secondary block mb-1.5">Read Time (minutes)</label>
                   <input
                     type="number"
                     value={readTime}
                     onChange={(e) => setReadTime(e.target.value)}
                     min="1" max="60"
-                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/70 focus:outline-none focus:ring-2 focus:ring-mauve/30"
+                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink-secondary focus:outline-none focus:ring-2 focus:ring-mauve/30"
                   />
                 </div>
 
                 {/* Cover image URL */}
                 <div>
-                  <label className="text-xs font-semibold text-white/60 block mb-1.5">Cover Image URL</label>
+                  <label className="text-xs font-semibold text-ink-secondary block mb-1.5">Cover Image URL</label>
                   <div className="flex gap-2">
                     <input
                       type="url"
                       value={coverImageUrl}
                       onChange={(e) => setCoverImageUrl(e.target.value)}
                       placeholder="https://..."
-                      className="flex-1 rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/70 focus:outline-none focus:ring-2 focus:ring-mauve/30 min-w-0"
+                      className="flex-1 rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink-secondary focus:outline-none focus:ring-2 focus:ring-mauve/30 min-w-0"
                     />
                     <input
                       type="file"
@@ -656,7 +656,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                       type="button"
                       onClick={() => document.getElementById("cover-image-file-input")?.click()}
                       disabled={uploadingImage}
-                      className="rounded-xl border border-hairline-dark p-2.5 text-white/50 hover:text-mauve hover:border-mauve/30 transition-colors shrink-0 disabled:opacity-40 flex items-center justify-center"
+                      className="rounded-xl border border-hairline-dark p-2.5 text-ink-secondary hover:text-mauve hover:border-mauve/30 transition-colors shrink-0 disabled:opacity-40 flex items-center justify-center"
                       title="Upload file"
                     >
                       {uploadingImage ? (
@@ -680,7 +680,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                       onChange={(e) => setIsFeatured(e.target.checked)}
                       className="h-4 w-4 rounded border-hairline-dark text-mauve focus:ring-mauve/30"
                     />
-                    <span className="text-xs font-medium text-white/70 flex items-center gap-1">
+                    <span className="text-xs font-medium text-ink-secondary flex items-center gap-1">
                       <Star className="h-3.5 w-3.5 text-amber-500" /> Featured article
                     </span>
                   </label>
@@ -691,7 +691,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                       onChange={(e) => setIsTrending(e.target.checked)}
                       className="h-4 w-4 rounded border-hairline-dark text-mauve focus:ring-mauve/30"
                     />
-                    <span className="text-xs font-medium text-white/70 flex items-center gap-1">
+                    <span className="text-xs font-medium text-ink-secondary flex items-center gap-1">
                       <TrendingUp className="h-3.5 w-3.5 text-mauve" /> Trending
                     </span>
                   </label>
@@ -701,21 +701,21 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
 
             {/* Tags placeholder */}
             <div className="bg-surface-card rounded-2xl border border-hairline-dark shadow-sm p-5">
-              <h3 className="text-sm font-bold text-white/80 mb-3 flex items-center gap-2">
-                <Tag className="h-4 w-4 text-white/50" />
+              <h3 className="text-sm font-bold text-ink mb-3 flex items-center gap-2">
+                <Tag className="h-4 w-4 text-ink-secondary" />
                 Tags
               </h3>
-              <p className="text-xs text-white/40">Tag management coming soon — tags are stored with the post.</p>
+              <p className="text-xs text-ink-tertiary">Tag management coming soon — tags are stored with the post.</p>
             </div>
 
             {/* SEO Settings */}
             <div className="bg-surface-card rounded-2xl border border-hairline-dark shadow-sm overflow-hidden">
               <button
                 onClick={() => setSeoOpen((v) => !v)}
-                className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/5 transition-colors"
+                className="w-full flex items-center justify-between px-5 py-4 hover:bg-mauve/5 transition-colors"
               >
-                <h3 className="text-sm font-bold text-white/80">SEO Settings</h3>
-                {seoOpen ? <ChevronUp className="h-4 w-4 text-white/40" /> : <ChevronDown className="h-4 w-4 text-white/40" />}
+                <h3 className="text-sm font-bold text-ink">SEO Settings</h3>
+                {seoOpen ? <ChevronUp className="h-4 w-4 text-ink-tertiary" /> : <ChevronDown className="h-4 w-4 text-ink-tertiary" />}
               </button>
 
               {seoOpen && (
@@ -726,7 +726,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                 >
                   <div className="pt-4">
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-semibold text-white/60">SEO Title</label>
+                      <label className="text-xs font-semibold text-ink-secondary">SEO Title</label>
                       <button onClick={() => handleAiAssist("seo_title")} disabled={aiLoading || !title} className="text-[10px] text-mauve font-semibold hover:text-mauve disabled:opacity-40">
                         AI Generate
                       </button>
@@ -737,16 +737,16 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                       onChange={(e) => setSeoTitle(e.target.value)}
                       placeholder="SEO optimised title..."
                       maxLength={70}
-                      className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/70 focus:outline-none focus:ring-2 focus:ring-mauve/30"
+                      className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink-secondary focus:outline-none focus:ring-2 focus:ring-mauve/30"
                     />
-                    <p className={`text-[10px] mt-1 ${seoTitle.length > 60 ? "text-amber-500" : "text-white/40"}`}>
+                    <p className={`text-[10px] mt-1 ${seoTitle.length > 60 ? "text-amber-500" : "text-ink-tertiary"}`}>
                       {seoTitle.length}/70 characters
                     </p>
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-semibold text-white/60">Meta Description</label>
+                      <label className="text-xs font-semibold text-ink-secondary">Meta Description</label>
                       <button onClick={() => handleAiAssist("seo_description")} disabled={aiLoading || !title} className="text-[10px] text-mauve font-semibold hover:text-mauve disabled:opacity-40">
                         AI Generate
                       </button>
@@ -757,20 +757,20 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                       placeholder="Meta description for search engines..."
                       maxLength={165}
                       rows={3}
-                      className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/70 focus:outline-none focus:ring-2 focus:ring-mauve/30 resize-none"
+                      className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink-secondary focus:outline-none focus:ring-2 focus:ring-mauve/30 resize-none"
                     />
-                    <p className={`text-[10px] mt-1 ${seoDesc.length > 155 ? "text-amber-500" : "text-white/40"}`}>
+                    <p className={`text-[10px] mt-1 ${seoDesc.length > 155 ? "text-amber-500" : "text-ink-tertiary"}`}>
                       {seoDesc.length}/165 characters
                     </p>
                   </div>
 
                   {/* SERP Preview */}
                   {(seoTitle || title) && (
-                    <div className="rounded-xl border border-hairline-dark bg-white/5 p-3">
-                      <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-2">SERP Preview</p>
+                    <div className="rounded-xl border border-hairline-dark bg-ink/5 p-3">
+                      <p className="text-[10px] font-semibold text-ink-tertiary uppercase tracking-wider mb-2">SERP Preview</p>
                       <p className="text-sm text-mauve font-medium truncate">{seoTitle || title} | Snapsy Blog</p>
                       <p className="text-[10px] text-emerald-400">snapsy.app/blog/{slug || "your-article-slug"}</p>
-                      <p className="text-xs text-white/50 mt-1 line-clamp-2 leading-relaxed">{seoDesc || excerpt}</p>
+                      <p className="text-xs text-ink-secondary mt-1 line-clamp-2 leading-relaxed">{seoDesc || excerpt}</p>
                     </div>
                   )}
                 </motion.div>
@@ -801,46 +801,46 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
               exit={{ opacity: 0, scale: 0.95 }}
               className="relative bg-surface-card rounded-2xl shadow-xl p-6 max-w-md w-full z-10"
             >
-              <button onClick={() => setShowNewCategoryModal(false)} className="absolute top-4 right-4 text-white/40 hover:text-white/60">
+              <button onClick={() => setShowNewCategoryModal(false)} className="absolute top-4 right-4 text-ink-tertiary hover:text-ink-secondary">
                 <X className="h-5 w-5" />
               </button>
-              <h3 className="font-bold text-white text-lg mb-4">Add New Category</h3>
+              <h3 className="font-bold text-ink text-lg mb-4">Add New Category</h3>
               <form onSubmit={handleCreateCategory} className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-white/60 block mb-1">Category Name *</label>
+                  <label className="text-xs font-semibold text-ink-secondary block mb-1">Category Name *</label>
                   <input
                     type="text"
                     required
                     value={newCatName}
                     onChange={(e) => handleCatNameChange(e.target.value)}
                     placeholder="e.g. Technology"
-                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/80 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
+                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-white/60 block mb-1">Slug *</label>
+                  <label className="text-xs font-semibold text-ink-secondary block mb-1">Slug *</label>
                   <input
                     type="text"
                     required
                     value={newCatSlug}
                     onChange={(e) => setNewCatSlug(e.target.value)}
                     placeholder="technology"
-                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/80 font-mono focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
+                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink font-mono focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-white/60 block mb-1">Emoji</label>
+                    <label className="text-xs font-semibold text-ink-secondary block mb-1">Emoji</label>
                     <input
                       type="text"
                       value={newCatEmoji}
                       onChange={(e) => setNewCatEmoji(e.target.value)}
                       placeholder="📝"
-                      className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/80 focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
+                      className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-white/60 block mb-1">Color</label>
+                    <label className="text-xs font-semibold text-ink-secondary block mb-1">Color</label>
                     <input
                       type="color"
                       value={newCatColor}
@@ -850,27 +850,27 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-white/60 block mb-1">Description</label>
+                  <label className="text-xs font-semibold text-ink-secondary block mb-1">Description</label>
                   <textarea
                     value={newCatDesc}
                     onChange={(e) => setNewCatDesc(e.target.value)}
                     placeholder="Brief description of the category..."
                     rows={2}
-                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/80 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-mauve/30 resize-none bg-surface-card"
+                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-mauve/30 resize-none bg-surface-card"
                   />
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => setShowNewCategoryModal(false)}
-                    className="flex-1 rounded-xl border border-hairline-dark px-4 py-2.5 text-sm font-medium text-white/70 hover:bg-white/5 transition-colors"
+                    className="flex-1 rounded-xl border border-hairline-dark px-4 py-2.5 text-sm font-medium text-ink-secondary hover:bg-mauve/5 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={newCatLoading}
-                    className="flex-1 rounded-xl bg-mauve px-4 py-2.5 text-sm font-semibold text-[#141110] hover:bg-mauve-strong transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    className="flex-1 rounded-xl bg-mauve px-4 py-2.5 text-sm font-semibold text-[#faf6ed] hover:bg-mauve-strong transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
                   >
                     {newCatLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                     Create
@@ -893,65 +893,65 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
               exit={{ opacity: 0, scale: 0.95 }}
               className="relative bg-surface-card rounded-2xl shadow-xl p-6 max-w-md w-full z-10"
             >
-              <button onClick={() => setShowNewAuthorModal(false)} className="absolute top-4 right-4 text-white/40 hover:text-white/60">
+              <button onClick={() => setShowNewAuthorModal(false)} className="absolute top-4 right-4 text-ink-tertiary hover:text-ink-secondary">
                 <X className="h-5 w-5" />
               </button>
-              <h3 className="font-bold text-white text-lg mb-4">Add New Author</h3>
+              <h3 className="font-bold text-ink text-lg mb-4">Add New Author</h3>
               <form onSubmit={handleCreateAuthor} className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-white/60 block mb-1">Author Name *</label>
+                  <label className="text-xs font-semibold text-ink-secondary block mb-1">Author Name *</label>
                   <input
                     type="text"
                     required
                     value={newAuthName}
                     onChange={(e) => handleAuthNameChange(e.target.value)}
                     placeholder="e.g. Jane Doe"
-                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/80 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
+                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-white/60 block mb-1">Slug *</label>
+                  <label className="text-xs font-semibold text-ink-secondary block mb-1">Slug *</label>
                   <input
                     type="text"
                     required
                     value={newAuthSlug}
                     onChange={(e) => setNewAuthSlug(e.target.value)}
                     placeholder="jane-doe"
-                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/80 font-mono focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
+                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink font-mono focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-white/60 block mb-1">Avatar URL</label>
+                  <label className="text-xs font-semibold text-ink-secondary block mb-1">Avatar URL</label>
                   <input
                     type="url"
                     value={newAuthAvatar}
                     onChange={(e) => setNewAuthAvatar(e.target.value)}
                     placeholder="https://..."
-                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/80 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
+                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-mauve/30 bg-surface-card"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-white/60 block mb-1">Bio</label>
+                  <label className="text-xs font-semibold text-ink-secondary block mb-1">Bio</label>
                   <textarea
                     value={newAuthBio}
                     onChange={(e) => setNewAuthBio(e.target.value)}
                     placeholder="Author biography..."
                     rows={2}
-                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-white/80 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-mauve/30 resize-none bg-surface-card"
+                    className="w-full rounded-xl border border-hairline-dark px-3 py-2.5 text-sm text-ink placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-mauve/30 resize-none bg-surface-card"
                   />
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => setShowNewAuthorModal(false)}
-                    className="flex-1 rounded-xl border border-hairline-dark px-4 py-2.5 text-sm font-medium text-white/70 hover:bg-white/5 transition-colors"
+                    className="flex-1 rounded-xl border border-hairline-dark px-4 py-2.5 text-sm font-medium text-ink-secondary hover:bg-mauve/5 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={newAuthLoading}
-                    className="flex-1 rounded-xl bg-mauve px-4 py-2.5 text-sm font-semibold text-[#141110] hover:bg-mauve-strong transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    className="flex-1 rounded-xl bg-mauve px-4 py-2.5 text-sm font-semibold text-[#faf6ed] hover:bg-mauve-strong transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
                   >
                     {newAuthLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                     Create

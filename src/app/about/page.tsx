@@ -104,12 +104,12 @@ export default function AboutPage() {
 
   // Partner trust logos
   const partners = [
-    { name: "WEDDINGWIRE", style: "font-serif tracking-widest text-white/50 font-bold" },
-    { name: "eventbrite", style: "font-sans tracking-tight text-white/50 font-extrabold italic" },
-    { name: "the knot", style: "font-serif tracking-wider text-white/50 font-medium lowercase" },
-    { name: "HOORAY!", style: "font-sans tracking-wide text-white/50 font-black uppercase" },
-    { name: "ZOLA", style: "font-sans tracking-widest text-white/50 font-light" },
-    { name: "cvent", style: "font-sans tracking-normal text-white/50 font-semibold" },
+    { name: "WEDDINGWIRE", style: "font-serif tracking-widest text-ink-secondary font-bold" },
+    { name: "eventbrite", style: "font-sans tracking-tight text-ink-secondary font-extrabold italic" },
+    { name: "the knot", style: "font-serif tracking-wider text-ink-secondary font-medium lowercase" },
+    { name: "HOORAY!", style: "font-sans tracking-wide text-ink-secondary font-black uppercase" },
+    { name: "ZOLA", style: "font-sans tracking-widest text-ink-secondary font-light" },
+    { name: "cvent", style: "font-sans tracking-normal text-ink-secondary font-semibold" },
   ]
 
   const handleScrollToStory = () => {
@@ -117,7 +117,7 @@ export default function AboutPage() {
   }
 
   return (
-    <div className={`flex min-h-screen flex-col bg-surface-dark text-white selection:bg-mauve/30 ${inter.className}`}>
+    <div className={`flex min-h-screen flex-col bg-surface-dark text-ink selection:bg-mauve/30 ${inter.className}`}>
       <PublicNavbar />
 
       <main className="flex-1 overflow-hidden">
@@ -146,7 +146,7 @@ export default function AboutPage() {
                 animate="visible"
                 custom={1}
                 variants={fadeUp}
-                className={`text-5xl font-light tracking-tight md:text-7xl text-white leading-[1.08] ${playfair.className}`}
+                className={`text-5xl font-light tracking-tight md:text-7xl text-ink leading-[1.08] ${playfair.className}`}
               >
                 We help moments <br />
                 last a <span className="italic font-light bg-gradient-to-r from-mauve to-mauve-strong bg-clip-text text-transparent">lifetime</span>.
@@ -157,7 +157,7 @@ export default function AboutPage() {
                 animate="visible"
                 custom={2}
                 variants={fadeUp}
-                className="text-lg text-white/60 max-w-lg leading-relaxed font-light"
+                className="text-lg text-ink-secondary max-w-lg leading-relaxed font-light"
               >
                 Snapsy was created to help people collect, preserve, and relive the moments that matter most — together, without friction.
               </motion.p>
@@ -169,17 +169,17 @@ export default function AboutPage() {
                 variants={fadeUp}
                 className="flex flex-wrap items-center gap-4 pt-4"
               >
-                <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold px-8 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10">
+                <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-8 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10">
                   <Link href="/signup">Create Your Event</Link>
                 </Button>
                 <Button
                   onClick={handleScrollToStory}
                   variant="ghost"
                   size="lg"
-                  className="rounded-full font-medium hover:bg-white/5 text-white border border-white/15"
+                  className="rounded-full font-medium hover:bg-mauve/5 text-ink border border-hairline-dark"
                 >
                   See how it works
-                  <Play className="ml-2 h-4 w-4 fill-current text-white" />
+                  <Play className="ml-2 h-4 w-4 fill-current text-ink" />
                 </Button>
               </motion.div>
             </div>
@@ -316,10 +316,10 @@ export default function AboutPage() {
               {/* Left Column Story */}
               <div className="lg:col-span-5 space-y-6">
                 <span className="text-xs font-semibold text-mauve tracking-wider uppercase block">OUR STORY</span>
-                <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-white leading-[1.1] ${playfair.className}`}>
+                <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-ink leading-[1.1] ${playfair.className}`}>
                   Why we built Snapsy
                 </h2>
-                <div className="space-y-4 text-white/60 font-light leading-relaxed">
+                <div className="space-y-4 text-ink-secondary font-light leading-relaxed">
                   <p>
                     We've all been to amazing events. We take tons of photos. But when the event is over, those photos stay in our phones.
                   </p>
@@ -336,22 +336,22 @@ export default function AboutPage() {
                     <div className="h-10 w-10 rounded-full bg-mauve/15 flex items-center justify-center text-mauve">
                       <Camera className="h-5 w-5" />
                     </div>
-                    <h4 className="text-xs font-bold text-white">Guest Capture</h4>
-                    <p className="text-[10px] text-white/50 leading-normal">Every guest captures beautiful moments.</p>
+                    <h4 className="text-xs font-bold text-ink">Guest Capture</h4>
+                    <p className="text-[10px] text-ink-secondary leading-normal">Every guest captures beautiful moments.</p>
                   </div>
                   <div className="space-y-2">
                     <div className="h-10 w-10 rounded-full bg-mauve/15 flex items-center justify-center text-mauve">
                       <Smile className="h-5 w-5" />
                     </div>
-                    <h4 className="text-xs font-bold text-white">Never Shared</h4>
-                    <p className="text-[10px] text-white/50 leading-normal">But most photos never get shared.</p>
+                    <h4 className="text-xs font-bold text-ink">Never Shared</h4>
+                    <p className="text-[10px] text-ink-secondary leading-normal">But most photos never get shared.</p>
                   </div>
                   <div className="space-y-2">
                     <div className="h-10 w-10 rounded-full bg-mauve/15 flex items-center justify-center text-mauve">
                       <Heart className="h-5 w-5" />
                     </div>
-                    <h4 className="text-xs font-bold text-white">Saved Forever</h4>
-                    <p className="text-[10px] text-white/50 leading-normal">Memories fade when they're not together.</p>
+                    <h4 className="text-xs font-bold text-ink">Saved Forever</h4>
+                    <p className="text-[10px] text-ink-secondary leading-normal">Memories fade when they're not together.</p>
                   </div>
                 </div>
               </div>
@@ -369,8 +369,8 @@ export default function AboutPage() {
                   />
                   {/* Play Button Overlay */}
                   <div className="absolute inset-0 flex items-center justify-center bg-surface-dark/30">
-                    <button className="h-16 w-16 rounded-full bg-mauve text-[#141110] flex items-center justify-center shadow-2xl hover:scale-110 transition-transform active:scale-95">
-                      <Play className="h-6 w-6 fill-current text-[#141110] translate-x-0.5" />
+                    <button className="h-16 w-16 rounded-full bg-mauve text-[#faf6ed] flex items-center justify-center shadow-2xl hover:scale-110 transition-transform active:scale-95">
+                      <Play className="h-6 w-6 fill-current text-[#faf6ed] translate-x-0.5" />
                     </button>
                   </div>
                 </div>
@@ -378,10 +378,10 @@ export default function AboutPage() {
                 {/* Overlaid Founder Quote Card */}
                 <div className="absolute bottom-[-30px] right-[-10px] md:right-[20px] max-w-[280px] bg-surface-card-elevated p-5 rounded-2xl shadow-xl border border-hairline-dark space-y-3">
                   <span className="text-4xl text-mauve/60 font-serif leading-none block h-4">"</span>
-                  <p className="text-xs text-white/70 leading-relaxed font-light italic">
+                  <p className="text-xs text-ink-secondary leading-relaxed font-light italic">
                     Snapsy is our way of making sure every memory finds its home.
                   </p>
-                  <div className="text-[10px] font-bold text-white/50 tracking-wider">
+                  <div className="text-[10px] font-bold text-ink-secondary tracking-wider">
                     — THE SNAPSY TEAM
                   </div>
                 </div>
@@ -395,7 +395,7 @@ export default function AboutPage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
               <span className="text-xs font-semibold text-mauve tracking-wider uppercase">OUR JOURNEY</span>
-              <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-white ${playfair.className}`}>
+              <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-ink ${playfair.className}`}>
                 How we got here
               </h2>
             </div>
@@ -408,7 +408,7 @@ export default function AboutPage() {
               <div className="flex justify-between min-w-[900px] px-8">
                 {timeline.map((step, idx) => (
                   <div key={idx} className="w-[130px] flex flex-col items-center text-center space-y-4 relative">
-                    <span className="text-sm font-bold text-white/50">{step.year}</span>
+                    <span className="text-sm font-bold text-ink-secondary">{step.year}</span>
 
                     {/* Circle icon marker */}
                     <div className="h-10 w-10 rounded-full bg-surface-card-elevated border-2 border-hairline-dark text-mauve flex items-center justify-center shadow-sm hover:border-mauve hover:scale-105 transition-all">
@@ -416,8 +416,8 @@ export default function AboutPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <h4 className="text-xs font-bold text-white">{step.title}</h4>
-                      <p className="text-[10px] text-white/50 leading-normal px-1">{step.desc}</p>
+                      <h4 className="text-xs font-bold text-ink">{step.title}</h4>
+                      <p className="text-[10px] text-ink-secondary leading-normal px-1">{step.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -431,7 +431,7 @@ export default function AboutPage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="max-w-xl space-y-4 mb-20 text-left">
               <span className="text-xs font-semibold text-mauve tracking-wider uppercase block">OUR VALUES</span>
-              <h2 className={`text-4xl font-light tracking-tight md:text-6xl text-white leading-none ${playfair.className}`}>
+              <h2 className={`text-4xl font-light tracking-tight md:text-6xl text-ink leading-none ${playfair.className}`}>
                 What we believe <br />
                 in <span className="italic font-light bg-gradient-to-r from-mauve to-mauve-strong bg-clip-text text-transparent">deeply</span>
               </h2>
@@ -445,11 +445,11 @@ export default function AboutPage() {
                   className="bg-surface-card-elevated p-8 rounded-2xl border border-hairline-dark hover:border-mauve/40 transition-all duration-300 group flex flex-col justify-between"
                 >
                   <div className="space-y-6">
-                    <div className="h-12 w-12 rounded-xl bg-mauve/15 flex items-center justify-center text-mauve transition-colors group-hover:bg-mauve group-hover:text-[#141110]">
+                    <div className="h-12 w-12 rounded-xl bg-mauve/15 flex items-center justify-center text-mauve transition-colors group-hover:bg-mauve group-hover:text-[#faf6ed]">
                       <v.icon className="h-5 w-5" />
                     </div>
-                    <h3 className="text-lg font-bold text-white">{v.title}</h3>
-                    <p className="text-sm text-white/60 font-light leading-relaxed">
+                    <h3 className="text-lg font-bold text-ink">{v.title}</h3>
+                    <p className="text-sm text-ink-secondary font-light leading-relaxed">
                       {v.desc}
                     </p>
                   </div>
@@ -466,12 +466,12 @@ export default function AboutPage() {
               {/* Left Note Content */}
               <div className="lg:col-span-6 space-y-8">
                 <span className="text-xs font-semibold text-mauve tracking-wider uppercase block">FOUNDER'S NOTE</span>
-                <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-white leading-[1.1] ${playfair.className}`}>
+                <h2 className={`text-4xl font-light tracking-tight md:text-5xl text-ink leading-[1.1] ${playfair.className}`}>
                   A note from <br />
                   our <span className="italic font-light bg-gradient-to-r from-mauve to-mauve-strong bg-clip-text text-transparent">founder</span>
                 </h2>
 
-                <div className="space-y-6 text-white/60 font-light leading-relaxed">
+                <div className="space-y-6 text-ink-secondary font-light leading-relaxed">
                   <p>
                     I started Snapsy after my best friend's wedding. We never got to see so many beautiful photos our guests took. I knew there had to be a better way.
                   </p>
@@ -482,7 +482,7 @@ export default function AboutPage() {
 
                 <div className="pt-6 space-y-2">
                   {/* Handwritten Signature SVG */}
-                  <svg className="w-36 h-12 text-white fill-current" viewBox="0 0 150 50">
+                  <svg className="w-36 h-12 text-ink fill-current" viewBox="0 0 150 50">
                     <path
                       d="M 10 30 Q 30 10 50 30 T 70 30 T 90 20 T 110 30 T 130 15"
                       fill="none"
@@ -492,8 +492,8 @@ export default function AboutPage() {
                     />
                   </svg>
                   <div>
-                    <h4 className="text-sm font-bold text-white">Arjun Patel</h4>
-                    <p className="text-xs text-white/50">Founder & CEO</p>
+                    <h4 className="text-sm font-bold text-ink">Arjun Patel</h4>
+                    <p className="text-xs text-ink-secondary">Founder & CEO</p>
                   </div>
                 </div>
               </div>
@@ -518,7 +518,7 @@ export default function AboutPage() {
         {/* SECTION 6: TRUST SECTION */}
         <section className="py-12 md:py-20 border-t border-hairline-dark bg-surface-card">
           <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center space-y-6">
-            <span className="text-[10px] font-bold text-white/50 tracking-widest uppercase block">
+            <span className="text-[10px] font-bold text-ink-secondary tracking-widest uppercase block">
               TRUSTED BY AMAZING HOSTS & BRANDS
             </span>
             
@@ -533,7 +533,7 @@ export default function AboutPage() {
         </section>
 
         {/* SECTION 7: FINAL CTA */}
-        <section className="relative py-20 md:py-32 bg-surface-card text-white overflow-hidden border-t border-hairline-dark">
+        <section className="relative py-20 md:py-32 bg-surface-card text-ink overflow-hidden border-t border-hairline-dark">
           {/* Deep dark gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-surface-card via-surface-card-elevated to-surface-card -z-10" />
 
@@ -557,7 +557,7 @@ export default function AboutPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.15 }}
-              className="text-md text-white/60 max-w-lg mx-auto font-light leading-relaxed"
+              className="text-md text-ink-secondary max-w-lg mx-auto font-light leading-relaxed"
             >
               Join thousands of hosts who trust Snapsy to capture, share, and relive what matters most.
             </motion.p>
@@ -569,14 +569,14 @@ export default function AboutPage() {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="flex flex-wrap justify-center items-center gap-4 pt-4"
             >
-              <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#141110] font-semibold px-8 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10">
+              <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-8 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10">
                 <Link href="/signup">Create Your Event</Link>
               </Button>
               <Button
                 onClick={handleScrollToStory}
                 variant="ghost"
                 size="lg"
-                className="rounded-full font-medium hover:bg-white/5 text-white border border-white/15 px-8"
+                className="rounded-full font-medium hover:bg-mauve/5 text-ink border border-hairline-dark px-8"
               >
                 See How It Works
               </Button>

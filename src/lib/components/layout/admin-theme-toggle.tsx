@@ -5,9 +5,12 @@ import { Sun, Moon, Laptop } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { saveAdminTheme } from "@/app/actions/admin-theme"
 
-// Note: To truly support dark mode, the application would need next-themes
-// and tailwind dark mode configuration. This component stores the preference 
-// and toggles the UI to simulate the feature.
+// Snapsy is a light-mode-only product (2026 Amber Noir Light rebrand) — there
+// is no dark theme designed anywhere in the app anymore, so this no longer
+// toggles document.documentElement's "dark" class (that would only flip
+// shadcn's base --background/--foreground tokens, producing a broken
+// half-dark admin shell). It still records the admin's stored preference via
+// saveAdminTheme for continuity, but always keeps the document in light mode.
 
 type Theme = "light" | "dark" | "system"
 
@@ -18,22 +21,12 @@ export function AdminThemeToggle({ initialTheme = "light" }: { initialTheme?: st
   const toggleTheme = async () => {
     if (isUpdating) return
     setIsUpdating(true)
-    
+
     const nextTheme: Theme = theme === "light" ? "dark" : theme === "dark" ? "system" : "light"
     setTheme(nextTheme)
-    
-    // Simulate applying theme to document
-    if (nextTheme === "dark") {
-      document.documentElement.classList.add("dark")
-    } else if (nextTheme === "light") {
-      document.documentElement.classList.remove("dark")
-    } else {
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.add("dark")
-      } else {
-        document.documentElement.classList.remove("dark")
-      }
-    }
+
+    // Light-mode-only product: never actually apply a "dark" class.
+    document.documentElement.classList.remove("dark")
 
     await saveAdminTheme(nextTheme)
     setIsUpdating(false)
@@ -45,15 +38,15 @@ export function AdminThemeToggle({ initialTheme = "light" }: { initialTheme?: st
       size="icon"
       onClick={toggleTheme}
       disabled={isUpdating}
-      className="h-9 w-9 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors"
-      title={`Current Theme: ${theme}`}
+      className="h-9 w-9 text-ink-secondary hover:bg-mauve/5 hover:text-ink rounded-lg transition-colors"
+      title={`Current Theme: ${theme} (light mode only)`}
     >
       {theme === "light" ? (
-        <Sun className="h-5 w-5 text-amber-400" />
+        <Sun className="h-5 w-5 text-mauve" />
       ) : theme === "dark" ? (
         <Moon className="h-5 w-5 text-mauve" />
       ) : (
-        <Laptop className="h-5 w-5 text-white/50" />
+        <Laptop className="h-5 w-5 text-ink-tertiary" />
       )}
     </Button>
   )

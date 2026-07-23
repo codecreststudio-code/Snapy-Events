@@ -93,7 +93,7 @@ export function AdminMfaForm() {
         <Button variant="ghost" type="button" onClick={async () => {
           await supabase.auth.signOut()
           router.push("/admin/login")
-        }} className="text-xs text-white/50 hover:text-white/70">
+        }} className="text-xs text-ink-secondary hover:text-ink-secondary">
           Sign in as a different user
         </Button>
       </div>

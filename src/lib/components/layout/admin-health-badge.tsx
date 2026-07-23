@@ -20,8 +20,8 @@ export function AdminHealthBadge() {
 
   if (!health) {
     return (
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 text-white/40 border border-hairline-dark animate-pulse">
-        <div className="h-2 w-2 rounded-full bg-white/30" />
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-ink/5 text-ink-tertiary border border-hairline-dark animate-pulse">
+        <div className="h-2 w-2 rounded-full bg-ink/30" />
         <span className="text-xs font-semibold">Checking...</span>
       </div>
     )
