@@ -134,7 +134,14 @@ export const API_RATE_LIMITS = {
   MEDIA_UPLOAD: Number(process.env.RATE_LIMIT_MEDIA_UPLOAD) || 30, // 30 uploads per min
   RECAP_GENERATE: Number(process.env.RATE_LIMIT_RECAP_GENERATE) || 1, // 1 render per 3 mins — ~300s ffmpeg render, a host rarely needs this more than once every few minutes
   MOVIE_UPLOAD: Number(process.env.RATE_LIMIT_MOVIE_UPLOAD) || 3, // 3 uploads per 5 mins — client renders the video, this route just stores the finished file
+  // Auto Collage (sharp composition) and AI Slideshow (scoring pass) generation
+  // — comparable resource cost to MOVIE_UPLOAD/RECAP_GENERATE above, which are
+  // both rate-limited for that exact reason; these two had no limit at all.
+  MEMORIES_GENERATE: Number(process.env.RATE_LIMIT_MEMORIES_GENERATE) || 6, // 6 generations per 5 mins
   NOTIFICATION_DEVICE_REGISTER: Number(process.env.RATE_LIMIT_NOTIFICATION_DEVICE_REGISTER) || 10, // 10 device (re)registrations per min — a malicious/buggy client could hammer this on every token refresh
+  // Outbound WhatsApp send — queues a message to an attacker-suppliable phone
+  // number on behalf of the host's account; previously had no throttle at all.
+  WHATSAPP_SEND: Number(process.env.RATE_LIMIT_WHATSAPP_SEND) || 20, // 20 sends per min
   // Payment routes previously had no rate limit at all, unlike every other
   // authenticated/public mutation in this codebase — a gap for both
   // Razorpay-order-spam and for hammering a coupon-validity/idempotency

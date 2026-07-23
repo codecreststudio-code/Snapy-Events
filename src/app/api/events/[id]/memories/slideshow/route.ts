@@ -15,6 +15,7 @@ import { createServiceClient } from "@/lib/supabase/server"
 import { getScoredPhotos } from "@/lib/integrations/memories"
 import { isValidTrackId, resolveTrackUrl } from "@/lib/integrations/slideshow-music"
 import { logger } from "@/lib/logger"
+import { API_RATE_LIMITS } from "@/lib/constants"
 
 const paramsSchema = z.object({ id: z.string().uuid() })
 const bodySchema = z.object({
@@ -43,6 +44,9 @@ export const POST = defineRoute<z.infer<typeof bodySchema>, unknown, { id: strin
   method: "POST",
   body: bodySchema,
   requireAuth: true,
+  // Scoring pass over the event's photos — same rationale as the collage
+  // route's rate limit (see that file for the fuller comment).
+  rateLimit: { key: "memories:slideshow", limit: API_RATE_LIMITS.MEMORIES_GENERATE, windowSeconds: 300 },
   audit: "memories.slideshow.generate",
   handler: async ({ body, params, auth }) => {
     const parsedParams = paramsSchema.safeParse(params)

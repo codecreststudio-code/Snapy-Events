@@ -44,6 +44,21 @@ export const POST = defineRoute({
     }
 
     const photoIds = Array.from(new Set(body.faces.map((f) => f.photo_id)))
+
+    // IDOR guard: a checked-in guest (or the host) for this event could
+    // otherwise pass an arbitrary photo_id belonging to a DIFFERENT event
+    // and delete/overwrite its face embeddings. Every photo_id in the
+    // payload must actually belong to body.event_id.
+    const { data: ownedPhotos } = await supabase
+      .from("photos")
+      .select("id")
+      .eq("event_id", body.event_id)
+      .in("id", photoIds)
+    const ownedIds = new Set((ownedPhotos ?? []).map((p) => p.id))
+    if (ownedIds.size !== photoIds.length) {
+      return fail("VALIDATION_ERROR", "One or more photos do not belong to this event", 422)
+    }
+
     await supabase.from("faces").delete().in("photo_id", photoIds)
 
     const rows = body.faces.map((f) => ({

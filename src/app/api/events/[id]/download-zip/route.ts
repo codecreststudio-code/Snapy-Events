@@ -83,34 +83,54 @@ export async function GET(
     let totalBytes = 0
     let filesAdded = 0
 
-    // Download each approved photo from storage and attach to zip archive.
-    // Pre-check the DB-stored file_size before downloading to avoid pulling
-    // a buffer we'd only have to discard.
-    for (let i = 0; i < photos.length; i++) {
-      if (filesAdded >= MAX_ZIP_FILES) break
-
+    // Pass 1 (cheap, no I/O): decide which photos to actually fetch, using
+    // the DB-stored file_size, so the MAX_ZIP_FILES/MAX_ZIP_BYTES budget is
+    // respected in original (upload-order) priority — same selection logic
+    // as before, just separated from the download step below.
+    const candidates: { index: number; id: string; storage_path: string; original_filename: string | null }[] = []
+    let budgetBytes = 0
+    for (let i = 0; i < photos.length && candidates.length < MAX_ZIP_FILES; i++) {
       const p = photos[i]
       const knownSize = Number(p.file_size ?? 0)
+      if (knownSize > 0 && budgetBytes + knownSize > MAX_ZIP_BYTES) break
+      budgetBytes += knownSize
+      candidates.push({ index: i, id: p.id, storage_path: p.storage_path, original_filename: p.original_filename })
+    }
 
-      // Skip files that alone would bust the byte budget
-      if (knownSize > 0 && totalBytes + knownSize > MAX_ZIP_BYTES) break
-
-      try {
-        const { data: fileData, error: downloadErr } = await supabase.storage
-          .from("photos")
-          .download(p.storage_path)
-
-        if (fileData && !downloadErr) {
-          const buffer = await fileData.arrayBuffer()
-          if (totalBytes + buffer.byteLength > MAX_ZIP_BYTES) break
-          const filename = p.original_filename || `photo-${i + 1}.jpg`
-          folder?.file(filename, buffer)
-          totalBytes += buffer.byteLength
-          filesAdded++
+    // Pass 2: the actual downloads are independent per-file network calls,
+    // so running them one-at-a-time (the original behavior) multiplied
+    // per-file latency by file count for no reason. Bounded concurrency
+    // keeps memory use predictable (buffers are still all held until
+    // zip.generateAsync below) while letting the network calls overlap.
+    const CONCURRENCY = 6
+    const downloaded: { filename: string; buffer: ArrayBuffer }[] = []
+    let cursor = 0
+    async function downloadWorker() {
+      while (cursor < candidates.length) {
+        const c = candidates[cursor++]
+        // Re-check the running byte budget — actual downloaded size can
+        // differ slightly from the DB's stored file_size.
+        if (totalBytes >= MAX_ZIP_BYTES) return
+        try {
+          const { data: fileData, error: downloadErr } = await supabase.storage
+            .from("photos")
+            .download(c.storage_path)
+          if (fileData && !downloadErr) {
+            const buffer = await fileData.arrayBuffer()
+            if (totalBytes + buffer.byteLength > MAX_ZIP_BYTES) continue
+            totalBytes += buffer.byteLength
+            downloaded.push({ filename: c.original_filename || `photo-${c.index + 1}.jpg`, buffer })
+          }
+        } catch (err) {
+          logger.error("Failed to download photo into ZIP", { photoId: c.id, error: String(err) })
         }
-      } catch (err) {
-        logger.error("Failed to download photo into ZIP", { photoId: p.id, error: String(err) })
       }
+    }
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, candidates.length) }, downloadWorker))
+
+    for (const d of downloaded) {
+      folder?.file(d.filename, d.buffer)
+      filesAdded++
     }
 
     if (filesAdded === 0) {

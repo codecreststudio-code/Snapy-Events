@@ -390,6 +390,13 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
     queryKey: ["photos", selectedGallery?.id],
     queryFn: () => getPhotos(selectedGallery!.id),
     enabled: !!selectedGallery?.id,
+    // This standalone gallery page had no live-refresh mechanism at all
+    // (unlike the host dashboard, which polls every 3s + has a realtime
+    // subscription) — a guest who stayed on this page while others
+    // uploaded would never see new photos until navigating away and back.
+    // A lighter poll than the host's is enough here since this is a
+    // public page potentially open on many guests' devices at once.
+    refetchInterval: 8000,
   })
 
   const settings = (event?.settings || {}) as GallerySettings

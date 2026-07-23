@@ -2,6 +2,7 @@ import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createServiceClient } from "@/lib/supabase/server"
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
+import { API_RATE_LIMITS } from "@/lib/constants"
 
 const bodySchema = z.object({
   event_id: z.string().uuid(),
@@ -14,6 +15,9 @@ export const POST = defineRoute({
   method: "POST",
   body: bodySchema,
   requireAuth: true,
+  // Queues a message to an attacker-suppliable phone_number on the host's
+  // behalf — a compromised or malicious host account had no throttle here.
+  rateLimit: { key: "whatsapp:send", limit: API_RATE_LIMITS.WHATSAPP_SEND, windowSeconds: 60 },
   audit: "whatsapp.alert.sent",
   handler: async ({ body, auth }) => {
     const supabase = await createServiceClient()

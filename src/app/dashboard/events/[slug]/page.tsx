@@ -1288,6 +1288,20 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     return `${supabaseUrl}/storage/v1/object/public/photos/${path}`
   }
 
+  // Formats photos.duration (seconds, added in migration 0041) as m:ss for
+  // the Memory Timeline. Previously the timeline hardcoded every video to
+  // "0:15" and every voice note to "0:30" regardless of actual length —
+  // this reads the real per-upload value now that it's persisted, falling
+  // back to a generic dash for older uploads recorded before that column
+  // existed (duration is null for those, not 0).
+  const formatDuration = (seconds: number | null | undefined) => {
+    if (!seconds || seconds <= 0) return "--:--"
+    const total = Math.round(seconds)
+    const mins = Math.floor(total / 60)
+    const secs = total % 60
+    return `${mins}:${secs.toString().padStart(2, "0")}`
+  }
+
   // Converts a raw `photos` row into the shape the shared media viewer
   // (src/lib/components/media/media-lightbox.tsx) expects, so the host
   // dashboard's activity timeline can open the exact same full-size
@@ -1342,7 +1356,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         videoUrl: getImageUrl(p.storage_path, ""),
         thumbnail: p.thumbnail_path ? getImageUrl(p.thumbnail_path, "") : undefined,
         title: p.original_filename || "Video clip",
-        duration: "0:15",
+        duration: formatDuration(p.duration),
         raw: p,
       })
     } else if (p.mime_type?.startsWith("audio/")) {
@@ -1351,7 +1365,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         type: "voice",
         guest: p.uploader_name || "Anonymous",
         category: "Voice Note",
-        duration: "0:30",
+        duration: formatDuration(p.duration),
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(p.uploader_name || "A")}&background=random`,
         time: new Date(p.created_at).toLocaleString("en-IN", { month: "short", day: "numeric", hour: '2-digit', minute: '2-digit' }),
         timestamp: new Date(p.created_at).getTime(),

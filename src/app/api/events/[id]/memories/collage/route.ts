@@ -21,6 +21,7 @@ import {
 } from "@/lib/integrations/collage"
 import { checkEventFeatureAccess } from "@/lib/plans/feature-gate"
 import { logger } from "@/lib/logger"
+import { API_RATE_LIMITS } from "@/lib/constants"
 
 const paramsSchema = z.object({ id: z.string().uuid() })
 const bodySchema = z.object({
@@ -43,6 +44,10 @@ export const POST = defineRoute<{ layout: CollageLayout; photo_ids?: string[] },
   method: "POST",
   body: bodySchema,
   requireAuth: true,
+  // Sharp image composition + storage upload — comparable resource cost to
+  // MOVIE_UPLOAD/RECAP_GENERATE, which are both rate-limited for that exact
+  // reason; this route had no limit at all.
+  rateLimit: { key: "memories:collage", limit: API_RATE_LIMITS.MEMORIES_GENERATE, windowSeconds: 300 },
   audit: "memories.collage.generate",
   handler: async ({ body, params, auth }) => {
     const parsedParams = paramsSchema.safeParse(params)
