@@ -397,6 +397,253 @@ const orbitPhotos = [
   { src: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=300&q=80", label: "Bridal Smile" },
 ]
 
+function RealMomentsSection() {
+  const [activeCategory, setActiveCategory] = useState("holidays")
+
+  const categories = [
+    { id: "weddings", label: "Weddings" },
+    { id: "birthdays", label: "Birthdays" },
+    { id: "parties", label: "Parties" },
+    { id: "trips", label: "Trips" },
+    { id: "holidays", label: "Holidays" },
+  ]
+
+  const categoryContent: Record<string, {
+    title: string
+    date: string
+    heroImg: string
+    galleryImgs: string[]
+    leftSub: string
+    leftCategoryLabel: string
+    rightSub: string
+    rightCategoryLabel: string
+    photosCount: number
+    joinedCount: number
+  }> = {
+    weddings: {
+      title: "Sarah & Mark",
+      date: "14 Oct 2026",
+      heroImg: "https://images.unsplash.com/photo-1519741497674-611481863552?w=1000&q=80",
+      galleryImgs: [
+        "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=500&q=80",
+        "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?w=500&q=80",
+        "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=500&q=80"
+      ],
+      leftSub: "CAMERA",
+      leftCategoryLabel: "DURING THE CEREMONY",
+      rightSub: "GALLERY",
+      rightCategoryLabel: "AFTER THE REVEAL",
+      photosCount: 142,
+      joinedCount: 68
+    },
+    birthdays: {
+      title: "Emma's 25th",
+      date: "08 Nov 2026",
+      heroImg: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1000&q=80",
+      galleryImgs: [
+        "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=500&q=80",
+        "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=500&q=80",
+        "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=500&q=80"
+      ],
+      leftSub: "CAMERA",
+      leftCategoryLabel: "THE CAKE BLOWOUT",
+      rightSub: "GALLERY",
+      rightCategoryLabel: "AFTER THE REVEAL",
+      photosCount: 98,
+      joinedCount: 34
+    },
+    parties: {
+      title: "Neon Rooftop Gala",
+      date: "31 Dec 2026",
+      heroImg: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1000&q=80",
+      galleryImgs: [
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&q=80",
+        "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=500&q=80",
+        "https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&q=80"
+      ],
+      leftSub: "CAMERA",
+      leftCategoryLabel: "MIDNIGHT CHEERS",
+      rightSub: "GALLERY",
+      rightCategoryLabel: "AFTER THE REVEAL",
+      photosCount: 230,
+      joinedCount: 110
+    },
+    trips: {
+      title: "Santorini Sunset",
+      date: "18 Aug 2026",
+      heroImg: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1000&q=80",
+      galleryImgs: [
+        "https://images.unsplash.com/photo-1533105079780-92b9be482077?w=500&q=80",
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&q=80",
+        "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=500&q=80"
+      ],
+      leftSub: "CAMERA",
+      leftCategoryLabel: "ALONG THE COAST",
+      rightSub: "GALLERY",
+      rightCategoryLabel: "AFTER THE REVEAL",
+      photosCount: 84,
+      joinedCount: 12
+    },
+    holidays: {
+      title: "Christmas",
+      date: "24 Dec 2026",
+      heroImg: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=1000&q=80",
+      galleryImgs: [
+        "https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=500&q=80",
+        "https://images.unsplash.com/photo-1576692139739-ab991fdfd6f3?w=500&q=80",
+        "https://images.unsplash.com/photo-1544717305-2782549b5136?w=500&q=80"
+      ],
+      leftSub: "CAMERA",
+      leftCategoryLabel: "OVER THE HOLIDAYS",
+      rightSub: "GALLERY",
+      rightCategoryLabel: "AFTER THE REVEAL",
+      photosCount: 115,
+      joinedCount: 42
+    }
+  }
+
+  const current = categoryContent[activeCategory] || categoryContent.holidays
+
+  return (
+    <section className="relative py-28 px-6 bg-surface-dark overflow-hidden text-center border-t border-b border-hairline-dark">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-mauve/10 via-transparent to-transparent" />
+
+      <div className="mx-auto max-w-5xl space-y-10">
+        
+        <div className="space-y-4">
+          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-bold tracking-widest text-mauve uppercase bg-mauve/10 border border-mauve/20">
+            <Sparkles className="h-3 w-3" />
+            <span>REAL MOMENTS</span>
+          </div>
+
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-playfair font-light text-ink tracking-tight">
+            “Your guests caught moments <span className="italic font-normal text-mauve">you never saw.</span>”
+          </h2>
+        </div>
+
+        <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3">
+          {categories.map((cat) => {
+            const isActive = activeCategory === cat.id
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`relative px-5 py-2.5 rounded-full text-xs font-semibold transition-all duration-300 ${
+                  isActive
+                    ? "bg-[#faf6ed] text-[#141210] shadow-lg shadow-white/10 font-bold scale-105"
+                    : "bg-surface-card border border-hairline-dark text-ink-secondary hover:text-ink hover:border-mauve/40"
+                }`}
+              >
+                {cat.label}
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="pt-8 pb-12 flex justify-center items-center relative">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 relative max-w-3xl">
+            
+            <div className="space-y-4 text-center">
+              <motion.div
+                key={`left-${activeCategory}`}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="w-[280px] sm:w-[310px] h-[560px] sm:h-[620px] rounded-[48px] bg-black border-[7px] border-[#2d2926] shadow-[0_25px_60px_rgba(0,0,0,0.8)] overflow-hidden relative flex flex-col justify-between p-4"
+              >
+                <img
+                  src={current.heroImg}
+                  alt={current.title}
+                  className="absolute inset-0 w-full h-full object-cover rounded-[40px]"
+                />
+                
+                <div className="relative z-10 flex justify-between items-center text-white text-xs font-medium pt-2 px-2">
+                  <span className="bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px]">Back</span>
+                  <span className="bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px]">HD 4K</span>
+                </div>
+
+                <div className="relative z-10 space-y-3 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 rounded-[32px]">
+                  <div className="text-left space-y-0.5">
+                    <h4 className="text-xl font-playfair font-light text-white">{current.title}</h4>
+                    <p className="text-[11px] text-white/70 font-light">{current.date}</p>
+                  </div>
+                  
+                  <button className="w-full bg-[#faf6ed] hover:bg-white text-black font-semibold text-xs py-3 rounded-full shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95">
+                    <span>Take your camera</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </motion.div>
+
+              <div className="space-y-0.5">
+                <p className="text-[10px] font-bold text-ink tracking-widest uppercase">{current.leftSub}</p>
+                <p className="text-[9px] font-light text-ink-tertiary tracking-widest uppercase">{current.leftCategoryLabel}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4 text-center md:-ml-8 md:-mt-8">
+              <motion.div
+                key={`right-${activeCategory}`}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="w-[260px] sm:w-[290px] h-[520px] sm:h-[580px] rounded-[44px] bg-[#141210] border-[6px] border-[#38332e] shadow-[0_25px_60px_rgba(0,0,0,0.7)] overflow-hidden relative flex flex-col justify-between p-3.5"
+              >
+                <div className="space-y-3 pt-2 text-left">
+                  <div className="flex justify-between items-center text-ink text-xs">
+                    <span className="text-[10px] bg-mauve/10 text-mauve px-2.5 py-1 rounded-full font-semibold">Gallery Live</span>
+                    <span className="text-[10px] text-ink-tertiary">5mo 11d left</span>
+                  </div>
+
+                  <div className="bg-surface-card p-3 rounded-2xl border border-hairline-dark flex justify-between items-center text-center">
+                    <div>
+                      <span className="text-sm font-bold text-ink block">{current.photosCount}</span>
+                      <span className="text-[9px] text-ink-tertiary uppercase tracking-wider">Photos</span>
+                    </div>
+                    <div className="h-6 w-px bg-hairline-dark" />
+                    <div>
+                      <span className="text-sm font-bold text-ink block">{current.joinedCount}</span>
+                      <span className="text-[9px] text-ink-tertiary uppercase tracking-wider">Joined</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 my-auto">
+                  {current.galleryImgs.map((img, idx) => (
+                    <div key={idx} className={`rounded-xl overflow-hidden border border-hairline-dark relative ${idx === 0 ? "col-span-2 h-28" : "h-24"}`}>
+                      <img src={img} alt="Guest upload" className="w-full h-full object-cover" />
+                      <div className="absolute bottom-1 right-1 bg-black/60 px-1.5 py-0.5 rounded text-[8px] text-white">
+                        Guest
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-between items-center bg-surface-card p-2 rounded-2xl border border-hairline-dark">
+                  <div className="h-7 w-7 rounded-full bg-mauve/10 text-mauve flex items-center justify-center">
+                    <Camera className="h-3.5 w-3.5" />
+                  </div>
+                  <span className="text-[10px] font-semibold text-ink">Scan QR to Upload</span>
+                  <div className="h-7 w-7 rounded-full bg-mauve text-[#faf6ed] flex items-center justify-center">
+                    <QrCode className="h-3.5 w-3.5" />
+                  </div>
+                </div>
+              </motion.div>
+
+              <div className="space-y-0.5">
+                <p className="text-[10px] font-bold text-ink tracking-widest uppercase">{current.rightSub}</p>
+                <p className="text-[9px] font-light text-ink-tertiary tracking-widest uppercase">{current.rightCategoryLabel}</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+  )
+}
+
 export default function HomePage() {
   const [activeRoadmap, setActiveRoadmap] = useState("step1")
   const [pointer, setPointer] = useState({ x: 0, y: 0 })
@@ -823,6 +1070,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* --- REAL MOMENTS SHOWCASE SECTION --- */}
+        <RealMomentsSection />
 
         {/* --- SECTION 3: SIGNATURE INTERACTIVE PHOTO ORBIT --- */}
         <section className="py-24 relative overflow-hidden">
