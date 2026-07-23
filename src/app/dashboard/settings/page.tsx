@@ -322,18 +322,6 @@ export default function SettingsPage() {
         </a>
       </div>
 
-      {/* SECTION 3: PARTNER */}
-      <div className="space-y-3">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-secondary">PARTNER</p>
-        <button
-          onClick={() => toast({ title: "Discount Code", description: "Enter code at checkout when upgrading your plan." })}
-          className="flex items-center gap-3 bg-surface-card border border-hairline-dark p-4 rounded-2xl hover:border-emerald-500/40 transition text-emerald-600 dark:text-emerald-400 font-semibold text-xs cursor-pointer shadow-sm w-full text-left"
-        >
-          <Tag className="h-4 w-4 text-emerald-500" />
-          <span>Have a discount code?</span>
-        </button>
-      </div>
-
       {/* SECTION 4: DESTINATIONS & OPTIONS */}
       <div className="space-y-3">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-secondary">DESTINATIONS</p>

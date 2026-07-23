@@ -37,10 +37,18 @@ interface DashboardData {
   albums: DashboardEvent[]
 }
 
-function supabasePhotoUrl(path: string) {
-  if (path.startsWith("http")) return path
-  const supabase = createClient()
-  return supabase.storage.from("event-memories").getPublicUrl(path).data.publicUrl
+function supabasePhotoUrl(path: string | null | undefined): string | null {
+  if (!path || typeof path !== "string") return null
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+    return path
+  }
+  const cleanPath = path.startsWith("/") ? path.slice(1) : path
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://rgueysvqeivxdnoeholx.supabase.co"
+
+  if (cleanPath.startsWith("photos/") || cleanPath.startsWith("event-memories/") || cleanPath.startsWith("event-photos/") || cleanPath.startsWith("gallery-covers/")) {
+    return `${supabaseUrl}/storage/v1/object/public/${cleanPath}`
+  }
+  return `${supabaseUrl}/storage/v1/object/public/photos/${cleanPath}`
 }
 
 async function getDashboardData(userId: string): Promise<DashboardData> {
@@ -74,7 +82,7 @@ async function getDashboardData(userId: string): Promise<DashboardData> {
   const eventIds = events.map((e) => e.id)
   const { data: photosData } = await supabase
     .from("photos")
-    .select("event_id, storage_path")
+    .select("event_id, storage_path, thumbnail_path")
     .in("event_id", eventIds)
 
   const countMap: Record<string, number> = {}
@@ -82,8 +90,9 @@ async function getDashboardData(userId: string): Promise<DashboardData> {
   photosData?.forEach((p) => {
     countMap[p.event_id] = (countMap[p.event_id] || 0) + 1
     if (!samplePhotoMap[p.event_id]) samplePhotoMap[p.event_id] = []
-    if (samplePhotoMap[p.event_id].length < 4 && p.storage_path) {
-      samplePhotoMap[p.event_id].push(p.storage_path)
+    const imgPath = p.thumbnail_path || p.storage_path
+    if (samplePhotoMap[p.event_id].length < 4 && imgPath) {
+      samplePhotoMap[p.event_id].push(imgPath)
     }
   })
 
@@ -190,29 +199,6 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
-            {/* SAMPLE EVENT ONBOARDING BANNER */}
-            <section className="rounded-3xl border border-mauve/30 bg-gradient-to-r from-mauve/15 via-white to-[#faf6ed] p-5 shadow-sm space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-mauve text-white shadow-md shadow-mauve/20">
-                    ✨
-                  </div>
-                  <div>
-                    <h3 className="font-playfair text-base font-bold text-ink">Explore Sample Event 💍</h3>
-                    <p className="text-xs text-ink-secondary">Take a 5-minute interactive tour to see how Snapsy Events works</p>
-                  </div>
-                </div>
-                <Link href="/dashboard/demo">
-                  <button
-                    type="button"
-                    className="flex items-center gap-1.5 rounded-full bg-mauve px-4 py-2 text-xs font-bold text-[#faf6ed] shadow-md shadow-mauve/20 transition-all hover:bg-mauve-strong hover:scale-[1.02]"
-                  >
-                    Try Demo <ChevronRight className="h-3.5 w-3.5" />
-                  </button>
-                </Link>
-              </div>
-            </section>
-
             {/* ACTIVE */}
             <section>
               <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-ink-tertiary">Active</h2>
@@ -259,63 +245,115 @@ export default function DashboardPage() {
             <section>
               <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-ink-tertiary">Albums</h2>
 
-              {albums.length === 0 ? (
-                <p className="text-sm text-ink-tertiary">No albums yet — create your first event to get started.</p>
-              ) : (
-                <div className="space-y-6">
-                  {albums.map((event) => {
-                    const dateRange = formatDateRange(event.event_date, event.end_date)
-                    const photosToDisplay = event.sample_photos && event.sample_photos.length > 0
-                      ? event.sample_photos
-                      : event.cover_image_url
-                        ? [event.cover_image_url]
-                        : []
+              <div className="space-y-6">
+                {/* User's Created Albums */}
+                {albums.map((event) => {
+                  const dateRange = formatDateRange(event.event_date, event.end_date)
+                  const photosToDisplay = event.sample_photos && event.sample_photos.length > 0
+                    ? event.sample_photos
+                    : event.cover_image_url
+                      ? [event.cover_image_url]
+                      : []
 
-                    return (
-                      <Link
-                        key={event.id}
-                        href={`/dashboard/events/${event.slug}`}
-                        className="group block space-y-3 rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 shadow-xs transition-all hover:border-mauve/40"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-playfair text-lg font-bold text-ink group-hover:text-mauve transition-colors">{event.name}</h3>
-                            <StatusPill status={event.status} />
-                          </div>
-                          {dateRange && <span className="text-xs text-ink-secondary font-medium">{dateRange}</span>}
+                  return (
+                    <Link
+                      key={event.id}
+                      href={`/dashboard/events/${event.slug}`}
+                      className="group block space-y-3 rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 shadow-xs transition-all hover:border-mauve/40"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-playfair text-lg font-bold text-ink group-hover:text-mauve transition-colors">{event.name}</h3>
+                          <StatusPill status={event.status} />
                         </div>
+                        {dateRange && <span className="text-xs text-ink-secondary font-medium">{dateRange}</span>}
+                      </div>
 
-                        {/* 4-Image Horizontal Grid (Matching Image 1 Reference) */}
+                      {/* Photos Grid or Clean Empty Placeholder */}
+                      {photosToDisplay.length > 0 ? (
                         <div className="grid grid-cols-4 gap-2 h-28 rounded-2xl overflow-hidden">
-                          {[0, 1, 2, 3].map((idx) => {
-                            const photoSrc = photosToDisplay[idx] || event.cover_image_url
+                          {photosToDisplay.slice(0, 4).map((photoPath, idx) => {
+                            const photoSrc = supabasePhotoUrl(photoPath)
+                            if (!photoSrc) return null
+                            const totalMore = event.photo_count > 4 ? event.photo_count - 4 : 0
                             return (
                               <div key={idx} className="relative h-full w-full bg-ink/5 overflow-hidden rounded-xl border border-hairline-dark">
-                                {photoSrc ? (
-                                  <img
-                                    src={photoSrc.startsWith("http") ? photoSrc : supabasePhotoUrl(photoSrc)}
-                                    alt=""
-                                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                  />
-                                ) : (
-                                  <div className="flex h-full w-full items-center justify-center bg-mauve/5 text-mauve/40">
-                                    <Camera className="h-5 w-5" />
+                                <img
+                                  src={photoSrc}
+                                  alt=""
+                                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                />
+                                {idx === 3 && totalMore > 0 && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white font-bold text-xs backdrop-blur-[1px]">
+                                    +{totalMore}
                                   </div>
                                 )}
                               </div>
                             )
                           })}
                         </div>
-
-                        <div className="flex items-center justify-between text-xs text-ink-secondary pt-1">
-                          <span>{event.photo_count} memories captured</span>
-                          <span className="font-semibold text-mauve group-hover:underline flex items-center gap-1">View Album →</span>
+                      ) : (
+                        <div className="flex h-20 w-full items-center justify-center rounded-2xl border border-dashed border-[#e5dfd0] bg-[#faf6ed]/50 px-4 text-center">
+                          <div className="flex items-center gap-2 text-xs font-medium text-ink-secondary">
+                            <Camera className="h-4 w-4 text-mauve/70" />
+                            <span>No photos yet — start capturing moments</span>
+                          </div>
                         </div>
-                      </Link>
-                    )
-                  })}
-                </div>
-              )}
+                      )}
+
+                      <div className="flex items-center justify-between text-xs text-ink-secondary pt-1">
+                        <span>{event.photo_count} memories captured</span>
+                        <span className="font-semibold text-mauve group-hover:underline flex items-center gap-1">View Album →</span>
+                      </div>
+                    </Link>
+                  )
+                })}
+
+                {/* Sample Album Card ("Welcome! SAMPLE" matching Image 2 reference) */}
+                <Link
+                  href="/dashboard/demo"
+                  className="group block space-y-3 rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 shadow-xs transition-all hover:border-mauve/40"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-playfair text-lg font-bold text-ink group-hover:text-mauve transition-colors">
+                        Welcome!
+                      </h3>
+                      <span className="rounded-md bg-mauve/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-mauve border border-mauve/20">
+                        SAMPLE
+                      </span>
+                    </div>
+                    <span className="text-xs text-ink-secondary font-medium">Jul 15~16, 2026</span>
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-2 h-28 rounded-2xl overflow-hidden">
+                    {[
+                      "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80",
+                      "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&q=80",
+                      "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600&q=80",
+                      "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=600&q=80"
+                    ].map((src, idx) => (
+                      <div key={idx} className="relative h-full w-full bg-ink/5 overflow-hidden rounded-xl border border-hairline-dark">
+                        <img
+                          src={src}
+                          alt=""
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        {idx === 3 && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white font-bold text-xs backdrop-blur-[1px]">
+                            +3
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-ink-secondary pt-1">
+                    <span>Interactive sample album</span>
+                    <span className="font-semibold text-mauve group-hover:underline flex items-center gap-1">Try Demo →</span>
+                  </div>
+                </Link>
+              </div>
             </section>
           </>
         )}

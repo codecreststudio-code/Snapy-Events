@@ -8,11 +8,13 @@ import { useAuth } from "@/lib/hooks"
 import { Avatar, AvatarFallback, AvatarImage } from "@/lib/components/ui/avatar"
 
 const TABS = [
-  { name: "Events", href: "/dashboard/events", icon: Camera },
-  { name: "Galleries", href: "/dashboard/galleries", icon: Disc },
+  { name: "Events", href: "/dashboard", icon: Camera },
 ]
 
 function isActivePath(pathname: string, href: string) {
+  if (href === "/dashboard") {
+    return pathname === "/dashboard" || pathname.startsWith("/dashboard/events")
+  }
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
