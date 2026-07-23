@@ -198,7 +198,7 @@ export function NewEventForm() {
   const router = useRouter()
   const { profile, user } = useAuth()
   const queryClient = useQueryClient()
-  
+
   // Current onboarding step: 1 to 10, then 11 (Final)
   const [step, setStep] = useState(1)
   const [createdEvent, setCreatedEvent] = useState<{ id: string; slug: string } | null>(null)
@@ -233,7 +233,7 @@ export function NewEventForm() {
   // fetchPlans effect below), the same live endpoint the public /pricing
   // page uses.
   const [guestCountPlan, setGuestCountPlan] = useState<string>("")
-  
+
   // Addons
   const [guestsBoost, setGuestsBoost] = useState(0)
   const [shotsBoost, setShotsBoost] = useState(0)
@@ -688,17 +688,17 @@ export function NewEventForm() {
 
       {/* Main Experience Layout */}
       <main className="flex-1 flex flex-col lg:flex-row max-w-7xl w-full mx-auto p-4 md:p-6 items-center justify-between gap-6 lg:gap-12 overflow-y-auto lg:overflow-hidden">
-        
+
         {/* Left Side: Step Card Container */}
         <div className="w-full lg:w-3/5 max-w-xl flex flex-col justify-center min-h-[360px] md:min-h-[400px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className="space-y-8"
+              initial={{ opacity: 0, y: 12, scale: 0.99 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.99 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-6 bg-surface-card/40 border border-hairline-dark rounded-3xl p-6 md:p-8 backdrop-blur-md shadow-xl"
             >
               {/* STEP 1: EVENT NAME */}
               {step === 1 && (
@@ -720,7 +720,7 @@ export function NewEventForm() {
                       autoFocus
                     />
                   </div>
-                  
+
                   {/* Suggestions */}
                   <div className="pt-2 space-y-3">
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-secondary">SUGGESTIONS</p>
@@ -729,11 +729,10 @@ export function NewEventForm() {
                         <button
                           key={s}
                           onClick={() => setName(s)}
-                          className={`px-4 py-2.5 text-xs rounded-full border transition-all cursor-pointer ${
-                            name === s
+                          className={`px-4 py-2.5 text-xs rounded-full border transition-all cursor-pointer ${name === s
                               ? "bg-mauve text-[#faf6ed] border-mauve font-semibold shadow-md"
                               : "border-hairline-dark bg-surface-card hover:border-mauve text-ink-secondary"
-                          }`}
+                            }`}
                         >
                           {s}
                         </button>
@@ -752,7 +751,7 @@ export function NewEventForm() {
                   <p className="text-xs md:text-sm text-ink-secondary">
                     Your choice tailors custom filters, layout designs, and countdown capsules.
                   </p>
-                  
+
                   <div className="grid grid-cols-2 gap-2.5 pt-1">
                     {EVENT_TYPE_CARDS.map((type) => {
                       const isSelected = eventType === type.id
@@ -767,9 +766,8 @@ export function NewEventForm() {
                             else if (type.id === "corporate") setCoverImage("linear-gradient(135deg, #84FAB0 0%, #8FD3F4 100%)")
                             else setCoverImage("linear-gradient(135deg, #E2E2E2 0%, #C9C9C9 100%)")
                           }}
-                          className={`p-3 rounded-xl text-left border transition-all flex items-center gap-3 h-14 cursor-pointer bg-gradient-to-br ${type.gradient} ${
-                            isSelected ? "border-mauve shadow-sm ring-1 ring-mauve" : "border-hairline-dark hover:border-mauve/30"
-                          }`}
+                          className={`p-3 rounded-xl text-left border transition-all flex items-center gap-3 h-14 cursor-pointer bg-gradient-to-br ${type.gradient} ${isSelected ? "border-mauve shadow-sm ring-1 ring-mauve" : "border-hairline-dark hover:border-mauve/30"
+                            }`}
                         >
                           <span className="text-xl shrink-0">{type.emoji}</span>
                           <span className="text-xs font-semibold text-ink truncate">{type.name}</span>
@@ -803,7 +801,7 @@ export function NewEventForm() {
                   <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-ink`}>
                     Choose a cover for your memories.
                   </h1>
-                  
+
                   {/* Selector tabs */}
                   <div className="flex border-b border-hairline-dark overflow-x-auto">
                     {[
@@ -814,9 +812,8 @@ export function NewEventForm() {
                       <button
                         key={tab.id}
                         onClick={() => setCoverType(tab.id as any)}
-                        className={`pb-2 px-3.5 text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
-                          coverType === tab.id ? "border-b-2 border-mauve text-mauve" : "text-ink-secondary"
-                        }`}
+                        className={`pb-2 px-3.5 text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${coverType === tab.id ? "border-b-2 border-mauve text-mauve" : "text-ink-secondary"
+                          }`}
                       >
                         {tab.label}
                       </button>
@@ -832,9 +829,8 @@ export function NewEventForm() {
                           <button
                             key={grad.name}
                             onClick={() => setCoverImage(grad.css)}
-                            className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all cursor-pointer bg-surface-card ${
-                              isSelected ? "border-mauve shadow-sm" : "border-hairline-dark hover:border-mauve/30"
-                            }`}
+                            className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all cursor-pointer bg-surface-card ${isSelected ? "border-mauve shadow-sm" : "border-hairline-dark hover:border-mauve/30"
+                              }`}
                           >
                             <div className="w-10 h-10 rounded-lg shrink-0" style={{ background: grad.css }} />
                             <span className="text-xs font-medium text-ink-secondary">{grad.name}</span>
@@ -853,9 +849,8 @@ export function NewEventForm() {
                           <button
                             key={idx}
                             onClick={() => setCoverImage(url)}
-                            className={`h-24 rounded-xl border overflow-hidden relative transition-all cursor-pointer ${
-                              isSelected ? "border-mauve shadow-md scale-[1.02]" : "border-hairline-dark"
-                            }`}
+                            className={`h-24 rounded-xl border overflow-hidden relative transition-all cursor-pointer ${isSelected ? "border-mauve shadow-md scale-[1.02]" : "border-hairline-dark"
+                              }`}
                           >
                             <img src={url} alt={`Template ${idx}`} className="w-full h-full object-cover" />
                             <div className="absolute inset-0 bg-black/10 hover:bg-transparent transition-all" />
@@ -974,7 +969,7 @@ export function NewEventForm() {
                   <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-ink`}>
                     When should guests see the memories?
                   </h1>
-                  
+
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     {[
                       { id: "immediately", label: "Immediately", desc: "Uploads go live instantly" },
@@ -989,9 +984,8 @@ export function NewEventForm() {
                         <button
                           key={opt.id}
                           onClick={() => setRevealExperience(opt.id)}
-                          className={`p-4 rounded-xl text-left border flex flex-col justify-between transition-all bg-surface-card cursor-pointer ${
-                            isSelected ? "border-mauve shadow-sm" : "border-hairline-dark hover:border-mauve/30"
-                          }`}
+                          className={`p-4 rounded-xl text-left border flex flex-col justify-between transition-all bg-surface-card cursor-pointer ${isSelected ? "border-mauve shadow-sm" : "border-hairline-dark hover:border-mauve/30"
+                            }`}
                         >
                           <span className="text-xs font-bold text-ink">{opt.label}</span>
                           <span className="text-[10px] text-ink-secondary mt-1">{opt.desc}</span>
@@ -1028,7 +1022,7 @@ export function NewEventForm() {
                   <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-ink`}>
                     How many guests are joining?
                   </h1>
-                  
+
                   <div className="space-y-3 pt-2">
                     {plansLoading && livePlans.length === 0 ? (
                       <div className="p-8 text-center text-ink-tertiary text-xs font-semibold">Loading plans…</div>
@@ -1057,9 +1051,8 @@ export function NewEventForm() {
                           <div
                             key={plan.id}
                             onClick={() => setGuestCountPlan(plan.id)}
-                            className={`p-4 rounded-2xl border-2 transition-all bg-surface-card cursor-pointer flex justify-between items-start gap-4 ${
-                              isSelected ? "border-mauve shadow-sm" : "border-hairline-dark hover:border-mauve/30"
-                            }`}
+                            className={`p-4 rounded-2xl border-2 transition-all bg-surface-card cursor-pointer flex justify-between items-start gap-4 ${isSelected ? "border-mauve shadow-sm" : "border-hairline-dark hover:border-mauve/30"
+                              }`}
                           >
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
@@ -1166,7 +1159,7 @@ export function NewEventForm() {
                   <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-ink`}>
                     What can your guests contribute?
                   </h1>
-                  
+
                   <div className="space-y-4">
                     {/* Photos switch */}
                     <div className="p-4 rounded-xl border border-hairline-dark bg-surface-card space-y-3">
@@ -1197,9 +1190,8 @@ export function NewEventForm() {
                                     }
                                     setPhotoLimit(val)
                                   }}
-                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${
-                                    photoLimit === val ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary"
-                                  }`}
+                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${photoLimit === val ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary"
+                                    }`}
                                 >
                                   {val === -1 ? "Unlimited" : val}
                                   {addonPrice > 0 && <span className="opacity-70"> +₹{addonPrice}</span>}
@@ -1244,9 +1236,8 @@ export function NewEventForm() {
                               <button
                                 key={sec}
                                 onClick={() => setVideoDuration(sec)}
-                                className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${
-                                  videoDuration === sec ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary"
-                                }`}
+                                className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${videoDuration === sec ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary"
+                                  }`}
                               >
                                 {sec}s
                               </button>
@@ -1290,9 +1281,8 @@ export function NewEventForm() {
                                 <button
                                   key={sec}
                                   onClick={() => setVoiceDuration(sec)}
-                                  className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${
-                                    voiceDuration === sec ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary"
-                                  }`}
+                                  className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${voiceDuration === sec ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary"
+                                    }`}
                                 >
                                   {sec}s
                                 </button>
@@ -1389,7 +1379,7 @@ export function NewEventForm() {
                   <h1 className={`font-playfair text-4xl md:text-5xl font-light leading-tight tracking-tight text-ink`}>
                     Design your invitation experience.
                   </h1>
-                  
+
                   <div className="space-y-4 pt-2">
                     <div>
                       <label className="text-[11px] uppercase tracking-widest text-ink-secondary font-bold block mb-2">Select Theme Template</label>
@@ -1399,9 +1389,8 @@ export function NewEventForm() {
                             key={theme}
                             type="button"
                             onClick={() => setInvitationTheme(theme)}
-                            className={`px-3 py-1.5 rounded-full text-xs font-semibold capitalize border transition-all cursor-pointer ${
-                              invitationTheme === theme ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card border-hairline-dark text-ink-secondary"
-                            }`}
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold capitalize border transition-all cursor-pointer ${invitationTheme === theme ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card border-hairline-dark text-ink-secondary"
+                              }`}
                           >
                             {theme}
                           </button>
@@ -1466,9 +1455,8 @@ export function NewEventForm() {
                 {Array.from({ length: 9 }).map((_, i) => (
                   <div
                     key={i}
-                    className={`h-1.5 rounded-full transition-all ${
-                      i + 1 === step ? "w-6 bg-mauve" : "w-1.5 bg-hairline-dark"
-                    }`}
+                    className={`h-1.5 rounded-full transition-all ${i + 1 === step ? "w-6 bg-mauve" : "w-1.5 bg-hairline-dark"
+                      }`}
                   />
                 ))}
               </div>
@@ -1479,7 +1467,7 @@ export function NewEventForm() {
         {/* Right Side: Phone Mockup Live Preview (Fidelity WOW factor) */}
         <div className="w-full lg:w-2/5 flex justify-center items-center py-2 shrink-0">
           <div className="w-[250px] sm:w-[270px] md:w-[280px] h-[450px] sm:h-[480px] md:h-[510px] rounded-[36px] md:rounded-[40px] border-[8px] md:border-[10px] border-[#1C1A17] bg-[#FAF8F5] shadow-xl overflow-hidden relative flex flex-col justify-between p-3.5 shrink-0 select-none scale-90 sm:scale-95 md:scale-100 origin-center transition-all">
-            
+
             {/* Phone Camera Notch notch */}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-5 bg-[#1C1A17] rounded-full z-20 flex items-center justify-center">
               <div className="w-2.5 h-2.5 rounded-full bg-slate-900 border border-[#222]" />
@@ -1490,7 +1478,7 @@ export function NewEventForm() {
               const currentTheme = THEME_PRESETS[invitationTheme] || THEME_PRESETS.minimal
               return (
                 <div className={`absolute inset-0 ${currentTheme.containerBg} transition-colors duration-500 flex flex-col justify-between p-4 pt-10 overflow-hidden`}>
-                  
+
                   {/* Event Cover Image Backdrop */}
                   <div className="absolute top-0 left-0 right-0 h-44 z-0 overflow-hidden">
                     <div
@@ -1513,7 +1501,7 @@ export function NewEventForm() {
                     <span className={`text-[8px] uppercase tracking-widest ${currentTheme.accentColor} font-bold`}>
                       {eventType === "custom" ? (customEventTypeName || "Custom Capsule") : `${eventType.replace(/_/g, " ")} Capsule`}
                     </span>
-                    
+
                     <h3 className={`font-playfair text-xl leading-tight font-medium ${currentTheme.titleColor}`}>
                       {name || "Your Event Name"}
                     </h3>
@@ -1661,7 +1649,7 @@ export function NewEventForm() {
                       const host = typeof window !== "undefined" ? window.location.host : ""
                       const url = `https://${host}/event/${createdEvent?.slug}`
                       if (typeof navigator !== "undefined" && "share" in navigator) {
-                        (navigator as any).share({ title: name, url }).catch(() => {})
+                        (navigator as any).share({ title: name, url }).catch(() => { })
                       } else {
                         copyInviteLink()
                       }
