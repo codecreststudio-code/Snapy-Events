@@ -60,7 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.3,
     },
     {
-      url: `${baseUrl}/refund-policy`,
+      url: `${baseUrl}/delete-data`,
       lastModified: new Date(),
       changeFrequency: "yearly",
       priority: 0.3,

@@ -21,8 +21,8 @@ const faqs = [
   { q: "How does AI face search work?", a: "We detect faces on upload, build secure vector embeddings, and let guests find every photo they're in by uploading a quick selfie. No data is shared publicly." },
   { q: "Can I password-protect a gallery?", a: "Yes. Each event supports custom access codes, host moderation queues, and auto-expiry dates for extra privacy control." },
   { q: "What if I want my own domain?", a: "On the Premium plan, you can connect your own custom domain (e.g. photos.yourbrand.com) with automatic secure SSL certificate verification." },
-  { q: "How do refunds work?", a: "We offer a 7-day no-questions-asked refund policy on all of our paid plans. If you are not satisfied, contact support for a prompt refund." },
-  { q: "Where is data stored?", a: "All data is securely hosted on Supabase Postgres databases. Image files transfer via encrypted TLS 1.3 tunnels and are stored encrypted at rest." },
+  { q: "What is your refund policy?", a: "All purchases, plan upgrades, and addon packages on Snapsy Events are final and non-refundable once activated. You can try Snapsy Events for free on our starter plan before upgrading." },
+  { q: "Where is my event data stored?", a: "All photos and media are hosted securely in multi-region encrypted cloud storage with global CDN distribution and Supabase PostgreSQL metadata encryption." },
 ]
 
 function FAQItem({ item, isOpen, onClick }: { item: typeof faqs[0]; isOpen: boolean; onClick: () => void }) {

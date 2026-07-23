@@ -11,7 +11,6 @@ const PUBLIC_PATHS = new Set<string>([
   "/contact",
   "/terms",
   "/privacy",
-  "/refund-policy",
   "/delete-data",
   "/manifest.webmanifest",
   "/login",
