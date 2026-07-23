@@ -58,12 +58,21 @@ async function getGalleries(eventIds: string[]): Promise<GalleryType[]> {
 
 async function getEvents(orgId: string) {
   const supabase = createClient()
-  const { data, error } = await supabase
+  let { data, error } = await supabase
     .from("events")
     .select("id")
     .eq("host_id", orgId)
 
-  if (error) throw error
+  if (error || !data || data.length === 0) {
+    const { data: orgData } = await supabase
+      .from("events")
+      .select("id")
+      .eq("organization_id", orgId)
+    if (orgData && orgData.length > 0) {
+      data = orgData
+    }
+  }
+
   return data || []
 }
 

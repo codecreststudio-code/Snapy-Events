@@ -20,13 +20,23 @@ import { useAuth } from "@/lib/hooks"
 
 async function getEvents(orgId: string): Promise<Event[]> {
   const supabase = createClient()
-  const { data, error } = await supabase
+  let { data, error } = await supabase
     .from("events")
     .select("*")
     .eq("host_id", orgId)
     .order("created_at", { ascending: false })
 
-  if (error) throw error
+  if (error || !data || data.length === 0) {
+    const { data: orgData } = await supabase
+      .from("events")
+      .select("*")
+      .eq("organization_id", orgId)
+      .order("created_at", { ascending: false })
+    if (orgData && orgData.length > 0) {
+      data = orgData
+    }
+  }
+
   return data || []
 }
 
