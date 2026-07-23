@@ -1,18 +1,12 @@
-// Snapsy service worker — hand-written (no next-pwa/workbox dependency, so
-// there's nothing new to `npm install` for this to work).
-//
-// Scope of what this SW is allowed to touch is deliberately an ALLOWLIST,
-// not a blocklist: only same-origin static assets (JS/CSS bundles, fonts,
-// icons, the logo, the manifest, and the marketing landing page) are ever
-// cached. Everything else — /api/*, /dashboard/*, /admin/*, /event/*,
-// /auth*, any cross-origin request (including Supabase storage/API) — is
-// left completely untouched and falls through to the network exactly as if
-// this SW didn't exist. This matches the product requirement directly:
-// offline support for "the shell", never for data.
-//
-// Bump CACHE_VERSION on any change to the cached-asset list below; the
-// activate handler deletes every cache that doesn't match the current
-// version, so stale precached assets never linger.
+// Snapsy service worker — hand-written (no next-pwa/workbox dependency).
+// Import Firebase compat scripts synchronously at initial worker evaluation time per W3C SW specification.
+try {
+  importScripts("https://www.gstatic.com/firebasejs/11.2.0/firebase-app-compat.js");
+  importScripts("https://www.gstatic.com/firebasejs/11.2.0/firebase-messaging-compat.js");
+} catch (err) {
+  console.warn("[sw] firebase scripts import skipped", err);
+}
+
 const CACHE_VERSION = "v1";
 const STATIC_CACHE = `snapsy-static-${CACHE_VERSION}`;
 const OFFLINE_URL = "/offline";
@@ -57,24 +51,15 @@ function initFirebaseMessaging(config) {
   }
 }
 
-try {
-  importScripts("https://www.gstatic.com/firebasejs/11.2.0/firebase-app-compat.js");
-  importScripts("https://www.gstatic.com/firebasejs/11.2.0/firebase-messaging-compat.js");
-
-  // Fetch Firebase Web config dynamically from server
-  fetch("/api/firebase-config")
-    .then((res) => (res.ok ? res.json() : null))
-    .then((config) => {
-      if (config) initFirebaseMessaging(config);
-    })
-    .catch((err) => {
-      console.warn("[sw] firebase config fetch skipped", err);
-    });
-} catch (err) {
-  // Firebase Messaging isn't available in every environment this SW may
-  // run in during development — never let that break core install/offline caching.
-  console.warn("[sw] firebase messaging scripts import skipped", err);
-}
+// Fetch Firebase Web config dynamically from server
+fetch("/api/firebase-config")
+  .then((res) => (res.ok ? res.json() : null))
+  .then((config) => {
+    if (config) initFirebaseMessaging(config);
+  })
+  .catch((err) => {
+    console.warn("[sw] firebase config fetch skipped", err);
+  });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();

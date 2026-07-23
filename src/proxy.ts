@@ -114,13 +114,10 @@ export async function proxy(request: NextRequest) {
         "default-src 'self'",
         "img-src 'self' data: blob: https:",
         "media-src 'self' blob: https://*.supabase.co",
-        // 'unsafe-inline' is required for Next.js inline scripts & dynamic chunks.
-        // NOTE: Do NOT include 'nonce-...' here, because W3C CSP specs dictate that when a nonce is present,
-        // browsers MUST ignore 'unsafe-inline', which blocks inline scripts without a nonce attribute.
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://*.razorpay.com https://cdn.jsdelivr.net https://*.gstatic.com https://www.gstatic.com",
-        "style-src 'self' 'unsafe-inline'",
-        "font-src 'self' data: https://*.gstatic.com",
-        "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co wss://*.supabase.in https://*.razorpay.com https://api.razorpay.com https://*.resend.com https://graph.facebook.com https://cdn.jsdelivr.net https://*.googleapis.com https://*.firebaseapp.com https://*.firebaseio.com wss://*.firebaseio.com https://fcmregistrations.googleapis.com",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://*.razorpay.com https://cdn.jsdelivr.net https://*.gstatic.com https://www.gstatic.com https://www.clarity.ms https://*.clarity.ms",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' data: https://*.gstatic.com https://fonts.gstatic.com",
+        "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co wss://*.supabase.in https://*.razorpay.com https://api.razorpay.com https://*.resend.com https://graph.facebook.com https://cdn.jsdelivr.net https://*.googleapis.com https://*.firebaseapp.com https://*.firebaseio.com wss://*.firebaseio.com https://fcmregistrations.googleapis.com https://www.clarity.ms https://*.clarity.ms https://c.clarity.ms",
         "frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://*.razorpay.com",
         "frame-ancestors 'none'",
         "base-uri 'self'",
