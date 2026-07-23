@@ -145,6 +145,29 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
+            {/* SAMPLE EVENT ONBOARDING BANNER */}
+            <section className="rounded-3xl border border-mauve/30 bg-gradient-to-r from-mauve/15 via-white to-[#faf6ed] p-5 shadow-sm space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-mauve text-white shadow-md shadow-mauve/20">
+                    ✨
+                  </div>
+                  <div>
+                    <h3 className="font-playfair text-base font-bold text-ink">Explore Sample Event 💍</h3>
+                    <p className="text-xs text-ink-secondary">Take a 5-minute interactive tour to see how Snapsy Events works</p>
+                  </div>
+                </div>
+                <Link href="/dashboard/demo">
+                  <button
+                    type="button"
+                    className="flex items-center gap-1.5 rounded-full bg-mauve px-4 py-2 text-xs font-bold text-[#faf6ed] shadow-md shadow-mauve/20 transition-all hover:bg-mauve-strong hover:scale-[1.02]"
+                  >
+                    Try Demo <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+                </Link>
+              </div>
+            </section>
+
             {/* ACTIVE */}
             <section>
               <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-ink-tertiary">Active</h2>

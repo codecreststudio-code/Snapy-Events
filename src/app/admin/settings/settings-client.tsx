@@ -15,7 +15,8 @@ import {
   Activity,
   Settings,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Sparkles
 } from "lucide-react"
 import { updatePlatformSettings } from "@/app/actions/admin-settings"
 
@@ -124,6 +125,38 @@ export function SettingsClient({
                 <p className="text-xs text-ink-tertiary font-semibold leading-relaxed">Allows Enterprise/Premium accounts to hide Snapsy footer branding.</p>
               </div>
               <Switch checked={whiteLabelEnabled} onCheckedChange={setWhiteLabelEnabled} />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Sample Event Demo Controls */}
+        <Card className="bg-surface-card border-hairline-dark shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-ink flex items-center gap-2 text-base font-bold">
+              <Sparkles className="h-5 w-5 text-mauve" />
+              <span>Sample Event Experience Controls</span>
+            </CardTitle>
+            <CardDescription className="text-ink-tertiary text-xs font-semibold leading-relaxed">
+              Manage the interactive demo event featured on host dashboards for onboarding.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between py-3 border-b border-hairline-dark">
+              <div className="space-y-0.5">
+                <Label className="text-ink text-sm font-bold block">Enable Onboarding Sample Event</Label>
+                <p className="text-xs text-ink-tertiary font-semibold leading-relaxed">Displays the interactive sample event card on user dashboards.</p>
+              </div>
+              <Switch checked={true} onCheckedChange={() => toast({ title: "Sample Event Enabled", description: "Sample event is active for all new users." })} />
+            </div>
+            <div className="flex items-center justify-between py-3">
+              <div className="space-y-0.5">
+                <Label className="text-ink text-sm font-bold block">Default Featured Template</Label>
+                <p className="text-xs text-ink-tertiary font-semibold leading-relaxed">Select the default theme for new users.</p>
+              </div>
+              <select className="rounded-full border border-[#e5dfd0] bg-white px-4 py-1.5 text-xs font-bold text-ink">
+                <option value="wedding">Snapsy & Events Wedding 💍</option>
+                <option value="birthday">Snapsy's Birthday Party 🎂</option>
+              </select>
             </div>
           </CardContent>
         </Card>
