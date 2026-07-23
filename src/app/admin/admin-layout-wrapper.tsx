@@ -45,7 +45,7 @@ export function AdminLayoutWrapper({
           isOwner={isOwner}
           initialTheme={initialTheme}
         />
-        <div className="flex-1 overflow-y-auto bg-surface-dark">
+        <div className="flex-1 overflow-y-auto bg-surface-dark" data-lenis-prevent>
           {children}
         </div>
       </div>

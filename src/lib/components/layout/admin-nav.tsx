@@ -117,7 +117,7 @@ export function AdminNav() {
   }
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-hairline-dark bg-surface-card text-ink md:flex md:flex-col h-screen overflow-y-auto sticky top-0">
+    <aside className="hidden w-64 shrink-0 border-r border-hairline-dark bg-surface-card text-ink md:flex md:flex-col h-screen overflow-y-auto sticky top-0" data-lenis-prevent>
       {/* Brand Header */}
       <div className="flex h-16 items-center border-b border-hairline-dark px-6 shrink-0 gap-2">
         <Link href="/admin" className="text-ink" aria-label="Admin home">

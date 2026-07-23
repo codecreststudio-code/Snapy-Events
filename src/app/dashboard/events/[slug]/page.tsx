@@ -48,6 +48,7 @@ import {
   ChevronRight,
   Users,
   Copy,
+  Heart,
   Check,
   Share2,
   MessageCircle,
@@ -1504,13 +1505,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex items-center gap-2 max-w-full overflow-x-auto no-scrollbar py-1 shrink-0">
             {downloadAllAllowed ? (
               <Button
                 variant="outline"
                 onClick={handleDownloadZip}
                 disabled={isDownloadingZip}
-                className="rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/5 text-xs flex items-center gap-1"
+                className="rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/5 text-xs flex items-center gap-1 shrink-0 whitespace-nowrap"
                 title="Download all approved photos as a print-ready ZIP"
               >
                 {isDownloadingZip ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
@@ -1522,7 +1523,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 disabled
                 aria-disabled="true"
                 title={featureAccess?.print_ready_downloads?.reason || "Print-ready downloads require a paid plan"}
-                className="rounded-full border border-[#b8925a]/40 bg-[#b8925a]/10 text-[#b8925a]/70 text-xs flex items-center gap-1.5 cursor-not-allowed opacity-80 hover:bg-[#b8925a]/10"
+                className="rounded-full border border-[#b8925a]/40 bg-[#b8925a]/10 text-[#b8925a]/70 text-xs flex items-center gap-1.5 cursor-not-allowed opacity-80 hover:bg-[#b8925a]/10 shrink-0 whitespace-nowrap"
               >
                 <Download className="h-3.5 w-3.5" />
                 <span>Download All</span>
@@ -1531,7 +1532,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 </span>
               </Button>
             )}
-            <Button asChild variant="outline" className="rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/5 text-xs">
+            <Button asChild variant="outline" className="rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/5 text-xs shrink-0 whitespace-nowrap">
               <Link href={`/event/${event.slug}`} target="_blank" className="flex items-center gap-1">
                 <span>Live Portal</span>
                 <ExternalLink className="h-3 w-3" />
@@ -1539,7 +1540,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </Button>
             <Button
               onClick={() => setIsDrawerOpen(true)}
-              className="rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a] text-xs font-semibold flex items-center gap-1 border-none cursor-pointer"
+              className="rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a] text-xs font-semibold flex items-center gap-1 border-none cursor-pointer shrink-0 whitespace-nowrap"
             >
               <Settings className="h-4 w-4" />
               <span>Settings</span>
@@ -1656,22 +1657,46 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     {item.type === "photo_group" && (
                       <div className="space-y-3">
                         <div className="grid grid-cols-3 gap-2">
-                          {item.photos?.map((p: any, idx: number) => (
-                            <div
-                              key={idx}
-                              className="aspect-square bg-ink/5 rounded-lg overflow-hidden relative group cursor-pointer"
-                              onClick={() => setActiveLightboxMedia(toLightboxMedia(p))}
-                              title="View & react"
-                            >
-                              <img src={getImageUrl(p.thumbnail_path || p.storage_path)} alt="Upload" className="w-full h-full object-cover" />
-                              {watermarkEnabled && <WatermarkOverlay />}
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <Search className="h-4 w-4 text-white" />
+                          {item.photos?.map((p: any, idx: number) => {
+                            const reactionsObj = p.metadata?.reactions || {}
+                            const commentsArr = p.metadata?.comments || []
+                            const reactTotal = Object.values(reactionsObj).reduce((a: number, b: any) => a + Number(b || 0), 0)
+                            return (
+                              <div
+                                key={idx}
+                                className="aspect-square bg-ink/5 rounded-xl overflow-hidden relative group cursor-pointer border border-[#e5dfd0] hover:border-[#b8925a]/40 transition-all shadow-sm"
+                                onClick={() => setActiveLightboxMedia(toLightboxMedia(p))}
+                                title="View photo, add reactions & comments"
+                              >
+                                <img src={getImageUrl(p.thumbnail_path || p.storage_path)} alt="Upload" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                                {watermarkEnabled && <WatermarkOverlay />}
+                                
+                                {/* Badges overlay for reactions & comments */}
+                                {(reactTotal > 0 || commentsArr.length > 0) && (
+                                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-1.5 flex items-center justify-between text-[10px] text-white">
+                                    {reactTotal > 0 ? (
+                                      <span className="flex items-center gap-0.5 font-bold text-amber-300">
+                                        <Heart className="h-3 w-3 fill-amber-300" /> {reactTotal}
+                                      </span>
+                                    ) : <span />}
+                                    {commentsArr.length > 0 && (
+                                      <span className="flex items-center gap-0.5 font-medium text-white/90">
+                                        <MessageSquare className="h-3 w-3" /> {commentsArr.length}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <Search className="h-4 w-4 text-white" />
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            )
+                          })}
                         </div>
-                        <p className="text-[10px] text-[#b8925a] font-semibold">Uploaded {item.photos?.length || 0} high-resolution prints to Capsule</p>
+                        <p className="text-[10px] text-[#b8925a] font-semibold flex items-center gap-1">
+                          <span>✨ Uploaded {item.photos?.length || 0} high-resolution prints to Capsule</span>
+                        </p>
                       </div>
                     )}
 
@@ -1690,7 +1715,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     {/* Video player visual display */}
                     {item.type === "video" && (
                       <div className="space-y-2">
-                        <div className="aspect-video bg-black rounded-xl overflow-hidden relative flex items-center justify-center group shadow-inner">
+                        <div className="aspect-video bg-black rounded-xl overflow-hidden relative flex items-center justify-center group shadow-inner border border-[#e5dfd0]">
                           <video
                             src={item.videoUrl}
                             poster={item.thumbnail}
@@ -1704,10 +1729,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           {watermarkEnabled && <WatermarkOverlay />}
                         </div>
                         <div className="flex items-center justify-between">
-                          <p className="text-xs font-semibold text-ink">{item.title}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs font-semibold text-ink">{item.title || "HD Video Clip"}</p>
+                            <span className="text-[9px] bg-red-500/10 text-red-600 font-bold px-2 py-0.5 rounded-full border border-red-500/20">HD Video</span>
+                          </div>
                           <button
                             onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
-                            className="text-[10px] font-bold text-[#b8925a] hover:text-mauve-strong flex items-center gap-1"
+                            className="text-[10px] font-bold text-[#b8925a] hover:text-mauve-strong flex items-center gap-1.5 rounded-full bg-[#b8925a]/10 px-2.5 py-1 border border-[#b8925a]/20"
                           >
                             <MessageSquare className="h-3 w-3" /> React & Comment
                           </button>
@@ -1718,22 +1746,31 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     {/* Voice audio card contribution */}
                     {item.type === "voice" && (
                       <div className="space-y-2.5">
-                        <div className="flex items-center gap-3 bg-ink/5 border border-hairline-dark p-3 rounded-xl">
-                          <audio
-                            src={item.audioUrl}
-                            controls
-                            preload="none"
-                            className="flex-1 h-10"
-                          >
-                            Your browser does not support audio playback.
-                          </audio>
+                        <div className="flex items-center gap-3 bg-gradient-to-r from-[#b8925a]/10 via-[#ffffff] to-[#b8925a]/5 border border-[#e5dfd0] p-3 rounded-2xl shadow-sm">
+                          <div className="h-9 w-9 rounded-full bg-[#b8925a] text-white flex items-center justify-center shrink-0 shadow-md">
+                            <Mic className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[10px] font-bold text-[#b8925a] uppercase tracking-wider block">Voice Note</span>
+                            <audio
+                              src={item.audioUrl}
+                              controls
+                              preload="none"
+                              className="w-full h-8 mt-1"
+                            >
+                              Your browser does not support audio playback.
+                            </audio>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
-                          className="text-[10px] font-bold text-[#b8925a] hover:text-mauve-strong flex items-center gap-1"
-                        >
-                          <MessageSquare className="h-3 w-3" /> React & Comment
-                        </button>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-[10px] text-ink-tertiary">Audio recording</span>
+                          <button
+                            onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
+                            className="text-[10px] font-bold text-[#b8925a] hover:text-mauve-strong flex items-center gap-1.5 rounded-full bg-[#b8925a]/10 px-2.5 py-1 border border-[#b8925a]/20"
+                          >
+                            <MessageSquare className="h-3 w-3" /> React & Comment
+                          </button>
+                        </div>
                       </div>
                     )}
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
+import { createPortal } from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/lib/components/ui/button"
 import { Camera, RefreshCw, X, Check, Video, Square, Play, Pause, Zap, ZapOff, Grid3x3, ZoomIn, AlertTriangle } from "lucide-react"
@@ -116,6 +117,24 @@ export function CameraCapture({
   // is true (falls back to instant CSS-driven state changes, same as before
   // this pass), never blocked entirely since none of it is essential motion.
   const prefersReducedMotion = useReducedMotion()
+  const [mounted, setMounted] = useState(false)
+
+  // Portal mount check
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Lock body scrolling while camera is active so background page cannot scroll
+  useEffect(() => {
+    const originalStyle = document.body.style.overflow
+    const originalTouchAction = document.body.style.touchAction
+    document.body.style.overflow = "hidden"
+    document.body.style.touchAction = "none"
+    return () => {
+      document.body.style.overflow = originalStyle
+      document.body.style.touchAction = originalTouchAction
+    }
+  }, [])
 
   const availableFilters = allowedFilters && allowedFilters.length > 0
     ? PRESET_FILTERS.filter(f => allowedFilters.includes(f.id) || f.id === "normal")
@@ -473,9 +492,9 @@ export function CameraCapture({
   const uploadingCount = pendingUploads.filter((p) => p.status === "uploading").length
   const erroredUploads = pendingUploads.filter((p) => p.status === "error")
 
-  return (
+  const content = (
     <div
-      className="fixed inset-0 z-50 bg-[#0B0908] flex flex-col sm:p-4 md:p-8"
+      className="fixed inset-0 top-0 left-0 right-0 bottom-0 z-[9999] h-screen h-[100dvh] w-screen w-[100dvw] overflow-hidden flex flex-col bg-[#0B0908] touch-none select-none"
       role="dialog"
       aria-modal="true"
       aria-label="Camera"
@@ -728,7 +747,17 @@ export function CameraCapture({
           <>
             {/* Filter Carousel */}
             {!isRecordingVideo && (
-              <div className="flex overflow-x-auto px-4 pb-4 gap-3 no-scrollbar snap-x">
+              <div
+                className="flex overflow-x-auto px-4 pb-4 gap-3 no-scrollbar snap-x touch-pan-x overscroll-contain"
+                style={{
+                  WebkitOverflowScrolling: "touch",
+                  touchAction: "pan-x",
+                  overscrollBehaviorX: "contain",
+                }}
+                onTouchStart={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
+              >
                 {availableFilters.map(filter => (
                   // Selected/unselected scale used to be the Tailwind
                   // `scale-110`/`scale-90` utilities; now that this button
@@ -833,4 +862,7 @@ export function CameraCapture({
       </div>
     </div>
   )
+
+  if (!mounted) return null
+  return createPortal(content, document.body)
 }

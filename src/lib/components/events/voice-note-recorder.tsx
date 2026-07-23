@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
+import { createPortal } from "react-dom"
 import { Button } from "@/lib/components/ui/button"
 import { Mic, Square, Play, Pause, RefreshCw, Check, X, Volume2 } from "lucide-react"
 
@@ -11,7 +12,23 @@ interface VoiceNoteRecorderProps {
 }
 
 export function VoiceNoteRecorder({ maxDuration = 30, onCapture, onClose }: VoiceNoteRecorderProps) {
+  const [mounted, setMounted] = useState(false)
   const [stream, setStream] = useState<MediaStream | null>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    const originalStyle = document.body.style.overflow
+    const originalTouchAction = document.body.style.touchAction
+    document.body.style.overflow = "hidden"
+    document.body.style.touchAction = "none"
+    return () => {
+      document.body.style.overflow = originalStyle
+      document.body.style.touchAction = originalTouchAction
+    }
+  }, [])
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null)
@@ -129,8 +146,8 @@ export function VoiceNoteRecorder({ maxDuration = 30, onCapture, onClose }: Voic
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`
   }
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+  const content = (
+    <div className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
       <div className="bg-[#ffffff] border border-[#e5dfd0] rounded-3xl p-6 sm:p-8 max-w-sm w-full flex flex-col items-center gap-6 relative shadow-2xl">
         {/* Top Header */}
         <div className="w-full flex items-center justify-between">
@@ -161,17 +178,17 @@ export function VoiceNoteRecorder({ maxDuration = 30, onCapture, onClose }: Voic
           </div>
         </div>
 
-        {/* Timer */}
+        {/* Time Counter */}
         <div className="text-center space-y-1">
-          <p className="text-3xl font-mono font-bold text-ink tracking-wider">
-            {formatTime(recordingTime)} <span className="text-xs font-normal text-ink-secondary">/ {formatTime(maxDuration)}</span>
-          </p>
-          <p className="text-xs text-[#C5A059]">
+          <span className="font-mono text-2xl font-bold text-ink">
+            0:{recordingTime < 10 ? `0${recordingTime}` : recordingTime} / 0:{maxDuration < 10 ? `0${maxDuration}` : maxDuration}
+          </span>
+          <p className="text-xs text-ink-secondary">
             {isRecording
-              ? `Recording live... Max limit: ${maxDuration}s`
+              ? "Recording audio message…"
               : previewUrl
-              ? "Listen to your note before sending"
-              : `Tap record button to begin (Limit: ${maxDuration}s)`}
+              ? "Listen to preview before sending"
+              : "Tap the button below to start recording"}
           </p>
         </div>
 
@@ -185,16 +202,15 @@ export function VoiceNoteRecorder({ maxDuration = 30, onCapture, onClose }: Voic
           />
         )}
 
-        {/* Controls */}
-        <div className="w-full pt-2 flex items-center justify-center gap-6">
+        {/* Actions */}
+        <div className="w-full flex items-center justify-center pt-2">
           {!previewUrl ? (
             !isRecording ? (
               <button
                 onClick={startRecording}
-                disabled={!stream}
-                className="w-16 h-16 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg shadow-red-600/30 transition-transform active:scale-95 cursor-pointer disabled:opacity-50"
+                className="w-16 h-16 rounded-full bg-[#b8925a] hover:bg-[#96723a] text-black flex items-center justify-center shadow-lg shadow-[#b8925a]/30 transition-transform active:scale-95 cursor-pointer"
               >
-                <div className="w-6 h-6 rounded-full bg-white" />
+                <Mic className="h-8 w-8" />
               </button>
             ) : (
               <button
@@ -228,4 +244,7 @@ export function VoiceNoteRecorder({ maxDuration = 30, onCapture, onClose }: Voic
       </div>
     </div>
   )
+
+  if (!mounted) return null
+  return createPortal(content, document.body)
 }

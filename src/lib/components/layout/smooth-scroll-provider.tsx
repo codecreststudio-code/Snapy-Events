@@ -5,8 +5,13 @@ import Lenis from "lenis"
 
 export function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Check for prefers-reduced-motion
-    if (typeof window === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    // Check for SSR or prefers-reduced-motion or touch devices (native touch inertia is superior and safer)
+    if (
+      typeof window === "undefined" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0
+    ) {
       return
     }
 
@@ -17,7 +22,12 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
       gestureOrientation: "vertical",
       smoothWheel: true,
       wheelMultiplier: 1.0,
-      touchMultiplier: 1.5,
+      touchMultiplier: 0, // Never hijack native touch events
+      prevent: (node) =>
+        node.hasAttribute("data-lenis-prevent") ||
+        node.classList.contains("no-lenis") ||
+        node.tagName === "TEXTAREA" ||
+        node.tagName === "INPUT",
     })
 
     function raf(time: number) {
