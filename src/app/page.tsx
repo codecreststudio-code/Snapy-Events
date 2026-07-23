@@ -51,7 +51,7 @@ function CountUp({ value, suffix = "" }: { value: number; suffix?: string }) {
     const incrementTime = 15
     const steps = duration / incrementTime
     const increment = Math.ceil(end / steps)
-    
+
     const timer = setInterval(() => {
       start += increment
       if (start >= end) {
@@ -100,11 +100,10 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
-      className={`relative rounded-3xl border bg-surface-card p-8 flex flex-col justify-between transition-all duration-300 ${
-        plan.popular
+      className={`relative rounded-3xl border bg-surface-card p-8 flex flex-col justify-between transition-all duration-300 ${plan.popular
           ? "border-mauve shadow-[0_20px_50px_rgba(184, 146, 90,0.15)] ring-1 ring-mauve md:scale-[1.04] z-10"
           : "border-hairline-dark hover:border-mauve/40 hover:shadow-xl"
-      }`}
+        }`}
     >
       {/* Background Spotlight Glow Wrapper */}
       <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
@@ -112,9 +111,8 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
           <div
             className="absolute -inset-px transition duration-300 opacity-100"
             style={{
-              background: `radial-gradient(350px circle at ${coords.x}px ${coords.y}px, ${
-                plan.popular ? "rgba(184, 146, 90, 0.14)" : "rgba(184, 146, 90, 0.07)"
-              }, transparent 80%)`,
+              background: `radial-gradient(350px circle at ${coords.x}px ${coords.y}px, ${plan.popular ? "rgba(184, 146, 90, 0.14)" : "rgba(184, 146, 90, 0.07)"
+                }, transparent 80%)`,
             }}
           />
         )}
@@ -169,11 +167,10 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       <div className="mt-8 pt-4">
         <Link href={`/signup?plan=${plan.name.toLowerCase()}`}>
           <Button
-            className={`w-full font-bold py-5 rounded-full transition-all active:scale-[0.99] ${
-              plan.popular
+            className={`w-full font-bold py-5 rounded-full transition-all active:scale-[0.99] ${plan.popular
                 ? "bg-mauve hover:bg-mauve-strong text-[#faf6ed] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
                 : "border border-hairline-dark text-ink hover:bg-mauve/5"
-            }`}
+              }`}
           >
             Get Started
           </Button>
@@ -282,7 +279,7 @@ function BentoCard({
 
       <h3 className="text-lg font-bold text-ink group-hover:text-mauve transition-colors duration-300">{title}</h3>
       <p className="mt-2 text-sm text-ink-secondary font-light leading-relaxed mb-6">{description}</p>
-      
+
       {children && <div className="relative mt-auto w-full pt-4">{children}</div>}
     </motion.div>
   )
@@ -1050,15 +1047,13 @@ export default function HomePage() {
                     <button
                       key={step.id}
                       onClick={() => setActiveRoadmap(step.id)}
-                      className={`w-full text-left flex items-start gap-4 p-5 rounded-2xl border transition-all duration-300 ${
-                        isActive
+                      className={`w-full text-left flex items-start gap-4 p-5 rounded-2xl border transition-all duration-300 ${isActive
                           ? "bg-mauve/10 border-mauve/30 shadow-sm"
                           : "bg-transparent border-transparent hover:bg-mauve/5"
-                      }`}
+                        }`}
                     >
-                      <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-bold text-sm transition-colors ${
-                        isActive ? "bg-mauve text-[#faf6ed]" : "bg-ink/10 text-ink-secondary"
-                      }`}>
+                      <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-bold text-sm transition-colors ${isActive ? "bg-mauve text-[#faf6ed]" : "bg-ink/10 text-ink-secondary"
+                        }`}>
                         {step.num}
                       </div>
                       <div className="space-y-1">
@@ -1075,7 +1070,7 @@ export default function HomePage() {
               {/* Visual Preview Displays */}
               <div className="lg:col-span-7 bg-surface-card border border-hairline-dark rounded-3xl p-6 md:p-8 shadow-inner min-h-[420px] flex items-center justify-center overflow-hidden relative">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 h-[300px] w-[300px] rounded-full bg-mauve/10 blur-3xl" />
-                
+
                 <AnimatePresence mode="wait">
                   {activeRoadmap === "step1" && (
                     <motion.div
