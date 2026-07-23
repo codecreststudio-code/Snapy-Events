@@ -36,14 +36,14 @@ interface DashboardData {
   albums: DashboardEvent[]
 }
 
-async function getDashboardData(orgId: string): Promise<DashboardData> {
+async function getDashboardData(userId: string): Promise<DashboardData> {
   const supabase = createClient()
 
-  // 1. Fetch organization events sorted newest first
+  // 1. Fetch organization/host events sorted newest first
   const { data: eventsData, error: eventsError } = await supabase
     .from("events")
-    .select("id, name, slug, status, event_date, end_date, cover_image_url")
-    .eq("organization_id", orgId)
+    .select("id, name, slug, status, event_date, end_date, cover_image_url, host_id, organization_id")
+    .or(`host_id.eq.${userId},organization_id.eq.${userId}`)
     .order("created_at", { ascending: false })
 
   if (eventsError) throw eventsError
@@ -53,17 +53,16 @@ async function getDashboardData(orgId: string): Promise<DashboardData> {
     return { activeEvents: [], albums: [] }
   }
 
-  // 2. Fetch approved photo counts per event
+  // 2. Fetch photo counts per event from photos table
   const eventIds = events.map((e) => e.id)
-  const { data: mediaCounts } = await supabase
-    .from("media")
+  const { data: photoCounts } = await supabase
+    .from("photos")
     .select("event_id")
     .in("event_id", eventIds)
-    .eq("status", "approved")
 
   const countMap: Record<string, number> = {}
-  mediaCounts?.forEach((m) => {
-    countMap[m.event_id] = (countMap[m.event_id] || 0) + 1
+  photoCounts?.forEach((p) => {
+    countMap[p.event_id] = (countMap[p.event_id] || 0) + 1
   })
 
   const fullEvents: DashboardEvent[] = events.map((e) => ({
@@ -115,18 +114,18 @@ function StatusPill({ status }: { status: string }) {
 }
 
 export default function DashboardPage() {
-  const { profile, isLoading: authLoading } = useAuth()
-  const orgId = profile?.id
+  const { user, profile, isLoading: authLoading } = useAuth()
+  const userId = profile?.id || user?.id
   const [showJoinModal, setShowJoinModal] = useState(false)
 
   const { data, isLoading: dataLoading } = useQuery({
-    queryKey: ["dashboard-home", orgId],
-    queryFn: () => getDashboardData(orgId!),
-    enabled: !!orgId,
+    queryKey: ["dashboard-home", userId],
+    queryFn: () => getDashboardData(userId!),
+    enabled: !!userId,
     refetchInterval: 20000,
   })
 
-  const isLoading = authLoading || (!!orgId && dataLoading)
+  const isLoading = authLoading || (!!userId && dataLoading)
   const activeEvents = data?.activeEvents ?? []
   const albums = data?.albums ?? []
 
@@ -158,7 +157,6 @@ export default function DashboardPage() {
             </button>
           </Link>
           <NotificationCenter />
-          <AccountMenu variant="compact" />
         </div>
       </div>
 
@@ -276,6 +274,11 @@ export default function DashboardPage() {
             </section>
           </>
         )}
+      </div>
+
+      {/* Floating Bottom Right Profile Icon */}
+      <div className="fixed bottom-16 right-4 sm:bottom-6 sm:right-6 z-50">
+        <AccountMenu variant="compact" />
       </div>
 
       <HomeBottomTabs />
