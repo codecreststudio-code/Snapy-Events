@@ -299,99 +299,205 @@ export function PublicFooter() {
         </div>
 
         {/* Main Footer Grid */}
-        <div className="mb-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 sm:gap-8">
+        <div className="mb-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
 
-          {/* Column 1: Brand & Logo (Col-span 2) */}
-          <div className="col-span-1 sm:col-span-2 lg:col-span-2 flex flex-col md:flex-row items-start gap-6 text-left">
-            {/* Logo on the left */}
-            <div className="shrink-0 flex items-center justify-start">
+          {/* Column 1: Brand & Logo (Col-span 2 on lg) */}
+          <div className="col-span-1 sm:col-span-2 lg:col-span-1 flex flex-col items-start text-left">
+            <div className="shrink-0 flex items-center justify-start mb-4">
               <img
-                src="/Favicon.png"
-                alt="Snapsy Logo"
-                className="h-40 sm:h-52 md:h-64 w-auto object-contain filter brightness-100 invert-0"
+                src="/Logo.png"
+                alt="Snapsy Events Logo"
+                className="h-16 w-auto object-contain"
               />
             </div>
-            {/* Text & Socials on the right */}
-            <div className="flex flex-col items-start">
-              <p className="text-ink-secondary text-sm leading-relaxed mb-4 max-w-sm text-left font-light">
-                Empowering event organizers with reliable, scalable, and innovative live photo sharing and event management solutions.
-              </p>
-              <div className="flex space-x-3 justify-start items-center">
-                {/* Facebook Icon Outline Pill */}
-                <a
-                  href="#"
-                  aria-label="Facebook"
-                  className="h-9 w-9 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
-                >
-                  <FacebookIcon className="h-4.5 w-4.5" />
-                </a>
-                {/* Instagram Icon Outline Pill */}
-                <a
-                  href="#"
-                  aria-label="Instagram"
-                  className="h-9 w-9 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
-                >
-                  <InstagramIcon className="h-4.5 w-4.5" />
-                </a>
-                {/* Twitter Icon Outline Pill */}
-                <a
-                  href="#"
-                  aria-label="Twitter"
-                  className="h-9 w-9 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
-                >
-                  <TwitterIcon className="h-4.5 w-4.5" />
-                </a>
-                {/* LinkedIn Icon Outline Pill */}
-                <a
-                  href="#"
-                  aria-label="LinkedIn"
-                  className="h-9 w-9 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
-                >
-                  <LinkedInIcon className="h-4.5 w-4.5" />
-                </a>
-              </div>
+            <p className="text-ink-secondary text-xs leading-relaxed mb-4 font-light">
+              Snapsy Events provides an app-free live photo sharing experience for weddings, corporate summits, and celebrations with QR code scanning and instant AI face search.
+            </p>
+            <div className="flex space-x-2 justify-start items-center">
+              <a
+                href="#"
+                aria-label="Facebook"
+                className="h-8 w-8 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
+              >
+                <FacebookIcon className="h-4 w-4" />
+              </a>
+              <a
+                href="#"
+                aria-label="Instagram"
+                className="h-8 w-8 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
+              >
+                <InstagramIcon className="h-4 w-4" />
+              </a>
+              <a
+                href="#"
+                aria-label="Twitter"
+                className="h-8 w-8 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
+              >
+                <TwitterIcon className="h-4 w-4" />
+              </a>
+              <a
+                href="#"
+                aria-label="LinkedIn"
+                className="h-8 w-8 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
+              >
+                <LinkedInIcon className="h-4 w-4" />
+              </a>
             </div>
           </div>
 
-          {/* Column 2: Solutions */}
+          {/* Column 2: USE CASES */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-ink-secondary">Solutions</h4>
-            <ul className="space-y-3">
+            <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-ink">Use Cases</h4>
+            <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/features" className="text-sm text-ink-secondary hover:text-ink transition-colors duration-200">
-                  Features
+                <Link href="/use-cases/weddings" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Weddings
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="text-sm text-ink-secondary hover:text-ink transition-colors duration-200">
-                  Pricing
+                <Link href="/use-cases/wedding-photo-sharing" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Wedding Photo Sharing
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-sm text-ink-secondary hover:text-ink transition-colors duration-200">
+                <Link href="/use-cases/disposable-camera-alternative" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Disposable Camera Alternative
+                </Link>
+              </li>
+              <li>
+                <Link href="/use-cases/corporate-events" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Corporate Events
+                </Link>
+              </li>
+              <li>
+                <Link href="/use-cases/parties-and-celebrations" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Parties & Celebrations
+                </Link>
+              </li>
+              <li>
+                <Link href="/use-cases/birthdays" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Birthdays
+                </Link>
+              </li>
+              <li>
+                <Link href="/use-cases/baby-showers" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Baby Showers
+                </Link>
+              </li>
+              <li>
+                <Link href="/use-cases/graduations" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Graduations
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: PRODUCT & RESOURCES */}
+          <div>
+            <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-ink">Product</h4>
+            <ul className="space-y-2 text-xs">
+              <li>
+                <Link href="/features" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Features Overview
+                </Link>
+              </li>
+              <li>
+                <Link href="/pricing" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Pricing Plans
+                </Link>
+              </li>
+              <li>
+                <Link href="/use-cases/photo-booth-alternative" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Photo Booth Alternative
+                </Link>
+              </li>
+              <li>
+                <Link href="/use-cases/digital-guest-book" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Digital Guest Book
+                </Link>
+              </li>
+              <li>
+                <Link href="/blog" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Blog & Photography Guides
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  About Snapsy Events
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
                   FAQs
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: Company */}
+          {/* Column 4: COMPARE */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-ink-secondary">Company</h4>
-            <ul className="space-y-3">
+            <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-ink">Compare</h4>
+            <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/about" className="text-sm text-ink-secondary hover:text-ink transition-colors duration-200">
-                  About Us
+                <Link href="/compare/all-alternatives" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  All Alternatives
                 </Link>
               </li>
               <li>
-                <Link href="/blog" className="text-sm text-ink-secondary hover:text-ink transition-colors duration-200">
-                  Blog
+                <Link href="/compare/vs-pov-camera" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Snapsy vs POV Camera
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm text-ink-secondary hover:text-ink transition-colors duration-200">
-                  Contact
+                <Link href="/compare/vs-guestpix" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Snapsy vs GuestPix
+                </Link>
+              </li>
+              <li>
+                <Link href="/compare/vs-weduploader" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Snapsy vs WedUploader
+                </Link>
+              </li>
+              <li>
+                <Link href="/compare/vs-once-film" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Snapsy vs Once Film
+                </Link>
+              </li>
+              <li>
+                <Link href="/compare/vs-disposable-cameras" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Snapsy vs Disposable Cameras
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 5: LEGAL & SUPPORT */}
+          <div>
+            <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-ink">Legal & Support</h4>
+            <ul className="space-y-2 text-xs">
+              <li>
+                <Link href="/privacy" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link href="/refund-policy" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Refund Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Support & Contact
+                </Link>
+              </li>
+              <li>
+                <Link href="/delete-data" className="text-ink-secondary hover:text-mauve transition-colors duration-200">
+                  Delete My Data
                 </Link>
               </li>
             </ul>
@@ -401,8 +507,8 @@ export function PublicFooter() {
 
         {/* Bottom Row */}
         <div className="border-t border-hairline-dark pt-8 flex flex-col items-center justify-between gap-4 md:flex-row">
-          <p className="text-xs text-ink-secondary">
-            &copy; {new Date().getFullYear()} Snapsy. All rights reserved.
+          <p className="text-xs text-ink-secondary font-light">
+            &copy; {new Date().getFullYear()} Snapsy Events. All rights reserved. Designed for unforgettable event memories.
           </p>
           <div className="flex space-x-6">
             <Link href="/privacy" className="text-xs text-ink-secondary hover:text-ink transition-colors duration-200">
@@ -411,13 +517,16 @@ export function PublicFooter() {
             <Link href="/terms" className="text-xs text-ink-secondary hover:text-ink transition-colors duration-200">
               Terms of Service
             </Link>
+            <Link href="/delete-data" className="text-xs text-ink-secondary hover:text-ink transition-colors duration-200">
+              Data Deletion
+            </Link>
           </div>
         </div>
 
         {/* Big brand wordmark at the very bottom */}
         <div className="mt-12 text-center select-none pointer-events-none">
           <span className="block text-[12vw] font-extrabold leading-none tracking-tighter text-ink/[0.03] uppercase">
-            Snapsy
+            Snapsy Events
           </span>
         </div>
       </div>

@@ -12,6 +12,7 @@ const PUBLIC_PATHS = new Set<string>([
   "/terms",
   "/privacy",
   "/refund-policy",
+  "/delete-data",
   "/manifest.webmanifest",
   "/login",
   "/signup",
@@ -24,6 +25,8 @@ function isPublic(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true
   if (pathname.startsWith("/blog")) return true
   if (pathname.startsWith("/about")) return true
+  if (pathname.startsWith("/use-cases")) return true
+  if (pathname.startsWith("/compare")) return true
   if (pathname.startsWith("/event/")) return true
   if (pathname.startsWith("/api/auth/")) return true
   if (pathname.startsWith("/api/admin/auth/")) return true
