@@ -31,6 +31,8 @@ import {
 import { Button } from "@/lib/components/ui/button"
 import { PublicNavbar, PublicFooter } from "@/lib/components/layout"
 import { motion, AnimatePresence, useInView } from "framer-motion"
+import { useCurrency } from "@/lib/context/currency-context"
+import { CurrencyToggle } from "@/lib/components/ui/currency-toggle"
 
 // Fonts are declared in root layout (server component) as CSS variables
 // --font-playfair and --font-inter — use them via className or style
@@ -72,6 +74,7 @@ function CountUp({ value, suffix = "" }: { value: number; suffix?: string }) {
 interface PricingPlan {
   name: string
   price: number
+  priceUsd?: number
   period: string
   description: string
   features: string[]
@@ -82,6 +85,8 @@ interface PricingPlan {
 function PricingCard({ plan }: { plan: PricingPlan }) {
   const [coords, setCoords] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
+  const { formatPrice } = useCurrency()
+  const displayPrice = formatPrice(plan.price, plan.priceUsd ?? 0)
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -155,7 +160,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
         </div>
 
         <div className="mt-4 sm:mt-6 flex items-baseline gap-1">
-          <span className="text-3xl sm:text-4xl font-extrabold text-ink">₹{plan.price}</span>
+          <span className="text-3xl sm:text-4xl font-extrabold text-ink">{displayPrice}</span>
           <span className="text-ink-secondary text-xs font-light">/ {plan.period}</span>
         </div>
 
@@ -707,6 +712,7 @@ export default function HomePage() {
     {
       name: "Basic",
       price: 0,
+      priceUsd: 0,
       period: "per event",
       description: "Perfect for trying out Snapsy",
       features: [
@@ -719,6 +725,7 @@ export default function HomePage() {
     {
       name: "Standard",
       price: 499,
+      priceUsd: 6,
       period: "per event",
       description: "For small events and personal use",
       features: [
@@ -735,6 +742,7 @@ export default function HomePage() {
     {
       name: "Premium",
       price: 2999,
+      priceUsd: 36,
       period: "per event",
       description: "For professional photographers and large events",
       features: [
@@ -765,6 +773,7 @@ export default function HomePage() {
             const mapped = result.data.map((p: any) => ({
               name: p.name,
               price: p.price_inr,
+              priceUsd: p.price_usd || Math.round(p.price_inr / 80) || 1,
               period: p.billing_interval === "monthly" ? "month" : "per event",
               description: p.description || "",
               features: Array.isArray(p.features) ? p.features : [],
@@ -1505,7 +1514,7 @@ export default function HomePage() {
         {/* --- SECTION 7: PREMIUM PRICING GRID --- */}
         <section className="py-16 sm:py-24 bg-surface-card border-y border-hairline-dark" id="pricing">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4 mb-12 sm:mb-20">
+            <div className="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4 mb-10 sm:mb-14">
               <span className="text-[10px] sm:text-xs font-bold text-mauve tracking-widest uppercase block">SIMPLE & TRANSPARENT</span>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-ink font-playfair">
                 Choose the perfect plan
@@ -1513,6 +1522,10 @@ export default function HomePage() {
               <p className="text-ink-secondary font-light max-w-xs sm:max-w-md mx-auto text-xs sm:text-sm leading-relaxed">
                 Transparent flat pricing based on your event capacity. Upgrade or customize bounds at any point.
               </p>
+
+              <div className="pt-2 flex justify-center">
+                <CurrencyToggle />
+              </div>
             </div>
 
             <div className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto items-stretch">
