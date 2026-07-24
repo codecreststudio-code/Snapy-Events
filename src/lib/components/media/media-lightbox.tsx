@@ -200,7 +200,7 @@ export function MediaLightbox({
   }
 
   return (
-    <div className="bg-[#080808] border border-white/10 rounded-3xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] w-full max-w-4xl shadow-2xl text-white">
+    <div className="bg-surface-dark border border-hairline-dark rounded-3xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] w-full max-w-4xl shadow-2xl text-white">
       {/* Media Content Box */}
       <div
         className="flex-1 bg-black flex items-center justify-center min-h-[300px] md:min-h-[480px] p-2 relative"

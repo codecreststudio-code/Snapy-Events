@@ -75,7 +75,7 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: GridPhoto; watermarkEnable
       />
       {watermarkEnabled && <WatermarkOverlay />}
       {p.is_best_shot && (
-        <div className="absolute top-2 left-2 bg-mauve/90 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
+        <div className="absolute top-2 left-2 bg-mauve/90 backdrop-blur-md text-[#1a1410] text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
           <span>✨</span> Highlight
         </div>
       )}
@@ -243,7 +243,7 @@ export function MediaGrid({
   return (
     <>
       {photos.length === 0 ? (
-        <Card className="mt-6 rounded-2xl border border-white/10 bg-[#080808] p-8 text-center text-sm text-neutral-400">
+        <Card className="mt-6 rounded-2xl border border-hairline-dark bg-surface-dark p-8 text-center text-sm text-ink-secondary">
           {emptyMessage}
         </Card>
       ) : (
@@ -252,7 +252,7 @@ export function MediaGrid({
             <button
               key={p.id}
               onClick={() => setActive(p)}
-              className="mb-4 block w-full break-inside-avoid overflow-hidden rounded-2xl border border-white/10 bg-[#080808] shadow-sm hover:border-white/30 hover:shadow-md transition-all text-left cursor-pointer"
+              className="mb-4 block w-full break-inside-avoid overflow-hidden rounded-2xl border border-hairline-dark bg-surface-dark shadow-sm hover:border-mauve/30 hover:shadow-md transition-all text-left cursor-pointer"
             >
               <MediaThumbnail p={p} watermarkEnabled={watermarkEnabled} />
             </button>

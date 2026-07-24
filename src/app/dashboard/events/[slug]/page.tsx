@@ -1825,7 +1825,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     {item.type === "voice" && (
                       <div className="space-y-2.5">
                         <div className="flex items-center gap-3 bg-gradient-to-r from-mauve/10 via-[#ffffff] to-mauve/5 border border-[#e5dfd0] p-3 rounded-2xl shadow-sm">
-                          <div className="h-9 w-9 rounded-full bg-mauve text-white flex items-center justify-center shrink-0 shadow-md">
+                          <div className="h-9 w-9 rounded-full bg-mauve text-[#1a1410] flex items-center justify-center shrink-0 shadow-md">
                             <Mic className="h-4 w-4" />
                           </div>
                           <div className="flex-1 min-w-0">

@@ -640,7 +640,7 @@ export default function SignupPage() {
           <CardFooter className="flex flex-col space-y-4 pb-6 px-6">
             <Button
               type="submit"
-              className="w-full font-bold py-5 rounded-full transition-all active:scale-[0.98] border-none bg-white text-black hover:bg-neutral-200 shadow-lg shadow-white/10 hover:scale-[1.01]"
+              className="w-full font-bold py-5 rounded-full transition-all active:scale-[0.98] border-none bg-mauve text-[#1a1410] hover:bg-mauve-strong shadow-lg shadow-mauve/20 hover:scale-[1.01]"
               disabled={isLoading}
             >
               {isLoading

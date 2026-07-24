@@ -130,7 +130,7 @@ export function InstallModal({
                   whileTap={installing ? undefined : tapScaleSubtle}
                   onClick={handleInstall}
                   disabled={installing}
-                  className="w-full h-11 rounded-full text-base font-semibold bg-white hover:bg-neutral-200 text-black shadow-lg shadow-white/10"
+                  className="w-full h-11 rounded-full text-base font-semibold bg-mauve hover:bg-mauve-strong text-[#1a1410] shadow-lg shadow-mauve/20"
                 >
                   {installing ? "Installing…" : "Install"}
                 </MotionButton>

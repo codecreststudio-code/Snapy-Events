@@ -145,11 +145,11 @@ export function AdminNav() {
                     className={cn(
                       "flex items-center gap-3 rounded-full px-3.5 py-2 text-xs font-semibold transition-all duration-200",
                       active
-                        ? "bg-white text-black shadow-sm"
-                        : "text-neutral-400 hover:bg-white/10 hover:text-white"
+                        ? "bg-mauve text-[#1a1410] shadow-sm"
+                        : "text-ink-secondary hover:bg-mauve/10 hover:text-ink"
                     )}
                   >
-                    <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-black" : "text-neutral-500")} />
+                    <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-[#1a1410]" : "text-ink-tertiary")} />
                     <span>{item.label}</span>
                   </Link>
                 )

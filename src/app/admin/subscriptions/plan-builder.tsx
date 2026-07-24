@@ -447,7 +447,7 @@ export function PlanBuilder() {
                           <Label className="text-xs font-bold text-ink-secondary">👥 Guests Limit per Event</Label>
                           <div className="flex items-center gap-2">
                             <Input type="number" value={limitGuests} onChange={e => setLimitGuests(Number(e.target.value))} className="h-8 text-xs font-bold bg-surface-card" />
-                            <button type="button" onClick={() => setLimitGuests(-1)} className={cn("px-2 py-1 text-[10px] font-bold rounded border", limitGuests === -1 ? "bg-mauve text-white border-mauve" : "bg-surface-card text-ink-secondary")}>
+                            <button type="button" onClick={() => setLimitGuests(-1)} className={cn("px-2 py-1 text-[10px] font-bold rounded border", limitGuests === -1 ? "bg-mauve text-[#1a1410] border-mauve" : "bg-surface-card text-ink-secondary")}>
                               ∞ Unlimited
                             </button>
                           </div>
@@ -457,7 +457,7 @@ export function PlanBuilder() {
                           <Label className="text-xs font-bold text-ink-secondary">📸 Shots Limit per Guest</Label>
                           <div className="flex items-center gap-2">
                             <Input type="number" value={limitShots} onChange={e => setLimitShots(Number(e.target.value))} className="h-8 text-xs font-bold bg-surface-card" />
-                            <button type="button" onClick={() => setLimitShots(-1)} className={cn("px-2 py-1 text-[10px] font-bold rounded border", limitShots === -1 ? "bg-mauve text-white border-mauve" : "bg-surface-card text-ink-secondary")}>
+                            <button type="button" onClick={() => setLimitShots(-1)} className={cn("px-2 py-1 text-[10px] font-bold rounded border", limitShots === -1 ? "bg-mauve text-[#1a1410] border-mauve" : "bg-surface-card text-ink-secondary")}>
                               ∞ Unlimited
                             </button>
                           </div>

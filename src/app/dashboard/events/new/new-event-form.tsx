@@ -1357,11 +1357,11 @@ export function NewEventForm() {
                           </div>
                           {/* Voice player design mock */}
                           <div className="bg-surface-card border border-hairline-dark rounded-xl p-2 flex items-center gap-3 mt-1">
-                            <div className="w-8 h-8 rounded-full bg-mauve flex items-center justify-center text-white shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-mauve flex items-center justify-center text-[#1a1410] shrink-0">
                               <Mic className="h-3.5 w-3.5" />
                             </div>
                             <div className="flex-1 space-y-1">
-                              <div className="h-1 bg-stone-200 rounded-full w-full overflow-hidden">
+                              <div className="h-1 bg-ink/15 rounded-full w-full overflow-hidden">
                                 <div className="h-full bg-mauve w-1/3" />
                               </div>
                               <p className="text-[8px] text-ink-secondary">Preview: "Wedding Wishes" audio note</p>

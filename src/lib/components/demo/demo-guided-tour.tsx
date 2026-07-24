@@ -199,7 +199,7 @@ export function DemoGuidedTour({
           {/* Top header bar */}
           <div className="flex items-center justify-between pb-4 border-b border-[#e5dfd0]">
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-mauve text-white text-xs font-bold shadow-md shadow-mauve/20">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-mauve text-[#1a1410] text-xs font-bold shadow-md shadow-mauve/20">
                 ✨
               </span>
               <div>

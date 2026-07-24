@@ -124,7 +124,7 @@ export function DemoEventView() {
       {/* Top Banner Notice */}
       <div className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-mauve/30 bg-mauve/15 px-4 py-2.5 backdrop-blur-md">
         <div className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-mauve text-white text-[10px] font-bold shadow-sm">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-mauve text-[#1a1410] text-[10px] font-bold shadow-sm">
             ✨
           </span>
           <span className="text-xs font-bold text-ink">Sample Event (Demo Mode)</span>
@@ -355,7 +355,7 @@ export function DemoEventView() {
                     onClick={() => setSelectedCategory(cat)}
                     className={`rounded-full px-3 py-1 text-xs font-bold capitalize transition-all ${
                       selectedCategory === cat
-                        ? "bg-mauve text-white"
+                        ? "bg-mauve text-[#1a1410]"
                         : "bg-white border border-[#e5dfd0] text-ink-secondary hover:border-mauve"
                     }`}
                   >
@@ -380,13 +380,13 @@ export function DemoEventView() {
                     />
                     {m.type === "video" && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-mauve/90 text-white shadow-lg">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-mauve/90 text-[#1a1410] shadow-lg">
                           <Play className="h-6 w-6 ml-0.5" />
                         </div>
                       </div>
                     )}
                     {m.type === "voice" && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-mauve/80 text-white p-4 space-y-2">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-mauve/80 text-[#1a1410] p-4 space-y-2">
                         <Mic className="h-8 w-8 animate-bounce" />
                         <span className="text-xs font-bold">Voice Note ({m.duration})</span>
                         <Button

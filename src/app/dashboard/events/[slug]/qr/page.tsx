@@ -169,7 +169,7 @@ function QRCodeCard({ qr, eventSlug, onDelete }: { qr: QRCode; eventSlug: string
       <div className="aspect-square bg-white flex flex-col items-center justify-center p-4 relative border-b border-stone-100">
         <div className="p-3 bg-white rounded-2xl shadow-sm border border-[#EAE5DF] relative overflow-hidden flex items-center justify-center">
           <img
-            src="/Logo.png"
+            src="/logo-mark-transparent.png"
             alt="Snapsy Logo Background"
             className="absolute inset-0 w-full h-full object-contain opacity-25 p-2 pointer-events-none filter saturate-150"
           />

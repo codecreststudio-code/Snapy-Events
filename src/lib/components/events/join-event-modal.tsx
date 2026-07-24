@@ -281,7 +281,7 @@ export function JoinEventModal({ isOpen, onClose }: JoinEventModalProps) {
               <Button
                 type="submit"
                 disabled={joinLoading || !joinCode.trim()}
-                className="w-full rounded-2xl bg-[#faf6ed] hover:bg-white text-black font-bold py-4 text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                className="w-full rounded-2xl bg-mauve hover:bg-mauve-strong text-[#1a1410] font-bold py-4 text-sm flex items-center justify-center gap-2 shadow-lg shadow-mauve/20 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
               >
                 {joinLoading ? (
                   <span className="flex items-center gap-2">

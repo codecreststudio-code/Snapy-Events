@@ -287,7 +287,7 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
               <div className="relative rounded-3xl overflow-hidden border-4 border-hairline-dark shadow-2xl aspect-[4/3]">
                 <img src={data.heroImage} alt={data.title} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-6">
-                  <span className="text-xs font-bold text-white tracking-widest uppercase bg-mauve/80 px-3 py-1 rounded-full backdrop-blur">
+                  <span className="text-xs font-bold text-[#1a1410] tracking-widest uppercase bg-mauve/80 px-3 py-1 rounded-full backdrop-blur">
                     POWERED BY SNAPSY EVENTS
                   </span>
                 </div>

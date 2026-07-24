@@ -253,7 +253,7 @@ export default function EmailDashboardClient({ initialTemplates, initialLogs, in
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${tab === t ? "bg-mauve text-white" : "text-ink-secondary hover:bg-mauve/5"}`}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${tab === t ? "bg-mauve text-[#1a1410]" : "text-ink-secondary hover:bg-mauve/5"}`}
             >
               {t === "templates" && <FileText className="h-4 w-4" />}
               {t === "logs" && <BarChart2 className="h-4 w-4" />}
