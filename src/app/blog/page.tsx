@@ -416,7 +416,7 @@ export default function BlogPage() {
                 <span>All Posts</span>
                 {!loading && (
                   <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-extrabold leading-none ${
-                    activeCategory === "all" ? "bg-[#faf6ed]/10 text-[#faf6ed]" : "bg-ink/10 text-ink-secondary"
+                    activeCategory === "all" ? "bg-ink/10 text-ink" : "bg-ink/10 text-ink-secondary"
                   }`}>
                     {posts.length}
                   </span>

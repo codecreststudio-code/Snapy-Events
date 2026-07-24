@@ -541,7 +541,7 @@ function RealMomentsSection() {
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
                   className={`px-5 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${isActive
-                      ? "bg-[#faf6ed] text-[#141210] font-bold shadow-md scale-105"
+                      ? "bg-ink text-surface-dark font-bold shadow-md scale-105"
                       : "bg-surface-card border border-hairline-dark text-ink-secondary hover:text-ink hover:border-mauve/40"
                     }`}
                 >
@@ -558,7 +558,7 @@ function RealMomentsSection() {
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
                   className={`px-5 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${isActive
-                      ? "bg-[#faf6ed] text-[#141210] font-bold shadow-md scale-105"
+                      ? "bg-ink text-surface-dark font-bold shadow-md scale-105"
                       : "bg-surface-card border border-hairline-dark text-ink-secondary hover:text-ink hover:border-mauve/40"
                     }`}
                 >
@@ -601,7 +601,7 @@ function RealMomentsSection() {
                     <p className="text-[9px] sm:text-[11px] text-white/70 font-light">{current.date}</p>
                   </div>
 
-                  <button className="w-full bg-[#faf6ed] hover:bg-white text-black font-semibold text-[9px] sm:text-xs py-1.5 sm:py-2.5 rounded-full shadow-md flex items-center justify-center gap-1 sm:gap-2 transition-transform active:scale-95">
+                  <button className="w-full bg-ink hover:bg-ink/90 text-surface-dark font-semibold text-[9px] sm:text-xs py-1.5 sm:py-2.5 rounded-full shadow-md flex items-center justify-center gap-1 sm:gap-2 transition-transform active:scale-95">
                     <span>Take your camera</span>
                     <ArrowRight className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
                   </button>

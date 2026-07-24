@@ -636,7 +636,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
   if (eventLoading || galleriesLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#faf6ed]">
+      <div className="min-h-screen flex items-center justify-center bg-surface-dark">
         <Loader2 className="h-8 w-8 animate-spin text-mauve" />
       </div>
     )
@@ -644,9 +644,9 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
   if (!event) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#faf6ed] text-[#1a1410]">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-surface-dark text-ink">
         <h1 className="text-2xl font-semibold mb-2">Event Not Found</h1>
-        <p className="text-[#6b6055] mb-4">
+        <p className="text-ink-secondary mb-4">
           The event you're looking for doesn't exist or uploads are disabled.
         </p>
         <Button asChild className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-bold">
@@ -658,13 +658,13 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
   if (!settings.allow_guest_uploads) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#faf6ed] text-[#1a1410]">
-        <CameraIcon className="h-12 w-12 text-[#8c8275] mb-4 animate-bounce" />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-surface-dark text-ink">
+        <CameraIcon className="h-12 w-12 text-ink-tertiary mb-4 animate-bounce" />
         <h1 className="text-2xl font-semibold mb-2">Uploads Disabled</h1>
-        <p className="text-[#6b6055] mb-4 text-center max-w-md">
+        <p className="text-ink-secondary mb-4 text-center max-w-md">
           This event is not accepting photo uploads at the moment.
         </p>
-        <Button asChild variant="outline" className="rounded-full border border-[#e5dfd0] bg-transparent text-[#1a1410] hover:bg-mauve/10">
+        <Button asChild variant="outline" className="rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/10">
           <Link href={`/event/${slug}`}>Back to Event</Link>
         </Button>
       </div>
@@ -675,13 +675,13 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
 
   if (isExpired) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#faf6ed] text-[#1a1410]">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-surface-dark text-ink">
         <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
         <h1 className="text-2xl font-semibold mb-2">Event Expired</h1>
-        <p className="text-[#6b6055] mb-4 text-center max-w-md">
+        <p className="text-ink-secondary mb-4 text-center max-w-md">
           This event has ended, and guest uploads are no longer allowed.
         </p>
-        <Button asChild variant="outline" className="rounded-full border border-[#e5dfd0] bg-transparent text-[#1a1410] hover:bg-mauve/10">
+        <Button asChild variant="outline" className="rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/10">
           <Link href={`/event/${slug}`}>Back to Event</Link>
         </Button>
       </div>
@@ -689,30 +689,30 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
   }
 
   return (
-    <div className="min-h-screen bg-[#faf6ed] text-[#1a1410] flex flex-col">
+    <div className="min-h-screen bg-surface-dark text-ink flex flex-col">
       {/* Guests reaching this page directly (bookmarked link, shared upload
           URL) without ever visiting the event landing page still need to
           check in — the modal issues the guest-session cookie the upload
           API now requires (see src/lib/security/guest-session.ts). */}
       <GuestCaptureModal eventId={event.id} eventName={event.name} />
-      <header className="pt-safe sticky top-0 z-40 border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur">
+      <header className="pt-safe sticky top-0 z-40 border-b border-hairline-dark bg-surface-dark/95 backdrop-blur">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <Link
             href={`/event/${slug}`}
-            className="flex items-center gap-2 text-[#6b6055] hover:text-[#1a1410] text-sm"
+            className="flex items-center gap-2 text-ink-secondary hover:text-ink text-sm"
           >
             <ArrowLeft className="h-5 w-5" />
             <span>Back to Event</span>
           </Link>
-          <span className="font-semibold text-[#1a1410]">Upload Photos</span>
+          <span className="font-semibold text-ink">Upload Photos</span>
           <div className="w-20" />
         </div>
       </header>
 
       <main className="flex-1 container py-6 space-y-6 max-w-3xl mx-auto px-4">
         <div>
-          <h1 className="font-playfair text-2xl font-bold tracking-tight text-[#1a1410]">{event.name}</h1>
-          <p className="text-sm text-[#6b6055]">Share your moments with other guests instantly.</p>
+          <h1 className="font-playfair text-2xl font-bold tracking-tight text-ink">{event.name}</h1>
+          <p className="text-sm text-ink-secondary">Share your moments with other guests instantly.</p>
         </div>
 
         {limitError && (
@@ -725,21 +725,21 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         )}
 
         {/* Guest Details Form */}
-        <Card className="bg-[#ffffff] border-[#e5dfd0] p-6 shadow-sm">
+        <Card className="bg-surface-card border-hairline-dark p-6 shadow-sm">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="guestName" className="text-[#6b6055] font-medium">Your Name *</Label>
+              <Label htmlFor="guestName" className="text-ink-secondary font-medium">Your Name *</Label>
               <Input
                 id="guestName"
                 placeholder="Enter your name"
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
                 disabled={isUploading}
-                className="bg-[#faf6ed] border-[#e5dfd0] text-[#1a1410] focus:border-mauve focus:ring-mauve focus-visible:ring-mauve"
+                className="bg-surface-dark border-hairline-dark text-ink focus:border-mauve focus:ring-mauve focus-visible:ring-mauve"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="guestEmail" className="text-[#6b6055] font-medium">Email Address (Optional)</Label>
+              <Label htmlFor="guestEmail" className="text-ink-secondary font-medium">Email Address (Optional)</Label>
               <Input
                 id="guestEmail"
                 type="email"
@@ -747,7 +747,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 value={guestEmail}
                 onChange={(e) => setGuestEmail(e.target.value)}
                 disabled={isUploading}
-                className="bg-[#faf6ed] border-[#e5dfd0] text-[#1a1410] focus:border-mauve focus:ring-mauve focus-visible:ring-mauve"
+                className="bg-surface-dark border-hairline-dark text-ink focus:border-mauve focus:ring-mauve focus-visible:ring-mauve"
               />
             </div>
           </div>
@@ -759,15 +759,15 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
             initialShotsUsed/maxShots below) — matching once.film's in-camera
             counter instead of a separate page banner. */}
 
-        <Card className="bg-[#ffffff] border-[#e5dfd0] shadow-sm">
+        <Card className="bg-surface-card border-hairline-dark shadow-sm">
           <CardContent className="p-6">
             <div className="space-y-2">
-              <label htmlFor="upload-gallery-select" className="text-sm font-medium text-[#6b6055]">Select Gallery</label>
+              <label htmlFor="upload-gallery-select" className="text-sm font-medium text-ink-secondary">Select Gallery</label>
               <select
                 id="upload-gallery-select"
                 value={selectedGallery}
                 onChange={(e) => setSelectedGallery(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-[#e5dfd0] bg-[#faf6ed] px-3 py-2 text-sm text-[#1a1410] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-mauve"
+                className="flex h-10 w-full rounded-md border border-hairline-dark bg-surface-dark px-3 py-2 text-sm text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-mauve"
               >
                 <option value="">Choose a gallery...</option>
                 {uploadGalleries.map((gallery) => (
@@ -818,17 +818,17 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                     interactive elements here to conflict with. */}
                 <button
                   type="button"
-                  className="border-2 border-dashed border-[#e5dfd0] bg-[#ffffff]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-mauve hover:bg-mauve/5 transition-all cursor-pointer group text-left w-full"
+                  className="border-2 border-dashed border-hairline-dark bg-surface-card/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-mauve hover:bg-mauve/5 transition-all cursor-pointer group text-left w-full"
                   onClick={() => setShowCamera(true)}
                 >
-                  <div className="p-4 rounded-full bg-[#ffffff] group-hover:bg-mauve/20 transition-colors border border-transparent group-hover:border-mauve/30">
-                    <CameraIcon className="h-8 w-8 text-[#6b6055] group-hover:text-mauve" />
+                  <div className="p-4 rounded-full bg-surface-card group-hover:bg-mauve/20 transition-colors border border-transparent group-hover:border-mauve/30">
+                    <CameraIcon className="h-8 w-8 text-ink-secondary group-hover:text-mauve" />
                   </div>
                   <div className="text-center">
-                    <p className="font-medium text-[#1a1410]">
+                    <p className="font-medium text-ink">
                       {allowVideo ? "Take Photo / Video" : "Take Photo"}
                     </p>
-                    <p className="text-xs text-[#6b6055] mt-1">
+                    <p className="text-xs text-ink-secondary mt-1">
                       {allowVideo
                         ? `Live camera with filters & clips up to ${videoLimit}s`
                         : "Use camera with premium filters"}
@@ -840,15 +840,15 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                 {allowVoice && (
                   <button
                     type="button"
-                    className="border-2 border-dashed border-[#e5dfd0] bg-[#ffffff]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-mauve hover:bg-mauve/5 transition-all cursor-pointer group text-left w-full"
+                    className="border-2 border-dashed border-hairline-dark bg-surface-card/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-mauve hover:bg-mauve/5 transition-all cursor-pointer group text-left w-full"
                     onClick={() => setShowVoiceRecorder(true)}
                   >
-                    <div className="p-4 rounded-full bg-[#ffffff] group-hover:bg-mauve/20 transition-colors border border-transparent group-hover:border-mauve/30">
-                      <MicIcon className="h-8 w-8 text-[#6b6055] group-hover:text-mauve" />
+                    <div className="p-4 rounded-full bg-surface-card group-hover:bg-mauve/20 transition-colors border border-transparent group-hover:border-mauve/30">
+                      <MicIcon className="h-8 w-8 text-ink-secondary group-hover:text-mauve" />
                     </div>
                     <div className="text-center">
-                      <p className="font-medium text-[#1a1410]">Record Voice Note</p>
-                      <p className="text-xs text-[#6b6055] mt-1">
+                      <p className="font-medium text-ink">Record Voice Note</p>
+                      <p className="text-xs text-ink-secondary mt-1">
                         Leave vocal wishes & audio notes up to {voiceLimit}s
                       </p>
                     </div>
@@ -865,7 +865,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                   role="button"
                   tabIndex={0}
                   aria-label="Upload media from your device"
-                  className="border-2 border-dashed border-[#e5dfd0] bg-[#ffffff]/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-mauve hover:bg-mauve/5 transition-all cursor-pointer group focus:outline-none focus:ring-2 focus:ring-mauve"
+                  className="border-2 border-dashed border-hairline-dark bg-surface-card/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-mauve hover:bg-mauve/5 transition-all cursor-pointer group focus:outline-none focus:ring-2 focus:ring-mauve"
                   onClick={() => fileInputRef.current?.click()}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -904,12 +904,12 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                     )
                   })()}
 
-                  <div className="p-4 rounded-full bg-[#ffffff] group-hover:bg-mauve/20 transition-colors border border-transparent group-hover:border-mauve/30">
-                    <ImageIcon className="h-8 w-8 text-[#6b6055] group-hover:text-mauve" />
+                  <div className="p-4 rounded-full bg-surface-card group-hover:bg-mauve/20 transition-colors border border-transparent group-hover:border-mauve/30">
+                    <ImageIcon className="h-8 w-8 text-ink-secondary group-hover:text-mauve" />
                   </div>
                   <div className="text-center">
-                    <p className="font-medium text-[#1a1410]">Upload Media</p>
-                    <p className="text-xs text-[#6b6055] mt-1">Select PNG, JPG, MP4, MOV up to 100MB</p>
+                    <p className="font-medium text-ink">Upload Media</p>
+                    <p className="text-xs text-ink-secondary mt-1">Select PNG, JPG, MP4, MOV up to 100MB</p>
                   </div>
                 </div>
               </div>
@@ -922,13 +922,13 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         {files.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-medium text-[#1a1410]">
+              <h2 className="text-lg font-medium text-ink">
                 {files.length} file(s) selected
               </h2>
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-full border border-[#e5dfd0] bg-transparent text-[#1a1410] hover:bg-mauve/10"
+                className="rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/10"
                 onClick={() => {
                   files.forEach((f) => URL.revokeObjectURL(f.preview))
                   setFiles([])
@@ -964,7 +964,7 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                       setPreviewFile(file)
                     }
                   }}
-                  className="relative aspect-square rounded-xl overflow-hidden bg-[#ffffff] border border-[#e5dfd0] cursor-pointer focus:outline-none focus:ring-2 focus:ring-mauve"
+                  className="relative aspect-square rounded-xl overflow-hidden bg-surface-card border border-hairline-dark cursor-pointer focus:outline-none focus:ring-2 focus:ring-mauve"
                 >
                   {kind === "image" && (
                     <img
@@ -984,9 +984,9 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
                     </>
                   )}
                   {kind === "audio" && (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-mauve/20 to-[#e5dfd0]/60 p-2">
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-mauve/20 to-hairline-dark/60 p-2">
                       <Volume2 className="h-8 w-8 text-mauve" />
-                      <span className="text-[10px] text-[#6b6055] text-center line-clamp-2 px-1">{file.file.name}</span>
+                      <span className="text-[10px] text-ink-secondary text-center line-clamp-2 px-1">{file.file.name}</span>
                     </div>
                   )}
                   {(kind === "video" || kind === "image") && (
@@ -1092,9 +1092,9 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
           )
         })()}
 
-        <Card className="bg-[#ffffff] border-[#e5dfd0] p-6 shadow-sm">
-          <h3 className="font-semibold text-[#1a1410] mb-2">Upload Guidelines</h3>
-          <ul className="text-sm text-[#6b6055] space-y-1">
+        <Card className="bg-surface-card border-hairline-dark p-6 shadow-sm">
+          <h3 className="font-semibold text-ink mb-2">Upload Guidelines</h3>
+          <ul className="text-sm text-ink-secondary space-y-1">
             {/* Used to say this unconditionally even though every event
                 defaulted to auto-approve with no host-facing way to turn
                 review on — see the new toggle in Event Settings
@@ -1109,8 +1109,8 @@ export default function GuestUploadPage({ params }: { params: Promise<{ slug: st
         </Card>
       </main>
 
-      <footer className="border-t border-[#e5dfd0] py-6 mt-12 bg-[#ffffff]">
-        <div className="container mx-auto px-4 text-center text-xs text-[#6b6055]">
+      <footer className="border-t border-hairline-dark py-6 mt-12 bg-surface-card">
+        <div className="container mx-auto px-4 text-center text-xs text-ink-secondary">
           Powered by{" "}
           <a href="/" className="underline hover:text-mauve-strong">
             Snapsy

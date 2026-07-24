@@ -165,7 +165,7 @@ function QRCodeCard({ qr, eventSlug, onDelete }: { qr: QRCode; eventSlug: string
   }
 
   return (
-    <Card className="overflow-hidden rounded-2xl border border-[#e5dfd0] bg-[#ffffff] hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300">
+    <Card className="overflow-hidden rounded-2xl border border-hairline-dark bg-surface-card hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300">
       <div className="aspect-square bg-white flex flex-col items-center justify-center p-4 relative border-b border-stone-100">
         <div className="p-3 bg-white rounded-2xl shadow-sm border border-[#EAE5DF] relative overflow-hidden flex items-center justify-center">
           <img
@@ -224,11 +224,11 @@ function QRCodeCard({ qr, eventSlug, onDelete }: { qr: QRCode; eventSlug: string
       </div>
 
       <CardContent className="p-4">
-        <h3 className="font-semibold text-[#1a1410]">{qr.name || "QR Code"}</h3>
-        <p className="text-sm text-[#6b6055] mt-1">
+        <h3 className="font-semibold text-ink">{qr.name || "QR Code"}</h3>
+        <p className="text-sm text-ink-secondary mt-1">
           {qr.scan_count || 0} scans
         </p>
-        <p className="text-xs text-[#7a7265] mt-2 break-all">{scanUrl}</p>
+        <p className="text-xs text-ink-tertiary mt-2 break-all">{scanUrl}</p>
       </CardContent>
     </Card>
   )
@@ -417,29 +417,29 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-5 hover:border-mauve/40 transition-all">
+        <Card className="rounded-2xl border border-hairline-dark bg-surface-card p-5 hover:border-mauve/40 transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-[#6b6055]">Total QR Codes</p>
-              <p className="mt-2 text-2xl font-semibold text-[#1a1410]">{qrCodes?.length || 0}</p>
+              <p className="text-sm font-medium text-ink-secondary">Total QR Codes</p>
+              <p className="mt-2 text-2xl font-semibold text-ink">{qrCodes?.length || 0}</p>
             </div>
             <QrCode className="h-8 w-8 text-mauve" />
           </div>
         </Card>
-        <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-5 hover:border-emerald-500/30 transition-all">
+        <Card className="rounded-2xl border border-hairline-dark bg-surface-card p-5 hover:border-emerald-500/30 transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-[#6b6055]">Total Scans</p>
-              <p className="mt-2 text-2xl font-semibold text-[#1a1410]">{totalScans}</p>
+              <p className="text-sm font-medium text-ink-secondary">Total Scans</p>
+              <p className="mt-2 text-2xl font-semibold text-ink">{totalScans}</p>
             </div>
-            <Camera className="h-8 w-8 text-emerald-700" />
+            <Camera className="h-8 w-8 text-emerald-400" />
           </div>
         </Card>
-        <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-5 hover:border-mauve/40 transition-all">
+        <Card className="rounded-2xl border border-hairline-dark bg-surface-card p-5 hover:border-mauve/40 transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-[#6b6055]">Active Codes</p>
-              <p className="mt-2 text-2xl font-semibold text-[#1a1410]">
+              <p className="text-sm font-medium text-ink-secondary">Active Codes</p>
+              <p className="mt-2 text-2xl font-semibold text-ink">
                 {qrCodes?.filter((qr) => qr.is_active).length || 0}
               </p>
             </div>
@@ -489,7 +489,7 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
           ))}
         </div>
       ) : (
-        <Card className="rounded-2xl border border-dashed border-[#e5dfd0] bg-ink/[0.02]">
+        <Card className="rounded-2xl border border-dashed border-hairline-dark bg-ink/[0.02]">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <QrCode className="h-12 w-12 text-ink-tertiary mb-4" />
             <h3 className="font-medium mb-2 text-ink">No QR codes yet</h3>

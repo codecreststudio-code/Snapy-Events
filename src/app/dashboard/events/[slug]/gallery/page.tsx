@@ -313,8 +313,8 @@ function GalleryCard({
 
   return (
     <>
-      <Card className="overflow-hidden rounded-2xl border border-[#e5dfd0] bg-[#ffffff] hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300">
-        <div className="aspect-video bg-[#faf6ed]/50 relative">
+      <Card className="overflow-hidden rounded-2xl border border-hairline-dark bg-surface-card hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300">
+        <div className="aspect-video bg-ink/5 relative">
           {gallery.cover_image_url ? (
             <img
               src={gallery.cover_image_url}
@@ -323,7 +323,7 @@ function GalleryCard({
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Image className="h-12 w-12 text-[#8c8275]" />
+              <Image className="h-12 w-12 text-ink-tertiary" />
             </div>
           )}
           <div className="absolute top-2 right-2">
@@ -359,27 +359,27 @@ function GalleryCard({
         <CardContent className="p-4">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <h3 className="font-semibold text-[#1a1410]">{gallery.name}</h3>
-              <p className="text-xs text-[#6b6055]">
+              <h3 className="font-semibold text-ink">{gallery.name}</h3>
+              <p className="text-xs text-ink-secondary">
                 {gallery.photo_count || 0} photos
               </p>
             </div>
             <div className="flex items-center gap-1">
               {gallery.is_public ? (
-                <Globe className="h-4 w-4 text-[#8c8275]" />
+                <Globe className="h-4 w-4 text-ink-tertiary" />
               ) : (
-                <Lock className="h-4 w-4 text-[#8c8275]" />
+                <Lock className="h-4 w-4 text-ink-tertiary" />
               )}
             </div>
           </div>
 
           <div className="mt-3 space-y-2">
-            <div className="flex items-center justify-between text-xs text-[#6b6055]">
+            <div className="flex items-center justify-between text-xs text-ink-secondary">
               <span>Uploads {settings?.allow_uploads ? "enabled" : "disabled"}</span>
               <span>Downloads {settings?.allow_downloads ? "enabled" : "disabled"}</span>
             </div>
             {gallery.reveal_enabled && gallery.reveal_at && (
-              <p className="text-xs text-[#7a7265]">
+              <p className="text-xs text-ink-tertiary">
                 Reveals at {new Date(gallery.reveal_at).toLocaleString()}
               </p>
             )}
@@ -692,7 +692,7 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
           ))}
         </div>
       ) : (
-        <Card className="rounded-2xl border border-dashed border-[#e5dfd0] bg-ink/[0.02]">
+        <Card className="rounded-2xl border border-dashed border-hairline-dark bg-ink/[0.02]">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Image className="h-12 w-12 text-ink-tertiary mb-4" />
             <h3 className="font-medium mb-2 text-ink">No galleries yet</h3>

@@ -54,7 +54,7 @@ export function CountdownTimer({ targetDate }: { targetDate: string }) {
         <div key={label} className="text-center">
           <div className="flex items-center justify-center">
             <div className="relative">
-              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-[#e5dfd0] bg-[#ffffff] shadow-sm md:h-28 md:w-28">
+              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-hairline-dark bg-surface-card shadow-sm md:h-28 md:w-28">
                 <AnimatePresence mode="popLayout" initial={false}>
                   <motion.span
                     key={value}
@@ -62,13 +62,13 @@ export function CountdownTimer({ targetDate }: { targetDate: string }) {
                     animate={{ y: 0, opacity: 1 }}
                     exit={prefersReducedMotion ? { opacity: 0 } : { y: 12, opacity: 0 }}
                     transition={{ duration: duration.fast, ease: easing.easeOut }}
-                    className="text-4xl font-bold text-[#1a1410] md:text-5xl"
+                    className="text-4xl font-bold text-ink md:text-5xl"
                   >
                     {value.toString().padStart(2, "0")}
                   </motion.span>
                 </AnimatePresence>
               </div>
-              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs uppercase tracking-wider text-[#7a7265]">
+              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs uppercase tracking-wider text-ink-tertiary">
                 {label}
               </div>
             </div>

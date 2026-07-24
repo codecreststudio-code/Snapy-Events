@@ -153,7 +153,7 @@ export function SettingsClient({
                 <Label className="text-ink text-sm font-bold block">Default Featured Template</Label>
                 <p className="text-xs text-ink-tertiary font-semibold leading-relaxed">Select the default theme for new users.</p>
               </div>
-              <select className="rounded-full border border-[#e5dfd0] bg-white px-4 py-1.5 text-xs font-bold text-[#1a1410]">
+              <select className="rounded-full border border-hairline-dark bg-surface-card px-4 py-1.5 text-xs font-bold text-ink">
                 <option value="wedding">Snapsy & Events Wedding 💍</option>
                 <option value="birthday">Snapsy's Birthday Party 🎂</option>
               </select>
@@ -184,7 +184,7 @@ export function SettingsClient({
                   <CheckCircle2 className="h-4 w-4" /> Configured
                 </span>
               ) : (
-                <span className="flex items-center gap-1.5 text-red-600 text-xs font-bold">
+                <span className="flex items-center gap-1.5 text-red-400 text-xs font-bold">
                   <XCircle className="h-4 w-4" /> Not configured
                 </span>
               )}
@@ -199,7 +199,7 @@ export function SettingsClient({
                   <CheckCircle2 className="h-4 w-4" /> Configured
                 </span>
               ) : (
-                <span className="flex items-center gap-1.5 text-red-600 text-xs font-bold">
+                <span className="flex items-center gap-1.5 text-red-400 text-xs font-bold">
                   <XCircle className="h-4 w-4" /> Not configured
                 </span>
               )}

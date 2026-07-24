@@ -202,27 +202,27 @@ export default function DownloadsPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      <div className="border-b border-[#e5dfd0] pb-6">
+      <div className="border-b border-hairline-dark pb-6">
         <h1 className="font-playfair text-3xl font-light text-ink">Downloads</h1>
         <p className="text-ink-secondary mt-1 text-sm">Download your photos and view download history</p>
       </div>
 
-      <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff]">
+      <Card className="rounded-2xl border border-hairline-dark bg-surface-card">
         <CardHeader>
-          <CardTitle className="text-[#1a1410]">Storage Overview</CardTitle>
+          <CardTitle className="text-ink">Storage Overview</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-1">
-              <p className="text-sm text-[#6b6055]">Total Photos</p>
-              <p className="text-2xl font-semibold text-[#1a1410]">{downloads?.length || 0}</p>
+              <p className="text-sm text-ink-secondary">Total Photos</p>
+              <p className="text-2xl font-semibold text-ink">{downloads?.length || 0}</p>
             </div>
             <div className="space-y-1">
-              <p className="text-sm text-[#6b6055]">Total Size</p>
-              <p className="text-2xl font-semibold text-[#1a1410]">{formatBytes(totalSize)}</p>
+              <p className="text-sm text-ink-secondary">Total Size</p>
+              <p className="text-2xl font-semibold text-ink">{formatBytes(totalSize)}</p>
             </div>
             <div className="space-y-1">
-              <p className="text-sm text-[#6b6055]">Selected</p>
+              <p className="text-sm text-ink-secondary">Selected</p>
               <p className="text-2xl font-semibold text-mauve">
                 {selectedIds.size} ({formatBytes(selectedSize)})
               </p>
@@ -232,14 +232,14 @@ export default function DownloadsPage() {
       </Card>
 
       {selectedIds.size > 0 && (
-        <Card className="rounded-2xl border border-mauve/40 bg-[#ffffff]">
+        <Card className="rounded-2xl border border-mauve/40 bg-surface-card">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <span className="text-sm text-[#1a1410]">
+                <span className="text-sm text-ink">
                   {selectedIds.size} photo(s) selected
                 </span>
-                <Button variant="ghost" size="sm" className="text-[#6b6055] hover:bg-mauve/5 hover:text-[#1a1410]" onClick={() => setSelectedIds(new Set())}>
+                <Button variant="ghost" size="sm" className="text-ink-secondary hover:bg-mauve/5 hover:text-ink" onClick={() => setSelectedIds(new Set())}>
                   Clear selection
                 </Button>
               </div>
@@ -270,12 +270,12 @@ export default function DownloadsPage() {
         </Card>
       )}
 
-      <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff]">
+      <Card className="rounded-2xl border border-hairline-dark bg-surface-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-[#1a1410]">Available Downloads</CardTitle>
-              <CardDescription className="text-[#6b6055]">Photos available for download</CardDescription>
+              <CardTitle className="text-ink">Available Downloads</CardTitle>
+              <CardDescription className="text-ink-secondary">Photos available for download</CardDescription>
             </div>
             {downloads && downloads.length > 0 && (
               <div className="flex items-center gap-2">
@@ -283,14 +283,14 @@ export default function DownloadsPage() {
                   checked={selectedIds.size === downloads.length}
                   onCheckedChange={toggleSelectAll}
                 />
-                <span className="text-sm text-[#6b6055]">Select All</span>
+                <span className="text-sm text-ink-secondary">Select All</span>
               </div>
             )}
           </div>
         </CardHeader>
         <CardContent className="p-0">
           {downloads && downloads.length > 0 ? (
-            <div className="divide-y divide-[#e5dfd0]">
+            <div className="divide-y divide-hairline-dark">
               {downloads.map((item) => (
                 <div
                   key={item.id}
@@ -304,21 +304,21 @@ export default function DownloadsPage() {
                     <FileImage className="h-6 w-6 text-mauve" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate text-[#1a1410]">{item.filename}</p>
-                    <p className="text-sm text-[#6b6055] truncate">
+                    <p className="font-medium truncate text-ink">{item.filename}</p>
+                    <p className="text-sm text-ink-secondary truncate">
                       {item.event_name} · {item.gallery_name}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-[#6b6055]">{formatBytes(item.size)}</p>
-                    <p className="text-xs text-[#7a7265]">
+                    <p className="text-sm text-ink-secondary">{formatBytes(item.size)}</p>
+                    <p className="text-xs text-ink-tertiary">
                       {formatDate(item.created_at)}
                     </p>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-[#6b6055] hover:bg-mauve/5 hover:text-mauve"
+                    className="text-ink-secondary hover:bg-mauve/5 hover:text-mauve"
                     onClick={() => downloadPhoto(item.storage_path, item.filename)}
                   >
                     <Download className="h-4 w-4" />
@@ -328,9 +328,9 @@ export default function DownloadsPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16">
-              <Image className="h-12 w-12 text-[#8c8275] mb-4" />
-              <h3 className="font-medium mb-2 text-[#1a1410]">No downloads available</h3>
-              <p className="text-sm text-[#6b6055] text-center max-w-md">
+              <Image className="h-12 w-12 text-ink-tertiary mb-4" />
+              <h3 className="font-medium mb-2 text-ink">No downloads available</h3>
+              <p className="text-sm text-ink-secondary text-center max-w-md">
                 Photos you upload to your galleries will appear here for download.
               </p>
             </div>
@@ -338,19 +338,19 @@ export default function DownloadsPage() {
         </CardContent>
       </Card>
 
-      <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff]">
+      <Card className="rounded-2xl border border-hairline-dark bg-surface-card">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <History className="h-5 w-5 text-[#6b6055]" />
-            <CardTitle className="text-[#1a1410]">Download History</CardTitle>
+            <History className="h-5 w-5 text-ink-secondary" />
+            <CardTitle className="text-ink">Download History</CardTitle>
           </div>
-          <CardDescription className="text-[#6b6055]">Recent download activity</CardDescription>
+          <CardDescription className="text-ink-secondary">Recent download activity</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <History className="h-12 w-12 text-[#8c8275] mb-4" />
-            <h3 className="font-medium mb-2 text-[#1a1410]">No download history</h3>
-            <p className="text-sm text-[#6b6055] text-center max-w-md">
+            <History className="h-12 w-12 text-ink-tertiary mb-4" />
+            <h3 className="font-medium mb-2 text-ink">No download history</h3>
+            <p className="text-sm text-ink-secondary text-center max-w-md">
               Your download history will appear here.
             </p>
           </div>

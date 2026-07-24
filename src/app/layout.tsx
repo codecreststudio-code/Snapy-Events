@@ -84,7 +84,7 @@ export const metadata: Metadata = {
   },
   other: {
     "mobile-web-app-capable": "yes",
-    "msapplication-TileColor": "#faf6ed",
+    "msapplication-TileColor": "#080808",
     "msapplication-config": "/browserconfig.xml",
   },
   twitter: {

@@ -19,6 +19,8 @@ import { JoinEventModal } from "@/lib/components/events/join-event-modal"
 // one route). Two sections: ACTIVE (the host's currently live/published
 // events, or a big "Create Event" prompt if there are none) and ALBUMS
 // (every event's gallery, shown as a cover-image card — newest first).
+// Dark theme throughout (host's explicit preference — the app is dark, not
+// light/cream) using the shared surface-dark/surface-card/ink token system.
 
 interface DashboardEvent {
   id: string
@@ -136,8 +138,8 @@ function StatusPill({ status }: { status: string }) {
     <span
       className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
         isLive
-          ? "border border-emerald-600/30 bg-emerald-500/15 text-emerald-700"
-          : "border border-[#e5dfd0] bg-mauve/5 text-[#6b6055]"
+          ? "border border-emerald-500/30 bg-emerald-500/15 text-emerald-400"
+          : "border border-hairline-dark bg-mauve/5 text-ink-secondary"
       }`}
     >
       {isLive ? "PUBLISHED" : status}
@@ -162,11 +164,11 @@ export default function DashboardPage() {
   const albums = data?.albums ?? []
 
   return (
-    <div className="min-h-screen bg-[#faf6ed] text-[#1a1410] pb-28">
+    <div className="min-h-screen bg-surface-dark text-ink pb-28">
       <JoinEventModal isOpen={showJoinModal} onClose={() => setShowJoinModal(false)} />
 
       {/* Top bar */}
-      <div className="pt-safe sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-[#e5dfd0] bg-[#faf6ed]/95 px-5 py-4 backdrop-blur-lg">
+      <div className="pt-safe sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-hairline-dark bg-surface-dark/95 px-5 py-4 backdrop-blur-lg">
         <Link href="/dashboard" className="inline-flex items-center transition-opacity hover:opacity-90">
           <Logo />
         </Link>
@@ -201,12 +203,12 @@ export default function DashboardPage() {
           <>
             {/* ACTIVE */}
             <section>
-              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#7a7265]">Active</h2>
+              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-ink-tertiary">Active</h2>
 
               {activeEvents.length === 0 ? (
                 <div className="flex flex-col items-center gap-5 py-10 text-center">
-                  <div className="h-2.5 w-2.5 rounded-full bg-mauve/20" />
-                  <p className="text-sm text-[#7a7265]">No active events</p>
+                  <div className="h-2.5 w-2.5 rounded-full bg-ink/15" />
+                  <p className="text-sm text-ink-tertiary">No active events</p>
                   <Link href="/dashboard/events/new">
                     <button
                       type="button"
@@ -223,18 +225,18 @@ export default function DashboardPage() {
                     <Link
                       key={event.id}
                       href={`/dashboard/events/${event.slug}`}
-                      className="flex items-center justify-between gap-4 rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-4 transition-all hover:border-mauve/40 shadow-xs"
+                      className="flex items-center justify-between gap-4 rounded-2xl border border-hairline-dark bg-surface-card p-4 transition-all hover:border-mauve/40 shadow-xs"
                     >
                       <div className="flex items-center gap-3 overflow-hidden">
                         <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-mauve/10">
                           <Camera className="h-5 w-5 text-mauve" />
                         </div>
                         <div className="overflow-hidden">
-                          <h3 className="truncate text-sm font-semibold text-[#1a1410]">{event.name}</h3>
-                          <p className="text-xs text-[#6b6055]">Live · {event.photo_count} photos</p>
+                          <h3 className="truncate text-sm font-semibold text-ink">{event.name}</h3>
+                          <p className="text-xs text-ink-secondary">Live · {event.photo_count} photos</p>
                         </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 flex-shrink-0 text-[#7a7265]" />
+                      <ChevronRight className="h-4 w-4 flex-shrink-0 text-ink-tertiary" />
                     </Link>
                   ))}
                 </div>
@@ -243,7 +245,7 @@ export default function DashboardPage() {
 
             {/* ALBUMS */}
             <section>
-              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#7a7265]">Albums</h2>
+              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-ink-tertiary">Albums</h2>
 
               <div className="space-y-6">
                 {/* User's Created Albums */}
@@ -259,14 +261,14 @@ export default function DashboardPage() {
                     <Link
                       key={event.id}
                       href={`/dashboard/events/${event.slug}`}
-                      className="group block space-y-3 rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 shadow-xs transition-all hover:border-mauve/40"
+                      className="group block space-y-3 rounded-3xl border border-hairline-dark bg-surface-card p-5 shadow-xs transition-all hover:border-mauve/40"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-playfair text-lg font-bold text-[#1a1410] group-hover:text-mauve transition-colors">{event.name}</h3>
+                          <h3 className="font-playfair text-lg font-bold text-ink group-hover:text-mauve transition-colors">{event.name}</h3>
                           <StatusPill status={event.status} />
                         </div>
-                        {dateRange && <span className="text-xs text-[#6b6055] font-medium">{dateRange}</span>}
+                        {dateRange && <span className="text-xs text-ink-secondary font-medium">{dateRange}</span>}
                       </div>
 
                       {/* Photos Grid or Clean Empty Placeholder */}
@@ -277,7 +279,7 @@ export default function DashboardPage() {
                             if (!photoSrc) return null
                             const totalMore = event.photo_count > 4 ? event.photo_count - 4 : 0
                             return (
-                              <div key={idx} className="relative h-full w-full bg-[#faf6ed]/60 overflow-hidden rounded-xl border border-[#e5dfd0]">
+                              <div key={idx} className="relative h-full w-full bg-ink/5 overflow-hidden rounded-xl border border-hairline-dark">
                                 <img
                                   src={photoSrc}
                                   alt=""
@@ -293,15 +295,15 @@ export default function DashboardPage() {
                           })}
                         </div>
                       ) : (
-                        <div className="flex h-20 w-full items-center justify-center rounded-2xl border border-dashed border-[#e5dfd0] bg-[#faf6ed]/50 px-4 text-center">
-                          <div className="flex items-center gap-2 text-xs font-medium text-[#6b6055]">
+                        <div className="flex h-20 w-full items-center justify-center rounded-2xl border border-dashed border-hairline-dark bg-ink/5 px-4 text-center">
+                          <div className="flex items-center gap-2 text-xs font-medium text-ink-secondary">
                             <Camera className="h-4 w-4 text-mauve/70" />
                             <span>No photos yet — start capturing moments</span>
                           </div>
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between text-xs text-[#6b6055] pt-1">
+                      <div className="flex items-center justify-between text-xs text-ink-secondary pt-1">
                         <span>{event.photo_count} memories captured</span>
                         <span className="font-semibold text-mauve group-hover:underline flex items-center gap-1">View Album →</span>
                       </div>
@@ -312,18 +314,18 @@ export default function DashboardPage() {
                 {/* Sample Album Card ("Welcome! SAMPLE" matching Image 2 reference) */}
                 <Link
                   href="/dashboard/demo"
-                  className="group block space-y-3 rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 shadow-xs transition-all hover:border-mauve/40"
+                  className="group block space-y-3 rounded-3xl border border-hairline-dark bg-surface-card p-5 shadow-xs transition-all hover:border-mauve/40"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-playfair text-lg font-bold text-[#1a1410] group-hover:text-mauve transition-colors">
+                      <h3 className="font-playfair text-lg font-bold text-ink group-hover:text-mauve transition-colors">
                         Welcome!
                       </h3>
                       <span className="rounded-md bg-mauve/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-mauve border border-mauve/20">
                         SAMPLE
                       </span>
                     </div>
-                    <span className="text-xs text-[#6b6055] font-medium">Jul 15~16, 2026</span>
+                    <span className="text-xs text-ink-secondary font-medium">Jul 15~16, 2026</span>
                   </div>
 
                   <div className="grid grid-cols-4 gap-2 h-28 rounded-2xl overflow-hidden">
@@ -333,7 +335,7 @@ export default function DashboardPage() {
                       "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600&q=80",
                       "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=600&q=80"
                     ].map((src, idx) => (
-                      <div key={idx} className="relative h-full w-full bg-[#faf6ed]/60 overflow-hidden rounded-xl border border-[#e5dfd0]">
+                      <div key={idx} className="relative h-full w-full bg-ink/5 overflow-hidden rounded-xl border border-hairline-dark">
                         <img
                           src={src}
                           alt=""
@@ -348,7 +350,7 @@ export default function DashboardPage() {
                     ))}
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-[#6b6055] pt-1">
+                  <div className="flex items-center justify-between text-xs text-ink-secondary pt-1">
                     <span>Interactive sample album</span>
                     <span className="font-semibold text-mauve group-hover:underline flex items-center gap-1">Try Demo →</span>
                   </div>

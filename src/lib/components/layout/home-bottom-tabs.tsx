@@ -31,7 +31,7 @@ export function HomeBottomTabs() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur-lg"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-hairline-dark bg-surface-dark/95 backdrop-blur-lg"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Primary"
     >
@@ -50,10 +50,10 @@ export function HomeBottomTabs() {
                 <item.icon
                   className={cn(
                     "h-4.5 w-4.5 transition-colors duration-200",
-                    active ? "text-mauve" : "text-[#6b6055]"
+                    active ? "text-mauve" : "text-ink-secondary"
                   )}
                 />
-                <span className={cn("transition-colors duration-200", active ? "text-[#1a1410] font-bold" : "text-[#6b6055] font-semibold")}>
+                <span className={cn("transition-colors duration-200", active ? "text-ink font-bold" : "text-ink-secondary font-semibold")}>
                   {item.name}
                 </span>
               </Link>
@@ -70,7 +70,7 @@ export function HomeBottomTabs() {
               "flex h-9 w-9 items-center justify-center rounded-full border transition-all hover:scale-105 active:scale-95 cursor-pointer",
               isSettingsActive
                 ? "border-mauve ring-2 ring-mauve/30 bg-mauve/10"
-                : "border-[#e5dfd0] bg-[#ffffff] hover:border-mauve/40"
+                : "border-hairline-dark bg-surface-dark hover:border-mauve/40"
             )}
           >
             <Avatar className="h-9 w-9">

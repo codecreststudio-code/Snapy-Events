@@ -224,10 +224,10 @@ export function HostUploadModal({ isOpen, onClose, eventId, eventSettings, onUpl
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-lg rounded-2xl border border-[#e5dfd0] bg-[#ffffff] text-[#1a1410] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-lg rounded-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-playfair text-xl font-medium text-[#1a1410]">Add Your Own Media</DialogTitle>
-            <DialogDescription className="text-[#6b6055]">
+            <DialogTitle className="font-playfair text-xl font-medium text-ink">Add Your Own Media</DialogTitle>
+            <DialogDescription className="text-ink-secondary">
               Capture or upload photos, videos, and voice notes straight into this capsule — the same as your guests can.
             </DialogDescription>
           </DialogHeader>
@@ -237,12 +237,12 @@ export function HostUploadModal({ isOpen, onClose, eventId, eventSettings, onUpl
               <button
                 type="button"
                 onClick={() => setShowCamera(true)}
-                className="border-2 border-dashed border-[#e5dfd0] bg-[#faf6ed]/40 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-mauve hover:bg-mauve/5 transition-all cursor-pointer group text-center"
+                className="border-2 border-dashed border-hairline-dark bg-ink/5 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-mauve hover:bg-mauve/5 transition-all cursor-pointer group text-center"
               >
-                <div className="p-3 rounded-full bg-[#ffffff] group-hover:bg-mauve/20 transition-colors border border-transparent group-hover:border-mauve/30">
-                  <CameraIcon className="h-6 w-6 text-[#6b6055] group-hover:text-mauve" />
+                <div className="p-3 rounded-full bg-surface-card group-hover:bg-mauve/20 transition-colors border border-transparent group-hover:border-mauve/30">
+                  <CameraIcon className="h-6 w-6 text-ink-secondary group-hover:text-mauve" />
                 </div>
-                <p className="text-xs font-semibold text-[#1a1410]">{allowVideo ? "Photo / Video" : "Take Photo"}</p>
+                <p className="text-xs font-semibold text-ink">{allowVideo ? "Photo / Video" : "Take Photo"}</p>
               </button>
             )}
 
@@ -250,24 +250,24 @@ export function HostUploadModal({ isOpen, onClose, eventId, eventSettings, onUpl
               <button
                 type="button"
                 onClick={() => setShowVoiceRecorder(true)}
-                className="border-2 border-dashed border-[#e5dfd0] bg-[#faf6ed]/40 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-mauve hover:bg-mauve/5 transition-all cursor-pointer group text-center"
+                className="border-2 border-dashed border-hairline-dark bg-ink/5 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-mauve hover:bg-mauve/5 transition-all cursor-pointer group text-center"
               >
-                <div className="p-3 rounded-full bg-[#ffffff] group-hover:bg-mauve/20 transition-colors border border-transparent group-hover:border-mauve/30">
-                  <MicIcon className="h-6 w-6 text-[#6b6055] group-hover:text-mauve" />
+                <div className="p-3 rounded-full bg-surface-card group-hover:bg-mauve/20 transition-colors border border-transparent group-hover:border-mauve/30">
+                  <MicIcon className="h-6 w-6 text-ink-secondary group-hover:text-mauve" />
                 </div>
-                <p className="text-xs font-semibold text-[#1a1410]">Voice Note</p>
+                <p className="text-xs font-semibold text-ink">Voice Note</p>
               </button>
             )}
 
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-[#e5dfd0] bg-[#faf6ed]/40 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-mauve hover:bg-mauve/5 transition-all cursor-pointer group text-center"
+              className="border-2 border-dashed border-hairline-dark bg-ink/5 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-mauve hover:bg-mauve/5 transition-all cursor-pointer group text-center"
             >
-              <div className="p-3 rounded-full bg-[#ffffff] group-hover:bg-mauve/20 transition-colors border border-transparent group-hover:border-mauve/30">
-                <ImageIcon className="h-6 w-6 text-[#6b6055] group-hover:text-mauve" />
+              <div className="p-3 rounded-full bg-surface-card group-hover:bg-mauve/20 transition-colors border border-transparent group-hover:border-mauve/30">
+                <ImageIcon className="h-6 w-6 text-ink-secondary group-hover:text-mauve" />
               </div>
-              <p className="text-xs font-semibold text-[#1a1410]">Upload from Device</p>
+              <p className="text-xs font-semibold text-ink">Upload from Device</p>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -282,12 +282,12 @@ export function HostUploadModal({ isOpen, onClose, eventId, eventSettings, onUpl
           {queue.length > 0 && (
             <div className="mt-4 space-y-1.5 max-h-40 overflow-y-auto">
               {queue.map((q) => (
-                <div key={q.id} className="flex items-center justify-between gap-2 rounded-lg border border-[#e5dfd0] bg-[#faf6ed]/40 px-3 py-2 text-xs">
-                  <span className="truncate text-[#1a1410]">{q.name}</span>
+                <div key={q.id} className="flex items-center justify-between gap-2 rounded-lg border border-hairline-dark bg-ink/5 px-3 py-2 text-xs">
+                  <span className="truncate text-ink">{q.name}</span>
                   {q.status === "uploading" && <Loader2 className="h-3.5 w-3.5 animate-spin text-mauve shrink-0" />}
-                  {q.status === "done" && <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />}
+                  {q.status === "done" && <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />}
                   {q.status === "error" && (
-                    <span className="text-red-600 shrink-0 flex items-center gap-1">
+                    <span className="text-red-400 shrink-0 flex items-center gap-1">
                       <X className="h-3.5 w-3.5" />
                       {q.error}
                     </span>

@@ -361,12 +361,12 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
           </p>
 
           {!checkedIn ? (
-            <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-[#e5dfd0] bg-[#ffffff] px-4 py-16 text-center">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#faf6ed]/60">
+            <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-hairline-dark bg-surface-card px-4 py-16 text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-ink/5">
                 <Lock className="h-8 w-8 text-mauve" />
               </div>
-              <h3 className="font-playfair mt-4 text-lg font-medium text-[#1a1410]">Check In to Continue</h3>
-              <p className="mt-2 max-w-md text-sm text-[#6b6055]">
+              <h3 className="font-playfair mt-4 text-lg font-medium text-ink">Check In to Continue</h3>
+              <p className="mt-2 max-w-md text-sm text-ink-secondary">
                 {settings.require_join_code
                   ? "This event is private to invited guests. Complete check-in above with the event code your host shared with you to view galleries and share your own photos."
                   : "This event is private to invited guests. Complete the check-in above to view galleries and share your own photos."}
@@ -399,12 +399,12 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
               )}
             </div>
           ) : (
-            <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-[#e5dfd0] bg-[#ffffff] px-4 py-16 text-center">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#faf6ed]/60">
+            <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-hairline-dark bg-surface-card px-4 py-16 text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-ink/5">
                 <Lock className="h-8 w-8 text-mauve" />
               </div>
-              <h3 className="font-playfair mt-4 text-lg font-medium text-[#1a1410]">Photos Coming Soon</h3>
-              <p className="mt-2 max-w-md text-sm text-[#6b6055]">
+              <h3 className="font-playfair mt-4 text-lg font-medium text-ink">Photos Coming Soon</h3>
+              <p className="mt-2 max-w-md text-sm text-ink-secondary">
                 {settings.enable_countdown && settings.countdown_date
                   ? `Photos will be revealed on ${formatEventDate(settings.countdown_date)}`
                   : "Photos will be available shortly. Check back soon!"}

@@ -182,7 +182,7 @@ function QRCodeCard({ qr, onDelete }: { qr: QRCodeWithEvent; onDelete: (id: stri
   }
 
   return (
-    <Card className="overflow-hidden rounded-2xl border border-[#e5dfd0] bg-[#ffffff] hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300 group">
+    <Card className="overflow-hidden rounded-2xl border border-hairline-dark bg-surface-card hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300 group">
       <div className="aspect-square bg-white flex flex-col items-center justify-center p-4 relative select-none">
         <div className="p-3 bg-white rounded-2xl shadow-sm border border-[#EAE5DF] relative overflow-hidden flex items-center justify-center">
           <img
