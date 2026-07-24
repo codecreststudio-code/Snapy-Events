@@ -549,6 +549,18 @@ export function NewEventForm() {
       toast({ title: "Please name your experience", description: "Name is required to build the memory capsule." })
       return
     }
+    // Step 4's copy explicitly promises this date is "shown to guests and
+    // used for your countdown" — but eventDate had no default (unlike
+    // endDate, which auto-fills to today+3 on mount) and nothing blocked
+    // Continue without it. Skipping it silently fell back to
+    // `new Date().toISOString()` at submit time in the mutationFn below,
+    // i.e. whatever moment the host happened to finish the wizard — not the
+    // actual event day — which is exactly the wrong date to show guests and
+    // count down to.
+    if (step === 4 && !eventDate) {
+      toast({ title: "Please set your event date", description: "This is the date shown to guests and used for the countdown." })
+      return
+    }
     if (step === 6 && !guestCountPlan) {
       toast({ title: "Please choose a plan", description: "Select an event plan to continue." })
       return
