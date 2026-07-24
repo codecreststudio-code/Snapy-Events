@@ -4,46 +4,22 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { ArrowRight, Menu, X, QrCode, Key, Loader2 } from "lucide-react"
+import { ArrowRight, Menu, X, QrCode } from "lucide-react"
 import { Button } from "@/lib/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { Logo } from "./logo"
+import { JoinEventModal } from "@/lib/components/events/join-event-modal"
 
 export function PublicNavbar() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const [hoveredPath, setHoveredPath] = useState<string | null>(null)
 
-  // Join Event Modal State
+  // Join Event Modal State — uses the shared JoinEventModal component (QR
+  // camera scanner + paste-link fallback) instead of a bare text-code form,
+  // so "Join Event" behaves the same from the public navbar as it does from
+  // the dashboard.
   const [showJoinModal, setShowJoinModal] = useState(false)
-  const [joinCode, setJoinCode] = useState("")
-  const [joinLoading, setJoinLoading] = useState(false)
-  const [joinError, setJoinError] = useState<string | null>(null)
-
-  const handleJoinSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!joinCode.trim()) return
-    setJoinLoading(true)
-    setJoinError(null)
-
-    try {
-      const res = await fetch("/api/events/join", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: joinCode.trim() }),
-      })
-      const data = await res.json()
-      if (res.ok && data.data?.slug) {
-        window.location.href = `/event/${data.data.slug}`
-      } else {
-        setJoinError(data.error?.message || "Invalid event code. Please check and try again.")
-      }
-    } catch (_) {
-      setJoinError("Unable to verify code right now. Please try again.")
-    } finally {
-      setJoinLoading(false)
-    }
-  }
 
   const navLinks = [
     { href: "/features", label: "Features" },
@@ -110,10 +86,7 @@ export function PublicNavbar() {
             {/* 1. Join Event Button */}
             <button
               type="button"
-              onClick={() => {
-                setJoinError(null)
-                setShowJoinModal(true)
-              }}
+              onClick={() => setShowJoinModal(true)}
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-mauve bg-mauve/10 hover:bg-mauve/20 border border-mauve/30 px-4 py-2 rounded-full transition-all duration-200 shadow-sm active:scale-95 shrink-0 cursor-pointer"
             >
               <QrCode className="h-3.5 w-3.5" />
@@ -177,7 +150,6 @@ export function PublicNavbar() {
                     type="button"
                     onClick={() => {
                       setIsOpen(false)
-                      setJoinError(null)
                       setShowJoinModal(true)
                     }}
                     className="flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold text-mauve bg-mauve/10 hover:bg-mauve/20 border border-mauve/30 transition text-left"
@@ -206,91 +178,10 @@ export function PublicNavbar() {
         </AnimatePresence>
       </header>
 
-      {/* Join Event Modal Dialog (Rendered at root layout level for perfect viewport centering) */}
-      <AnimatePresence>
-        {showJoinModal && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 min-h-screen">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowJoinModal(false)}
-              className="fixed inset-0 bg-black/75 backdrop-blur-sm"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-surface-card p-6 sm:p-8 rounded-3xl border border-hairline-dark shadow-2xl space-y-6 text-left z-10 my-auto"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-2xl bg-mauve/10 text-mauve flex items-center justify-center">
-                    <QrCode className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-ink">Join an Event</h3>
-                    <p className="text-xs text-ink-secondary font-light">Enter your event code or custom URL slug</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowJoinModal(false)}
-                  className="rounded-full p-2 text-ink-secondary hover:bg-mauve/10 hover:text-ink transition cursor-pointer"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              <form onSubmit={handleJoinSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-ink uppercase tracking-wider">Event Code or Subdomain</label>
-                  <div className="relative">
-                    <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-tertiary" />
-                    <input
-                      type="text"
-                      required
-                      value={joinCode}
-                      onChange={(e) => setJoinCode(e.target.value)}
-                      placeholder="e.g. K7XQ9M or sarah-wedding"
-                      className="w-full rounded-2xl border border-hairline-dark bg-surface-dark pl-11 pr-4 py-3 text-sm text-ink uppercase placeholder:normal-case placeholder:text-ink-tertiary focus:border-mauve focus:outline-none"
-                    />
-                  </div>
-                  {joinError && (
-                    <p className="text-xs font-medium text-red-400 pt-1">{joinError}</p>
-                  )}
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowJoinModal(false)}
-                    className="flex-1 rounded-full border-hairline-dark text-ink font-semibold py-3 text-xs"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={joinLoading}
-                    className="flex-1 rounded-full bg-mauve text-[#1a1410] font-semibold py-3 text-xs hover:bg-mauve-strong shadow-lg shadow-mauve/15"
-                  >
-                    {joinLoading ? (
-                      <span className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Verifying...
-                      </span>
-                    ) : (
-                      "Join Gallery"
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* Join Event Modal (shared QR-camera-scanner + paste-link component —
+          same one used on the dashboard, so this behaves identically from
+          the public navbar instead of falling back to a bare text field) */}
+      <JoinEventModal isOpen={showJoinModal} onClose={() => setShowJoinModal(false)} />
     </>
   )
 }
@@ -454,11 +345,7 @@ export function PublicFooter() {
           {/* Column 1: Brand & Logo */}
           <div className="col-span-1 sm:col-span-2 lg:col-span-1 flex flex-col items-start text-left">
             <div className="shrink-0 flex items-center justify-start mb-4">
-              <img
-                src="/Logo.png"
-                alt="Snapsy Events Logo"
-                className="h-14 w-auto object-contain"
-              />
+              <Logo imgClassName="h-24 sm:h-28 md:h-32 max-h-none w-auto" />
             </div>
             <p className="text-ink-secondary text-xs leading-relaxed mb-4 font-light">
               The modern disposable camera & live photo sharing experience for events, weddings, and parties. Powered by Snapsy Events.
@@ -604,9 +491,9 @@ export function PublicFooter() {
           </div>
         </div>
 
-        {/* Big brand wordmark at the very bottom */}
+        {/* Big brand wordmark at the very bottom — animated gold gradient shimmer */}
         <div className="mt-12 text-center select-none pointer-events-none">
-          <span className="block text-[12vw] font-extrabold leading-none tracking-tighter text-white/[0.04] uppercase">
+          <span className="footer-wordmark-gradient block text-[12vw] font-extrabold leading-none tracking-tighter uppercase">
             Snapsy Events
           </span>
         </div>
