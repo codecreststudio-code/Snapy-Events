@@ -180,23 +180,19 @@ export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null;
     // debugging showed remote images are the least reliable part of an
     // email (blocked in spam, stripped by some clients, slow to fetch) —
     // a bold text mark on the gradient always renders, everywhere, instantly.
-    const footerHtml = `<div style="padding: 20px 30px 28px; border-top: 1px solid #ede9fe; text-align: center;">
-      <p style="font-size: 12px; font-weight: 700; color: #7c3aed; margin: 0 0 8px;">Every Guest. Every Moment. One Shared Memory.</p>
-      ${settings.company_address ? `<p style="font-size: 11px; color: #9c958e; margin: 0 0 4px;">${settings.company_address}</p>` : ""}
-      <p style="font-size: 11px; color: #9c958e; margin: 0;">${settings.footer_text}</p>
+    const footerHtml = `<div style="padding: 24px 30px 28px; border-top: 1px solid #f3e8d2; text-align: center; background-color: #fdfcf9;">
+      <p style="font-size: 13px; font-weight: 700; color: #b89252; margin: 0 0 8px;">Every Guest. Every Moment. One Shared Memory.</p>
+      ${settings.company_address ? `<p style="font-size: 11px; color: #8c8275; margin: 0 0 4px;">${settings.company_address}</p>` : ""}
+      <p style="font-size: 11px; color: #8c8275; margin: 0;">${settings.footer_text}</p>
     </div>`
 
-    // Brand: violet-600 -> fuchsia-500 gradient, matching the marketing site
-    // (src/app/page.tsx uses the same "from-violet-600 to-fuchsia-500" accent
-    // throughout) — not the tan/brown palette used only inside the event
-    // creation wizard's own UI, which isn't the site's actual brand identity.
-    html = `<div class="snapsy-wrapper" style="font-family: sans-serif; color: #1c1a17; background-color: #f7f5fb; padding: 30px 15px;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(124,58,237,0.12);">
-        <div style="background: linear-gradient(135deg, #7c3aed, #d946ef); padding: 40px 30px; text-align: center;">
-          <div style="font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">${settings.sender_name}</div>
-          <div style="font-size: 13px; color: rgba(255,255,255,0.85); margin-top: 6px;">${heroSubtitle}</div>
+    html = `<div class="snapsy-wrapper" style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1c1a17; background-color: #f6f4f0; padding: 40px 15px;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e8e2d5; box-shadow: 0 10px 30px rgba(0,0,0,0.06);">
+        <div style="background: #141210; border-top: 4px solid #c9a96e; padding: 36px 30px; text-align: center;">
+          <div style="font-size: 22px; font-weight: 800; color: #c9a96e; letter-spacing: 1.5px; text-transform: uppercase;">${settings.sender_name}</div>
+          <div style="font-size: 11px; font-weight: 600; color: #dfc594; margin-top: 6px; text-transform: uppercase; letter-spacing: 1.5px;">${heroSubtitle}</div>
         </div>
-        <div style="padding: 32px 30px;">
+        <div style="padding: 36px 32px; background-color: #ffffff;">
           ${html}
           ${settings.signature ? `<p style="margin-top: 25px; font-style: italic; color: #7a756e;">${settings.signature}</p>` : ""}
         </div>
