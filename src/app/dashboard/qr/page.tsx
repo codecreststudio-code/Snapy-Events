@@ -241,13 +241,13 @@ function QRCodeCard({ qr, onDelete }: { qr: QRCodeWithEvent; onDelete: (id: stri
           </DropdownMenu>
         </div>
       </div>
-      <CardContent className="p-4 bg-ink/[0.02] border-t border-[#e5dfd0]">
-        <h3 className="font-semibold text-sm text-ink group-hover:text-mauve transition-colors">{qr.name || "QR Code"}</h3>
+      <CardContent className="p-4 bg-[#faf6ed]/40 border-t border-[#e5dfd0]">
+        <h3 className="font-semibold text-sm text-[#1a1410] group-hover:text-mauve transition-colors">{qr.name || "QR Code"}</h3>
         <div className="flex items-center justify-between mt-1">
-          <p className="text-xs text-ink-secondary font-medium">
+          <p className="text-xs text-[#6b6055] font-medium">
             {qr.event?.name || "General Code"}
           </p>
-          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20">
+          <span className="text-[10px] bg-emerald-500/10 text-emerald-700 font-bold px-2 py-0.5 rounded-full border border-emerald-600/20">
             {qr.scan_count || 0} scans
           </span>
         </div>
@@ -483,8 +483,8 @@ export default function ConsolidatedQRPage() {
           <div className="absolute top-0 right-0 w-24 h-24 bg-mauve/5 rounded-full filter blur-xl transform translate-x-4 -translate-y-4" />
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider">Total QR Codes</p>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-ink">{qrCodes?.length || 0}</p>
+              <p className="text-xs font-semibold text-[#6b6055] uppercase tracking-wider">Total QR Codes</p>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-[#1a1410]">{qrCodes?.length || 0}</p>
             </div>
             <div className="p-3 bg-mauve/10 rounded-xl text-mauve">
               <QrCode className="h-6 w-6" />
@@ -496,10 +496,10 @@ export default function ConsolidatedQRPage() {
           <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full filter blur-xl transform translate-x-4 -translate-y-4" />
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider">Total Scans</p>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-ink">{totalScans}</p>
+              <p className="text-xs font-semibold text-[#6b6055] uppercase tracking-wider">Total Scans</p>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-[#1a1410]">{totalScans}</p>
             </div>
-            <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400">
+            <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-700">
               <Camera className="h-6 w-6" />
             </div>
           </div>
@@ -509,8 +509,8 @@ export default function ConsolidatedQRPage() {
           <div className="absolute top-0 right-0 w-24 h-24 bg-mauve/5 rounded-full filter blur-xl transform translate-x-4 -translate-y-4" />
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider">Active QR Checkpoints</p>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-ink">
+              <p className="text-xs font-semibold text-[#6b6055] uppercase tracking-wider">Active QR Checkpoints</p>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-[#1a1410]">
                 {qrCodes?.filter((qr) => qr.is_active).length || 0}
               </p>
             </div>
@@ -540,9 +540,9 @@ export default function ConsolidatedQRPage() {
             onChange={(e) => setSelectedEventId(e.target.value)}
             className="flex h-10 w-full sm:w-56 rounded-md border border-[#e5dfd0] bg-ink/5 px-3 py-2 text-sm text-ink ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 focus-visible:ring-offset-2"
           >
-            <option value="all" className="bg-[#ffffff] text-ink">All Events</option>
+            <option value="all" className="bg-[#ffffff] text-[#1a1410]">All Events</option>
             {events?.map((evt) => (
-              <option key={evt.id} value={evt.id} className="bg-[#ffffff] text-ink">
+              <option key={evt.id} value={evt.id} className="bg-[#ffffff] text-[#1a1410]">
                 {evt.name}
               </option>
             ))}

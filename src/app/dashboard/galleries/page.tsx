@@ -121,7 +121,7 @@ function GalleryCard({
               />
             ) : coverGradient ? null : (
               <div className="absolute inset-0 bg-gradient-to-br from-mauve/10 to-mauve-strong/5 flex items-center justify-center">
-                <Images className="h-10 w-10 text-ink-tertiary group-hover:text-mauve/60 transition-colors" />
+                <Images className="h-10 w-10 text-[#8c8275] group-hover:text-mauve/60 transition-colors" />
               </div>
             )}
 
@@ -162,12 +162,12 @@ function GalleryCard({
           <div className="p-5 space-y-3">
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-1">
-                <h3 className="font-semibold text-base leading-snug text-ink group-hover:text-mauve transition-colors truncate">
+                <h3 className="font-semibold text-base leading-snug text-[#1a1410] group-hover:text-mauve transition-colors truncate">
                   {gallery.name}
                 </h3>
                 {(gallery as any)?.event && (
-                  <p className="text-xs text-ink-secondary truncate flex items-center gap-1">
-                    <span className="font-medium text-ink-tertiary">Event:</span>
+                  <p className="text-xs text-[#6b6055] truncate flex items-center gap-1">
+                    <span className="font-medium text-[#7a7265]">Event:</span>
                     {(gallery as any)?.event?.name}
                   </p>
                 )}
@@ -175,7 +175,7 @@ function GalleryCard({
             </div>
 
             {gallery.description && (
-              <p className="text-xs text-ink-secondary line-clamp-2 leading-relaxed bg-ink/[0.03] p-2.5 rounded border border-[#e5dfd0]">
+              <p className="text-xs text-[#6b6055] line-clamp-2 leading-relaxed bg-[#faf6ed]/60 p-2.5 rounded border border-[#e5dfd0]">
                 {gallery.description}
               </p>
             )}
@@ -183,9 +183,9 @@ function GalleryCard({
         </div>
 
         {/* Footer Metrics */}
-        <div className="px-5 py-4 border-t border-[#e5dfd0] bg-ink/[0.02] flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs text-ink-secondary">
-            <ImageIcon className="h-4 w-4 text-ink-tertiary" />
+        <div className="px-5 py-4 border-t border-[#e5dfd0] bg-[#faf6ed]/40 flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-xs text-[#6b6055]">
+            <ImageIcon className="h-4 w-4 text-[#8c8275]" />
             <span>{gallery.photo_count || 0} photos</span>
           </div>
 
@@ -196,13 +196,13 @@ function GalleryCard({
                 Public
               </span>
             ) : (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase border bg-ink/5 border-hairline-dark text-ink-secondary flex items-center gap-1">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase border bg-[#e5dfd0]/40 border-[#e5dfd0] text-[#6b6055] flex items-center gap-1">
                 <Lock className="h-3 w-3" />
                 Private
               </span>
             )}
             {gallery.reveal_enabled && gallery.reveal_at && (
-              <span className="text-[10px] text-ink-tertiary font-medium">
+              <span className="text-[10px] text-[#7a7265] font-medium">
                 Delayed Reveal
               </span>
             )}
@@ -343,9 +343,9 @@ export default function GalleriesPage() {
             onChange={(e) => setFilterType(e.target.value)}
             className="flex h-10 w-full sm:w-44 rounded-md border border-[#e5dfd0] bg-ink/5 px-3 py-2 text-sm text-ink ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 focus-visible:ring-offset-2"
           >
-            <option value="all" className="bg-[#ffffff] text-ink">All Galleries</option>
-            <option value="public" className="bg-[#ffffff] text-ink">Public Only</option>
-            <option value="private" className="bg-[#ffffff] text-ink">Private Only</option>
+            <option value="all" className="bg-[#ffffff] text-[#1a1410]">All Galleries</option>
+            <option value="public" className="bg-[#ffffff] text-[#1a1410]">Public Only</option>
+            <option value="private" className="bg-[#ffffff] text-[#1a1410]">Private Only</option>
           </select>
         </div>
       </div>

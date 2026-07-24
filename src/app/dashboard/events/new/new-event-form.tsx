@@ -1661,10 +1661,10 @@ export function NewEventForm() {
                 <span className="text-[10px] font-bold uppercase tracking-widest text-mauve">
                   {totalEventPrice > 0 ? "Almost There" : "Setup Complete"}
                 </span>
-                <h2 className={`font-playfair text-3xl sm:text-4xl font-medium text-ink`}>
+                <h2 className={`font-playfair text-3xl sm:text-4xl font-medium text-[#1a1410]`}>
                   {totalEventPrice > 0 ? "One step left — complete payment." : "Your memory capsule is ready."}
                 </h2>
-                <p className="text-sm text-ink-secondary max-w-sm mx-auto">
+                <p className="text-sm text-[#6b6055] max-w-sm mx-auto">
                   {totalEventPrice > 0
                     // Payment hasn't happened yet at this point — the event was
                     // saved as a draft (see /api/events) and stays invisible/
@@ -1711,14 +1711,14 @@ export function NewEventForm() {
                   </div>
 
                   <div className="text-center space-y-0.5">
-                    <p className="text-sm font-semibold text-ink">{name}</p>
+                    <p className="text-sm font-semibold text-[#1a1410]">{name}</p>
                     <p className="text-[10px] uppercase tracking-widest text-mauve font-bold">Plan: {(selectedPlan?.name || guestCountPlan).toUpperCase()}</p>
                   </div>
 
                   {/* Copyable join/invite pill */}
                   <button
                     onClick={copyInviteLink}
-                    className="w-full max-w-xs flex items-center justify-between gap-2 rounded-full border border-hairline-dark bg-transparent px-4 py-2 text-ink hover:bg-mauve/10 transition-all cursor-pointer"
+                    className="w-full max-w-xs flex items-center justify-between gap-2 rounded-full border border-[#e5dfd0] bg-transparent px-4 py-2 text-[#1a1410] hover:bg-mauve/10 transition-all cursor-pointer"
                   >
                     <span className="truncate text-xs font-mono">{createdEvent?.slug}</span>
                     <Copy className="h-3.5 w-3.5 shrink-0 text-mauve" />
@@ -1736,7 +1736,7 @@ export function NewEventForm() {
                           copyInviteLink()
                         }
                       }}
-                      className="px-4 py-1.5 rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 text-[11px] font-semibold text-ink-secondary transition-all flex items-center gap-1.5 cursor-pointer"
+                      className="px-4 py-1.5 rounded-full border border-[#e5dfd0] bg-transparent hover:bg-mauve/10 text-[11px] font-semibold text-[#6b6055] transition-all flex items-center gap-1.5 cursor-pointer"
                     >
                       <Share2 className="h-3.5 w-3.5" />
                       <span>Share</span>
@@ -1745,7 +1745,7 @@ export function NewEventForm() {
                       <a
                         href={qrCodeUrl}
                         download={`${slugify(name)}-qr-code.png`}
-                        className="px-4 py-1.5 rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 text-[11px] font-semibold text-ink-secondary transition-all flex items-center gap-1.5"
+                        className="px-4 py-1.5 rounded-full border border-[#e5dfd0] bg-transparent hover:bg-mauve/10 text-[11px] font-semibold text-[#6b6055] transition-all flex items-center gap-1.5"
                       >
                         <DownloadIcon className="h-3.5 w-3.5" />
                         <span>Download QR</span>
@@ -1758,8 +1758,8 @@ export function NewEventForm() {
               {totalEventPrice > 0 && (
                 <div className="border border-[#e5dfd0] rounded-2xl p-5 bg-[#faf6ed] text-center space-y-1">
                   <p className="text-[10px] uppercase tracking-widest text-mauve font-bold">Amount Due</p>
-                  <p className="text-2xl font-playfair text-ink">₹{totalEventPrice.toLocaleString("en-IN")}</p>
-                  <p className="text-xs text-ink-secondary">Plan: {(selectedPlan?.name || guestCountPlan).toUpperCase()}</p>
+                  <p className="text-2xl font-playfair text-[#1a1410]">₹{totalEventPrice.toLocaleString("en-IN")}</p>
+                  <p className="text-xs text-[#6b6055]">Plan: {(selectedPlan?.name || guestCountPlan).toUpperCase()}</p>
                 </div>
               )}
 
@@ -1768,7 +1768,7 @@ export function NewEventForm() {
                 <Button
                   variant="outline"
                   onClick={() => router.push("/dashboard/events")}
-                  className="flex-1 rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/10 py-5"
+                  className="flex-1 rounded-full border border-[#e5dfd0] bg-transparent text-[#1a1410] hover:bg-mauve/10 py-5"
                 >
                   Go to Dashboard
                 </Button>

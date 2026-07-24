@@ -224,11 +224,11 @@ function QRCodeCard({ qr, eventSlug, onDelete }: { qr: QRCode; eventSlug: string
       </div>
 
       <CardContent className="p-4">
-        <h3 className="font-semibold text-ink">{qr.name || "QR Code"}</h3>
-        <p className="text-sm text-ink-secondary mt-1">
+        <h3 className="font-semibold text-[#1a1410]">{qr.name || "QR Code"}</h3>
+        <p className="text-sm text-[#6b6055] mt-1">
           {qr.scan_count || 0} scans
         </p>
-        <p className="text-xs text-ink-tertiary mt-2 break-all">{scanUrl}</p>
+        <p className="text-xs text-[#7a7265] mt-2 break-all">{scanUrl}</p>
       </CardContent>
     </Card>
   )
@@ -420,8 +420,8 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
         <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-5 hover:border-mauve/40 transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-ink-secondary">Total QR Codes</p>
-              <p className="mt-2 text-2xl font-semibold text-ink">{qrCodes?.length || 0}</p>
+              <p className="text-sm font-medium text-[#6b6055]">Total QR Codes</p>
+              <p className="mt-2 text-2xl font-semibold text-[#1a1410]">{qrCodes?.length || 0}</p>
             </div>
             <QrCode className="h-8 w-8 text-mauve" />
           </div>
@@ -429,17 +429,17 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
         <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-5 hover:border-emerald-500/30 transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-ink-secondary">Total Scans</p>
-              <p className="mt-2 text-2xl font-semibold text-ink">{totalScans}</p>
+              <p className="text-sm font-medium text-[#6b6055]">Total Scans</p>
+              <p className="mt-2 text-2xl font-semibold text-[#1a1410]">{totalScans}</p>
             </div>
-            <Camera className="h-8 w-8 text-emerald-400" />
+            <Camera className="h-8 w-8 text-emerald-700" />
           </div>
         </Card>
         <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-5 hover:border-mauve/40 transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-ink-secondary">Active Codes</p>
-              <p className="mt-2 text-2xl font-semibold text-ink">
+              <p className="text-sm font-medium text-[#6b6055]">Active Codes</p>
+              <p className="mt-2 text-2xl font-semibold text-[#1a1410]">
                 {qrCodes?.filter((qr) => qr.is_active).length || 0}
               </p>
             </div>

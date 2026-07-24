@@ -56,17 +56,17 @@ export function DemoAiFaceSearchModal({
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-playfair text-lg font-bold text-ink">
+                <h3 className="font-playfair text-lg font-bold text-[#1a1410]">
                   AI Face Search Demo 👤✨
                 </h3>
-                <p className="text-xs text-ink-tertiary">
+                <p className="text-xs text-[#7a7265]">
                   Select a guest or upload a selfie to instantly find matching photos
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="rounded-full p-2 text-ink-tertiary hover:bg-black/5 transition-colors"
+              className="rounded-full p-2 text-[#8c8275] hover:bg-black/5 transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
@@ -74,7 +74,7 @@ export function DemoAiFaceSearchModal({
 
           {/* Guest Cluster Selector */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-ink-tertiary mb-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#7a7265] mb-3">
               Step 1: Select a Guest Face Cluster
             </h4>
             <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
@@ -96,7 +96,7 @@ export function DemoAiFaceSearchModal({
                       alt={g.name}
                       className="h-10 w-10 rounded-full object-cover border border-white shadow-sm"
                     />
-                    <span className="truncate text-[10px] font-medium text-ink w-full text-center">
+                    <span className="truncate text-[10px] font-medium text-[#1a1410] w-full text-center">
                       {g.name.split(" ")[0]}
                     </span>
                   </button>
@@ -108,7 +108,7 @@ export function DemoAiFaceSearchModal({
           {/* Search Result State */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-ink-tertiary">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#7a7265]">
                 Step 2: AI Face Recognition Results
               </h4>
               {selectedGuest && (
@@ -122,7 +122,7 @@ export function DemoAiFaceSearchModal({
             {isSearching ? (
               <div className="flex flex-col items-center justify-center py-12 space-y-3 bg-white/60 rounded-2xl border border-[#e5dfd0]">
                 <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-mauve" />
-                <p className="text-xs font-medium text-ink-secondary">
+                <p className="text-xs font-medium text-[#6b6055]">
                   Scanning 154 photos using vector face embeddings...
                 </p>
               </div>
@@ -150,7 +150,7 @@ export function DemoAiFaceSearchModal({
 
           {/* Footer */}
           <div className="flex items-center justify-between pt-4 border-t border-[#e5dfd0]">
-            <p className="text-xs text-ink-tertiary">
+            <p className="text-xs text-[#7a7265]">
               In real events, guests upload a selfie to unlock all their event photos instantly!
             </p>
             <Button

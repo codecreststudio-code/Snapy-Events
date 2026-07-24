@@ -39,7 +39,7 @@ export function AccountMenu({ variant = "sidebar" }: { variant?: "sidebar" | "co
 
   const menuContent = (
     <DropdownMenuContent side="top" align="end" sideOffset={12} className="w-56 rounded-2xl border border-[#e5dfd0] bg-white p-2 shadow-xl z-50">
-      <DropdownMenuLabel className="px-3 py-2 text-xs font-bold text-ink">My Account</DropdownMenuLabel>
+      <DropdownMenuLabel className="px-3 py-2 text-xs font-bold text-[#1a1410]">My Account</DropdownMenuLabel>
       <DropdownMenuSeparator className="my-1 bg-[#e5dfd0]" />
       {profile?.is_admin && (
         <>
@@ -52,16 +52,16 @@ export function AccountMenu({ variant = "sidebar" }: { variant?: "sidebar" | "co
         </>
       )}
       <DropdownMenuItem asChild>
-        <Link href="/dashboard/settings" className="cursor-pointer rounded-xl px-3 py-2 text-xs font-medium text-ink hover:bg-mauve/10">Settings</Link>
+        <Link href="/dashboard/settings" className="cursor-pointer rounded-xl px-3 py-2 text-xs font-medium text-[#1a1410] hover:bg-mauve/10">Settings</Link>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
-        <Link href="/dashboard/billing" className="cursor-pointer rounded-xl px-3 py-2 text-xs font-medium text-ink hover:bg-mauve/10">Billing</Link>
+        <Link href="/dashboard/billing" className="cursor-pointer rounded-xl px-3 py-2 text-xs font-medium text-[#1a1410] hover:bg-mauve/10">Billing</Link>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
-        <Link href="/dashboard/qr" className="cursor-pointer rounded-xl px-3 py-2 text-xs font-medium text-ink hover:bg-mauve/10">QR Codes</Link>
+        <Link href="/dashboard/qr" className="cursor-pointer rounded-xl px-3 py-2 text-xs font-medium text-[#1a1410] hover:bg-mauve/10">QR Codes</Link>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
-        <Link href="/dashboard/downloads" className="cursor-pointer rounded-xl px-3 py-2 text-xs font-medium text-ink hover:bg-mauve/10">Downloads</Link>
+        <Link href="/dashboard/downloads" className="cursor-pointer rounded-xl px-3 py-2 text-xs font-medium text-[#1a1410] hover:bg-mauve/10">Downloads</Link>
       </DropdownMenuItem>
       <DropdownMenuSeparator className="my-1 bg-[#e5dfd0]" />
       <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer rounded-xl px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/10">

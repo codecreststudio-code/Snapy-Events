@@ -136,8 +136,8 @@ function StatusPill({ status }: { status: string }) {
     <span
       className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
         isLive
-          ? "border border-emerald-500/30 bg-emerald-500/15 text-emerald-400"
-          : "border border-hairline-dark bg-mauve/5 text-ink-secondary"
+          ? "border border-emerald-600/30 bg-emerald-500/15 text-emerald-700"
+          : "border border-[#e5dfd0] bg-mauve/5 text-[#6b6055]"
       }`}
     >
       {isLive ? "PUBLISHED" : status}
@@ -230,11 +230,11 @@ export default function DashboardPage() {
                           <Camera className="h-5 w-5 text-mauve" />
                         </div>
                         <div className="overflow-hidden">
-                          <h3 className="truncate text-sm font-semibold text-ink">{event.name}</h3>
-                          <p className="text-xs text-ink-secondary">Live · {event.photo_count} photos</p>
+                          <h3 className="truncate text-sm font-semibold text-[#1a1410]">{event.name}</h3>
+                          <p className="text-xs text-[#6b6055]">Live · {event.photo_count} photos</p>
                         </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 flex-shrink-0 text-ink-tertiary" />
+                      <ChevronRight className="h-4 w-4 flex-shrink-0 text-[#7a7265]" />
                     </Link>
                   ))}
                 </div>
@@ -263,10 +263,10 @@ export default function DashboardPage() {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-playfair text-lg font-bold text-ink group-hover:text-mauve transition-colors">{event.name}</h3>
+                          <h3 className="font-playfair text-lg font-bold text-[#1a1410] group-hover:text-mauve transition-colors">{event.name}</h3>
                           <StatusPill status={event.status} />
                         </div>
-                        {dateRange && <span className="text-xs text-ink-secondary font-medium">{dateRange}</span>}
+                        {dateRange && <span className="text-xs text-[#6b6055] font-medium">{dateRange}</span>}
                       </div>
 
                       {/* Photos Grid or Clean Empty Placeholder */}
@@ -294,14 +294,14 @@ export default function DashboardPage() {
                         </div>
                       ) : (
                         <div className="flex h-20 w-full items-center justify-center rounded-2xl border border-dashed border-[#e5dfd0] bg-[#faf6ed]/50 px-4 text-center">
-                          <div className="flex items-center gap-2 text-xs font-medium text-ink-secondary">
+                          <div className="flex items-center gap-2 text-xs font-medium text-[#6b6055]">
                             <Camera className="h-4 w-4 text-mauve/70" />
                             <span>No photos yet — start capturing moments</span>
                           </div>
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between text-xs text-ink-secondary pt-1">
+                      <div className="flex items-center justify-between text-xs text-[#6b6055] pt-1">
                         <span>{event.photo_count} memories captured</span>
                         <span className="font-semibold text-mauve group-hover:underline flex items-center gap-1">View Album →</span>
                       </div>
@@ -316,14 +316,14 @@ export default function DashboardPage() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-playfair text-lg font-bold text-ink group-hover:text-mauve transition-colors">
+                      <h3 className="font-playfair text-lg font-bold text-[#1a1410] group-hover:text-mauve transition-colors">
                         Welcome!
                       </h3>
                       <span className="rounded-md bg-mauve/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-mauve border border-mauve/20">
                         SAMPLE
                       </span>
                     </div>
-                    <span className="text-xs text-ink-secondary font-medium">Jul 15~16, 2026</span>
+                    <span className="text-xs text-[#6b6055] font-medium">Jul 15~16, 2026</span>
                   </div>
 
                   <div className="grid grid-cols-4 gap-2 h-28 rounded-2xl overflow-hidden">
@@ -348,7 +348,7 @@ export default function DashboardPage() {
                     ))}
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-ink-secondary pt-1">
+                  <div className="flex items-center justify-between text-xs text-[#6b6055] pt-1">
                     <span>Interactive sample album</span>
                     <span className="font-semibold text-mauve group-hover:underline flex items-center gap-1">Try Demo →</span>
                   </div>

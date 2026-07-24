@@ -71,7 +71,7 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf6ed] text-ink">
+    <div className="flex min-h-screen flex-col bg-[#faf6ed] text-[#1a1410]">
       <header className="pt-safe sticky top-0 z-50 w-full border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur supports-[backdrop-filter]:bg-[#faf6ed]/80">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           <Link href="/">
@@ -80,7 +80,7 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
           <Button
             asChild
             size="sm"
-            className="rounded-full border border-ink/15 bg-transparent text-ink hover:bg-mauve/10 hover:text-mauve"
+            className="rounded-full border border-ink/15 bg-transparent text-[#1a1410] hover:bg-mauve/10 hover:text-mauve"
           >
             <Link href={`/event/${event.slug}/upload`}>
               <Camera className="h-4 w-4" />
@@ -106,10 +106,10 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
             <p className="text-sm uppercase tracking-widest text-mauve">
               {event.user?.name ?? "Event"}
             </p>
-            <h1 className="font-playfair text-3xl font-medium tracking-tight text-ink md:text-4xl">
+            <h1 className="font-playfair text-3xl font-medium tracking-tight text-[#1a1410] md:text-4xl">
               {event.name}
             </h1>
-            <p className="text-lg text-ink-secondary">
+            <p className="text-lg text-[#6b6055]">
               Photos Coming Soon
             </p>
           </div>
@@ -119,14 +119,14 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
           </div>
 
           <div className="animate-slide-up animate-delay-3 rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-6 text-center">
-            <h2 className="font-playfair font-medium text-ink mb-2">What happens next?</h2>
-            <p className="text-sm text-ink-secondary">
+            <h2 className="font-playfair font-medium text-[#1a1410] mb-2">What happens next?</h2>
+            <p className="text-sm text-[#6b6055]">
               Our photographer is busy capturing amazing moments. Once the gallery is ready,
               you&apos;ll be able to view and download all the photos from this event.
             </p>
           </div>
 
-          <div className="animate-slide-up animate-delay-3 flex flex-wrap items-center justify-center gap-4 text-sm text-ink-secondary">
+          <div className="animate-slide-up animate-delay-3 flex flex-wrap items-center justify-center gap-4 text-sm text-[#6b6055]">
             {event.event_date && (
               <span className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
@@ -141,7 +141,7 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
           </div>
 
           <div className="animate-slide-up animate-delay-4 pt-8">
-            <p className="text-sm text-ink-secondary mb-4">
+            <p className="text-sm text-[#6b6055] mb-4">
               Want to be notified when photos are ready?
             </p>
             <div className="flex items-center justify-center gap-2 max-w-sm mx-auto">
@@ -149,7 +149,7 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
                 type="email"
                 placeholder="Enter your email"
                 aria-label="Email address"
-                className="flex h-10 w-full rounded-full border border-[#e5dfd0] bg-[#ffffff] px-4 py-2 text-sm text-ink ring-offset-background placeholder:text-ink-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve focus-visible:ring-offset-2"
+                className="flex h-10 w-full rounded-full border border-[#e5dfd0] bg-[#ffffff] px-4 py-2 text-sm text-[#1a1410] ring-offset-background placeholder:text-[#8c8275] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve focus-visible:ring-offset-2"
               />
               <Button className="rounded-full bg-mauve text-[#1a1410] hover:bg-mauve-strong">
                 <Mail className="h-4 w-4" />

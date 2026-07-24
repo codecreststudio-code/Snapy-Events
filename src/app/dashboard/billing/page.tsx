@@ -264,8 +264,8 @@ function PricingCard({
       <div className="relative z-10">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-lg font-bold text-ink">{plan.name}</h3>
-            <p className="mt-1.5 text-xs text-ink-secondary leading-relaxed font-light min-h-[32px]">
+            <h3 className="text-lg font-bold text-[#1a1410]">{plan.name}</h3>
+            <p className="mt-1.5 text-xs text-[#6b6055] leading-relaxed font-light min-h-[32px]">
               {plan.description}
             </p>
           </div>
@@ -275,27 +275,27 @@ function PricingCard({
             </span>
           )}
           {isPremium && (
-            <span className="h-7 w-7 rounded-full bg-ink/10 flex items-center justify-center text-ink shrink-0">
+            <span className="h-7 w-7 rounded-full bg-[#e5dfd0]/50 flex items-center justify-center text-[#1a1410] shrink-0">
               <Crown className="h-3.5 w-3.5" />
             </span>
           )}
         </div>
 
         <div className="mt-4 flex items-baseline gap-1">
-          <span className="text-3xl font-extrabold text-ink">{symbol}{displayPrice}</span>
-          <span className="text-ink-tertiary text-xs font-light">/ event</span>
+          <span className="text-3xl font-extrabold text-[#1a1410]">{symbol}{displayPrice}</span>
+          <span className="text-[#7a7265] text-xs font-light">/ event</span>
         </div>
 
-        <ul className="mt-5 space-y-3 border-t border-hairline-dark pt-5">
+        <ul className="mt-5 space-y-3 border-t border-[#e5dfd0] pt-5">
           {plan.features.map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-2.5 text-xs text-ink-secondary font-light">
+            <li key={idx} className="flex items-start gap-2.5 text-xs text-[#6b6055] font-light">
               <Check
                 className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
                   isSelected
                     ? isPremium
                       ? "text-mauve-strong"
                       : "text-mauve"
-                    : "text-ink-tertiary"
+                    : "text-[#8c8275]"
                 }`}
               />
               <span>{feature}</span>
@@ -310,7 +310,7 @@ function PricingCard({
           className={`w-full font-bold py-2.5 rounded-xl transition-all active:scale-[0.98] text-xs border-none ${
             isSelected
               ? "bg-mauve text-[#1a1410] shadow-md shadow-mauve/10"
-              : "bg-mauve/5 text-ink-secondary hover:bg-mauve/10"
+              : "bg-mauve/5 text-[#6b6055] hover:bg-mauve/10"
           }`}
         >
           {isSelected ? "Selected" : `Choose ${plan.name}`}
@@ -548,16 +548,16 @@ export default function BillingPage() {
           entitlement for the next event a host creates. */}
       {subscription && (
         <Card className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff] shadow-sm overflow-hidden">
-          <CardHeader className="bg-ink/[0.02] border-b border-[#e5dfd0] pb-4">
-            <CardTitle className="text-lg font-bold text-ink">Last Purchased Plan</CardTitle>
-            <CardDescription className="text-ink-secondary">
+          <CardHeader className="bg-[#faf6ed]/60 border-b border-[#e5dfd0] pb-4">
+            <CardTitle className="text-lg font-bold text-[#1a1410]">Last Purchased Plan</CardTitle>
+            <CardDescription className="text-[#6b6055]">
               Reference only. Snapsy bills per event, so this reflects your most recent purchase — not an ongoing subscription or a discount on your next event.
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
             <div>
-              <p className="text-xs font-medium text-ink-tertiary uppercase tracking-wider">Plan Tier</p>
-              <p className="text-lg font-bold text-ink capitalize mt-1">{subscription.plan_id}</p>
+              <p className="text-xs font-medium text-[#7a7265] uppercase tracking-wider">Plan Tier</p>
+              <p className="text-lg font-bold text-[#1a1410] capitalize mt-1">{subscription.plan_id}</p>
             </div>
           </CardContent>
         </Card>
@@ -591,7 +591,7 @@ export default function BillingPage() {
           <div className="flex items-center justify-between border-b border-[#e5dfd0] pb-4 mb-6">
             <div className="flex items-center gap-2.5">
               <Sparkles className={`h-5 w-5 ${accent.icon} animate-pulse`} />
-              <h3 className="text-lg font-bold text-ink">
+              <h3 className="text-lg font-bold text-[#1a1410]">
                 Customize Limits with Add-Ons
               </h3>
             </div>
@@ -608,9 +608,9 @@ export default function BillingPage() {
             <div className="space-y-8">
               {/* Guest Limit Boost */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold text-ink-secondary flex items-center gap-2">
+                <Label className="text-sm font-semibold text-[#4a4038] flex items-center gap-2">
                   <span>🚀 Boost Guest Limit</span>
-                  <span className="text-xs text-ink-tertiary font-normal">(Base: {baseGuestLimitStr})</span>
+                  <span className="text-xs text-[#7a7265] font-normal">(Base: {baseGuestLimitStr})</span>
                 </Label>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {guestBoostsList.map((boost) => (
@@ -621,7 +621,7 @@ export default function BillingPage() {
                       className={`py-3 px-3 rounded-2xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
                         guestBoost === boost.value
                           ? accent.buttonActive
-                          : "bg-ink/[0.03] border-[#e5dfd0] text-ink-secondary hover:border-mauve/30 hover:bg-mauve/5"
+                          : "bg-[#faf6ed]/60 border-[#e5dfd0] text-[#6b6055] hover:border-mauve/30 hover:bg-mauve/5"
                       }`}
                     >
                       <span>{boost.label}</span>
@@ -635,9 +635,9 @@ export default function BillingPage() {
 
               {/* Shots Limit Boost */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold text-ink-secondary flex items-center gap-2">
+                <Label className="text-sm font-semibold text-[#4a4038] flex items-center gap-2">
                   <span>📸 Boost Shots Per Guest</span>
-                  <span className="text-xs text-ink-tertiary font-normal">(Base: {baseShotLimitStr})</span>
+                  <span className="text-xs text-[#7a7265] font-normal">(Base: {baseShotLimitStr})</span>
                 </Label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {shotBoostsList.map((boost) => (
@@ -648,7 +648,7 @@ export default function BillingPage() {
                       className={`py-3 px-3 rounded-2xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
                         shotBoost === boost.value
                           ? accent.buttonActive
-                          : "bg-ink/[0.03] border-[#e5dfd0] text-ink-secondary hover:border-mauve/30 hover:bg-mauve/5"
+                          : "bg-[#faf6ed]/60 border-[#e5dfd0] text-[#6b6055] hover:border-mauve/30 hover:bg-mauve/5"
                       }`}
                     >
                       <span>{boost.label}</span>
@@ -667,21 +667,21 @@ export default function BillingPage() {
       {/* Pricing Overview & Main Action Card */}
       <div className="flex flex-col sm:flex-row items-center justify-between rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-8 max-w-4xl mx-auto gap-6 shadow-sm">
         <div className="text-center sm:text-left">
-          <span className="text-xs text-ink-tertiary uppercase tracking-widest font-semibold">Total Price</span>
+          <span className="text-xs text-[#7a7265] uppercase tracking-widest font-semibold">Total Price</span>
           <div className="flex items-baseline gap-1.5 justify-center sm:justify-start mt-1">
-            <span className="text-3xl font-extrabold text-ink">
+            <span className="text-3xl font-extrabold text-[#1a1410]">
               {symbol}{getPrice(totalPrice, Math.round(totalPrice / 80))}
             </span>
-            <span className="text-sm text-ink-secondary font-light">
+            <span className="text-sm text-[#6b6055] font-light">
               {selectedPlan === "free" ? "forever" : "per event"}
             </span>
           </div>
-          <p className="text-xs text-ink-tertiary mt-1.5 font-light">
+          <p className="text-xs text-[#7a7265] mt-1.5 font-light">
             {selectedPlan === "free" ? (
               isFreeNoOp ? (
-                <span className="text-ink-secondary">You&apos;re currently on the Free plan.</span>
+                <span className="text-[#6b6055]">You&apos;re currently on the Free plan.</span>
               ) : (
-                <span className="text-ink-secondary">No charge — downgrading resets any paid add-ons.</span>
+                <span className="text-[#6b6055]">No charge — downgrading resets any paid add-ons.</span>
               )
             ) : (
               <>
@@ -689,14 +689,14 @@ export default function BillingPage() {
                 {guestBoost > 0 && ` + Guest Boost ${symbol}${getPrice(guestAddOnPrice, Math.round(guestAddOnPrice / 80))}`}
                 {shotBoost > 0 && ` + Shots Boost ${symbol}${getPrice(shotAddOnPrice, Math.round(shotAddOnPrice / 80))}`}
                 {isSamePlan && (
-                  <span className="block text-[11px] text-ink-tertiary mt-1">
+                  <span className="block text-[11px] text-[#7a7265] mt-1">
                     You&apos;ve purchased the {activePlanDetails.name} plan before — this will be a new, full-price purchase for a new event.
                   </span>
                 )}
               </>
             )}
           </p>
-          <p className="text-[11px] text-ink-tertiary mt-2 font-light">
+          <p className="text-[11px] text-[#7a7265] mt-2 font-light">
             Plans are purchased per event — pricing above is a preview. Checkout always happens from Create Event.
           </p>
         </div>

@@ -153,7 +153,7 @@ export function SettingsClient({
                 <Label className="text-ink text-sm font-bold block">Default Featured Template</Label>
                 <p className="text-xs text-ink-tertiary font-semibold leading-relaxed">Select the default theme for new users.</p>
               </div>
-              <select className="rounded-full border border-[#e5dfd0] bg-white px-4 py-1.5 text-xs font-bold text-ink">
+              <select className="rounded-full border border-[#e5dfd0] bg-white px-4 py-1.5 text-xs font-bold text-[#1a1410]">
                 <option value="wedding">Snapsy & Events Wedding 💍</option>
                 <option value="birthday">Snapsy's Birthday Party 🎂</option>
               </select>

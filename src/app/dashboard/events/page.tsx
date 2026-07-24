@@ -188,7 +188,7 @@ export default function EventsPage() {
                     />
                   ) : coverGradient ? null : (
                     <div className="absolute inset-0 bg-gradient-to-br from-mauve/5 to-mauve/10 flex items-center justify-center">
-                      <Camera className="h-10 w-10 text-ink-tertiary group-hover:text-mauve/50 transition-colors" />
+                      <Camera className="h-10 w-10 text-[#8c8275] group-hover:text-mauve/50 transition-colors" />
                     </div>
                   )}
 
@@ -196,7 +196,7 @@ export default function EventsPage() {
                   <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="secondary" size="icon" className="h-8 w-8 rounded-full border border-hairline-dark bg-[#faf6ed]/80 hover:bg-[#faf6ed] text-ink shadow-sm cursor-pointer">
+                        <Button variant="secondary" size="icon" className="h-8 w-8 rounded-full border border-[#e5dfd0] bg-[#faf6ed]/80 hover:bg-[#faf6ed] text-[#1a1410] shadow-sm cursor-pointer">
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -244,22 +244,22 @@ export default function EventsPage() {
                 <div className="p-5 space-y-4">
                   <div className="space-y-1">
                     <Link href={`/dashboard/events/${event.slug}`}>
-                      <h3 className="font-semibold text-lg text-ink hover:text-mauve transition-colors line-clamp-1 leading-snug">
+                      <h3 className="font-semibold text-lg text-[#1a1410] hover:text-mauve transition-colors line-clamp-1 leading-snug">
                         {event.name}
                       </h3>
                     </Link>
                   </div>
 
-                  <div className="space-y-2 text-xs text-ink-secondary">
+                  <div className="space-y-2 text-xs text-[#6b6055]">
                     {event.event_date && (
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-ink-tertiary" />
+                        <Calendar className="h-4 w-4 text-[#8c8275]" />
                         <span>{formatDate(event.event_date)}</span>
                       </div>
                     )}
                     {event.venue && (
                       <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-ink-tertiary" />
+                        <MapPin className="h-4 w-4 text-[#8c8275]" />
                         <span className="truncate">{event.venue}</span>
                       </div>
                     )}
@@ -268,30 +268,30 @@ export default function EventsPage() {
               </div>
 
               {/* Status and views footer */}
-              <div className="px-5 py-4 border-t border-hairline-dark bg-ink/[0.02] flex items-center justify-between">
+              <div className="px-5 py-4 border-t border-[#e5dfd0] bg-[#faf6ed]/40 flex items-center justify-between">
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase border flex items-center gap-1.5 ${
                     event.status === "published"
-                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                      ? "bg-emerald-500/10 border-emerald-600/20 text-emerald-700"
                       : event.status === "archived"
-                        ? "bg-ink/5 border-ink/15 text-ink-secondary"
+                        ? "bg-[#e5dfd0]/40 border-[#e5dfd0] text-[#6b6055]"
                         : "bg-mauve/10 border-mauve/20 text-mauve"
                   }`}
                 >
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${
                       event.status === "published"
-                        ? "bg-emerald-400 animate-pulse"
+                        ? "bg-emerald-500 animate-pulse"
                         : event.status === "archived"
-                          ? "bg-ink/30"
+                          ? "bg-[#8c8275]"
                           : "bg-mauve"
                     }`}
                   />
                   {event.status}
                 </span>
 
-                <div className="flex items-center gap-1.5 text-xs text-ink-secondary">
-                  <ImageIcon className="h-4 w-4 text-ink-tertiary" />
+                <div className="flex items-center gap-1.5 text-xs text-[#6b6055]">
+                  <ImageIcon className="h-4 w-4 text-[#8c8275]" />
                   <span>{event.view_count || 0} views</span>
                 </div>
               </div>
@@ -302,13 +302,13 @@ export default function EventsPage() {
       ) : (
         <Card className="rounded-2xl border border-dashed border-[#e5dfd0] bg-[#ffffff]/40 py-20">
           <CardContent className="flex flex-col items-center justify-center text-center">
-            <div className="p-4 bg-ink/5 rounded-full mb-4 border border-hairline-dark shadow-inner">
-              <Camera className="h-10 w-10 text-ink-tertiary" />
+            <div className="p-4 bg-[#e5dfd0]/30 rounded-full mb-4 border border-[#e5dfd0] shadow-inner">
+              <Camera className="h-10 w-10 text-[#8c8275]" />
             </div>
-            <h3 className="font-playfair text-xl font-light text-ink">
+            <h3 className="font-playfair text-xl font-light text-[#1a1410]">
               {activeFilter === "archived" ? "No archived events" : "No events yet"}
             </h3>
-            <p className="text-sm text-ink-secondary mt-2 max-w-sm">
+            <p className="text-sm text-[#6b6055] mt-2 max-w-sm">
               {activeFilter === "archived"
                 ? "Events you archive from their settings drawer will show up here."
                 : "Create your first photography event to instantly collect guest pictures via QR codes and manage photo galleries."}

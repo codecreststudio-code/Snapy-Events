@@ -384,23 +384,23 @@ export default function SettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <UserIcon className="h-5 w-5 text-mauve" />
-              <CardTitle className="text-ink">Profile</CardTitle>
+              <CardTitle className="text-[#1a1410]">Profile</CardTitle>
             </div>
-            <CardDescription className="text-ink-secondary">Your personal information</CardDescription>
+            <CardDescription className="text-[#6b6055]">Your personal information</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-ink-secondary">Email</Label>
-              <Input id="email" value={profile?.email || ""} disabled className="bg-ink/5 border-[#e5dfd0] text-ink-secondary" />
+              <Label htmlFor="email" className="text-[#6b6055]">Email</Label>
+              <Input id="email" value={profile?.email || ""} disabled className="bg-[#faf6ed]/60 border-[#e5dfd0] text-[#6b6055]" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="full-name" className="text-ink-secondary">Full Name</Label>
+              <Label htmlFor="full-name" className="text-[#6b6055]">Full Name</Label>
               <Input
                 id="full-name"
                 value={profileForm.full_name}
                 onChange={(e) => setProfileForm((prev) => ({ ...prev, full_name: e.target.value }))}
                 placeholder="John Smith"
-                className="bg-ink/5 border-[#e5dfd0] text-ink placeholder:text-ink-tertiary focus:border-mauve focus:ring-mauve"
+                className="bg-[#faf6ed]/60 border-[#e5dfd0] text-[#1a1410] placeholder:text-[#8c8275] focus:border-mauve focus:ring-mauve"
               />
             </div>
             <Button
@@ -417,15 +417,15 @@ export default function SettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Bell className="h-5 w-5 text-mauve" />
-              <CardTitle className="text-ink">Notifications</CardTitle>
+              <CardTitle className="text-[#1a1410]">Notifications</CardTitle>
             </div>
-            <CardDescription className="text-ink-secondary">Choose what you want to be notified about</CardDescription>
+            <CardDescription className="text-[#6b6055]">Choose what you want to be notified about</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-ink">New Photos Uploaded</Label>
-                <p className="text-sm text-ink-secondary">
+                <Label className="text-[#1a1410]">New Photos Uploaded</Label>
+                <p className="text-sm text-[#6b6055]">
                   Get notified when new photos are uploaded to your events
                 </p>
               </div>
@@ -439,8 +439,8 @@ export default function SettingsPage() {
             <Separator className="bg-[#e5dfd0]" />
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-ink">Guest Uploads</Label>
-                <p className="text-sm text-ink-secondary">
+                <Label className="text-[#1a1410]">Guest Uploads</Label>
+                <p className="text-sm text-[#6b6055]">
                   Get notified when guests upload photos
                 </p>
               </div>
@@ -454,8 +454,8 @@ export default function SettingsPage() {
             <Separator className="bg-[#e5dfd0]" />
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-ink">Event Reminders</Label>
-                <p className="text-sm text-ink-secondary">
+                <Label className="text-[#1a1410]">Event Reminders</Label>
+                <p className="text-sm text-[#6b6055]">
                   Get reminders before your events start
                 </p>
               </div>
@@ -469,8 +469,8 @@ export default function SettingsPage() {
             <Separator className="bg-[#e5dfd0]" />
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-ink">WhatsApp Updates</Label>
-                <p className="text-sm text-ink-secondary">
+                <Label className="text-[#1a1410]">WhatsApp Updates</Label>
+                <p className="text-sm text-[#6b6055]">
                   Receive updates via WhatsApp (if configured)
                 </p>
               </div>
@@ -495,17 +495,17 @@ export default function SettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <BellRing className="h-5 w-5 text-mauve" />
-              <CardTitle className="text-ink">Push Notifications</CardTitle>
+              <CardTitle className="text-[#1a1410]">Push Notifications</CardTitle>
             </div>
-            <CardDescription className="text-ink-secondary">
+            <CardDescription className="text-[#6b6055]">
               Control what shows up in your notification center and on your device
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between rounded-xl border border-[#e5dfd0] bg-ink/5 px-4 py-3">
+            <div className="flex items-center justify-between rounded-xl border border-[#e5dfd0] bg-[#faf6ed]/60 px-4 py-3">
               <div className="space-y-0.5">
-                <Label className="text-ink">Enable push notifications</Label>
-                <p className="text-sm text-ink-secondary">
+                <Label className="text-[#1a1410]">Enable push notifications</Label>
+                <p className="text-sm text-[#6b6055]">
                   {!pushSupported
                     ? "Not supported in this browser"
                     : pushPermission === "granted"
@@ -516,7 +516,7 @@ export default function SettingsPage() {
                 </p>
               </div>
               {pushPermission === "granted" ? (
-                <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">
+                <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-700">
                   Enabled
                 </span>
               ) : (
@@ -544,8 +544,8 @@ export default function SettingsPage() {
                 const row = (
                   <div key={field.key} className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label className="text-ink">{field.label}</Label>
-                      <p className="text-sm text-ink-secondary">{field.description}</p>
+                      <Label className="text-[#1a1410]">{field.label}</Label>
+                      <p className="text-sm text-[#6b6055]">{field.description}</p>
                     </div>
                     <Switch
                       checked={pushPrefs?.[field.key] ?? false}
@@ -565,19 +565,19 @@ export default function SettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-mauve" />
-              <CardTitle className="text-ink">Security</CardTitle>
+              <CardTitle className="text-[#1a1410]">Security</CardTitle>
             </div>
-            <CardDescription className="text-ink-secondary">Manage your security settings</CardDescription>
+            <CardDescription className="text-[#6b6055]">Manage your security settings</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-ink">Password</Label>
-                <p className="text-sm text-ink-secondary">
+                <Label className="text-[#1a1410]">Password</Label>
+                <p className="text-sm text-[#6b6055]">
                   Change your account password
                 </p>
               </div>
-              <Button variant="outline" className="border-[#e5dfd0] bg-transparent text-ink-secondary hover:bg-mauve/5 hover:text-ink">Change Password</Button>
+              <Button variant="outline" className="border-[#e5dfd0] bg-transparent text-[#6b6055] hover:bg-mauve/5 hover:text-[#1a1410]">Change Password</Button>
             </div>
             <Separator className="bg-[#e5dfd0]" />
             <div className="flex flex-col">

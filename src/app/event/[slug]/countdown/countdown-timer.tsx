@@ -62,13 +62,13 @@ export function CountdownTimer({ targetDate }: { targetDate: string }) {
                     animate={{ y: 0, opacity: 1 }}
                     exit={prefersReducedMotion ? { opacity: 0 } : { y: 12, opacity: 0 }}
                     transition={{ duration: duration.fast, ease: easing.easeOut }}
-                    className="text-4xl font-bold text-ink md:text-5xl"
+                    className="text-4xl font-bold text-[#1a1410] md:text-5xl"
                   >
                     {value.toString().padStart(2, "0")}
                   </motion.span>
                 </AnimatePresence>
               </div>
-              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs uppercase tracking-wider text-ink-tertiary">
+              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs uppercase tracking-wider text-[#7a7265]">
                 {label}
               </div>
             </div>

@@ -113,13 +113,13 @@ export function GuestFaceSearchModal({ isOpen, onClose, galleryId, eventId }: Gu
                         <Loader2 className="w-4 h-4 animate-spin" />
                         <span>Processing...</span>
                       </div>
-                      <p className="text-xs text-ink-secondary">{statusMessage || "Searching..."}</p>
+                      <p className="text-xs text-[#6b6055]">{statusMessage || "Searching..."}</p>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-sm font-semibold text-ink">Search Complete</h4>
-                        <p className="text-xs text-ink-secondary">
+                        <h4 className="text-sm font-semibold text-[#1a1410]">Search Complete</h4>
+                        <p className="text-xs text-[#6b6055]">
                           Found {results.length} matching {results.length === 1 ? "photo" : "photos"}
                         </p>
                       </div>
@@ -127,7 +127,7 @@ export function GuestFaceSearchModal({ isOpen, onClose, galleryId, eventId }: Gu
                         onClick={handleReset}
                         variant="outline"
                         size="sm"
-                        className="text-xs border-hairline-dark text-ink hover:bg-mauve/5"
+                        className="text-xs border-[#e5dfd0] text-[#1a1410] hover:bg-mauve/5"
                       >
                         Try Another Selfie
                       </Button>
