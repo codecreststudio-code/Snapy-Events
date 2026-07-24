@@ -12,7 +12,6 @@ import {
   Users
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/lib/components/ui/button"
 
 const navigation = [
   { name: "Overview", href: "/admin", icon: LayoutDashboard },
@@ -54,13 +53,7 @@ export function AdminNavbar() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-4">
-          <Link href="/">
-            <Button variant="outline" size="sm" className="rounded-full border-hairline-dark text-ink hover:bg-mauve/5">
-              View Site
-            </Button>
-          </Link>
-        </div>
+
       </div>
     </header>
   )

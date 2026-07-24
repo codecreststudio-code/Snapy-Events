@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
-import { createClient, createServiceClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/server"
 import { API_RATE_LIMITS } from "@/lib/constants"
 
 const subscribeSchema = z.object({
@@ -58,7 +58,7 @@ export const GET = defineRoute({
   method: "GET",
   requireAuth: "admin",
   handler: async () => {
-    const supabase = await createClient()
+    const supabase = await createServiceClient()
     const { data, error } = await supabase
       .from("blog_subscribers")
       .select("*")

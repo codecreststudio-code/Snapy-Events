@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
-import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/server"
 
 const updateSchema = z.object({
   status: z.enum(["active", "unsubscribed", "bounced"]).optional(),
@@ -13,7 +13,7 @@ export const PATCH = defineRoute({
   body: updateSchema,
   handler: async ({ body, params }) => {
     const { id } = params as { id: string }
-    const supabase = await createClient()
+    const supabase = await createServiceClient()
 
     const { status, name } = body
     const updates: Record<string, any> = {}
@@ -50,7 +50,7 @@ export const DELETE = defineRoute({
   requireAuth: "admin",
   handler: async ({ params }) => {
     const { id } = params as { id: string }
-    const supabase = await createClient()
+    const supabase = await createServiceClient()
 
     const { error } = await supabase
       .from("blog_subscribers")
