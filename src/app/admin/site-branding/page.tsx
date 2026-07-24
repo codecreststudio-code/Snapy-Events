@@ -67,7 +67,7 @@ export default function SiteBrandingPage() {
         setCredits({ ...DEFAULT_CREDITS, ...(json.footer_credits ?? {}) })
         setCustomTags(json.custom_tags ?? [])
       }
-    } catch (_) {}
+    } catch (_) { }
     setLoading(false)
   }, [])
 
@@ -128,9 +128,8 @@ export default function SiteBrandingPage() {
             initial={{ opacity: 0, y: -20, x: "-50%" }}
             animate={{ opacity: 1, y: 0, x: "-50%" }}
             exit={{ opacity: 0, y: -20, x: "-50%" }}
-            className={`fixed top-6 left-1/2 z-50 flex items-center gap-2.5 rounded-2xl px-5 py-3 text-sm font-medium shadow-lg ${
-              toast.type === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"
-            }`}
+            className={`fixed top-6 left-1/2 z-50 flex items-center gap-2.5 rounded-2xl px-5 py-3 text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"
+              }`}
           >
             {toast.type === "success" ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
             {toast.msg}
@@ -173,11 +172,10 @@ export default function SiteBrandingPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-3 px-6 text-sm font-semibold border-b-2 transition-all ${
-                activeTab === tab.id
-                  ? "border-mauve text-mauve font-bold"
-                  : "border-transparent text-ink-secondary hover:text-ink"
-              }`}
+              className={`py-3 px-6 text-sm font-semibold border-b-2 transition-all ${activeTab === tab.id
+                ? "border-mauve text-mauve font-bold"
+                : "border-transparent text-ink-secondary hover:text-ink"
+                }`}
             >
               {tab.label}
               {tab.count !== null && (
@@ -260,7 +258,7 @@ export default function SiteBrandingPage() {
                   <div className="space-y-5">
                     {/* Built By */}
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-ink block">Built By — Name</label>
+                      <label className="text-xs font-bold text-ink block">Built With - 💖</label>
                       <input
                         type="text"
                         value={credits.built_by}
