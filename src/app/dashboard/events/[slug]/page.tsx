@@ -23,6 +23,7 @@ import { MediaLightbox, type LightboxMedia } from "@/lib/components/media/media-
 import { MemoryViewer, type MemoryViewerItem } from "@/lib/components/media/memory-viewer"
 import { SLIDESHOW_TRACKS, resolveTrackUrl } from "@/lib/integrations/slideshow-music"
 import { renderMovie, MovieRenderError } from "@/lib/movie/movie-renderer"
+import { HostUploadModal } from "@/lib/components/events/host-upload-modal"
 import {
   ArrowLeft,
   Calendar,
@@ -61,7 +62,8 @@ import {
   PlayCircle,
   Gift,
   FileDown,
-  FolderOpen
+  FolderOpen,
+  Upload
 } from "lucide-react"
 
 const TEMPLATE_COVERS = [
@@ -291,6 +293,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   const [regeneratingCode, setRegeneratingCode] = useState(false)
   const [activeLightboxMedia, setActiveLightboxMedia] = useState<LightboxMedia | null>(null)
   const [isDownloadingZip, setIsDownloadingZip] = useState(false)
+  // Lets the host add their own photos/videos/voice notes the same way
+  // guests do (camera, voice recorder, file picker) — see host-upload-modal.tsx.
+  const [showHostUpload, setShowHostUpload] = useState(false)
   const watermarkEnabled = useWatermarkEnabled()
 
   const publicEventUrl = typeof window !== "undefined"
@@ -1618,6 +1623,15 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               </Link>
             </Button>
             <Button
+              variant="outline"
+              onClick={() => setShowHostUpload(true)}
+              className="rounded-full border border-mauve/30 bg-mauve/10 text-mauve hover:bg-mauve/20 text-xs flex items-center gap-1 shrink-0 whitespace-nowrap"
+              title="Add your own photos, videos, or voice notes to this capsule"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              <span>Add Media</span>
+            </Button>
+            <Button
               onClick={() => setIsDrawerOpen(true)}
               className="rounded-full bg-mauve text-[#1a1410] hover:bg-mauve-strong text-xs font-semibold flex items-center gap-1 border-none cursor-pointer shrink-0 whitespace-nowrap"
             >
@@ -2765,6 +2779,16 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           shareText={event?.name ? `Check out our movie from ${event.name}!` : undefined}
           onClose={() => setShowMovieViewer(false)}
           onReact={(movieId, emoji) => movieReactMutation.mutate({ movieId, emoji })}
+        />
+      )}
+
+      {event && (
+        <HostUploadModal
+          isOpen={showHostUpload}
+          onClose={() => setShowHostUpload(false)}
+          eventId={event.id}
+          eventSettings={event.settings}
+          onUploaded={() => queryClient.invalidateQueries({ queryKey: ["event-photos", event.id] })}
         />
       )}
 

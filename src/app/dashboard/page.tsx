@@ -162,7 +162,7 @@ export default function DashboardPage() {
   const albums = data?.albums ?? []
 
   return (
-    <div className="min-h-screen bg-surface-dark text-ink pb-28">
+    <div className="min-h-screen bg-[#faf6ed] text-[#1a1410] pb-28">
       <JoinEventModal isOpen={showJoinModal} onClose={() => setShowJoinModal(false)} />
 
       {/* Top bar */}
@@ -201,12 +201,12 @@ export default function DashboardPage() {
           <>
             {/* ACTIVE */}
             <section>
-              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-ink-tertiary">Active</h2>
+              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#7a7265]">Active</h2>
 
               {activeEvents.length === 0 ? (
                 <div className="flex flex-col items-center gap-5 py-10 text-center">
-                  <div className="h-2.5 w-2.5 rounded-full bg-ink/15" />
-                  <p className="text-sm text-ink-tertiary">No active events</p>
+                  <div className="h-2.5 w-2.5 rounded-full bg-mauve/20" />
+                  <p className="text-sm text-[#7a7265]">No active events</p>
                   <Link href="/dashboard/events/new">
                     <button
                       type="button"
@@ -243,7 +243,7 @@ export default function DashboardPage() {
 
             {/* ALBUMS */}
             <section>
-              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-ink-tertiary">Albums</h2>
+              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#7a7265]">Albums</h2>
 
               <div className="space-y-6">
                 {/* User's Created Albums */}
@@ -277,7 +277,7 @@ export default function DashboardPage() {
                             if (!photoSrc) return null
                             const totalMore = event.photo_count > 4 ? event.photo_count - 4 : 0
                             return (
-                              <div key={idx} className="relative h-full w-full bg-ink/5 overflow-hidden rounded-xl border border-hairline-dark">
+                              <div key={idx} className="relative h-full w-full bg-[#faf6ed]/60 overflow-hidden rounded-xl border border-[#e5dfd0]">
                                 <img
                                   src={photoSrc}
                                   alt=""
@@ -333,7 +333,7 @@ export default function DashboardPage() {
                       "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600&q=80",
                       "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=600&q=80"
                     ].map((src, idx) => (
-                      <div key={idx} className="relative h-full w-full bg-ink/5 overflow-hidden rounded-xl border border-hairline-dark">
+                      <div key={idx} className="relative h-full w-full bg-[#faf6ed]/60 overflow-hidden rounded-xl border border-[#e5dfd0]">
                         <img
                           src={src}
                           alt=""

@@ -113,12 +113,21 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     const hostId = eventObj?.host_id
     const settings = (eventObj?.settings as Record<string, any>) || {}
 
+    // Computed once, up front, and reused across several checks below: the
+    // check-in requirement, the guest/shot quota checks, the self-notification
+    // skip, and (just below) the approval default all need to distinguish
+    // "the event's own host is uploading from their dashboard" from "an
+    // anonymous guest is uploading" — and `auth.user.id` can't do that here
+    // (see the comment on `approvedFlag` right below), so this real
+    // cookie-session check (isEventHost) is the one source of truth for it.
+    const uploaderIsHost = await isEventHost(hostId)
+
     // Guests may never self-approve based on their own request body — that
     // would let a malicious guest force-approve their own upload regardless
     // of the host's moderation preference. But this route always runs with
     // requireAuth:false (guests must be able to hit it anonymously after
     // check-in), so `auth.user` is empty for EVERY caller here, including
-    // the host's own uploads from the guest-facing upload page — a blind
+    // the host's own uploads from their dashboard — a blind
     // `if (!auth?.user?.id) approvedFlag = false` therefore forced
     // is_approved=false on every single upload ever made through this route,
     // permanently, regardless of the event's auto_approve_photos toggle.
@@ -129,7 +138,13 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     // The event's own auto_approve_photos setting (a host-controlled,
     // server-side value looked up here, not something the guest's request
     // body can influence) is the correct source of truth for guest uploads.
-    if (!auth?.user?.id) {
+    // The host's own uploads always publish immediately regardless of that
+    // setting — auto_approve_photos/moderate_uploads exist to let a host
+    // review what GUESTS submit before it goes live, not to make the host
+    // review their own photos.
+    if (uploaderIsHost) {
+      approvedFlag = true
+    } else if (!auth?.user?.id) {
       approvedFlag = settings.auto_approve_photos !== false && (settings as any).moderate_uploads !== true
     }
 
@@ -139,7 +154,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     // not as a guest. Without this, anyone with the gallery/event URL could
     // upload regardless of whether they ever checked in, which defeated the
     // point of the per-event join code and check-in modal entirely.
-    if (!(await isEventHost(hostId)) && !hasGuestSessionFromRequest(request, gallery.event_id)) {
+    if (!uploaderIsHost && !hasGuestSessionFromRequest(request, gallery.event_id)) {
       return fail("FORBIDDEN", "Please check in to this event before uploading.", 403)
     }
 
@@ -279,7 +294,14 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
     // A guest is "new" when they have no prior shots in this event
     const isNewGuest = (currentGuestShotsCount ?? 0) === 0
 
-    if (isNewGuest && (totalGuestCount ?? 0) >= maxGuests) {
+    // Both quota checks below cap how many outside guests/shots an event's
+    // plan supports — they were never meant to cap the host's own
+    // contributions to their own event (uploaderIsHost, computed above
+    // alongside the check-in exemption). Without this, a host uploading
+    // from their own dashboard with no uploader_name/email set could get
+    // blocked by "this event has reached its guest limit" the moment the
+    // event's real guests filled the plan's quota.
+    if (!uploaderIsHost && isNewGuest && (totalGuestCount ?? 0) >= maxGuests) {
       return fail("PLAN_LIMIT_REACHED", `This event has reached its limit of ${maxGuests} guests. The host must upgrade to receive more uploads.`, 403)
     }
 
@@ -296,7 +318,7 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
       ? Infinity
       : (hostConfiguredPhotoLimit && hostConfiguredPhotoLimit > 0 ? hostConfiguredPhotoLimit : maxShots)
 
-    if (Number.isFinite(effectiveMaxShots) && (currentGuestShotsCount ?? 0) >= effectiveMaxShots) {
+    if (!uploaderIsHost && Number.isFinite(effectiveMaxShots) && (currentGuestShotsCount ?? 0) >= effectiveMaxShots) {
       return fail("PLAN_LIMIT_REACHED", `You have reached the limit of ${effectiveMaxShots} uploads per guest for this event.`, 403)
     }
 
@@ -417,7 +439,12 @@ export const POST = defineRoute<unknown, z.infer<typeof querySchema>, unknown>({
 
     // Notify the host — but never when the host is the one uploading (they
     // reach this same route from their own dashboard, not just guests).
-    if (hostId && auth?.user?.id !== hostId) {
+    // `auth?.user?.id` is never populated on this route (requireAuth: false,
+    // see the comment on `approvedFlag` above), so it can't be used to
+    // detect "the host is uploading" — `uploaderIsHost` (the real cookie
+    // session check from isEventHost, computed above) is the one that
+    // actually works for that.
+    if (hostId && !uploaderIsHost) {
       const eventName = eventObj?.name || "your event"
       const eventSlug = eventObj?.slug
       const uploaderLabel = cleanName || "A guest"
