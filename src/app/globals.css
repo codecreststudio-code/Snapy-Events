@@ -150,7 +150,7 @@
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 20px;
-  --radius-xl: 9999px;
+  --radius-xl: 24px;
 
   --color-gold: var(--snapy-gold);
   --color-gold-light: var(--snapy-gold-light);
