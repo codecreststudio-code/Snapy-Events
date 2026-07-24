@@ -46,21 +46,24 @@ export async function GET(request: NextRequest) {
       id: "newsletter",
       name: "Newsletter Broadcast",
       subject: "✨ {{newsletter_title}} — Snapsy Events",
-      html_content: `<h2 style="font-size:22px;font-weight:800;color:#1c1a17;margin:0 0 12px;">📰 {{newsletter_title}}</h2>
-<p style="font-size:15px;color:#374151;line-height:1.6;margin:0 0 20px;">Hello {{subscriber_name}}, welcome to this edition of the Snapsy Events newsletter!</p>
-<div style="background:#fcf9f2;border:1px solid #f3e8d2;border-radius:12px;padding:20px 22px;margin:0 0 22px;">
-  <p style="font-size:14px;color:#2c2824;line-height:1.6;margin:0;white-space:pre-wrap;">{{newsletter_content}}</p>
-</div>
-<div style="margin:0 0 24px;">
-  <div style="padding:6px 0;font-size:13px;color:#374151;">📸&nbsp;&nbsp;Discover new live event features</div>
-  <div style="padding:6px 0;font-size:13px;color:#374151;">⚡&nbsp;&nbsp;High-speed real-time photo sharing</div>
-  <div style="padding:6px 0;font-size:13px;color:#374151;">🤖&nbsp;&nbsp;AI Face Search & Smart Memories</div>
-  <div style="padding:6px 0;font-size:13px;color:#374151;">🎉&nbsp;&nbsp;Exclusive tips for event hosts & guests</div>
+      html_content: `<table style="width:100%;border-collapse:collapse;margin:0 0 20px;">
+  <tr>
+    <td style="width:52px;vertical-align:top;">
+      <div style="width:48px;height:48px;border-radius:50%;background:rgba(202,138,4,0.1);border:1px solid rgba(234,179,8,0.3);text-align:center;line-height:48px;font-size:20px;">📰</div>
+    </td>
+    <td style="vertical-align:top;padding-left:12px;">
+      <h2 style="font-size:20px;font-weight:800;color:#ffffff;margin:0 0 6px;"><span style="color:#eab308;">{{newsletter_title}}</span></h2>
+      <p style="font-size:14px;color:#a1a1aa;line-height:1.5;margin:0;">Hello {{subscriber_name}}, welcome to this edition of the Snapsy Events newsletter!</p>
+    </td>
+  </tr>
+</table>
+<div style="background:#0d0d0f;border:1px solid rgba(234,179,8,0.35);border-radius:12px;padding:20px 22px;margin:0 0 22px;">
+  <p style="font-size:14px;color:#e4e4e7;line-height:1.6;margin:0;white-space:pre-wrap;">{{newsletter_content}}</p>
 </div>
 <div style="text-align:center;margin:12px 0 24px;">
-  <a href="{{cta_url}}" style="background:linear-gradient(135deg,#c9a96e,#b89252);color:#ffffff;text-decoration:none;padding:14px 34px;border-radius:10px;font-weight:700;font-size:14px;display:inline-block;box-shadow:0 4px 12px rgba(201,169,110,0.3);">{{cta_text}} →</a>
+  <a href="{{cta_url}}" style="background:linear-gradient(135deg,#facc15 0%,#ca8a04 100%);color:#000000;text-decoration:none;padding:15px 38px;border-radius:10px;font-weight:800;font-size:14px;display:inline-block;box-shadow:0 4px 20px rgba(234,179,8,0.35);">{{cta_text}} &nbsp;→</a>
 </div>
-<div style="background:#f7f5fb;border:1px solid #ede9fe;border-radius:10px;padding:14px 16px;margin:0 0 20px;font-size:12px;color:#64748b;line-height:1.5;">You are receiving this email because you subscribed to Snapsy Events. If you wish to unsubscribe, click <a href="{{unsubscribe_url}}" style="color:#b89252;text-decoration:underline;">here</a>.</div>`,
+<div style="background:#181511;border:1px solid rgba(234,179,8,0.2);border-radius:10px;padding:14px 18px;margin:0 0 20px;font-size:12px;color:#a1a1aa;line-height:1.5;">You are receiving this email because you subscribed to Snapsy Events. If you wish to unsubscribe, click <a href="{{unsubscribe_url}}" style="color:#eab308;text-decoration:underline;">here</a>.</div>`,
       text_content: `{{newsletter_title}}\n\nHello {{subscriber_name}},\n\n{{newsletter_content}}\n\nRead more at {{cta_url}}`,
       variables: ["subscriber_name", "newsletter_title", "newsletter_content", "cta_text", "cta_url", "unsubscribe_url"],
       is_system: true,
