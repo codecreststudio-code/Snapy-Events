@@ -35,12 +35,25 @@ export async function logGuestAccess(
   // reads this same row anonymously), so this doesn't need elevated access.
   const { data: eventRow, error: eventErr } = await supabase
     .from("events")
-    .select("join_code, settings, name, slug, host_id")
+    .select("join_code, settings, name, slug, host_id, status")
     .eq("id", eventId)
     .single()
 
   if (eventErr || !eventRow) {
     return { success: false, error: "This event could not be found." }
+  }
+
+  // SECURITY: this is the single choke point every guest-facing surface
+  // (gallery viewing, uploads, reactions/comments/voice replies) sits
+  // behind — none of those routes issue a session without check-in
+  // succeeding here first (see src/lib/security/guest-session.ts). An event
+  // stays in `draft` until a verified Razorpay payment (or a genuinely free
+  // plan) flips it to `published` — see /api/events (POST) and
+  // /api/payments/verify — so blocking check-in here means an unpaid event
+  // can never be joined, uploaded to, or otherwise used by anyone, even if
+  // a guest has the exact link, QR code, or join code.
+  if (eventRow.status !== "published") {
+    return { success: false, error: "This event isn't available yet. Please check back once your host finishes setting it up." }
   }
 
   const settings = (eventRow.settings as Record<string, unknown> | null) ?? {}

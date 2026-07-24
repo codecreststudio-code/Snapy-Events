@@ -1282,6 +1282,69 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
   const settings = (event.settings || {}) as ExtEventSettings
 
+  // SECURITY GATE: an event is created as `draft` with
+  // settings.payment_status === "pending_payment" and stays that way until
+  // a verified Razorpay payment (webhook or the signature-checked
+  // /api/payments/verify callback) — or a genuinely free/₹0 plan — flips it
+  // to `published` (see /api/events POST, /api/payments/verify,
+  // /api/payments/checkout-free, and the Razorpay webhook). Block the full
+  // management UI below — upload, share, QR, guest list, analytics,
+  // download, everything — until that happens. Previously this page
+  // rendered identically for a paid and a never-paid-for event: the host
+  // could open it, manage it, share it, and upload media indefinitely just
+  // by closing the Razorpay checkout tab, because nothing here ever checked
+  // payment status. Only the ability to resume checkout is reachable while
+  // pending.
+  const isPendingPayment =
+    event.status === "draft" &&
+    (settings as any)?.payment_status !== "paid" &&
+    (settings as any)?.payment_status !== "free"
+
+  if (isPendingPayment) {
+    const resumeCheckout = () => {
+      const s = settings as any
+      const params = new URLSearchParams({
+        plan: s?.guest_count_plan || "",
+        event: event.slug,
+        event_id: event.id,
+        guests: String(s?.guests_boost || 0),
+        shots: String(s?.shots_boost || 0),
+        photo_limit: String(s?.photo_limit ?? 20),
+        videos: s?.content_types?.videos ? "1" : "0",
+        voice_notes: s?.content_types?.voice_notes ? "1" : "0",
+      })
+      router.push(`/checkout?${params.toString()}`)
+    }
+    return (
+      <div className="min-h-screen bg-[#faf6ed] flex flex-col items-center justify-center p-6 text-center space-y-5">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#b8925a]/10">
+          <AlertCircle className="h-8 w-8 text-[#b8925a]" />
+        </div>
+        <div className="max-w-md space-y-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#b8925a]">Payment Required</span>
+          <h2 className="font-playfair text-2xl sm:text-3xl font-light text-ink">
+            Complete payment to activate "{event.name}"
+          </h2>
+          <p className="text-sm text-ink-secondary">
+            This event is saved as a draft and isn't live yet — guests can't view it, join it, or upload anything
+            until payment is confirmed. Complete checkout to publish it and unlock uploads, sharing, and analytics.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            onClick={resumeCheckout}
+            className="rounded-full bg-[#b8925a] hover:bg-[#96723a] text-[#faf6ed] font-semibold px-8 py-5"
+          >
+            Complete Payment
+          </Button>
+          <Button asChild variant="outline" className="rounded-full border border-hairline-dark px-8 py-5">
+            <Link href="/dashboard/events">Back to Dashboard</Link>
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
   const getImageUrl = (path: string | null, fallback: string = "/placeholder.png") => {
     if (!path) return fallback

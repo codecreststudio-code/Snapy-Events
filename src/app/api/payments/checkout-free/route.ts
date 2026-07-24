@@ -4,6 +4,8 @@ import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { calculatePrice } from "@/app/api/payments/checkout/route"
 import { getFeatureFlags } from "@/lib/platform-settings"
 import { API_RATE_LIMITS } from "@/lib/constants"
+import { sendEmail } from "@/lib/integrations/resend"
+import { serverEnv } from "@/lib/env"
 
 // Handles the case where /api/payments/checkout's calculatePrice() legitimately
 // comes back to ₹0/$0 — e.g. the host's plan is already active and this
@@ -68,7 +70,7 @@ export const POST = defineRoute({
 
     const { data: eventRow } = await supabase
       .from("events")
-      .select("id, host_id, settings")
+      .select("id, host_id, status, settings, name, slug")
       .eq("id", body.event_id)
       .maybeSingle()
     if (!eventRow || eventRow.host_id !== userId) {
@@ -141,10 +143,19 @@ export const POST = defineRoute({
     // a 100%-off coupon, both legitimate ₹0 outcomes now that
     // calculatePrice() no longer waives the base price just because the
     // host purchased this tier before.
+    //
+    // SECURITY: same draft -> published transition as the paid flow (see
+    // /api/payments/verify and the Razorpay webhook) — this route is
+    // reached when calculatePrice() legitimately recomputes to ₹0 (e.g. a
+    // 100%-off coupon on what /api/events created as a draft, pending-
+    // payment event), so it needs the same activation logic, not just the
+    // Razorpay-signed paths.
     const currentSettings = (eventRow.settings as Record<string, any>) || {}
+    const wasDraft = eventRow.status === "draft"
     await supabase
       .from("events")
       .update({
+        ...(wasDraft ? { status: "published" } : {}),
         settings: {
           ...currentSettings,
           payment_status: "free",
@@ -159,6 +170,26 @@ export const POST = defineRoute({
         },
       })
       .eq("id", body.event_id)
+
+    if (wasDraft) {
+      const { data: userRow } = await supabase
+        .from("users")
+        .select("email, full_name")
+        .eq("id", userId)
+        .maybeSingle()
+      if (userRow?.email) {
+        void sendEmail({
+          to: userRow.email,
+          templateId: "event_created",
+          variables: {
+            host_name: userRow.full_name || userRow.email,
+            event_name: eventRow.name,
+            event_link: `${serverEnv.APP_URL}/event/${eventRow.slug}`,
+          },
+          tags: [{ name: "type", value: "event-published" }],
+        })
+      }
+    }
 
     // Consume a coupon use if one somehow drove the price to zero.
     if (body.coupon_code) {

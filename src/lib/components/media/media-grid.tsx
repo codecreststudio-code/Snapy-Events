@@ -243,7 +243,7 @@ export function MediaGrid({
   return (
     <>
       {photos.length === 0 ? (
-        <Card className="mt-6 rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-8 text-center text-sm text-ink-secondary">
+        <Card className="mt-6 rounded-2xl border border-white/10 bg-[#080808] p-8 text-center text-sm text-neutral-400">
           {emptyMessage}
         </Card>
       ) : (
@@ -252,7 +252,7 @@ export function MediaGrid({
             <button
               key={p.id}
               onClick={() => setActive(p)}
-              className="mb-4 block w-full break-inside-avoid overflow-hidden rounded-xl border border-[#e5dfd0] bg-[#ffffff] shadow-sm hover:border-[#b8925a]/40 hover:shadow-md transition-all text-left cursor-pointer"
+              className="mb-4 block w-full break-inside-avoid overflow-hidden rounded-2xl border border-white/10 bg-[#080808] shadow-sm hover:border-white/30 hover:shadow-md transition-all text-left cursor-pointer"
             >
               <MediaThumbnail p={p} watermarkEnabled={watermarkEnabled} />
             </button>

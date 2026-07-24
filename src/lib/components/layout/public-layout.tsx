@@ -388,21 +388,20 @@ export function PublicFooter() {
 
   return (
     <footer
-      className="relative w-full border-t border-hairline-dark text-ink overflow-hidden pt-20 pb-6 px-4 sm:px-6 lg:px-8 bg-surface-dark"
-      style={{ background: "radial-gradient(100% 80% at 50% 110%, rgba(184, 146, 90, 0.10) 0%, rgba(250, 246, 237, 0.95) 60%, rgba(255, 255, 255, 1) 100%)" }}
+      className="relative w-full border-t border-hairline-dark text-ink overflow-hidden pt-20 pb-6 px-4 sm:px-6 lg:px-8 bg-[#000000]"
     >
       {/* Background blur decorations */}
       <div className="pointer-events-none absolute top-0 left-0 z-0 h-full w-full overflow-hidden">
-        <div className="bg-mauve absolute top-1/4 left-1/4 h-72 w-72 rounded-full opacity-[0.05] blur-3xl" />
-        <div className="bg-mauve-strong absolute right-1/4 bottom-1/4 h-80 w-80 rounded-full opacity-[0.05] blur-3xl" />
+        <div className="bg-white/5 absolute top-1/4 left-1/4 h-72 w-72 rounded-full opacity-[0.05] blur-3xl" />
+        <div className="bg-white/5 absolute right-1/4 bottom-1/4 h-80 w-80 rounded-full opacity-[0.05] blur-3xl" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl">
         {/* Glassmorphic Centered Newsletter Card */}
         <div className="bg-surface-card border border-hairline-dark backdrop-blur-md mb-16 rounded-2xl p-8 md:p-12 relative overflow-hidden">
           {/* Glowing accents */}
-          <div className="absolute -top-24 -left-24 w-48 h-48 bg-mauve/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-mauve-strong/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-24 -left-24 w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none" />
 
           <div className="max-w-2xl mx-auto text-center relative z-10 flex flex-col items-center">
             <h3 className="mb-4 text-2xl font-playfair font-light md:text-3xl tracking-tight text-ink">
@@ -417,8 +416,8 @@ export function PublicFooter() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col items-center gap-2 py-4"
               >
-                <div className="h-10 w-10 rounded-full bg-mauve/20 flex items-center justify-center border border-mauve/30">
-                  <span className="text-mauve text-lg">✓</span>
+                <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                  <span className="text-white text-lg">✓</span>
                 </div>
                 <p className="font-semibold text-ink text-sm">Thank you for subscribing!</p>
                 <p className="text-xs text-ink-secondary">You are now on our list.</p>
@@ -431,12 +430,12 @@ export function PublicFooter() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   required
-                  className="w-full border border-hairline-dark bg-mauve/5 text-ink placeholder:text-ink-tertiary focus-visible:ring-mauve/50 rounded-full px-5 py-3 text-sm focus:ring-2 focus:outline-none transition-all duration-200"
+                  className="w-full border border-hairline-dark bg-white/5 text-ink placeholder:text-ink-tertiary focus-visible:ring-white/50 rounded-full px-5 py-3 text-sm focus:ring-2 focus:outline-none transition-all duration-200"
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold rounded-full px-6 py-3 text-sm shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 shrink-0 disabled:opacity-50"
+                  className="bg-white hover:bg-neutral-200 text-black font-semibold rounded-full px-6 py-3 text-sm shadow-lg shadow-white/10 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 shrink-0 disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? "Subscribing…" : "Subscribe Now"}
                 </button>
@@ -603,7 +602,7 @@ export function PublicFooter() {
 
         {/* Big brand wordmark at the very bottom */}
         <div className="mt-12 text-center select-none pointer-events-none">
-          <span className="block text-[12vw] font-extrabold leading-none tracking-tighter text-ink/[0.03] uppercase">
+          <span className="block text-[12vw] font-extrabold leading-none tracking-tighter text-white/[0.04] uppercase">
             Snapsy Events
           </span>
         </div>

@@ -7,6 +7,7 @@ import { slugify } from "@/lib/utils"
 import { logAudit } from "@/lib/audit/log"
 import { sendEmail } from "@/lib/integrations/resend"
 import { serverEnv } from "@/lib/env"
+import { calculatePrice } from "@/app/api/payments/checkout/route"
 
 const listQuery = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -44,16 +45,70 @@ export const POST = defineRoute({
   handler: async ({ body, auth, request }) => {
     const supabase = await createClient()
 
-    // Per-event model: no global event count limit — each event is a fresh per-event purchase
-    // Payment enforcement happens at checkout after event is created
+    // Per-event model: no global event count limit — each event is a fresh per-event purchase.
+    //
+    // SECURITY: this event's initial `status` (and settings.payment_status)
+    // must NEVER be trusted from the client. This route used to insert with
+    // `status: body.status || "published"` — the wizard always sent
+    // "published", so a fully live, fully functional, unlimited event was
+    // created and made publicly joinable the instant this request landed,
+    // regardless of whether the host had paid (or would ever pay) for it.
+    // The "Launch Event" button's redirect to Razorpay checkout was a purely
+    // optional, decoupled next step — closing that tab, hitting Back, or
+    // just never clicking it left the event permanently live for free.
+    //
+    // The fix: recompute the real price server-side here, the exact same
+    // way /api/payments/checkout sizes its Razorpay order. A ₹0 result
+    // (free plan, no boosts/add-ons) publishes immediately, same as before.
+    // Anything above ₹0 is created as `draft` with payment_status
+    // "pending_payment" and stays that way — every guest-facing entry point
+    // (event/[slug] page, check-in, /api/events/join, gallery/qr/countdown
+    // pages) already gates on status === "published", and the host's own
+    // management dashboard now blocks full access for a draft/pending
+    // event too. Only a verified Razorpay payment (webhook or the signed
+    // /api/payments/verify callback) can flip status to "published" — see
+    // those routes for the other half of this fix.
     const slug = `${slugify(body.name)}-${Date.now().toString(36).slice(-4)}`
+    const requestedSettings = (body.settings ?? {}) as Record<string, any>
+    let requiresPayment = false
+    if (typeof requestedSettings.guest_count_plan === "string" && requestedSettings.guest_count_plan) {
+      try {
+        const price = await calculatePrice(
+          supabase,
+          requestedSettings.guest_count_plan,
+          Number(requestedSettings.guests_boost) || 0,
+          Number(requestedSettings.shots_boost) || 0,
+          // Coupons are redeemed explicitly at checkout, never silently
+          // applied at creation time — a coupon code here would otherwise
+          // let a $0-priced draft masquerade as "free" without ever going
+          // through checkout's coupon eligibility/consumption logic.
+          undefined,
+          "INR",
+          auth.user!.id,
+          typeof requestedSettings.photo_limit === "number" ? requestedSettings.photo_limit : undefined,
+          Boolean(requestedSettings.content_types?.videos),
+          Boolean(requestedSettings.content_types?.voice_notes)
+        )
+        requiresPayment = price > 0
+      } catch {
+        // Unknown/invalid plan id — fail closed (require payment/checkout
+        // to resolve it) rather than silently publishing a mispriced event.
+        requiresPayment = true
+      }
+    }
+
+    const initialStatus = requiresPayment ? "draft" : "published"
     const { data, error } = await supabase
       .from("events")
       .insert({
         ...body,
         slug,
         host_id: auth.user!.id,
-        status: body.status || "published",
+        status: initialStatus,
+        settings: {
+          ...requestedSettings,
+          payment_status: requiresPayment ? "pending_payment" : "free",
+        },
       })
       .select()
       .single()

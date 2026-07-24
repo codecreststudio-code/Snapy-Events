@@ -742,7 +742,7 @@ export function CameraCapture({
       </div>
 
       {/* Bottom Controls */}
-      <div className="h-48 bg-[#faf6ed] shrink-0 flex flex-col justify-center pb-[max(2rem,env(safe-area-inset-bottom))] pt-4">
+      <div className="h-48 bg-[#000000] shrink-0 flex flex-col justify-center pb-[max(2rem,env(safe-area-inset-bottom))] pt-4">
         {!hasPreview ? (
           <>
             {/* Filter Carousel */}

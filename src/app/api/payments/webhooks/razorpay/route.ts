@@ -139,14 +139,24 @@ export async function POST(request: NextRequest) {
             if (p.notes?.event_id) {
               const { data: eventRow } = await supabase
                 .from("events")
-                .select("id, host_id, settings")
+                .select("id, host_id, status, settings, name, slug")
                 .eq("id", p.notes.event_id)
                 .maybeSingle()
               if (eventRow && eventRow.host_id === userId) {
                 const currentSettings = (eventRow.settings as Record<string, any>) || {}
+                // SECURITY: this webhook is the authoritative, Razorpay-signed
+                // confirmation of payment — it (and /api/payments/verify,
+                // which is also cryptographically signature-checked, not
+                // client-trusted) is the only place that may flip a
+                // `draft`/pending-payment event to `published`. See the
+                // matching fix in /api/events (POST), which now creates
+                // paid-plan events as `draft` instead of "published" up
+                // front. Only transitions out of `draft`.
+                const wasDraft = eventRow.status === "draft"
                 await supabase
                   .from("events")
                   .update({
+                    ...(wasDraft ? { status: "published" } : {}),
                     settings: {
                       ...currentSettings,
                       payment_status: "paid",
@@ -161,6 +171,26 @@ export async function POST(request: NextRequest) {
                     },
                   })
                   .eq("id", p.notes.event_id)
+
+                // Mirrors the same "your event is now live" email fired from
+                // the draft -> published transition in
+                // /api/payments/verify/route.ts — this webhook and that
+                // endpoint are the two possible paths to this point, and the
+                // idempotency check earlier in this handler (existingTxn)
+                // guarantees only one of them actually reaches here per
+                // payment, so this can never double-send.
+                if (wasDraft && userRow?.email) {
+                  void sendEmail({
+                    to: userRow.email,
+                    templateId: "event_created",
+                    variables: {
+                      host_name: userRow.full_name || userRow.email,
+                      event_name: eventRow.name,
+                      event_link: `${process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://snapsy-events.vercel.app"}/event/${eventRow.slug}`,
+                    },
+                    tags: [{ name: "type", value: "event-published" }],
+                  })
+                }
               }
             }
 

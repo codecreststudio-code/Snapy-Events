@@ -6,7 +6,7 @@ import { Button } from "@/lib/components/ui/button"
 import { Camera, Calendar, MapPin, QrCode, Lock, Upload } from "lucide-react"
 import { Logo } from "@/lib/components/layout/logo"
 import { GuestCaptureModal } from "@/lib/components/events/guest-capture-modal"
-import { hasGuestSessionSSR } from "@/lib/security/guest-session"
+import { hasGuestSessionSSR, isEventHost } from "@/lib/security/guest-session"
 import { publicUrl } from "@/lib/integrations/storage"
 import { getFeatureFlags } from "@/lib/platform-settings"
 import { MediaGrid, type GridPhoto } from "@/lib/components/media/media-grid"
@@ -86,6 +86,24 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
     .single()
 
   if (!ev) notFound()
+
+  // SECURITY: an event stays in `draft` (unpaid/pending payment) until a
+  // verified Razorpay payment flips it to `published` — see /api/events
+  // (POST) and /api/payments/verify. Previously this page had no status
+  // check at all: it rendered the full hero, description, and check-in
+  // modal for ANY event by slug regardless of payment, so an unpaid event
+  // was completely joinable and usable by anyone with the link the instant
+  // it was created — before "Launch Event" was even clicked. The host gets
+  // redirected to their management dashboard (which shows a "Complete
+  // Payment" screen); anyone else gets a 404, same as if the slug didn't
+  // exist — there is no legitimate reason to expose an unpaid event's name,
+  // cover image, or existence to the public.
+  if (ev.status !== "published") {
+    if (await isEventHost(ev.host_id)) {
+      redirect(`/dashboard/events/${ev.slug}`)
+    }
+    notFound()
+  }
 
   // events.view_count was read on the dashboard but nothing ever incremented
   // it, so every event permanently showed "0 views" regardless of real guest

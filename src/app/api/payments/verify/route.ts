@@ -4,6 +4,8 @@ import { createServiceClient } from "@/lib/supabase/server"
 import crypto from "node:crypto"
 import { fetchRazorpayOrder } from "@/lib/integrations/razorpay"
 import { API_RATE_LIMITS } from "@/lib/constants"
+import { sendEmail } from "@/lib/integrations/resend"
+import { serverEnv } from "@/lib/env"
 
 function timingSafeEqualHex(a: string, b: string): boolean {
   const ba = Buffer.from(a, "utf8")
@@ -184,14 +186,22 @@ export const POST = defineRoute({
     if (eventId) {
       const { data: eventRow } = await supabase
         .from("events")
-        .select("id, host_id, settings")
+        .select("id, host_id, status, settings, name, slug")
         .eq("id", eventId)
         .maybeSingle()
       if (eventRow && eventRow.host_id === userId) {
         const currentSettings = (eventRow.settings as Record<string, any>) || {}
+        // SECURITY: this is the payment-confirmation moment that flips a
+        // `draft` (pending-payment) event to `published` — see the matching
+        // fix in /api/events (POST), which now creates paid-plan events as
+        // `draft` instead of trusting the client to say "published" up
+        // front. Only transitions out of `draft`; never overrides a status
+        // an admin/host has since set (e.g. "completed"/"archived").
+        const wasDraft = eventRow.status === "draft"
         await supabase
           .from("events")
           .update({
+            ...(wasDraft ? { status: "published" } : {}),
             settings: {
               ...currentSettings,
               payment_status: "paid",
@@ -209,6 +219,30 @@ export const POST = defineRoute({
             },
           })
           .eq("id", eventId)
+
+        // The "your event is live" email used to fire at creation time
+        // (whenever status was "published"), which no longer happens for
+        // paid events until this exact moment. Fire it here instead, once,
+        // on the actual draft -> published transition.
+        if (wasDraft) {
+          const { data: userRow } = await supabase
+            .from("users")
+            .select("email, full_name")
+            .eq("id", userId)
+            .maybeSingle()
+          if (userRow?.email) {
+            void sendEmail({
+              to: userRow.email,
+              templateId: "event_created",
+              variables: {
+                host_name: userRow.full_name || userRow.email,
+                event_name: eventRow.name,
+                event_link: `${serverEnv.APP_URL}/event/${eventRow.slug}`,
+              },
+              tags: [{ name: "type", value: "event-published" }],
+            })
+          }
+        }
       }
     }
 

@@ -31,7 +31,7 @@ export function HomeBottomTabs() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur-lg"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#000000]/95 backdrop-blur-lg"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Primary"
     >
@@ -44,16 +44,16 @@ export function HomeBottomTabs() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="relative flex items-center gap-2 py-1.5 px-3 text-[11px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 rounded-xl transition-all hover:bg-mauve/5"
+                className="relative flex items-center gap-2 py-1.5 px-3 text-[11px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-xl transition-all hover:bg-white/5"
                 aria-current={active ? "page" : undefined}
               >
                 <item.icon
                   className={cn(
                     "h-4.5 w-4.5 transition-colors duration-200",
-                    active ? "text-mauve" : "text-ink-secondary"
+                    active ? "text-white" : "text-neutral-400"
                   )}
                 />
-                <span className={cn("transition-colors duration-200", active ? "text-mauve font-bold" : "text-ink-secondary font-semibold")}>
+                <span className={cn("transition-colors duration-200", active ? "text-white font-bold" : "text-neutral-400 font-semibold")}>
                   {item.name}
                 </span>
               </Link>
@@ -69,8 +69,8 @@ export function HomeBottomTabs() {
             className={cn(
               "flex h-9 w-9 items-center justify-center rounded-full border transition-all hover:scale-105 active:scale-95 cursor-pointer",
               isSettingsActive
-                ? "border-mauve ring-2 ring-mauve/30 bg-mauve/10"
-                : "border-[#e5dfd0] bg-[#ffffff] hover:border-mauve/60"
+                ? "border-white ring-2 ring-white/30 bg-white/10"
+                : "border-white/10 bg-[#080808] hover:border-white/40"
             )}
           >
             <Avatar className="h-9 w-9">

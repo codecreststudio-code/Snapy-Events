@@ -200,7 +200,7 @@ export function MediaLightbox({
   }
 
   return (
-    <div className="bg-[#ffffff] border border-[#e5dfd0] rounded-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] w-full max-w-4xl shadow-2xl">
+    <div className="bg-[#080808] border border-white/10 rounded-3xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] w-full max-w-4xl shadow-2xl text-white">
       {/* Media Content Box */}
       <div
         className="flex-1 bg-black flex items-center justify-center min-h-[300px] md:min-h-[480px] p-2 relative"
@@ -227,9 +227,9 @@ export function MediaLightbox({
         )}
         {isMessage(p) ? (
           <div className="p-8 text-center max-w-md space-y-4">
-            <MessageCircle className="h-12 w-12 text-[#b8925a] mx-auto" />
+            <MessageCircle className="h-12 w-12 text-white mx-auto" />
             <p className="text-xl font-serif italic text-white/90">"{p.metadata?.text || p.original_filename}"</p>
-            <p className="text-xs text-[#b8925a] font-semibold">Wish by {p.uploader_name || "Guest"}</p>
+            <p className="text-xs text-neutral-400 font-semibold">Wish by {p.uploader_name || "Guest"}</p>
           </div>
         ) : isVideo(p) && p.url ? (
           <div className="relative max-h-[75vh] w-auto">
@@ -240,7 +240,7 @@ export function MediaLightbox({
           </div>
         ) : isAudio(p) && p.url ? (
           <div className="flex flex-col items-center gap-4 p-8">
-            <Volume2 className="h-16 w-16 text-[#b8925a]" />
+            <Volume2 className="h-16 w-16 text-white" />
             <p className="text-white/80 font-medium">{p.uploader_name ? `Voice note from ${p.uploader_name}` : p.original_filename}</p>
             <audio src={p.url} controls autoPlay className="w-80 max-w-full">
               Your browser does not support audio playback.
@@ -252,16 +252,16 @@ export function MediaLightbox({
             {watermarkEnabled && <WatermarkOverlay dense />}
           </div>
         ) : (
-          <div className="aspect-square bg-gradient-to-br from-mauve/20 to-mauve-strong/20" />
+          <div className="aspect-square bg-gradient-to-br from-white/10 to-white/5" />
         )}
       </div>
 
       {/* Side Panel: Reactions & Comments */}
-      <div className="w-full md:w-80 bg-[#ffffff] border-t md:border-t-0 md:border-l border-[#e5dfd0] flex flex-col justify-between p-4 gap-4">
+      <div className="w-full md:w-80 bg-[#080808] border-t md:border-t-0 md:border-l border-white/10 flex flex-col justify-between p-4 gap-4">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#e5dfd0] pb-3">
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
           <div className="min-w-0">
-            <p className="truncate text-xs font-semibold text-[#b8925a]">{p.uploader_name || "Event Guest"}</p>
+            <p className="truncate text-xs font-semibold text-white">{p.uploader_name || "Event Guest"}</p>
             <p className="text-[10px] text-ink-tertiary">{new Date(p.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
           </div>
           <div className="flex shrink-0 items-center gap-1">

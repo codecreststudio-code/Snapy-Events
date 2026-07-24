@@ -72,7 +72,7 @@ export function InstallModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[420px] rounded-2xl sm:rounded-2xl border border-[#e5dfd0] bg-[#ffffff] text-ink">
+      <DialogContent className="sm:max-w-[420px] rounded-3xl sm:rounded-3xl border border-white/10 bg-[#080808] text-white">
         <AnimatePresence mode="wait" initial={false}>
           {success ? (
             <motion.div
@@ -87,23 +87,23 @@ export function InstallModal({
                 initial={prefersReducedMotion ? false : { scale: 0.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.05 }}
-                className="flex h-16 w-16 items-center justify-center rounded-full bg-[#b8925a]/15 border border-[#b8925a]/30"
+                className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 border border-white/20"
               >
-                <Check className="h-8 w-8 text-[#b8925a]" />
+                <Check className="h-8 w-8 text-white" />
               </motion.div>
               <div>
-                <p className="font-playfair text-lg font-medium text-ink">Installed</p>
-                <p className="mt-1 text-sm text-ink-secondary">Look for Snapsy on your home screen.</p>
+                <p className="font-playfair text-lg font-medium text-white">Installed</p>
+                <p className="mt-1 text-sm text-neutral-400">Look for Snapsy on your home screen.</p>
               </div>
             </motion.div>
           ) : (
             <motion.div key="content" initial={false} animate="visible" exit={prefersReducedMotion ? undefined : { opacity: 0 }}>
               <DialogHeader className="items-center text-center sm:text-center">
-                <div className="mb-3 h-16 w-16 overflow-hidden rounded-2xl border border-hairline-dark shadow-lg">
+                <div className="mb-3 h-16 w-16 overflow-hidden rounded-2xl border border-white/10 shadow-lg">
                   <Image src="/icons/icon-192.png" alt="" width={64} height={64} className="h-full w-full object-cover" />
                 </div>
-                <DialogTitle className="font-playfair text-2xl font-medium text-ink">Install Snapsy</DialogTitle>
-                <DialogDescription className="text-ink-secondary">
+                <DialogTitle className="font-playfair text-2xl font-medium text-white">Install Snapsy</DialogTitle>
+                <DialogDescription className="text-neutral-400">
                   Add Snapsy to your device for the fastest way back into your events.
                 </DialogDescription>
               </DialogHeader>
@@ -115,9 +115,9 @@ export function InstallModal({
                 variants={staggerContainer(0.06)}
               >
                 {BENEFITS.map(({ icon: Icon, label }) => (
-                  <motion.li key={label} variants={fadeInUp} className="flex items-center gap-3 text-sm text-ink">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#b8925a]/15 border border-[#b8925a]/30">
-                      <Icon className="h-4 w-4 text-[#b8925a]" />
+                  <motion.li key={label} variants={fadeInUp} className="flex items-center gap-3 text-sm text-white">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 border border-white/20">
+                      <Icon className="h-4 w-4 text-white" />
                     </span>
                     {label}
                   </motion.li>
@@ -130,7 +130,7 @@ export function InstallModal({
                   whileTap={installing ? undefined : tapScaleSubtle}
                   onClick={handleInstall}
                   disabled={installing}
-                  className="w-full h-11 rounded-full text-base font-semibold bg-[#b8925a] hover:bg-[#96723a] text-[#faf6ed]"
+                  className="w-full h-11 rounded-full text-base font-semibold bg-white hover:bg-neutral-200 text-black shadow-lg shadow-white/10"
                 >
                   {installing ? "Installing…" : "Install"}
                 </MotionButton>

@@ -8,11 +8,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-mauve text-[#faf6ed] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/15 hover:shadow-mauve/30",
-        mauve: "bg-mauve text-[#faf6ed] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/20 hover:shadow-mauve/40",
-        glass: "bg-mauve/5 border border-hairline-dark text-ink backdrop-blur-md hover:bg-mauve/10 hover:border-mauve/30 hover:shadow-lg hover:shadow-mauve/5",
-        gradient: "bg-gradient-to-r from-mauve via-amber-200/80 to-mauve text-[#faf6ed] font-semibold hover:brightness-110 shadow-lg shadow-mauve/25",
-        glow: "bg-mauve text-[#faf6ed] font-semibold shadow-[0_0_20px_rgba(184,146,90,0.4)] hover:shadow-[0_0_30px_rgba(184,146,90,0.6)]",
+        default: "bg-white text-black font-semibold hover:bg-neutral-200 shadow-lg shadow-white/10",
+        mauve: "bg-white text-black font-semibold hover:bg-neutral-200 shadow-lg shadow-white/10",
+        glass: "bg-white/5 border border-white/10 text-white backdrop-blur-md hover:bg-white/10 hover:border-white/20 hover:shadow-lg",
+        gradient: "bg-white text-black font-semibold hover:bg-neutral-200 shadow-lg shadow-white/10",
+        glow: "bg-white text-black font-semibold shadow-[0_0_20px_rgba(255,255,255,0.25)] hover:bg-neutral-200",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-md shadow-destructive/20",
         outline: "border border-hairline-dark bg-surface-card/60 text-ink hover:bg-surface-card hover:text-ink hover:border-mauve/40",
         secondary: "bg-ink/5 text-ink hover:bg-ink/10 border border-hairline-dark",

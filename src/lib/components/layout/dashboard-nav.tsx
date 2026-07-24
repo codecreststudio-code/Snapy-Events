@@ -62,13 +62,13 @@ export function DashboardNav({ auth }: Props) {
 
   return (
     <>
-      <aside className="hidden w-64 shrink-0 border-r border-[#e5dfd0] bg-[#faf6ed] md:flex md:flex-col">
-        <div className="flex h-16 items-center border-b border-[#e5dfd0] px-4">
+      <aside className="hidden w-64 shrink-0 border-r border-white/10 bg-[#080808] md:flex md:flex-col">
+        <div className="flex h-16 items-center border-b border-white/10 px-4">
           <Link href="/dashboard" aria-label="Dashboard">
             <Logo />
           </Link>
         </div>
-        <nav className="flex-1 space-y-1 p-3" aria-label="Dashboard">
+        <nav className="flex-1 space-y-1.5 p-3" aria-label="Dashboard">
           {NAV.map((item) => {
             const active = item.exact ? pathname === item.href : pathname.startsWith(item.href)
             return (
@@ -76,10 +76,10 @@ export function DashboardNav({ auth }: Props) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center gap-3 rounded-full px-3.5 py-2 text-sm font-semibold transition-all",
                   active
-                    ? "bg-mauve/10 text-mauve-strong"
-                    : "text-ink-secondary hover:bg-mauve/5 hover:text-mauve-strong",
+                    ? "bg-white text-black shadow-md"
+                    : "text-neutral-400 hover:bg-white/10 hover:text-white",
                 )}
               >
                 <item.icon className="h-4 w-4" />
@@ -88,22 +88,22 @@ export function DashboardNav({ auth }: Props) {
             )
           })}
         </nav>
-        <div className="border-t border-[#e5dfd0] p-3">
-          <div className="rounded-lg border border-mauve/20 bg-mauve/5 p-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-ink">
-              <Sparkles className="h-4 w-4 text-mauve" />
+        <div className="border-t border-white/10 p-3">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-3.5">
+            <div className="flex items-center gap-2 text-sm font-semibold text-white">
+              <Sparkles className="h-4 w-4 text-white" />
               Upgrade to Premium
             </div>
-            <p className="mt-1 text-xs text-ink-secondary">
+            <p className="mt-1 text-xs text-neutral-400">
               Unlock AI face search, white-label and unlimited events.
             </p>
-            <Button asChild size="sm" className="mt-3 w-full rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold">
+            <Button asChild size="sm" className="mt-3 w-full rounded-full bg-white hover:bg-neutral-200 text-black font-semibold">
               <Link href="/dashboard/billing">Upgrade</Link>
             </Button>
           </div>
         </div>
       </aside>
-      <header className="flex h-16 items-center justify-between border-b border-[#e5dfd0] bg-[#faf6ed] px-4 md:px-6">
+      <header className="flex h-16 items-center justify-between border-b border-white/10 bg-[#000000] px-4 md:px-6">
         <div className="md:hidden">
           <Link href="/dashboard" aria-label="Dashboard home">
             <Logo />

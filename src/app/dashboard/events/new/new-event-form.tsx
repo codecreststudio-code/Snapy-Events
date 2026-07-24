@@ -1646,85 +1646,110 @@ export function NewEventForm() {
               </div>
 
               <div className="text-center pt-8 space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#b8925a]">Setup Complete</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#b8925a]">
+                  {totalEventPrice > 0 ? "Almost There" : "Setup Complete"}
+                </span>
                 <h2 className={`font-playfair text-3xl sm:text-4xl font-medium text-ink`}>
-                  Your memory capsule is ready.
+                  {totalEventPrice > 0 ? "One step left — complete payment." : "Your memory capsule is ready."}
                 </h2>
                 <p className="text-sm text-ink-secondary max-w-sm mx-auto">
-                  The portal has been created. Invite guests to share photos, video clips, and vocal greetings.
+                  {totalEventPrice > 0
+                    // Payment hasn't happened yet at this point — the event was
+                    // saved as a draft (see /api/events) and stays invisible/
+                    // unusable to everyone, including via this link or QR,
+                    // until checkout is completed. Nothing shareable is shown
+                    // here for exactly that reason: handing out a join link/QR
+                    // for an event that isn't live yet would just send guests
+                    // to a "not found" page.
+                    ? "Your event details are saved. It won't be visible or joinable by guests until payment is confirmed — complete checkout to publish it."
+                    : "The portal has been created. Invite guests to share photos, video clips, and vocal greetings."}
                 </p>
               </div>
 
-              {/* Real Custom Snapsy Logo QR Card Output */}
-              <div className="border border-[#e5dfd0] rounded-2xl p-6 bg-[#faf6ed] flex flex-col items-center gap-4 shadow-sm">
-                <div className="p-3 bg-white rounded-2xl border border-[#e5dfd0] relative overflow-hidden flex items-center justify-center shrink-0">
-                  <img
-                    src="/Favicon.png"
-                    alt="Snapsy Logo Background"
-                    className="absolute inset-0 w-full h-full object-contain opacity-25 p-1 pointer-events-none"
-                  />
-                  <QRCodeSVG
-                    id="new-event-modal-qr"
-                    value={createdEvent ? `${typeof window !== "undefined" ? window.location.origin : "https://snapsy-events.vercel.app"}/event/${createdEvent.slug}` : "https://snapsy-events.vercel.app"}
-                    size={168}
-                    bgColor={"transparent"}
-                    fgColor={"#faf6ed"}
-                    level={"H"}
-                    imageSettings={{
-                      src: "/Favicon.png",
-                      x: undefined,
-                      y: undefined,
-                      height: 40,
-                      width: 40,
-                      excavate: true,
-                    }}
-                    className="relative z-10"
-                  />
-                </div>
+              {/* Real Custom Snapsy Logo QR Card Output — only shown once the
+                  event is actually live (free plan, no payment needed).
+                  Showing a "share this" QR/link for a still-unpaid draft
+                  would just send guests to a page that says the event isn't
+                  available. */}
+              {totalEventPrice === 0 && (
+                <div className="border border-[#e5dfd0] rounded-2xl p-6 bg-[#faf6ed] flex flex-col items-center gap-4 shadow-sm">
+                  <div className="p-3 bg-white rounded-2xl border border-[#e5dfd0] relative overflow-hidden flex items-center justify-center shrink-0">
+                    <img
+                      src="/Favicon.png"
+                      alt="Snapsy Logo Background"
+                      className="absolute inset-0 w-full h-full object-contain opacity-25 p-1 pointer-events-none"
+                    />
+                    <QRCodeSVG
+                      id="new-event-modal-qr"
+                      value={createdEvent ? `${typeof window !== "undefined" ? window.location.origin : "https://snapsy-events.vercel.app"}/event/${createdEvent.slug}` : "https://snapsy-events.vercel.app"}
+                      size={168}
+                      bgColor={"transparent"}
+                      fgColor={"#faf6ed"}
+                      level={"H"}
+                      imageSettings={{
+                        src: "/Favicon.png",
+                        x: undefined,
+                        y: undefined,
+                        height: 40,
+                        width: 40,
+                        excavate: true,
+                      }}
+                      className="relative z-10"
+                    />
+                  </div>
 
-                <div className="text-center space-y-0.5">
-                  <p className="text-sm font-semibold text-ink">{name}</p>
-                  <p className="text-[10px] uppercase tracking-widest text-[#b8925a] font-bold">Plan: {(selectedPlan?.name || guestCountPlan).toUpperCase()}</p>
-                </div>
+                  <div className="text-center space-y-0.5">
+                    <p className="text-sm font-semibold text-ink">{name}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-[#b8925a] font-bold">Plan: {(selectedPlan?.name || guestCountPlan).toUpperCase()}</p>
+                  </div>
 
-                {/* Copyable join/invite pill */}
-                <button
-                  onClick={copyInviteLink}
-                  className="w-full max-w-xs flex items-center justify-between gap-2 rounded-full border border-hairline-dark bg-transparent px-4 py-2 text-ink hover:bg-mauve/10 transition-all cursor-pointer"
-                >
-                  <span className="truncate text-xs font-mono">{createdEvent?.slug}</span>
-                  <Copy className="h-3.5 w-3.5 shrink-0 text-[#b8925a]" />
-                </button>
-
-                {/* Share/Download Actions */}
-                <div className="flex flex-wrap gap-2 justify-center">
+                  {/* Copyable join/invite pill */}
                   <button
-                    onClick={() => {
-                      const host = typeof window !== "undefined" ? window.location.host : ""
-                      const url = `https://${host}/event/${createdEvent?.slug}`
-                      if (typeof navigator !== "undefined" && "share" in navigator) {
-                        (navigator as any).share({ title: name, url }).catch(() => { })
-                      } else {
-                        copyInviteLink()
-                      }
-                    }}
-                    className="px-4 py-1.5 rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 text-[11px] font-semibold text-ink-secondary transition-all flex items-center gap-1.5 cursor-pointer"
+                    onClick={copyInviteLink}
+                    className="w-full max-w-xs flex items-center justify-between gap-2 rounded-full border border-hairline-dark bg-transparent px-4 py-2 text-ink hover:bg-mauve/10 transition-all cursor-pointer"
                   >
-                    <Share2 className="h-3.5 w-3.5" />
-                    <span>Share</span>
+                    <span className="truncate text-xs font-mono">{createdEvent?.slug}</span>
+                    <Copy className="h-3.5 w-3.5 shrink-0 text-[#b8925a]" />
                   </button>
-                  {qrCodeUrl && (
-                    <a
-                      href={qrCodeUrl}
-                      download={`${slugify(name)}-qr-code.png`}
-                      className="px-4 py-1.5 rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 text-[11px] font-semibold text-ink-secondary transition-all flex items-center gap-1.5"
+
+                  {/* Share/Download Actions */}
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    <button
+                      onClick={() => {
+                        const host = typeof window !== "undefined" ? window.location.host : ""
+                        const url = `https://${host}/event/${createdEvent?.slug}`
+                        if (typeof navigator !== "undefined" && "share" in navigator) {
+                          (navigator as any).share({ title: name, url }).catch(() => { })
+                        } else {
+                          copyInviteLink()
+                        }
+                      }}
+                      className="px-4 py-1.5 rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 text-[11px] font-semibold text-ink-secondary transition-all flex items-center gap-1.5 cursor-pointer"
                     >
-                      <DownloadIcon className="h-3.5 w-3.5" />
-                      <span>Download QR</span>
-                    </a>
-                  )}
+                      <Share2 className="h-3.5 w-3.5" />
+                      <span>Share</span>
+                    </button>
+                    {qrCodeUrl && (
+                      <a
+                        href={qrCodeUrl}
+                        download={`${slugify(name)}-qr-code.png`}
+                        className="px-4 py-1.5 rounded-full border border-hairline-dark bg-transparent hover:bg-mauve/10 text-[11px] font-semibold text-ink-secondary transition-all flex items-center gap-1.5"
+                      >
+                        <DownloadIcon className="h-3.5 w-3.5" />
+                        <span>Download QR</span>
+                      </a>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {totalEventPrice > 0 && (
+                <div className="border border-[#e5dfd0] rounded-2xl p-5 bg-[#faf6ed] text-center space-y-1">
+                  <p className="text-[10px] uppercase tracking-widest text-[#b8925a] font-bold">Amount Due</p>
+                  <p className="text-2xl font-playfair text-ink">₹{totalEventPrice.toLocaleString("en-IN")}</p>
+                  <p className="text-xs text-ink-secondary">Plan: {(selectedPlan?.name || guestCountPlan).toUpperCase()}</p>
+                </div>
+              )}
 
               {/* Actions Footer */}
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -1739,7 +1764,7 @@ export function NewEventForm() {
                   onClick={handleLaunch}
                   className="flex-1 rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a] font-bold py-5 border-none shadow-[0_4px_14px_rgba(184,146,90,0.25)]"
                 >
-                  Launch Event
+                  {totalEventPrice > 0 ? "Complete Payment" : "Launch Event"}
                 </Button>
               </div>
             </motion.div>
