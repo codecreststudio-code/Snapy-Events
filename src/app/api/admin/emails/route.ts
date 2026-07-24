@@ -39,6 +39,36 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await sb.from("email_templates").select("*").order("is_system", { ascending: false }).order("name")
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Auto-seed newsletter template if it doesn't exist in the database yet
+  if (data && !data.some(t => t.id === "newsletter")) {
+    const defaultNewsletter = {
+      id: "newsletter",
+      name: "Newsletter Broadcast",
+      subject: "✨ {{newsletter_title}} — Snapsy Events",
+      html_content: `<h2 style="font-size:22px;font-weight:800;color:#1c1a17;margin:0 0 12px;">📰 {{newsletter_title}}</h2>
+<p style="font-size:15px;color:#374151;line-height:1.6;margin:0 0 20px;">Hello {{subscriber_name}}, welcome to this edition of the Snapsy Events newsletter!</p>
+<div style="background:#fcf9f2;border:1px solid #f3e8d2;border-radius:12px;padding:20px 22px;margin:0 0 22px;">
+  <p style="font-size:14px;color:#2c2824;line-height:1.6;margin:0;white-space:pre-wrap;">{{newsletter_content}}</p>
+</div>
+<div style="margin:0 0 24px;">
+  <div style="padding:6px 0;font-size:13px;color:#374151;">📸&nbsp;&nbsp;Discover new live event features</div>
+  <div style="padding:6px 0;font-size:13px;color:#374151;">⚡&nbsp;&nbsp;High-speed real-time photo sharing</div>
+  <div style="padding:6px 0;font-size:13px;color:#374151;">🤖&nbsp;&nbsp;AI Face Search & Smart Memories</div>
+  <div style="padding:6px 0;font-size:13px;color:#374151;">🎉&nbsp;&nbsp;Exclusive tips for event hosts & guests</div>
+</div>
+<div style="text-align:center;margin:12px 0 24px;">
+  <a href="{{cta_url}}" style="background:linear-gradient(135deg,#c9a96e,#b89252);color:#ffffff;text-decoration:none;padding:14px 34px;border-radius:10px;font-weight:700;font-size:14px;display:inline-block;box-shadow:0 4px 12px rgba(201,169,110,0.3);">{{cta_text}} →</a>
+</div>
+<div style="background:#f7f5fb;border:1px solid #ede9fe;border-radius:10px;padding:14px 16px;margin:0 0 20px;font-size:12px;color:#64748b;line-height:1.5;">You are receiving this email because you subscribed to Snapsy Events. If you wish to unsubscribe, click <a href="{{unsubscribe_url}}" style="color:#b89252;text-decoration:underline;">here</a>.</div>`,
+      text_content: `{{newsletter_title}}\n\nHello {{subscriber_name}},\n\n{{newsletter_content}}\n\nRead more at {{cta_url}}`,
+      variables: ["subscriber_name", "newsletter_title", "newsletter_content", "cta_text", "cta_url", "unsubscribe_url"],
+      is_system: true,
+    }
+    await sb.from("email_templates").upsert(defaultNewsletter, { onConflict: "id" })
+    data.push(defaultNewsletter as any)
+  }
+
   return NextResponse.json({ data })
 }
 
@@ -56,13 +86,6 @@ export async function POST(request: NextRequest) {
   const user = await requireAdmin()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  // This route predates defineRoute() (which auto-applies this same check
-  // for every POST/PUT/PATCH/DELETE — see src/lib/api/handler.ts) and was
-  // built directly on NextRequest/NextResponse, so it never got CSRF
-  // protection despite mutating email templates/settings and sending mail.
-  // verifyCsrf() passes automatically for genuine same-origin requests (it
-  // checks Origin/Referer first), so this doesn't require any client-side
-  // change — it only blocks requests that don't originate from this app.
   const isValidCsrf = await verifyCsrf(request.headers.get("x-csrf-token"), request)
   if (!isValidCsrf) {
     return NextResponse.json({ error: "Invalid or missing CSRF token" }, { status: 403 })
@@ -82,6 +105,12 @@ export async function POST(request: NextRequest) {
       to: recipient,
       templateId: template_id,
       variables: {
+        subscriber_name: "Valued Subscriber",
+        newsletter_title: "Exciting New Features from Snapsy Events!",
+        newsletter_content: "We are thrilled to share our latest updates! You can now generate AI face search highlights, guest award badges, and custom video recap movies directly from your live event galleries.",
+        cta_text: "Explore Snapsy Features",
+        cta_url: "https://snapsy-events.vercel.app/features",
+        unsubscribe_url: "https://snapsy-events.vercel.app/delete-data",
         host_name: "Test User",
         host_email: recipient,
         event_name: "My Test Event",

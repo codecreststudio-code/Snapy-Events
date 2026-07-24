@@ -84,6 +84,7 @@ const HERO_SUBTITLES: Record<string, string> = {
   event_created: "Your Event is Live",
   guest_invitation: "You're Invited",
   support_ticket: "Support Update",
+  newsletter: "Newsletter & Community Update",
 }
 
 // 1. Fetch Dynamic Settings from platform_settings
