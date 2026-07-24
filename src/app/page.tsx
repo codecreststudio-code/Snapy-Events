@@ -881,45 +881,23 @@ export default function HomePage() {
             })
           }}
         >
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,rgba(184,146,90,0.20),transparent_18%),radial-gradient(circle_at_20%_20%,rgba(150,114,58,0.14),transparent_20%),radial-gradient(circle_at_bottom_left,rgba(184,146,90,0.08),transparent_25%),linear-gradient(180deg,rgba(250,246,237,0.94),rgba(255,255,255,0.9))]" />
+          <div className="absolute inset-0 -z-10 bg-[#080808]" />
           <div className="absolute inset-0 -z-10 overflow-hidden">
             <motion.div
               animate={{ x: pointer.x * 24, y: pointer.y * 24 }}
               transition={{ type: "spring", stiffness: 40, damping: 16 }}
-              className="absolute -left-16 top-12 h-80 w-80 rounded-full bg-mauve/15 blur-3xl"
+              className="absolute -left-16 top-12 h-80 w-80 rounded-full bg-white/5 blur-3xl"
             />
             <motion.div
               animate={{ x: pointer.x * -18, y: pointer.y * -18 }}
               transition={{ type: "spring", stiffness: 40, damping: 16 }}
-              className="absolute right-10 bottom-10 h-64 w-64 rounded-full bg-mauve-strong/15 blur-3xl"
+              className="absolute right-10 bottom-10 h-64 w-64 rounded-full bg-white/5 blur-3xl"
             />
             <motion.div
               animate={{ y: scrollY * 0.08 }}
               transition={{ ease: "easeOut", duration: 0.4 }}
-              className="absolute left-1/2 top-1/4 h-[320px] sm:h-[420px] w-[320px] sm:w-[420px] -translate-x-1/2 rounded-full border border-ink/10 bg-ink/[0.02] shadow-[0_0_120px_rgba(184,146,90,0.12)]"
+              className="absolute left-1/2 top-1/4 h-[320px] sm:h-[420px] w-[320px] sm:w-[420px] -translate-x-1/2 rounded-full border border-white/10 bg-white/[0.02]"
             />
-            <div className="pointer-events-none absolute inset-0">
-              <motion.div
-                animate={{ opacity: [0, 0.4, 0], x: [0, 10, 0], y: [0, -10, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute left-16 top-24 h-2 w-2 rounded-full bg-mauve/50 blur-sm"
-              />
-              <motion.div
-                animate={{ opacity: [0, 0.35, 0], x: [0, -10, 0], y: [0, 12, 0] }}
-                transition={{ duration: 7.2, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute right-20 top-32 h-2 w-2 rounded-full bg-mauve/40 blur-sm"
-              />
-              <motion.div
-                animate={{ opacity: [0, 0.4, 0], x: [0, 14, 0], y: [0, 8, 0] }}
-                transition={{ duration: 5.8, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute left-1/2 top-10 h-1.5 w-1.5 rounded-full bg-mauve/60 blur-sm"
-              />
-              <motion.div
-                animate={{ opacity: [0, 0.35, 0], x: [0, -14, 0], y: [0, -8, 0] }}
-                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute right-1/3 bottom-24 h-1.5 w-1.5 rounded-full bg-mauve-strong/60 blur-sm"
-              />
-            </div>
           </div>
 
           {/* Centered Hero Content */}
@@ -928,27 +906,21 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] sm:text-xs font-semibold text-mauve bg-mauve/10 border border-mauve/20 backdrop-blur"
+              className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[10px] sm:text-xs font-semibold text-neutral-300 bg-white/5 border border-white/10 backdrop-blur"
             >
-              <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-mauve" />
-              <span>THE #1 EVENT PHOTO SHARING PLATFORM</span>
+              <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#c5a059]" />
+              <span>DISPOSABLE CAMERA APP FOR EVENTS</span>
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="relative overflow-hidden text-3xl min-[380px]:text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-light tracking-tight text-ink leading-[1.1] sm:leading-[1.05] font-playfair"
+              className="relative overflow-hidden text-4xl min-[380px]:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light tracking-tight text-white leading-[1.1] sm:leading-[1.05] font-playfair"
             >
-              Capture Every Moment. <br className="hidden min-[380px]:inline" />
-              <span className="italic font-light bg-gradient-to-r from-mauve via-mauve-strong to-mauve bg-clip-text text-transparent">Reveal Together.</span>
-              <motion.span
-                aria-hidden="true"
-                initial={{ x: -200, opacity: 0 }}
-                animate={{ x: 200, opacity: [0, 0.6, 0] }}
-                transition={{ delay: 0.6, duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                className="pointer-events-none absolute left-0 top-0 h-full w-20 bg-gradient-to-r from-mauve/0 via-mauve/30 to-mauve/0"
-              />
+              Every Guest. <br />
+              Every Angle. <br />
+              <span className="italic font-normal text-[#c5a059]">One Gallery.</span>
             </motion.h1>
 
             <motion.p

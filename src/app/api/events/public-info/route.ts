@@ -20,7 +20,10 @@ export const GET = defineRoute({
       .from("events")
       .select("id, name, slug, settings, host_id, end_date, status")
       .eq("slug", slug)
-      .neq("status", "archived")
+      // A `draft` event (unpaid/pending-payment, see /api/events POST) has
+      // no legitimate guest-facing use — matches gallery/qr/countdown/join,
+      // which already gate on status === "published".
+      .eq("status", "published")
       .maybeSingle()
 
     if (error || !event) return fail("NOT_FOUND", "Event not found", 404)

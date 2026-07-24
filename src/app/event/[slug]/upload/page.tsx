@@ -67,7 +67,12 @@ async function getEvent(slug: string) {
     .from("events")
     .select("id, name, slug, settings, host_id, end_date, status, host:users(preferences)")
     .eq("slug", slug)
-    .neq("status", "archived")
+    // Matches gallery/qr/countdown/join — a `draft` (unpaid/pending-payment)
+    // event has no valid guest session (check-in itself is blocked for
+    // non-published events, see logGuestAccess in actions/guest.ts), so any
+    // upload attempt fails server-side regardless. Excluding it here too
+    // avoids showing an upload form for an event that isn't actually live.
+    .eq("status", "published")
     .single()
   if (error) throw error
   return data

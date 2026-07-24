@@ -5,92 +5,94 @@
   font-family: var(--font-dm-sans), 'DM Sans', system-ui, -apple-system, sans-serif;
 }
 .font-playfair {
-  font-family: var(--font-dm-sans), 'DM Sans', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-playfair), Playfair Display, Georgia, serif;
 }
 
 :root {
-  --background: 0 0% 0%;
-  --foreground: 0 0% 99.6%;
-  --card: 0 0% 3.1%;
-  --card-foreground: 0 0% 99.6%;
-  --popover: 0 0% 7.1%;
-  --popover-foreground: 0 0% 99.6%;
+  --background: 0 0% 3.1%;
+  --foreground: 0 0% 96.1%;
+  --card: 0 0% 7.1%;
+  --card-foreground: 0 0% 96.1%;
+  --popover: 0 0% 8.6%;
+  --popover-foreground: 0 0% 96.1%;
   --primary: 0 0% 100%;
   --primary-foreground: 0 0% 0%;
   --secondary: 0 0% 12%;
-  --secondary-foreground: 0 0% 99.6%;
+  --secondary-foreground: 0 0% 96.1%;
   --muted: 0 0% 12%;
-  --muted-foreground: 0 0% 60%;
-  --accent: 0 0% 15%;
-  --accent-foreground: 0 0% 99.6%;
+  --muted-foreground: 0 0% 62%;
+  --accent: 40 50% 56%;
+  --accent-foreground: 0 0% 96.1%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 100% / 0.12;
-  --input: 0 0% 100% / 0.12;
+  --border: 0 0% 100% / 0.08;
+  --input: 0 0% 100% / 0.08;
   --ring: 0 0% 100%;
   --radius: 12px;
 
-  /* ─── Scene Disposable Camera App Tokens (DESIGN.md) ───────────────────── */
-  --snapy-mauve: #ffffff;
-  --snapy-mauve-strong: #fefefe;
-  --snapy-surface-dark: #000000;
-  --snapy-surface-card: #080808;
-  --snapy-surface-card-elevated: #121212;
-  --snapy-hairline-dark: rgba(255, 255, 255, 0.12);
-  --snapy-ink: #fefefe;
-  --snapy-ink-secondary: #999999;
+  /* ─── scenedisposable.com Exact Color Tokens ───────────────────────────── */
+  --snapy-surface-dark: #080808;
+  --snapy-surface-card: #121212;
+  --snapy-surface-card-elevated: #161616;
+  --snapy-hairline-dark: rgba(255, 255, 255, 0.08);
+  --snapy-ink: #f5f5f5;
+  --snapy-ink-secondary: #9e9e9e;
   --snapy-ink-tertiary: #666666;
+  --snapy-gold: #c5a059;
+  --snapy-gold-light: #e5c178;
+  --snapy-mauve: #ffffff;
+  --snapy-mauve-strong: #f5f5f5;
 }
 
 .dark {
-  --background: 0 0% 0%;
-  --foreground: 0 0% 99.6%;
-  --card: 0 0% 3.1%;
-  --card-foreground: 0 0% 99.6%;
-  --popover: 0 0% 7.1%;
-  --popover-foreground: 0 0% 99.6%;
+  --background: 0 0% 3.1%;
+  --foreground: 0 0% 96.1%;
+  --card: 0 0% 7.1%;
+  --card-foreground: 0 0% 96.1%;
+  --popover: 0 0% 8.6%;
+  --popover-foreground: 0 0% 96.1%;
   --primary: 0 0% 100%;
   --primary-foreground: 0 0% 0%;
   --secondary: 0 0% 12%;
-  --secondary-foreground: 0 0% 99.6%;
+  --secondary-foreground: 0 0% 96.1%;
   --muted: 0 0% 12%;
-  --muted-foreground: 0 0% 60%;
-  --accent: 0 0% 15%;
-  --accent-foreground: 0 0% 99.6%;
+  --muted-foreground: 0 0% 62%;
+  --accent: 40 50% 56%;
+  --accent-foreground: 0 0% 96.1%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 100% / 0.12;
-  --input: 0 0% 100% / 0.12;
+  --border: 0 0% 100% / 0.08;
+  --input: 0 0% 100% / 0.08;
   --ring: 0 0% 100%;
 }
 
 @theme {
-  --color-background: #000000;
-  --color-foreground: #fefefe;
+  --color-background: #080808;
+  --color-foreground: #f5f5f5;
   
-  --color-card: #080808;
-  --color-card-foreground: #fefefe;
+  --color-card: #121212;
+  --color-card-foreground: #f5f5f5;
   
-  --color-popover: #121212;
-  --color-popover-foreground: #fefefe;
+  --color-popover: #161616;
+  --color-popover-foreground: #f5f5f5;
   
   --color-primary: #ffffff;
   --color-primary-foreground: #000000;
   
   --color-secondary: #181818;
-  --color-secondary-foreground: #fefefe;
+  --color-secondary-foreground: #f5f5f5;
   
-  --color-muted: #121212;
-  --color-muted-foreground: #999999;
+  --color-muted: #141414;
+  --color-muted-foreground: #9e9e9e;
   
-  --color-accent: #222222;
-  --color-accent-foreground: #fefefe;
+  --color-accent: #c5a059;
+  --color-accent-foreground: #f5f5f5;
   
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   
-  --color-border: rgba(255, 255, 255, 0.12);
-  --color-input: rgba(255, 255, 255, 0.12);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-input: rgba(255, 255, 255, 0.08);
   --color-ring: #ffffff;
   
   --radius-xs: 8px;
@@ -99,6 +101,8 @@
   --radius-lg: 20px;
   --radius-xl: 9999px;
 
+  --color-gold: #c5a059;
+  --color-gold-light: #e5c178;
   --color-mauve: var(--snapy-mauve);
   --color-mauve-strong: var(--snapy-mauve-strong);
   --color-surface-dark: var(--snapy-surface-dark);
@@ -111,7 +115,7 @@
 }
 
 * {
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 html {
@@ -120,8 +124,8 @@ html {
 }
 
 body {
-  background-color: #000000;
-  color: #fefefe;
+  background-color: #080808;
+  color: #f5f5f5;
   font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
 }

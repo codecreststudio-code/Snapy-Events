@@ -149,10 +149,15 @@ export const POST = defineRoute({
     // reached when calculatePrice() legitimately recomputes to ₹0 (e.g. a
     // 100%-off coupon on what /api/events created as a draft, pending-
     // payment event), so it needs the same activation logic, not just the
-    // Razorpay-signed paths.
+    // Razorpay-signed paths. Uses `sbAdmin` (service-role), not the
+    // request-scoped `supabase` client used elsewhere in this handler —
+    // migration 0044_payment_activation_guard.sql's DB trigger only allows
+    // the pending_payment -> published/free transition for service-role
+    // writes, specifically so a host can't replicate this same update by
+    // calling the Supabase REST API directly with their own session.
     const currentSettings = (eventRow.settings as Record<string, any>) || {}
     const wasDraft = eventRow.status === "draft"
-    await supabase
+    await sbAdmin
       .from("events")
       .update({
         ...(wasDraft ? { status: "published" } : {}),
