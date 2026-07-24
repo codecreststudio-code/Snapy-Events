@@ -94,5 +94,7 @@ export async function updatePlatformSettings(key: string, value: any) {
   
   revalidatePath("/admin/settings")
   revalidatePath("/admin/feature-flags")
+  revalidatePath("/admin/site-branding")
+  revalidatePath("/")
   return { success: true }
 }

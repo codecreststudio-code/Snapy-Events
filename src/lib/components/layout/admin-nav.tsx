@@ -28,7 +28,8 @@ import {
   Film,
   Volume2,
   FileText,
-  Users
+  Users,
+  Globe
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "./logo"
@@ -79,6 +80,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
       { href: "/admin/blog", label: "Blog", icon: FileText },
       { href: "/admin/marketing", label: "Marketing", icon: Megaphone },
+      { href: "/admin/site-branding", label: "Site Branding", icon: Globe },
       { href: "/admin/notifications", label: "Notifications", icon: Bell },
       { href: "/admin/email", label: "Email Management", icon: Mail },
     ],

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -187,35 +187,13 @@ export function PublicNavbar() {
 }
 
 const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
   </svg>
 )
 
 const InstagramIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
     <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
@@ -223,45 +201,98 @@ const InstagramIcon = (props: React.SVGProps<SVGSVGElement>) => (
 )
 
 const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
   </svg>
 )
 
 const LinkedInIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
     <rect width="4" height="12" x="2" y="9" />
     <circle cx="4" cy="4" r="2" />
   </svg>
 )
 
+const YouTubeIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+    <path d="m10 15 5-3-5-3z" />
+  </svg>
+)
+
+const TikTokIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+  </svg>
+)
+
+const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+    <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
+  </svg>
+)
+
+const TelegramIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M21.2 4.4L2.4 10.8c-.6.2-.6 1.1.1 1.3l4.7 1.5 1.8 5.6c.2.5.8.7 1.2.4l2.5-2 4.9 3.6c.5.4 1.2.1 1.3-.5L21.8 5.3c.2-.7-.5-1.2-1-.9z" />
+    <path d="M8 13.5l9-6.5" />
+  </svg>
+)
+
+const PinterestIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <line x1="12" y1="11" x2="10" y2="20" />
+    <circle cx="12" cy="10" r="8" />
+  </svg>
+)
+
+const SnapchatIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M12 2C8.13 2 5 5.58 5 10c0 1.3.5 2.7 1 3.5-.5.5-1.5.5-2 1s0 1.5.5 1.5c.7 0 1.2 0 1.5.5s.5 1 .5 1.5c0 .3 0 .5-.5 1s-1 1-.5 1.5S7 21 8.5 21c1 0 2-.5 3.5-.5s2.5.5 3.5.5c1.5 0 1.5-.5 2-1s-.5-1-.5-1.5 0-1.2.5-1.5.5-1 .5-1.5 1.5-.5 1.5-.5.5-1.5-.5-1.5-1.5-.5-2-1c.5-.8 1-2.2 1-3.5 0-4.42-3.13-8-7-8z" />
+  </svg>
+)
+
+// Map platform keys to their icon components for dynamic rendering
+const SOCIAL_ICON_MAP: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+  facebook: FacebookIcon,
+  instagram: InstagramIcon,
+  twitter: TwitterIcon,
+  linkedin: LinkedInIcon,
+  youtube: YouTubeIcon,
+  tiktok: TikTokIcon,
+  whatsapp: WhatsAppIcon,
+  telegram: TelegramIcon,
+  pinterest: PinterestIcon,
+  snapchat: SnapchatIcon,
+}
+
+type SiteBranding = {
+  social_links: Record<string, string>
+  footer_credits: { built_by: string; built_by_url: string; powered_by: string }
+  custom_tags: { label: string; url: string }[]
+}
+
+const DEFAULT_BRANDING: SiteBranding = {
+  social_links: {},
+  footer_credits: { built_by: "CodeCrest_Studio", built_by_url: "https://codecreststudio.vercel.app/", powered_by: "Snapsy Events" },
+  custom_tags: [],
+}
+
 export function PublicFooter() {
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [branding, setBranding] = useState<SiteBranding>(DEFAULT_BRANDING)
+
+  // Fetch site branding on mount
+  useEffect(() => {
+    fetch("/api/site-branding")
+      .then((r) => (r.ok ? r.json() : DEFAULT_BRANDING))
+      .then((data) => setBranding({ ...DEFAULT_BRANDING, ...data }))
+      .catch(() => {})
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -350,35 +381,39 @@ export function PublicFooter() {
             <p className="text-ink-secondary text-xs leading-relaxed mb-4 font-light">
               The modern disposable camera & live photo sharing experience for events, weddings, and parties. Powered by Snapsy Events.
             </p>
-            <div className="flex space-x-2 justify-start items-center">
-              <a
-                href="#"
-                aria-label="Facebook"
-                className="h-8 w-8 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
-              >
-                <FacebookIcon className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                aria-label="Instagram"
-                className="h-8 w-8 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
-              >
-                <InstagramIcon className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                aria-label="Twitter"
-                className="h-8 w-8 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
-              >
-                <TwitterIcon className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                aria-label="LinkedIn"
-                className="h-8 w-8 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
-              >
-                <LinkedInIcon className="h-4 w-4" />
-              </a>
+            <div className="flex flex-wrap gap-2 justify-start items-center">
+              {Object.entries(branding.social_links)
+                .filter(([, url]) => url?.trim())
+                .map(([key, url]) => {
+                  const Icon = SOCIAL_ICON_MAP[key]
+                  if (!Icon) return null
+                  return (
+                    <a
+                      key={key}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={key.charAt(0).toUpperCase() + key.slice(1)}
+                      className="h-8 w-8 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-secondary hover:text-mauve hover:border-mauve/50 hover:bg-mauve/10 transition-all duration-200"
+                    >
+                      <Icon className="h-4 w-4" />
+                    </a>
+                  )
+                })}
+              {/* Fallback: show placeholder icons when nothing is configured */}
+              {Object.values(branding.social_links).every((v) => !v?.trim()) && (
+                <>
+                  <span className="h-8 w-8 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-tertiary opacity-40">
+                    <FacebookIcon className="h-4 w-4" />
+                  </span>
+                  <span className="h-8 w-8 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-tertiary opacity-40">
+                    <InstagramIcon className="h-4 w-4" />
+                  </span>
+                  <span className="h-8 w-8 rounded-lg border border-hairline-dark bg-mauve/5 flex items-center justify-center text-ink-tertiary opacity-40">
+                    <TwitterIcon className="h-4 w-4" />
+                  </span>
+                </>
+              )}
             </div>
           </div>
 
@@ -476,7 +511,7 @@ export function PublicFooter() {
         {/* Bottom Row */}
         <div className="border-t border-hairline-dark pt-8 flex flex-col items-center justify-between gap-4 md:flex-row">
           <p className="text-xs text-ink-secondary font-light">
-            &copy; {new Date().getFullYear()} Snapsy Events. All rights reserved. Designed for unforgettable event memories.
+            &copy; {new Date().getFullYear()} {branding.footer_credits?.powered_by || "Snapsy Events"}. All rights reserved. Designed for unforgettable event memories.
           </p>
           <div className="flex space-x-6">
             <Link href="/privacy" className="text-xs text-ink-secondary hover:text-ink transition-colors duration-200">
@@ -489,6 +524,52 @@ export function PublicFooter() {
               Data Deletion
             </Link>
           </div>
+        </div>
+
+        {/* Built By & Custom Tags Row (Exact below bottom links) */}
+        <div className="mt-4 flex flex-col items-center justify-between gap-3 pt-4 border-t border-hairline-dark/40 md:flex-row text-xs text-ink-tertiary">
+          {branding.footer_credits?.built_by && (
+            <div>
+              Built by{" "}
+              {branding.footer_credits.built_by_url ? (
+                <a
+                  href={branding.footer_credits.built_by_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-mauve hover:text-mauve-strong transition-colors font-medium underline underline-offset-2"
+                >
+                  {branding.footer_credits.built_by}
+                </a>
+              ) : (
+                <span className="text-mauve font-medium">{branding.footer_credits.built_by}</span>
+              )}
+            </div>
+          )}
+
+          {branding.custom_tags && branding.custom_tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 items-center justify-center">
+              {branding.custom_tags.map((tag, idx) =>
+                tag.url ? (
+                  <a
+                    key={idx}
+                    href={tag.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 rounded-full border border-hairline-dark bg-mauve/5 px-2.5 py-0.5 text-[10px] font-semibold text-ink-secondary hover:text-mauve hover:border-mauve/30 transition-all"
+                  >
+                    {tag.label}
+                  </a>
+                ) : (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center rounded-full border border-hairline-dark bg-mauve/5 px-2.5 py-0.5 text-[10px] font-semibold text-ink-secondary"
+                  >
+                    {tag.label}
+                  </span>
+                )
+              )}
+            </div>
+          )}
         </div>
 
         {/* Big brand wordmark at the very bottom — animated gold gradient shimmer */}
