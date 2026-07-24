@@ -37,15 +37,15 @@ export function DashboardSidebar() {
 
   return (
     <>
-      <div className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-[#e5dfd0] bg-[#faf6ed] lg:flex">
-        <div className="flex h-16 items-center gap-2 border-b border-[#e5dfd0] px-6">
+      <div className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-white/10 bg-[#080808] lg:flex">
+        <div className="flex h-16 items-center gap-2 border-b border-white/10 px-6">
           <Link href="/dashboard" className="inline-flex items-center transition-opacity hover:opacity-90">
             <Logo />
           </Link>
         </div>
 
         <div className="flex-1 overflow-y-auto py-4">
-          <nav className="px-4 space-y-1">
+          <nav className="px-4 space-y-1.5">
             {navigation.map((item) => {
               const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`))
               return (
@@ -53,13 +53,13 @@ export function DashboardSidebar() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold transition-all",
                     isActive
-                      ? "bg-mauve/10 text-mauve-strong"
-                      : "text-ink-secondary hover:bg-mauve/5 hover:text-mauve-strong"
+                      ? "bg-white text-black shadow-md"
+                      : "text-neutral-400 hover:bg-white/10 hover:text-white"
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
+                  <item.icon className="h-4 w-4" />
                   {item.name}
                 </Link>
               )
@@ -69,18 +69,18 @@ export function DashboardSidebar() {
             <button
               type="button"
               onClick={() => setShowJoinModal(true)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-mauve bg-mauve/10 hover:bg-mauve/20 transition-colors cursor-pointer"
+              className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold text-white bg-white/10 hover:bg-white/20 transition-all cursor-pointer mt-2"
             >
-              <QrCode className="h-5 w-5 text-mauve" />
+              <QrCode className="h-4 w-4 text-white" />
               <span>Join Event</span>
             </button>
           </nav>
 
           <div className="mt-6 px-4">
-            <div className="h-px bg-[#e5dfd0]" />
+            <div className="h-px bg-white/10" />
           </div>
 
-          <nav className="px-4 mt-6 space-y-1">
+          <nav className="px-4 mt-6 space-y-1.5">
             {secondaryNavigation.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
               return (
@@ -88,13 +88,13 @@ export function DashboardSidebar() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold transition-all",
                     isActive
-                      ? "bg-mauve/10 text-mauve-strong"
-                      : "text-ink-secondary hover:bg-mauve/5 hover:text-mauve-strong"
+                      ? "bg-white text-black shadow-md"
+                      : "text-neutral-400 hover:bg-white/10 hover:text-white"
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
+                  <item.icon className="h-4 w-4" />
                   {item.name}
                 </Link>
               )
@@ -102,7 +102,7 @@ export function DashboardSidebar() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-2 border-t border-[#e5dfd0] p-4">
+        <div className="flex items-center gap-2 border-t border-white/10 p-4">
           <div className="min-w-0 flex-1">
             <AccountMenu variant="sidebar" />
           </div>

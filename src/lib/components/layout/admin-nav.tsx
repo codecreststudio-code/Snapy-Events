@@ -143,13 +143,13 @@ export function AdminNav() {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-250",
+                      "flex items-center gap-3 rounded-full px-3.5 py-2 text-xs font-semibold transition-all duration-200",
                       active
-                        ? "bg-mauve/10 text-mauve-strong border-l-2 border-mauve"
-                        : "text-ink-secondary hover:bg-mauve/5 hover:text-ink"
+                        ? "bg-white text-black shadow-sm"
+                        : "text-neutral-400 hover:bg-white/10 hover:text-white"
                     )}
                   >
-                    <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-mauve-strong" : "text-ink-tertiary")} />
+                    <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-black" : "text-neutral-500")} />
                     <span>{item.label}</span>
                   </Link>
                 )

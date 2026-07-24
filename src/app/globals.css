@@ -1,125 +1,103 @@
 @import "tailwindcss";
 
 /* ─── Font utilities ──────────────────────────────────────────────────────── */
-/* Playfair Display is loaded in the root layout (server component) as
-   --font-playfair CSS variable. Use this class anywhere instead of
-   next/font's .className to avoid client-side font re-fetching. */
+.font-dm-sans {
+  font-family: var(--font-dm-sans), 'DM Sans', system-ui, -apple-system, sans-serif;
+}
 .font-playfair {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-dm-sans), 'DM Sans', system-ui, -apple-system, sans-serif;
 }
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
+  --background: 0 0% 0%;
+  --foreground: 0 0% 99.6%;
+  --card: 0 0% 3.1%;
+  --card-foreground: 0 0% 99.6%;
+  --popover: 0 0% 7.1%;
+  --popover-foreground: 0 0% 99.6%;
+  --primary: 0 0% 100%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 12%;
+  --secondary-foreground: 0 0% 99.6%;
+  --muted: 0 0% 12%;
+  --muted-foreground: 0 0% 60%;
+  --accent: 0 0% 15%;
+  --accent-foreground: 0 0% 99.6%;
   --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
-  --radius: 0.5rem;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 100% / 0.12;
+  --input: 0 0% 100% / 0.12;
+  --ring: 0 0% 100%;
+  --radius: 12px;
 
-  /* ─── Snapy event-surface tokens — "Amber Noir Light" rebrand ───────────
-     2026 brandkit refresh: the previous dark mauve/lavender identity has
-     been replaced app-wide with a light, premium ivory-and-antique-gold
-     system per explicit product direction (light mode only, existing purple
-     logo mark kept unchanged). Token NAMES are kept as-is on purpose
-     (surface-dark, hairline-dark, mauve, etc.) even though their VALUES are
-     no longer literally dark/mauve — renaming would mean touching every one
-     of the ~90 files already consuming bg-surface-dark / text-mauve /
-     border-hairline-dark, which is unnecessary churn for a values-only
-     rebrand. Read the comment on each token for what it actually renders as
-     now, not what its name implies.
-
-     - surface-dark   -> page background, warm ivory (was near-black)
-     - surface-card   -> card/panel background, crisp white
-     - surface-card-elevated -> modal/popover background, warm-white
-     - hairline-dark  -> border/divider color, soft warm tan
-     - mauve / mauve-strong -> primary accent, antique gold (was mauve/purple)
-     - ink / ink-secondary / ink-tertiary -> NEW. Primary/secondary/tertiary
-       text colors for the light surfaces above — use these (text-ink,
-       text-ink-secondary, text-ink-tertiary) instead of text-white,
-       text-white/60, text-white/40 on any element sitting directly on an
-       app surface. Elements that intentionally keep a dark/colored chip —
-       solid gold buttons, photo-caption gradient overlays, colored badges —
-       should keep white text as before; only surface-level text needs to
-       move to the ink tokens. */
-  --snapy-mauve: #b8925a;
-  --snapy-mauve-strong: #96723a;
-  --snapy-surface-dark: #faf6ed;
-  --snapy-surface-card: #ffffff;
-  --snapy-surface-card-elevated: #fffdf7;
-  --snapy-hairline-dark: #e5dfd0;
-  --snapy-ink: #2a241c;
-  --snapy-ink-secondary: #6b5f4f;
-  --snapy-ink-tertiary: #9c9184;
+  /* ─── Scene Disposable Camera App Tokens (DESIGN.md) ───────────────────── */
+  --snapy-mauve: #ffffff;
+  --snapy-mauve-strong: #fefefe;
+  --snapy-surface-dark: #000000;
+  --snapy-surface-card: #080808;
+  --snapy-surface-card-elevated: #121212;
+  --snapy-hairline-dark: rgba(255, 255, 255, 0.12);
+  --snapy-ink: #fefefe;
+  --snapy-ink-secondary: #999999;
+  --snapy-ink-tertiary: #666666;
 }
 
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
+  --background: 0 0% 0%;
+  --foreground: 0 0% 99.6%;
+  --card: 0 0% 3.1%;
+  --card-foreground: 0 0% 99.6%;
+  --popover: 0 0% 7.1%;
+  --popover-foreground: 0 0% 99.6%;
+  --primary: 0 0% 100%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 12%;
+  --secondary-foreground: 0 0% 99.6%;
+  --muted: 0 0% 12%;
+  --muted-foreground: 0 0% 60%;
+  --accent: 0 0% 15%;
+  --accent-foreground: 0 0% 99.6%;
   --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 25%;
-  --input: 217.2 32.6% 25%;
-  --ring: 224.3 76.3% 48%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 100% / 0.12;
+  --input: 0 0% 100% / 0.12;
+  --ring: 0 0% 100%;
 }
 
 @theme {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
+  --color-background: #000000;
+  --color-foreground: #fefefe;
   
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card: #080808;
+  --color-card-foreground: #fefefe;
   
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover: #121212;
+  --color-popover-foreground: #fefefe;
   
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary: #ffffff;
+  --color-primary-foreground: #000000;
   
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary: #181818;
+  --color-secondary-foreground: #fefefe;
   
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted: #121212;
+  --color-muted-foreground: #999999;
   
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent: #222222;
+  --color-accent-foreground: #fefefe;
   
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-input: rgba(255, 255, 255, 0.12);
+  --color-ring: #ffffff;
   
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 20px;
+  --radius-xl: 9999px;
 
   --color-mauve: var(--snapy-mauve);
   --color-mauve-strong: var(--snapy-mauve-strong);
@@ -133,38 +111,22 @@
 }
 
 * {
-  border-color: hsl(214.3 31.8% 91.4%);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
-/* ─── Global horizontal-overflow guard ──────────────────────────────────
-   Backstop against any single element (a decorative blur circle, a stray
-   fixed-width element, a translate animation, a not-yet-caught arbitrary
-   value) pushing the document wider than the viewport. Without this, ONE
-   offending element anywhere on a page makes the ENTIRE page horizontally
-   scrollable on mobile, which visually shifts and clips every centered
-   section (hero heading, buttons, join box) even though those sections'
-   own CSS is correct — the browser is just scrolled sideways. `clip`
-   (rather than `hidden`) avoids creating a new scroll container, so it
-   doesn't interfere with `position: sticky` headers/bottom bars. */
 html {
   overflow-x: hidden;
+  color-scheme: dark;
 }
 
 body {
-  background-color: hsl(0 0% 100%);
-  color: hsl(222.2 84% 4.9%);
+  background-color: #000000;
+  color: #fefefe;
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
 }
 
-/* ─── Mobile viewport height + safe areas ───────────────────────────────
-   `100vh`/`85vh` etc. size against the LARGEST possible mobile viewport
-   (address bar collapsed), so a section centered with `min-h-[85vh]` sits
-   lower than what's actually visible while the address bar is showing —
-   reads as "excessive blank space above the hero" until the user scrolls.
-   `dvh` tracks the real, current viewport instead. Declared with a `vh`
-   value first as a same-rule fallback (cascade, not a media query) for
-   browsers that don't understand `dvh` yet — they simply ignore that
-   second declaration and keep the first. */
+/* ─── Mobile viewport height + safe areas ─────────────────────────────── */
 .hero-min-h {
   min-height: 85vh;
   min-height: 85dvh;
@@ -176,9 +138,6 @@ body {
   }
 }
 
-/* Installed PWA / iOS safe areas — env(safe-area-inset-*) resolves to 0 on
-   browsers/devices without a notch or home indicator, so this is a no-op
-   everywhere except iPhone notch/Dynamic Island + Android gesture bars. */
 .pt-safe {
   padding-top: env(safe-area-inset-top);
 }
@@ -187,16 +146,16 @@ body {
 }
 
 .dark * {
-  border-color: hsl(217.2 32.6% 25%);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .dark body {
-  background-color: hsl(222.2 84% 4.9%);
-  color: hsl(210 40% 98%);
+  background-color: #000000;
+  color: #fefefe;
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.2s ease-in-out;
 }
 
 .animate-slide-up {
@@ -234,40 +193,35 @@ body {
   }
 }
 
-/* ─── Shared glass/frosted surface ──────────────────────────────────────
-   Every "floating over media" panel (invite card, upload progress overlay,
-   settings sheet header, etc.) previously reimplemented its own
-   backdrop-blur + translucent-bg + border combo per element. One class,
-   applied on top of the dark surface tokens above, keeps every floating
-   panel visually identical. */
+/* ─── Shared dark glass/frosted surface (DESIGN.md) ────────────────────── */
 .glass-panel {
-  background-color: color-mix(in srgb, var(--snapy-surface-card) 75%, transparent);
+  background-color: rgba(8, 8, 8, 0.75);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid color-mix(in srgb, var(--snapy-mauve) 18%, var(--snapy-hairline-dark));
-  box-shadow: 0 12px 32px rgba(43, 36, 26, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0px 18px 50px 0px rgba(0, 0, 0, 0.55);
 }
 
 .glass-panel-elevated {
-  background-color: color-mix(in srgb, var(--snapy-surface-card-elevated) 90%, transparent);
+  background-color: rgba(18, 18, 18, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid color-mix(in srgb, var(--snapy-mauve) 30%, var(--snapy-hairline-dark));
-  box-shadow: 0 20px 44px rgba(43, 36, 26, 0.14), 0 0 30px rgba(184, 146, 90, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0px 18px 50px 0px rgba(0, 0, 0, 0.75);
 }
 
 .glow-mauve {
-  box-shadow: 0 0 25px -5px rgba(184, 146, 90, 0.4);
+  box-shadow: 0 0 30px -5px rgba(255, 255, 255, 0.15);
 }
 
 .text-gradient-mauve {
-  background: linear-gradient(135deg, #2a241c 0%, #6b5f4f 40%, #b8925a 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #d4d4d4 50%, #999999 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-gradient-gold {
-  background: linear-gradient(135deg, #92400e 0%, #b45309 50%, #d97706 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #e5e5e5 50%, #a3a3a3 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

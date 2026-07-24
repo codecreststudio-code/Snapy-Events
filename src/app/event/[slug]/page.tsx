@@ -216,10 +216,10 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf6ed] text-ink">
+    <div className="flex min-h-screen flex-col bg-[#000000] text-[#fefefe]">
       <GuestCaptureModal eventId={event.id} eventName={event.name} requireJoinCode={!!settings.require_join_code} />
 
-      <header className="pt-safe sticky top-0 z-50 w-full border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur supports-[backdrop-filter]:bg-[#faf6ed]/80">
+      <header className="pt-safe sticky top-0 z-50 w-full border-b border-white/10 bg-[#000000]/95 backdrop-blur supports-[backdrop-filter]:bg-[#000000]/80">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
             {event.user?.branding?.logo_url ? (
@@ -237,7 +237,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
               <Button
                 asChild
                 size="sm"
-                className="rounded-full border border-ink/15 bg-transparent text-ink hover:bg-mauve/10 hover:text-[#b8925a]"
+                className="rounded-full border border-white/20 bg-white/10 text-white hover:bg-white hover:text-black"
               >
                 <Link href={`/event/${event.slug}/upload`}>
                   <Upload className="h-4 w-4" />
@@ -250,14 +250,14 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
       </header>
 
       <main className="flex-1">
-        <section className="relative overflow-hidden border-b border-[#e5dfd0]">
+        <section className="relative overflow-hidden border-b border-white/10">
           {event.cover_image_url && (
             <div
               className="absolute inset-0 -z-20 bg-cover bg-center opacity-30"
               style={{ backgroundImage: `url(${event.cover_image_url})` }}
             />
           )}
-          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#faf6ed]/30 via-[#faf6ed]/70 to-[#faf6ed]" />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#000000]/30 via-[#000000]/70 to-[#000000]" />
           <div className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 sm:py-20">
             {/* Server Component hero — can't reach for Framer Motion hooks here,
                 so the staggered entrance is pure CSS (existing keyframe

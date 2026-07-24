@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Inter, Playfair_Display } from "next/font/google"
+import { Inter, Playfair_Display, DM_Sans } from "next/font/google"
 import "./globals.css"
 import { QueryProvider } from "@/lib/hooks/query-provider"
 import { AuthProvider } from "@/lib/hooks/use-auth"
@@ -34,6 +34,12 @@ const playfair = Playfair_Display({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-playfair",
+})
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-dm-sans",
 })
 
 export const metadata: Metadata = {
@@ -105,8 +111,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#faf6ed",
-  colorScheme: "light",
+  themeColor: "#000000",
+  colorScheme: "dark",
 }
 
 import { Toaster } from "@/lib/components/ui/toaster"
@@ -121,11 +127,11 @@ export default function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Snapsy",
+    "name": "Scene",
     "operatingSystem": "All",
     "applicationCategory": "MultimediaApplication",
-    "url": "https://snapsy-events.vercel.app",
-    "description": "The complete AI event photography platform for hosts and guests. Instant QR code photo sharing, AI face recognition, live event wall, and guestbook audio notes.",
+    "url": "https://scenedisposable.com",
+    "description": "Disposable Camera App for Events & Weddings — Scene. Create events, generate QR codes, snap live guest photos, manage galleries, and share memories.",
     "offers": {
       "@type": "Offer",
       "price": "0",
@@ -139,7 +145,7 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en" suppressHydrationWarning className="selection:bg-mauve/30 selection:text-ink">
+    <html lang="en" suppressHydrationWarning className="dark selection:bg-white/20 selection:text-white">
       <head>
         {/* Preconnect to Google Fonts origins to eliminate DNS/TCP overhead */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -149,7 +155,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${inter.variable} ${playfair.variable} ${inter.className} bg-surface-dark text-ink antialiased selection:bg-mauve/30 selection:text-ink`} suppressHydrationWarning>
+      <body className={`${dmSans.variable} ${inter.variable} ${dmSans.className} bg-[#000000] text-[#fefefe] antialiased selection:bg-white/20 selection:text-white`} suppressHydrationWarning>
         <QueryProvider>
           <AuthProvider>
             <CurrencyProvider>

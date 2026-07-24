@@ -123,7 +123,7 @@ export function PublicNavbar() {
 
             {/* 3. Get Started Button */}
             <Link href="/signup" className="shrink-0">
-              <Button className="rounded-full bg-mauve px-5 py-2 text-[#faf6ed] text-xs font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+              <Button className="rounded-full bg-white px-5 py-2 text-black text-xs font-semibold hover:bg-neutral-200 shadow-lg shadow-white/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
                 Get Started
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Button>
