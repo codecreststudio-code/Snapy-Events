@@ -101,8 +101,8 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       viewport={{ once: true }}
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
       className={`relative rounded-3xl border bg-surface-card p-5 sm:p-8 flex flex-col justify-between transition-all duration-300 ${plan.popular
-          ? "border-mauve shadow-[0_20px_50px_rgba(184,146,90,0.15)] ring-1 ring-mauve md:scale-[1.03] z-10"
-          : "border-hairline-dark hover:border-mauve/40 hover:shadow-xl"
+        ? "border-mauve shadow-[0_20px_50px_rgba(184,146,90,0.15)] ring-1 ring-mauve md:scale-[1.03] z-10"
+        : "border-hairline-dark hover:border-mauve/40 hover:shadow-xl"
         }`}
     >
       {/* Background Spotlight Glow Wrapper */}
@@ -173,8 +173,8 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
         <Link href={`/signup?plan=${plan.name.toLowerCase()}`}>
           <Button
             className={`w-full font-bold py-3.5 sm:py-5 rounded-full transition-all active:scale-[0.99] ${plan.popular || plan.bestValue
-                ? "bg-mauve hover:bg-mauve-strong text-[#faf6ed] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
-                : "border border-hairline-dark text-ink hover:bg-mauve/5"
+              ? "bg-mauve hover:bg-mauve-strong text-[#faf6ed] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
+              : "border border-hairline-dark text-ink hover:bg-mauve/5"
               }`}
           >
             Get Started
@@ -514,7 +514,7 @@ function RealMomentsSection() {
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-mauve/10 via-transparent to-transparent" />
 
       <div className="mx-auto max-w-4xl space-y-8">
-        
+
         {/* Header Title with Lines */}
         <div className="space-y-4">
           <div className="flex items-center justify-center gap-3">
@@ -540,11 +540,10 @@ function RealMomentsSection() {
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`px-5 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${
-                    isActive
+                  className={`px-5 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${isActive
                       ? "bg-[#faf6ed] text-[#141210] font-bold shadow-md scale-105"
                       : "bg-surface-card border border-hairline-dark text-ink-secondary hover:text-ink hover:border-mauve/40"
-                  }`}
+                    }`}
                 >
                   {cat.label}
                 </button>
@@ -558,11 +557,10 @@ function RealMomentsSection() {
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`px-5 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${
-                    isActive
+                  className={`px-5 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${isActive
                       ? "bg-[#faf6ed] text-[#141210] font-bold shadow-md scale-105"
                       : "bg-surface-card border border-hairline-dark text-ink-secondary hover:text-ink hover:border-mauve/40"
-                  }`}
+                    }`}
                 >
                   {cat.label}
                 </button>
@@ -574,7 +572,7 @@ function RealMomentsSection() {
         {/* Dual Phone Showcase (Side by Side on All Devices) */}
         <div className="pt-6 pb-6 flex justify-center items-center">
           <div className="flex flex-row items-end justify-center gap-2.5 xs:gap-3.5 sm:gap-6 md:gap-10 relative max-w-full">
-            
+
             {/* Left Phone (Camera / Taking Photo view) */}
             <div className="space-y-3 text-center shrink-0">
               <motion.div
@@ -602,7 +600,7 @@ function RealMomentsSection() {
                     <h4 className="text-xs sm:text-lg font-playfair font-light text-white leading-tight">{current.title}</h4>
                     <p className="text-[9px] sm:text-[11px] text-white/70 font-light">{current.date}</p>
                   </div>
-                  
+
                   <button className="w-full bg-[#faf6ed] hover:bg-white text-black font-semibold text-[9px] sm:text-xs py-1.5 sm:py-2.5 rounded-full shadow-md flex items-center justify-center gap-1 sm:gap-2 transition-transform active:scale-95">
                     <span>Take your camera</span>
                     <ArrowRight className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
@@ -906,28 +904,27 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[10px] sm:text-xs font-semibold text-neutral-300 bg-white/5 border border-white/10 backdrop-blur"
+              className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[10px] sm:text-xs font-semibold text-white bg-white/5 border border-white/10 backdrop-blur"
             >
               <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#c5a059]" />
-              <span>DISPOSABLE CAMERA APP FOR EVENTS</span>
+              <span>THE #1 EVENT PHOTO SHARING PLATFORM</span>
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="relative overflow-hidden text-4xl min-[380px]:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light tracking-tight text-white leading-[1.1] sm:leading-[1.05] font-playfair"
+              className="relative overflow-hidden text-3xl min-[380px]:text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-light tracking-tight text-white leading-[1.1] sm:leading-[1.05] font-playfair"
             >
-              Every Guest. <br />
-              Every Angle. <br />
-              <span className="italic font-normal text-[#c5a059]">One Gallery.</span>
+              Capture Every Moment. <br className="hidden min-[380px]:inline" />
+              <span className="italic font-normal text-[#c5a059]">Reveal Together.</span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-xs sm:text-base md:text-lg text-ink-secondary max-w-md sm:max-w-xl mx-auto leading-relaxed font-light"
+              className="text-xs sm:text-base md:text-lg text-neutral-400 max-w-md sm:max-w-xl mx-auto leading-relaxed font-light"
             >
               Collect, organize and share event photos with QR codes, real-time uploads and AI magic. Your memories, beautifully organized.
             </motion.p>
@@ -938,17 +935,17 @@ export default function HomePage() {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="flex flex-col min-[420px]:flex-row justify-center items-center gap-2.5 sm:gap-4 pt-2 sm:pt-4"
             >
-              <Button asChild size="lg" className="w-full min-[420px]:w-auto rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-8 py-3 text-xs sm:text-sm hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10">
+              <Button asChild size="lg" className="w-full min-[420px]:w-auto rounded-full bg-white hover:bg-neutral-200 text-black font-semibold px-8 py-3 text-xs sm:text-sm transition-all shadow-lg shadow-white/10">
                 <Link href="/signup">Get Started Free</Link>
               </Button>
               <Button
                 onClick={handleScrollToHowItWorks}
                 variant="ghost"
                 size="lg"
-                className="w-full min-[420px]:w-auto rounded-full font-medium hover:bg-mauve/5 text-ink border border-hairline-dark px-8 py-3 text-xs sm:text-sm"
+                className="w-full min-[420px]:w-auto rounded-full font-medium hover:bg-white/10 text-white border border-white/10 px-8 py-3 text-xs sm:text-sm"
               >
                 See How It Works
-                <Play className="ml-2 h-3.5 w-3.5 text-ink" />
+                <Play className="ml-2 h-3.5 w-3.5 text-white" />
               </Button>
             </motion.div>
 
@@ -1307,8 +1304,8 @@ export default function HomePage() {
                       key={step.id}
                       onClick={() => setActiveRoadmap(step.id)}
                       className={`w-full text-left flex items-center gap-3.5 sm:gap-4 p-4 sm:p-5 rounded-2xl border transition-all duration-300 ${isActive
-                          ? "bg-mauve/10 border-mauve/30 shadow-sm"
-                          : "bg-surface-card border-hairline-dark hover:bg-mauve/5"
+                        ? "bg-mauve/10 border-mauve/30 shadow-sm"
+                        : "bg-surface-card border-hairline-dark hover:bg-mauve/5"
                         }`}
                     >
                       <div className={`flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl font-bold text-sm sm:text-base transition-colors ${isActive ? "bg-mauve text-[#faf6ed] shadow-md" : "bg-ink/10 text-ink-secondary"
