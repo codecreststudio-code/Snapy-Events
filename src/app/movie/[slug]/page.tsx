@@ -94,7 +94,7 @@ export default function SharePage({ params }: { params: Promise<{ slug: string }
                     url: pageUrl,
                   })
                 }
-                className="w-full flex items-center justify-center gap-2 rounded-full bg-mauve text-[#faf6ed] font-semibold py-3 text-sm hover:bg-mauve-strong transition-colors"
+                className="w-full flex items-center justify-center gap-2 rounded-full bg-mauve text-[#1a1410] font-semibold py-3 text-sm hover:bg-mauve-strong transition-colors"
               >
                 <Share2 className="h-4 w-4" /> Share
               </button>

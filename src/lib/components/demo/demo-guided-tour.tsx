@@ -290,7 +290,7 @@ export function DemoGuidedTour({
                 type="button"
                 size="sm"
                 onClick={handleNext}
-                className="rounded-full bg-mauve px-5 text-xs font-bold text-[#faf6ed] hover:bg-mauve-strong shadow-md shadow-mauve/20 gap-1"
+                className="rounded-full bg-mauve px-5 text-xs font-bold text-[#1a1410] hover:bg-mauve-strong shadow-md shadow-mauve/20 gap-1"
               >
                 {currentStepIndex === TOUR_STEPS.length - 1 ? (
                   <>

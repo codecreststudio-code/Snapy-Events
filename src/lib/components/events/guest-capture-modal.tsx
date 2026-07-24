@@ -134,9 +134,9 @@ export function GuestCaptureModal({
                 initial={prefersReducedMotion ? false : { scale: 0.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.05 }}
-                className="flex h-16 w-16 items-center justify-center rounded-full bg-[#b8925a]/15 border border-[#b8925a]/30"
+                className="flex h-16 w-16 items-center justify-center rounded-full bg-mauve/15 border border-mauve/30"
               >
-                <Check className="h-8 w-8 text-[#b8925a]" />
+                <Check className="h-8 w-8 text-mauve" />
               </motion.div>
               <div>
                 <p className="font-playfair text-lg font-medium text-ink">You&apos;re checked in</p>

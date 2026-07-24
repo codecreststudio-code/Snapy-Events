@@ -64,7 +64,7 @@ export default async function TagPage({ params }: Props) {
       <main className="flex-1">
         <section className="border-b border-hairline-dark bg-surface-card py-14 md:py-20">
           <div className="container mx-auto max-w-3xl px-6 text-center">
-            <div className="inline-block rounded-full bg-mauve px-4 py-1 text-xs font-bold text-[#faf6ed] mb-4">TAG</div>
+            <div className="inline-block rounded-full bg-mauve px-4 py-1 text-xs font-bold text-[#1a1410] mb-4">TAG</div>
             <h1 className={`text-3xl md:text-4xl font-light tracking-tight text-ink mb-3 ${playfair.className}`}>
               #{t.name}
             </h1>

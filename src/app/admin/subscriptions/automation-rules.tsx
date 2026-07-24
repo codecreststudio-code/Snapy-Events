@@ -127,7 +127,7 @@ export function AutomationRules() {
       <div className="lg:col-span-2 space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-bold text-ink">Automation Engine</h2>
-          <Button onClick={startAdd} className="h-8 bg-mauve hover:bg-mauve-strong text-[#faf6ed] text-xs font-bold gap-1">
+          <Button onClick={startAdd} className="h-8 bg-mauve hover:bg-mauve-strong text-[#1a1410] text-xs font-bold gap-1">
             <Plus className="h-3.5 w-3.5" /> New Rule
           </Button>
         </div>

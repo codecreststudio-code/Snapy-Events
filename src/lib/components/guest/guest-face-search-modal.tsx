@@ -48,7 +48,7 @@ export function GuestFaceSearchModal({ isOpen, onClose, galleryId, eventId }: Gu
         {/* Modal Header */}
         <div className="px-6 py-5 border-b border-hairline-dark flex items-center justify-between bg-surface-card-elevated">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#b8925a] to-[#96723a] flex items-center justify-center text-white shadow-lg shadow-[#b8925a]/20">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-mauve to-mauve-strong flex items-center justify-center text-white shadow-lg shadow-mauve/20">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
@@ -92,7 +92,7 @@ export function GuestFaceSearchModal({ isOpen, onClose, galleryId, eventId }: Gu
               <div className="flex gap-3 pt-2">
                 <Button
                   onClick={() => fileInputRef.current?.click()}
-                  className="bg-gradient-to-r from-[#b8925a] to-[#96723a] text-white hover:brightness-95 rounded-xl px-5 py-2.5 font-medium flex items-center gap-2 shadow-lg shadow-[#b8925a]/20"
+                  className="bg-gradient-to-r from-mauve to-mauve-strong text-white hover:brightness-95 rounded-xl px-5 py-2.5 font-medium flex items-center gap-2 shadow-lg shadow-mauve/20"
                 >
                   <Camera className="w-4 h-4" />
                   Upload Selfie

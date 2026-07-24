@@ -246,7 +246,7 @@ export function SettingsClient({
           <Button
             type="submit"
             disabled={saving}
-            className="bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold px-8 py-5 rounded-xl flex items-center gap-1.5 shadow-md transition-shadow"
+            className="bg-mauve hover:bg-mauve-strong text-[#1a1410] font-bold px-8 py-5 rounded-xl flex items-center gap-1.5 shadow-md transition-shadow"
           >
             <Save className="h-4 w-4" />
             <span>{saving ? "Saving Changes..." : "Save Configuration"}</span>

@@ -275,7 +275,7 @@ export function PlanBuilder() {
             <h2 className="text-lg font-bold text-ink">Plan Builder</h2>
             <p className="text-xs text-ink-secondary">Configured event plans & subscription tiers</p>
           </div>
-          <Button onClick={startAdd} className="h-8 bg-mauve hover:bg-mauve-strong text-[#faf6ed] text-xs font-bold gap-1">
+          <Button onClick={startAdd} className="h-8 bg-mauve hover:bg-mauve-strong text-[#1a1410] text-xs font-bold gap-1">
             <Plus className="h-3.5 w-3.5" /> New Plan
           </Button>
         </div>
@@ -541,7 +541,7 @@ export function PlanBuilder() {
                   />
                 </div>
 
-                <Button type="submit" disabled={actioning} className="w-full h-9 bg-mauve hover:bg-mauve-strong font-bold text-xs text-[#faf6ed] shadow-sm">
+                <Button type="submit" disabled={actioning} className="w-full h-9 bg-mauve hover:bg-mauve-strong font-bold text-xs text-[#1a1410] shadow-sm">
                   {actioning ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
                   Save Plan Changes
                 </Button>

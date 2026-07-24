@@ -182,7 +182,7 @@ export default function DashboardPage() {
           <Link href="/dashboard/events/new">
             <button
               type="button"
-              className="flex items-center gap-1.5 rounded-full bg-mauve px-4 py-2 text-xs font-bold text-[#faf6ed] shadow-lg shadow-mauve/20 transition-all hover:bg-mauve-strong hover:scale-[1.02] active:scale-[0.98]"
+              className="flex items-center gap-1.5 rounded-full bg-mauve px-4 py-2 text-xs font-bold text-[#1a1410] shadow-lg shadow-mauve/20 transition-all hover:bg-mauve-strong hover:scale-[1.02] active:scale-[0.98]"
             >
               <Plus className="h-3.5 w-3.5" />
               New
@@ -210,7 +210,7 @@ export default function DashboardPage() {
                   <Link href="/dashboard/events/new">
                     <button
                       type="button"
-                      className="flex items-center gap-2 rounded-full bg-mauve px-6 py-3 text-sm font-bold text-[#faf6ed] shadow-lg shadow-mauve/20 transition-all hover:bg-mauve-strong hover:scale-[1.02] active:scale-[0.98]"
+                      className="flex items-center gap-2 rounded-full bg-mauve px-6 py-3 text-sm font-bold text-[#1a1410] shadow-lg shadow-mauve/20 transition-all hover:bg-mauve-strong hover:scale-[1.02] active:scale-[0.98]"
                     >
                       <Plus className="h-4 w-4" />
                       Create Event

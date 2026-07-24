@@ -165,7 +165,7 @@ export default function AdminNotificationsPage() {
             <Button
               type="submit"
               disabled={broadcasting}
-              className="w-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold h-10 shadow-sm flex items-center justify-center gap-1.5"
+              className="w-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-bold h-10 shadow-sm flex items-center justify-center gap-1.5"
             >
               <Send className="h-4 w-4" />
               <span>{broadcasting ? "Sending..." : "Publish Broadcast"}</span>

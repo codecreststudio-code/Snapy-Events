@@ -101,7 +101,7 @@ export function SlideshowPlayer({
       ))}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5">
         {photos.map((p, i) => (
-          <div key={p.id} className={`h-1 rounded-full transition-all ${i === index ? "w-6 bg-[#b8925a]" : "w-1.5 bg-white/30"}`} />
+          <div key={p.id} className={`h-1 rounded-full transition-all ${i === index ? "w-6 bg-mauve" : "w-1.5 bg-white/30"}`} />
         ))}
       </div>
     </div>

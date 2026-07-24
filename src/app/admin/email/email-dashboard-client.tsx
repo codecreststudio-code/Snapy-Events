@@ -292,7 +292,7 @@ export default function EmailDashboardClient({ initialTemplates, initialLogs, in
                   <button
                     onClick={sendTestEmail}
                     disabled={busy}
-                    className="flex items-center gap-1.5 bg-mauve text-[#faf6ed] px-4 py-2 rounded-lg text-sm font-bold hover:bg-mauve-strong disabled:opacity-50"
+                    className="flex items-center gap-1.5 bg-mauve text-[#1a1410] px-4 py-2 rounded-lg text-sm font-bold hover:bg-mauve-strong disabled:opacity-50"
                   >
                     {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                     Send Test
@@ -373,7 +373,7 @@ export default function EmailDashboardClient({ initialTemplates, initialLogs, in
                   </div>
                   <div className="flex justify-end gap-2 p-5 border-t border-hairline-dark">
                     <button onClick={() => setEditingTemplate(null)} className="px-4 py-2 rounded-lg text-sm text-ink-secondary hover:bg-mauve/5 font-semibold">Cancel</button>
-                    <button onClick={saveTemplate} disabled={busy} className="flex items-center gap-1.5 bg-mauve text-[#faf6ed] px-5 py-2 rounded-lg text-sm font-bold hover:bg-mauve-strong disabled:opacity-50">
+                    <button onClick={saveTemplate} disabled={busy} className="flex items-center gap-1.5 bg-mauve text-[#1a1410] px-5 py-2 rounded-lg text-sm font-bold hover:bg-mauve-strong disabled:opacity-50">
                       {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                       Save Template
                     </button>
@@ -388,7 +388,7 @@ export default function EmailDashboardClient({ initialTemplates, initialLogs, in
                 <h2 className="font-bold text-ink">Email Templates</h2>
                 <button
                   onClick={openNew}
-                  className="flex items-center gap-1.5 bg-mauve text-[#faf6ed] px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-mauve-strong"
+                  className="flex items-center gap-1.5 bg-mauve text-[#1a1410] px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-mauve-strong"
                 >
                   <Plus className="h-4 w-4" />
                   New Template
@@ -586,7 +586,7 @@ export default function EmailDashboardClient({ initialTemplates, initialLogs, in
               <button
                 onClick={saveSettings}
                 disabled={busy}
-                className="flex items-center gap-2 bg-mauve text-[#faf6ed] px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-mauve-strong disabled:opacity-50 shadow-md"
+                className="flex items-center gap-2 bg-mauve text-[#1a1410] px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-mauve-strong disabled:opacity-50 shadow-md"
               >
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Save Settings

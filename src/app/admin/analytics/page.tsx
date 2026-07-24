@@ -88,7 +88,7 @@ export default function AdminAnalyticsPage() {
                 onClick={() => setDays(p.value)}
                 className={cn(
                   "px-3 py-1.5 rounded-md text-xs font-bold transition-all",
-                  days === p.value ? "bg-mauve text-[#faf6ed] shadow-sm" : "text-ink-secondary hover:text-ink"
+                  days === p.value ? "bg-mauve text-[#1a1410] shadow-sm" : "text-ink-secondary hover:text-ink"
                 )}
               >
                 {p.label}

@@ -10,7 +10,13 @@ const Switch = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SwitchPrimitives.Root
     className={cn(
-      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border border-zinc-300 dark:border-zinc-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600 dark:data-[state=checked]:bg-violet-500 dark:data-[state=checked]:border-violet-500 data-[state=unchecked]:bg-zinc-200 dark:data-[state=unchecked]:bg-zinc-800",
+      // Checked state was violet-600/500 — a color with no relationship to
+      // the rest of the palette (not gold, not ink, not a status color).
+      // Every other "on/selected/active" affordance in the app (buttons,
+      // focus rings, active nav) now resolves through the gold `mauve`
+      // token, so this toggle used to be the one clearly mismatched control
+      // exactly the kind of inconsistency this pass is closing.
+      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border border-hairline-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-mauve data-[state=checked]:border-mauve data-[state=unchecked]:bg-ink/15",
       className
     )}
     {...props}

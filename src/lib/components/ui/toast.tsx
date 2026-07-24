@@ -34,10 +34,16 @@ const Toast = React.forwardRef<
       className={cn(
         "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
         {
-          "border-border bg-background text-foreground": variant === "default",
+          // success/info previously used light-mode green-50/blue-50
+          // backgrounds with dark text — correct for a white UI, but this
+          // app is permanently dark, so those rendered as jarring bright
+          // cards with no relationship to the rest of the surface system.
+          // Now dark surface-card with a colored left accent + status text,
+          // matching how badges/alerts render status elsewhere.
+          "border-hairline-dark bg-surface-card-elevated text-ink": variant === "default",
           "border-destructive bg-destructive text-destructive-foreground": variant === "destructive",
-          "border-green-500 bg-green-50 text-green-900": variant === "success",
-          "border-blue-500 bg-blue-50 text-blue-900": variant === "info",
+          "border-l-4 border-l-success border-hairline-dark bg-surface-card-elevated text-ink": variant === "success",
+          "border-l-4 border-l-info border-hairline-dark bg-surface-card-elevated text-ink": variant === "info",
         },
         className
       )}

@@ -353,7 +353,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
   }
 
   const saveBtnClass = {
-    idle: status === "published" ? "bg-mauve text-[#faf6ed] hover:bg-mauve-strong" : "bg-surface-dark text-ink hover:bg-surface-card-elevated",
+    idle: status === "published" ? "bg-mauve text-[#1a1410] hover:bg-mauve-strong" : "bg-surface-dark text-ink hover:bg-surface-card-elevated",
     saving: "bg-ink/10 text-ink-tertiary cursor-not-allowed",
     saved: "bg-green-600 text-white",
     error: "bg-red-600 text-white",
@@ -870,7 +870,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                   <button
                     type="submit"
                     disabled={newCatLoading}
-                    className="flex-1 rounded-xl bg-mauve px-4 py-2.5 text-sm font-semibold text-[#faf6ed] hover:bg-mauve-strong transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    className="flex-1 rounded-xl bg-mauve px-4 py-2.5 text-sm font-semibold text-[#1a1410] hover:bg-mauve-strong transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
                   >
                     {newCatLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                     Create
@@ -951,7 +951,7 @@ export default function AdminBlogEditorPage({ postId }: { postId?: string }) {
                   <button
                     type="submit"
                     disabled={newAuthLoading}
-                    className="flex-1 rounded-xl bg-mauve px-4 py-2.5 text-sm font-semibold text-[#faf6ed] hover:bg-mauve-strong transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    className="flex-1 rounded-xl bg-mauve px-4 py-2.5 text-sm font-semibold text-[#1a1410] hover:bg-mauve-strong transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
                   >
                     {newAuthLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                     Create

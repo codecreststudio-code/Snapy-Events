@@ -193,11 +193,11 @@ export function JoinEventModal({ isOpen, onClose }: JoinEventModalProps) {
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
-              <span className="text-xs font-bold uppercase tracking-widest text-[#b8925a]">Scan or Join</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-mauve">Scan or Join</span>
             </div>
 
             {/* QR Scanner Camera Viewfinder Frame */}
-            <div className="relative aspect-square w-full bg-[#171513] rounded-3xl border-2 border-dashed border-[#b8925a]/40 overflow-hidden shadow-inner flex items-center justify-center">
+            <div className="relative aspect-square w-full bg-[#171513] rounded-3xl border-2 border-dashed border-mauve/40 overflow-hidden shadow-inner flex items-center justify-center">
               {/* Hidden canvas for scanning frame analysis */}
               <canvas ref={canvasRef} className="hidden" />
 
@@ -214,8 +214,8 @@ export function JoinEventModal({ isOpen, onClose }: JoinEventModalProps) {
               {/* Viewfinder Overlay & Scanner Beam */}
               {cameraActive && !scanSuccess && (
                 <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
-                  <div className="w-56 h-56 border-2 border-[#b8925a] rounded-2xl relative shadow-[0_0_20px_rgba(184,146,90,0.3)]">
-                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#b8925a] to-transparent animate-bounce opacity-80" />
+                  <div className="w-56 h-56 border-2 border-mauve rounded-2xl relative shadow-[0_0_20px_rgba(184,146,90,0.3)]">
+                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-mauve to-transparent animate-bounce opacity-80" />
                   </div>
                 </div>
               )}
@@ -223,7 +223,7 @@ export function JoinEventModal({ isOpen, onClose }: JoinEventModalProps) {
               {/* Camera Offline / Permission Required Fallback */}
               {!cameraActive && !scanSuccess && (
                 <div className="p-6 text-center space-y-3 z-10">
-                  <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-[#b8925a]/60 bg-[#b8925a]/10 flex items-center justify-center text-[#b8925a] mx-auto">
+                  <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-mauve/60 bg-mauve/10 flex items-center justify-center text-mauve mx-auto">
                     <Camera className="h-8 w-8" />
                   </div>
                   <div className="space-y-1">
@@ -237,7 +237,7 @@ export function JoinEventModal({ isOpen, onClose }: JoinEventModalProps) {
                   <Button
                     type="button"
                     onClick={startCamera}
-                    className="mt-2 text-xs bg-[#b8925a]/20 hover:bg-[#b8925a]/30 text-[#b8925a] border border-[#b8925a]/40 rounded-full px-4 py-1.5"
+                    className="mt-2 text-xs bg-mauve/20 hover:bg-mauve/30 text-mauve border border-mauve/40 rounded-full px-4 py-1.5"
                   >
                     Enable Camera Scanner
                   </Button>
@@ -267,7 +267,7 @@ export function JoinEventModal({ isOpen, onClose }: JoinEventModalProps) {
                     value={joinCode}
                     onChange={(e) => setJoinCode(e.target.value)}
                     placeholder="Paste link or enter code (e.g. MQV8KF)"
-                    className="w-full rounded-2xl border border-[#2a2724] bg-[#171513] px-4 py-3.5 text-sm text-white placeholder:text-zinc-500 focus:border-[#b8925a] focus:outline-none transition-colors"
+                    className="w-full rounded-2xl border border-[#2a2724] bg-[#171513] px-4 py-3.5 text-sm text-white placeholder:text-zinc-500 focus:border-mauve focus:outline-none transition-colors"
                   />
                 </div>
                 {joinError && (

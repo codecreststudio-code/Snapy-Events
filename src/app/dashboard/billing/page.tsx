@@ -309,7 +309,7 @@ function PricingCard({
           type="button"
           className={`w-full font-bold py-2.5 rounded-xl transition-all active:scale-[0.98] text-xs border-none ${
             isSelected
-              ? "bg-mauve text-[#faf6ed] shadow-md shadow-mauve/10"
+              ? "bg-mauve text-[#1a1410] shadow-md shadow-mauve/10"
               : "bg-mauve/5 text-ink-secondary hover:bg-mauve/10"
           }`}
         >
@@ -489,9 +489,9 @@ export default function BillingPage() {
     if (selectedPlan === "free") {
       return base + "bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/10"
     } else if (selectedPlan === "premium") {
-      return base + "bg-mauve-strong hover:bg-mauve text-[#faf6ed] shadow-md shadow-mauve-strong/20"
+      return base + "bg-mauve-strong hover:bg-mauve text-[#1a1410] shadow-md shadow-mauve-strong/20"
     }
-    return base + "bg-mauve hover:bg-mauve-strong text-[#faf6ed] shadow-md shadow-mauve/20"
+    return base + "bg-mauve hover:bg-mauve-strong text-[#1a1410] shadow-md shadow-mauve/20"
   }
 
   const getActionButtonText = () => {

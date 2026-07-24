@@ -175,7 +175,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
           <Button
             className={`w-full font-bold py-5 rounded-full transition-all active:scale-[0.99] ${
               plan.popular || plan.bestValue
-                ? "bg-mauve hover:bg-mauve-strong text-[#faf6ed] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
+                ? "bg-mauve hover:bg-mauve-strong text-[#1a1410] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
                 : "border border-hairline-dark text-ink hover:bg-mauve/5"
             }`}
           >

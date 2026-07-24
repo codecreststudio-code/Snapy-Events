@@ -8,16 +8,20 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-white text-black font-semibold hover:bg-neutral-200 shadow-lg shadow-white/10",
-        mauve: "bg-white text-black font-semibold hover:bg-neutral-200 shadow-lg shadow-white/10",
-        glass: "bg-white/5 border border-white/10 text-white backdrop-blur-md hover:bg-white/10 hover:border-white/20 hover:shadow-lg",
-        gradient: "bg-white text-black font-semibold hover:bg-neutral-200 shadow-lg shadow-white/10",
-        glow: "bg-white text-black font-semibold shadow-[0_0_20px_rgba(255,255,255,0.25)] hover:bg-neutral-200",
+        // Primary CTA — solid gold, dark ink text. Black-on-gold gives ~8.5:1
+        // contrast (vs ~2.4:1 for white-on-gold, which fails WCAG AA even at
+        // large text sizes) and reads as the classic luxury/jewelry
+        // black-on-gold pairing rather than a flat corporate button.
+        default: "bg-mauve text-[#1a1410] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/20 hover:shadow-mauve/30",
+        mauve: "bg-mauve text-[#1a1410] font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/20 hover:shadow-mauve/30",
+        glass: "bg-white/5 border border-white/10 text-white backdrop-blur-md hover:bg-white/10 hover:border-mauve/30 hover:shadow-lg",
+        gradient: "bg-gradient-to-br from-mauve-strong via-mauve to-mauve text-[#1a1410] font-semibold shadow-lg shadow-mauve/20 hover:shadow-mauve/35 hover:brightness-110",
+        glow: "bg-mauve text-[#1a1410] font-semibold shadow-[0_0_28px_-4px_rgba(197,160,89,0.55)] hover:bg-mauve-strong hover:shadow-[0_0_34px_-4px_rgba(197,160,89,0.7)]",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-md shadow-destructive/20",
-        outline: "border border-hairline-dark bg-surface-card/60 text-ink hover:bg-surface-card hover:text-ink hover:border-mauve/40",
+        outline: "border border-hairline-dark bg-surface-card/60 text-ink hover:bg-surface-card hover:text-ink hover:border-mauve/50",
         secondary: "bg-ink/5 text-ink hover:bg-ink/10 border border-hairline-dark",
-        ghost: "text-ink-secondary hover:bg-mauve/5 hover:text-ink",
-        link: "text-mauve underline-offset-4 hover:underline",
+        ghost: "text-ink-secondary hover:bg-mauve/10 hover:text-mauve-strong",
+        link: "text-mauve underline-offset-4 hover:underline hover:text-mauve-strong",
       },
       size: {
         default: "h-11 px-5 py-2.5 min-h-[44px]",

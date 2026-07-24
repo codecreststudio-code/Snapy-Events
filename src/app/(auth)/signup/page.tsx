@@ -212,8 +212,8 @@ function SignupPricingCard({
               ? plan.id === "free"
                 ? "bg-ink/10 text-ink shadow-md"
                 : plan.id === "starter" || plan.id === "standard"
-                ? "bg-mauve text-[#faf6ed] shadow-md shadow-mauve/10"
-                : "bg-mauve-strong text-[#faf6ed] shadow-lg shadow-mauve-strong/20"
+                ? "bg-mauve text-[#1a1410] shadow-md shadow-mauve/10"
+                : "bg-mauve-strong text-[#1a1410] shadow-lg shadow-mauve-strong/20"
               : "bg-mauve/5 text-ink-secondary hover:bg-mauve/10"
           }`}
         >
@@ -385,7 +385,7 @@ export default function SignupPage() {
   }
 
   const getContinueButtonClass = () => {
-    const base = "w-full sm:w-auto font-bold px-8 py-6 rounded-2xl flex items-center justify-center gap-2 text-base transition-all active:scale-[0.98] border-none text-[#faf6ed] "
+    const base = "w-full sm:w-auto font-bold px-8 py-6 rounded-2xl flex items-center justify-center gap-2 text-base transition-all active:scale-[0.98] border-none text-[#1a1410] "
     if (selectedPlan === "premium") {
       return base + "bg-mauve-strong hover:scale-[1.01] shadow-lg shadow-mauve-strong/20"
     }

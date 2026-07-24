@@ -173,7 +173,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
         <Link href={`/signup?plan=${plan.name.toLowerCase()}`}>
           <Button
             className={`w-full font-bold py-3.5 sm:py-5 rounded-full transition-all active:scale-[0.99] ${plan.popular || plan.bestValue
-              ? "bg-mauve hover:bg-mauve-strong text-[#faf6ed] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
+              ? "bg-mauve hover:bg-mauve-strong text-[#1a1410] shadow-lg shadow-mauve/10 border-none hover:scale-[1.01]"
               : "border border-hairline-dark text-ink hover:bg-mauve/5"
               }`}
           >
@@ -244,7 +244,7 @@ function JoinEventCodeBox() {
           type="submit"
           disabled={loading || !code.trim()}
           size="sm"
-          className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-5 disabled:opacity-50"
+          className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold px-5 disabled:opacity-50"
         >
           {loading ? "Joining..." : "Join Event"}
         </Button>
@@ -278,7 +278,7 @@ function BentoCard({
     >
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-mauve/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-      <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-mauve/10 text-mauve group-hover:bg-mauve group-hover:text-[#faf6ed] transition-colors duration-300 mb-4 sm:mb-6 shrink-0">
+      <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-mauve/10 text-mauve group-hover:bg-mauve group-hover:text-[#1a1410] transition-colors duration-300 mb-4 sm:mb-6 shrink-0">
         <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
       </div>
 
@@ -662,7 +662,7 @@ function RealMomentsSection() {
                     <Camera className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
                   </div>
                   <span className="text-[8px] sm:text-[10px] font-semibold text-ink">Upload</span>
-                  <div className="h-5 w-5 sm:h-7 sm:w-7 rounded-full bg-mauve text-[#faf6ed] flex items-center justify-center">
+                  <div className="h-5 w-5 sm:h-7 sm:w-7 rounded-full bg-mauve text-[#1a1410] flex items-center justify-center">
                     <QrCode className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
                   </div>
                 </div>
@@ -1220,7 +1220,7 @@ export default function HomePage() {
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80" className="h-12 w-12 rounded-full object-cover border-2 border-mauve shadow-md" />
-                      <div className="absolute -bottom-1 -right-1 bg-mauve text-[#faf6ed] rounded-full p-0.5 shadow">
+                      <div className="absolute -bottom-1 -right-1 bg-mauve text-[#1a1410] rounded-full p-0.5 shadow">
                         <Sparkles className="h-2.5 w-2.5" />
                       </div>
                     </div>
@@ -1308,7 +1308,7 @@ export default function HomePage() {
                         : "bg-surface-card border-hairline-dark hover:bg-mauve/5"
                         }`}
                     >
-                      <div className={`flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl font-bold text-sm sm:text-base transition-colors ${isActive ? "bg-mauve text-[#faf6ed] shadow-md" : "bg-ink/10 text-ink-secondary"
+                      <div className={`flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl font-bold text-sm sm:text-base transition-colors ${isActive ? "bg-mauve text-[#1a1410] shadow-md" : "bg-ink/10 text-ink-secondary"
                         }`}>
                         {step.num}
                       </div>
@@ -1561,7 +1561,7 @@ export default function HomePage() {
                   className="pt-4 sm:pt-6"
                 >
                   <Link href="/signup">
-                    <Button size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-8 sm:px-10 py-3.5 sm:py-4 text-xs sm:text-sm hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10 border-none">
+                    <Button size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold px-8 sm:px-10 py-3.5 sm:py-4 text-xs sm:text-sm hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10 border-none">
                       Start Free Today
                       <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
                     </Button>

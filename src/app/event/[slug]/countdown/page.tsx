@@ -80,7 +80,7 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
           <Button
             asChild
             size="sm"
-            className="rounded-full border border-ink/15 bg-transparent text-ink hover:bg-mauve/10 hover:text-[#b8925a]"
+            className="rounded-full border border-ink/15 bg-transparent text-ink hover:bg-mauve/10 hover:text-mauve"
           >
             <Link href={`/event/${event.slug}/upload`}>
               <Camera className="h-4 w-4" />
@@ -98,12 +98,12 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
               pattern as event/[slug]/page.tsx's hero section. */}
           <div className="animate-slide-up flex justify-center">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-ink/5">
-              <Clock className="h-10 w-10 text-[#b8925a]" />
+              <Clock className="h-10 w-10 text-mauve" />
             </div>
           </div>
 
           <div className="animate-slide-up animate-delay-1 space-y-2">
-            <p className="text-sm uppercase tracking-widest text-[#b8925a]">
+            <p className="text-sm uppercase tracking-widest text-mauve">
               {event.user?.name ?? "Event"}
             </p>
             <h1 className="font-playfair text-3xl font-medium tracking-tight text-ink md:text-4xl">
@@ -149,9 +149,9 @@ export default async function CountdownPage({ params }: PageProps<"/event/[slug]
                 type="email"
                 placeholder="Enter your email"
                 aria-label="Email address"
-                className="flex h-10 w-full rounded-full border border-[#e5dfd0] bg-[#ffffff] px-4 py-2 text-sm text-ink ring-offset-background placeholder:text-ink-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:ring-offset-2"
+                className="flex h-10 w-full rounded-full border border-[#e5dfd0] bg-[#ffffff] px-4 py-2 text-sm text-ink ring-offset-background placeholder:text-ink-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mauve focus-visible:ring-offset-2"
               />
-              <Button className="rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a]">
+              <Button className="rounded-full bg-mauve text-[#1a1410] hover:bg-mauve-strong">
                 <Mail className="h-4 w-4" />
                 Notify Me
               </Button>

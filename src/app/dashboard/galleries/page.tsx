@@ -291,7 +291,7 @@ export default function GalleriesPage() {
             <h1 className="font-playfair text-3xl font-light text-ink">Galleries</h1>
             <p className="text-ink-secondary text-sm">Manage your photo directories</p>
           </div>
-          <Button disabled className="rounded-full bg-mauve text-[#faf6ed] font-semibold">
+          <Button disabled className="rounded-full bg-mauve text-[#1a1410] font-semibold">
             <Plus className="mr-2 h-4 w-4" /> Create Gallery
           </Button>
         </div>
@@ -317,7 +317,7 @@ export default function GalleriesPage() {
           </p>
         </div>
         <Link href="/dashboard/events">
-          <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+          <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
             <Plus className="mr-2 h-4 w-4" />
             Create from Event
           </Button>
@@ -376,7 +376,7 @@ export default function GalleriesPage() {
             {!searchQuery && filterType === "all" && (
               <div className="mt-6">
                 <Link href="/dashboard/events">
-                  <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+                  <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
                     Go to Events
                   </Button>
                 </Link>

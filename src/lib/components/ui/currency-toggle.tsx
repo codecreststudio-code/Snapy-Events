@@ -20,7 +20,7 @@ export function CurrencyToggle({ className, size = "md" }: { className?: string;
         className={cn(
           "px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 flex items-center gap-1 cursor-pointer",
           currency === "INR"
-            ? "bg-mauve text-[#faf6ed] shadow-md shadow-mauve/20 scale-[1.02]"
+            ? "bg-mauve text-[#1a1410] shadow-md shadow-mauve/20 scale-[1.02]"
             : "text-ink-secondary hover:text-ink hover:bg-mauve/10"
         )}
       >
@@ -34,7 +34,7 @@ export function CurrencyToggle({ className, size = "md" }: { className?: string;
         className={cn(
           "px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 flex items-center gap-1 cursor-pointer",
           currency === "USD"
-            ? "bg-mauve text-[#faf6ed] shadow-md shadow-mauve/20 scale-[1.02]"
+            ? "bg-mauve text-[#1a1410] shadow-md shadow-mauve/20 scale-[1.02]"
             : "text-ink-secondary hover:text-ink hover:bg-mauve/10"
         )}
       >

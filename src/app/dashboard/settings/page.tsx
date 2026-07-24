@@ -267,7 +267,7 @@ export default function SettingsPage() {
       <div className="space-y-3">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-secondary">INFO</p>
         <div className="flex items-center gap-4 bg-surface-card border border-hairline-dark p-4 rounded-3xl shadow-sm">
-          <div className="w-14 h-14 rounded-full bg-[#faf6ed] border-2 border-[#e5dfd0] flex items-center justify-center text-[#b8925a] font-bold text-lg shrink-0 shadow-inner">
+          <div className="w-14 h-14 rounded-full bg-[#faf6ed] border-2 border-[#e5dfd0] flex items-center justify-center text-mauve font-bold text-lg shrink-0 shadow-inner">
             {initials}
           </div>
           <div className="flex-1 relative">
@@ -406,7 +406,7 @@ export default function SettingsPage() {
             <Button
               onClick={() => profileMutation.mutate()}
               disabled={profileMutation.isPending}
-              className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all"
+              className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all"
             >
               {profileMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
@@ -484,7 +484,7 @@ export default function SettingsPage() {
             <Button
               onClick={() => notificationMutation.mutate()}
               disabled={notificationMutation.isPending}
-              className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all"
+              className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all"
             >
               {notificationMutation.isPending ? "Saving..." : "Save Preferences"}
             </Button>
@@ -524,7 +524,7 @@ export default function SettingsPage() {
                   onClick={handleEnablePush}
                   disabled={!pushSupported || pushPermission === "denied" || isEnablingPush}
                   size="sm"
-                  className="rounded-full bg-mauve font-semibold text-[#faf6ed] hover:bg-mauve-strong"
+                  className="rounded-full bg-mauve font-semibold text-[#1a1410] hover:bg-mauve-strong"
                 >
                   {isEnablingPush ? "Requesting..." : pushPermission === "denied" ? "Blocked" : "Enable"}
                 </Button>

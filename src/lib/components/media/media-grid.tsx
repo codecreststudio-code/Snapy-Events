@@ -24,10 +24,10 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: GridPhoto; watermarkEnable
 
   if (isMessage(p)) {
     return (
-      <div className="aspect-square bg-gradient-to-br from-[#b8925a]/10 to-[#e5dfd0]/40 p-4 flex flex-col justify-between border border-[#b8925a]/20 rounded-lg">
+      <div className="aspect-square bg-gradient-to-br from-mauve/10 to-[#e5dfd0]/40 p-4 flex flex-col justify-between border border-mauve/20 rounded-lg">
         <div className="flex items-center gap-2 min-w-0">
-          <MessageCircle className="h-4 w-4 shrink-0 text-[#b8925a]" />
-          <span className="min-w-0 truncate text-xs font-semibold text-[#b8925a]">{p.uploader_name || "Guest Wish"}</span>
+          <MessageCircle className="h-4 w-4 shrink-0 text-mauve" />
+          <span className="min-w-0 truncate text-xs font-semibold text-mauve">{p.uploader_name || "Guest Wish"}</span>
         </div>
         <p className="font-playfair text-xs italic text-ink line-clamp-3 my-auto">"{p.metadata?.text || p.original_filename}"</p>
         <span className="text-[10px] text-ink-tertiary">Written Note</span>
@@ -56,8 +56,8 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: GridPhoto; watermarkEnable
 
   if (isAudio(p)) {
     return (
-      <div className="aspect-square bg-gradient-to-br from-[#b8925a]/20 to-[#e5dfd0]/60 flex flex-col items-center justify-center p-3 gap-2 relative">
-        <Volume2 className="h-10 w-10 text-[#b8925a]" />
+      <div className="aspect-square bg-gradient-to-br from-mauve/20 to-[#e5dfd0]/60 flex flex-col items-center justify-center p-3 gap-2 relative">
+        <Volume2 className="h-10 w-10 text-mauve" />
         <span className="text-xs text-ink font-medium line-clamp-1">{p.uploader_name || "Voice Note"}</span>
       </div>
     )
@@ -75,7 +75,7 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: GridPhoto; watermarkEnable
       />
       {watermarkEnabled && <WatermarkOverlay />}
       {p.is_best_shot && (
-        <div className="absolute top-2 left-2 bg-[#b8925a]/90 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
+        <div className="absolute top-2 left-2 bg-mauve/90 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
           <span>✨</span> Highlight
         </div>
       )}
@@ -95,7 +95,7 @@ function MediaThumbnail({ p, watermarkEnabled }: { p: GridPhoto; watermarkEnable
       )}
     </div>
   ) : (
-    <div className="aspect-square bg-gradient-to-br from-[#b8925a]/20 to-[#e5dfd0]/60" />
+    <div className="aspect-square bg-gradient-to-br from-mauve/20 to-[#e5dfd0]/60" />
   )
 }
 

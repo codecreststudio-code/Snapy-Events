@@ -215,7 +215,7 @@ export default function AdminPhotosPage() {
                     <Button
                       onClick={() => handleApprove(selectedPhoto.id)}
                       disabled={actioningId === selectedPhoto.id}
-                      className="w-full text-xs font-bold bg-mauve hover:bg-mauve-strong text-[#faf6ed] shadow-sm flex items-center justify-center gap-1"
+                      className="w-full text-xs font-bold bg-mauve hover:bg-mauve-strong text-[#1a1410] shadow-sm flex items-center justify-center gap-1"
                     >
                       <CheckCircle2 className="h-4 w-4" />
                       <span>Approve</span>

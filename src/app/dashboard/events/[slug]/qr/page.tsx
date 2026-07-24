@@ -278,7 +278,7 @@ function CreateQRDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+        <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
           <Plus className="h-4 w-4" />
           Generate QR Code
         </Button>
@@ -324,7 +324,7 @@ function CreateQRDialog({
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold">
+            <Button type="submit" disabled={loading} className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold">
               {loading ? "Creating..." : "Generate"}
             </Button>
           </DialogFooter>
@@ -392,7 +392,7 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
       <div className="flex flex-col items-center justify-center py-16">
         <QrCode className="h-12 w-12 text-ink-tertiary mb-4" />
         <h2 className="text-lg font-medium text-ink">Event not found</h2>
-        <Button asChild className="mt-4 rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold">
+        <Button asChild className="mt-4 rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold">
           <Link href="/dashboard/events">Back to Events</Link>
         </Button>
       </div>

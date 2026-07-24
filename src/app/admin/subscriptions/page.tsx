@@ -40,7 +40,7 @@ export default function AdminSubscriptionsPage() {
             className={cn(
               "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200",
               activeTab === tab.id
-                ? "bg-mauve text-[#faf6ed]"
+                ? "bg-mauve text-[#1a1410]"
                 : "text-ink-secondary hover:text-ink hover:bg-mauve/5"
             )}
           >

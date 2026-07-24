@@ -60,7 +60,7 @@ export function AdminRolesClient({ initialAdmins, currentUserId }: { initialAdmi
         <Button 
           onClick={handleAddAdmin} 
           disabled={loadingAction === "add"}
-          className="h-9 bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-sm gap-1.5 shrink-0"
+          className="h-9 bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold shadow-sm gap-1.5 shrink-0"
         >
           {loadingAction === "add" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           <span>Grant Admin Role</span>

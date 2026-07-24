@@ -169,7 +169,7 @@ export default function AboutPage() {
                 variants={fadeUp}
                 className="flex flex-wrap items-center gap-4 pt-4"
               >
-                <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-8 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10">
+                <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold px-8 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10">
                   <Link href="/signup">Create Your Event</Link>
                 </Button>
                 <Button
@@ -369,8 +369,8 @@ export default function AboutPage() {
                   />
                   {/* Play Button Overlay */}
                   <div className="absolute inset-0 flex items-center justify-center bg-surface-dark/30">
-                    <button className="h-16 w-16 rounded-full bg-mauve text-[#faf6ed] flex items-center justify-center shadow-2xl hover:scale-110 transition-transform active:scale-95">
-                      <Play className="h-6 w-6 fill-current text-[#faf6ed] translate-x-0.5" />
+                    <button className="h-16 w-16 rounded-full bg-mauve text-[#1a1410] flex items-center justify-center shadow-2xl hover:scale-110 transition-transform active:scale-95">
+                      <Play className="h-6 w-6 fill-current text-[#1a1410] translate-x-0.5" />
                     </button>
                   </div>
                 </div>
@@ -445,7 +445,7 @@ export default function AboutPage() {
                   className="bg-surface-card-elevated p-8 rounded-2xl border border-hairline-dark hover:border-mauve/40 transition-all duration-300 group flex flex-col justify-between"
                 >
                   <div className="space-y-6">
-                    <div className="h-12 w-12 rounded-xl bg-mauve/15 flex items-center justify-center text-mauve transition-colors group-hover:bg-mauve group-hover:text-[#faf6ed]">
+                    <div className="h-12 w-12 rounded-xl bg-mauve/15 flex items-center justify-center text-mauve transition-colors group-hover:bg-mauve group-hover:text-[#1a1410]">
                       <v.icon className="h-5 w-5" />
                     </div>
                     <h3 className="text-lg font-bold text-ink">{v.title}</h3>
@@ -569,7 +569,7 @@ export default function AboutPage() {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="flex flex-wrap justify-center items-center gap-4 pt-4"
             >
-              <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-8 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10">
+              <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold px-8 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-mauve/10">
                 <Link href="/signup">Create Your Event</Link>
               </Button>
               <Button

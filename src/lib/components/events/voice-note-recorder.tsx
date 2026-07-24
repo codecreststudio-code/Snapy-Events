@@ -166,12 +166,12 @@ export function VoiceNoteRecorder({ maxDuration = 30, onCapture, onClose }: Voic
               isRecording
                 ? "bg-red-500/20 border-2 border-red-500 animate-pulse scale-105"
                 : previewUrl
-                ? "bg-[#b8925a]/20 border-2 border-[#b8925a]"
+                ? "bg-mauve/20 border-2 border-mauve"
                 : "bg-ink/5 border border-ink/10"
             }`}
           >
             {previewUrl ? (
-              <Volume2 className="h-12 w-12 text-[#b8925a]" />
+              <Volume2 className="h-12 w-12 text-mauve" />
             ) : (
               <Mic className={`h-12 w-12 ${isRecording ? "text-red-500" : "text-ink-secondary"}`} />
             )}
@@ -208,7 +208,7 @@ export function VoiceNoteRecorder({ maxDuration = 30, onCapture, onClose }: Voic
             !isRecording ? (
               <button
                 onClick={startRecording}
-                className="w-16 h-16 rounded-full bg-[#b8925a] hover:bg-[#96723a] text-black flex items-center justify-center shadow-lg shadow-[#b8925a]/30 transition-transform active:scale-95 cursor-pointer"
+                className="w-16 h-16 rounded-full bg-mauve hover:bg-mauve-strong text-black flex items-center justify-center shadow-lg shadow-mauve/30 transition-transform active:scale-95 cursor-pointer"
               >
                 <Mic className="h-8 w-8" />
               </button>
@@ -234,7 +234,7 @@ export function VoiceNoteRecorder({ maxDuration = 30, onCapture, onClose }: Voic
                 {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
               </button>
 
-              <Button onClick={handleConfirm} className="bg-[#b8925a] hover:bg-[#96723a] text-black font-bold flex items-center gap-1.5 rounded-full px-5 py-2">
+              <Button onClick={handleConfirm} className="bg-mauve hover:bg-mauve-strong text-black font-bold flex items-center gap-1.5 rounded-full px-5 py-2">
                 <Check className="h-4 w-4" />
                 <span className="text-xs">Send</span>
               </Button>

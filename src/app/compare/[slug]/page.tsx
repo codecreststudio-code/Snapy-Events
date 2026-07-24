@@ -263,7 +263,7 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
               Create your event gallery today with zero app downloads and instant AI face matching.
             </p>
             <div className="pt-2">
-              <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-9 py-6 text-sm">
+              <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold px-9 py-6 text-sm">
                 <Link href="/signup">
                   Get Started Free
                   <ArrowRight className="ml-2 h-4 w-4" />

@@ -190,7 +190,7 @@ export function PublicNavbar() {
                     </Button>
                   </Link>
                   <Link href="/signup" onClick={() => setIsOpen(false)}>
-                    <Button className="w-full rounded-full bg-mauve text-[#faf6ed] text-xs font-semibold py-2.5 hover:bg-mauve-strong shadow-lg shadow-mauve/10">
+                    <Button className="w-full rounded-full bg-mauve text-[#1a1410] text-xs font-semibold py-2.5 hover:bg-mauve-strong shadow-lg shadow-mauve/10">
                       Get Started
                       <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                     </Button>
@@ -270,7 +270,7 @@ export function PublicNavbar() {
                   <Button
                     type="submit"
                     disabled={joinLoading}
-                    className="flex-1 rounded-full bg-mauve text-[#faf6ed] font-semibold py-3 text-xs hover:bg-mauve-strong shadow-lg shadow-mauve/15"
+                    className="flex-1 rounded-full bg-mauve text-[#1a1410] font-semibold py-3 text-xs hover:bg-mauve-strong shadow-lg shadow-mauve/15"
                   >
                     {joinLoading ? (
                       <span className="flex items-center gap-2">

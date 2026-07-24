@@ -148,7 +148,7 @@ export function MfaSettings() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button type="submit" disabled={actionLoading || verifyCode.length < 6} className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold">
+                  <Button type="submit" disabled={actionLoading || verifyCode.length < 6} className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold">
                     {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                     Verify and Enable
                   </Button>

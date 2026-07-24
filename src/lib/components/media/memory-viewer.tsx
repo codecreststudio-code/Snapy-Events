@@ -318,7 +318,7 @@ export function MemoryViewer({
         {items.length > 1 && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
             {items.map((it, i) => (
-              <div key={it.id} className={`h-1 rounded-full transition-all ${i === index ? "w-6 bg-[#b8925a]" : "w-1.5 bg-white/30"}`} />
+              <div key={it.id} className={`h-1 rounded-full transition-all ${i === index ? "w-6 bg-mauve" : "w-1.5 bg-white/30"}`} />
             ))}
           </div>
         )}
@@ -366,7 +366,7 @@ export function MemoryViewer({
           <Button
             disabled={busy !== null}
             onClick={handleShare}
-            className={`rounded-full bg-[#b8925a] hover:bg-[#96723a] text-black text-xs py-5 flex items-center justify-center gap-1.5 ${!item.storyUrl ? "col-span-2" : ""}`}
+            className={`rounded-full bg-mauve hover:bg-mauve-strong text-black text-xs py-5 flex items-center justify-center gap-1.5 ${!item.storyUrl ? "col-span-2" : ""}`}
           >
             <Share2 className="h-4 w-4" />
             {busy === "share" ? "Preparing…" : item.kind === "video" ? "Share to Story" : "Share"}

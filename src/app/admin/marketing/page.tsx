@@ -471,7 +471,7 @@ export default function AdminMarketingPage() {
             <Button
               type="submit"
               disabled={actioning}
-              className="w-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold h-10 shadow-sm"
+              className="w-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-bold h-10 shadow-sm"
             >
               <span>Activate Promo Code</span>
             </Button>

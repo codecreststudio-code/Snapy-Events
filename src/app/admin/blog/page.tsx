@@ -307,7 +307,7 @@ export default function AdminBlogPage() {
             </Link>
             {activeTab === "posts" && (
               <Link href="/admin/blog/new">
-                <Button className="rounded-xl bg-mauve text-[#faf6ed] hover:bg-mauve-strong gap-2">
+                <Button className="rounded-xl bg-mauve text-[#1a1410] hover:bg-mauve-strong gap-2">
                   <Plus className="h-4 w-4" /> New Article
                 </Button>
               </Link>

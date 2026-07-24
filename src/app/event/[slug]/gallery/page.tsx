@@ -173,7 +173,7 @@ function PhotoGrid({
         </p>
         <Button
           asChild
-          className="mt-4 rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a]"
+          className="mt-4 rounded-full bg-mauve text-[#1a1410] hover:bg-mauve-strong"
         >
           <Link href={`/event/${eventSlug}/upload`}>
             <Camera className="h-4 w-4" />
@@ -355,7 +355,7 @@ function PhotoGrid({
               {allowDownloads && (
                 <Button
                   size="sm"
-                  className="rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a]"
+                  className="rounded-full bg-mauve text-[#1a1410] hover:bg-mauve-strong"
                   onClick={() => downloadPhoto(photos[currentIndex])}
                 >
                   <Download className="h-4 w-4" />
@@ -416,7 +416,7 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
   if (eventLoading || galleriesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#faf6ed]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#b8925a]" />
+        <Loader2 className="h-8 w-8 animate-spin text-mauve" />
       </div>
     )
   }
@@ -426,7 +426,7 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#faf6ed] text-ink">
         <h1 className="font-playfair text-2xl font-medium mb-2">Gallery Not Found</h1>
         <p className="text-ink-secondary mb-4">The gallery you're looking for doesn't exist.</p>
-        <Button asChild className="rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a]">
+        <Button asChild className="rounded-full bg-mauve text-[#1a1410] hover:bg-mauve-strong">
           <Link href="/">Go Home</Link>
         </Button>
       </div>
@@ -438,7 +438,7 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
       <header className="pt-safe sticky top-0 z-40 border-b border-[#e5dfd0] bg-[#faf6ed]/95 backdrop-blur">
         <div className="container mx-auto flex h-14 items-center justify-between px-4 sm:px-6">
           <Link href={`/event/${slug}`} className="flex min-w-0 items-center gap-2">
-            <ImageIcon className="h-5 w-5 shrink-0 text-[#b8925a]" />
+            <ImageIcon className="h-5 w-5 shrink-0 text-mauve" />
             <span className="truncate font-playfair font-medium text-ink">{event.name}</span>
           </Link>
           <div className="flex shrink-0 items-center gap-2">
@@ -451,7 +451,7 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
               asChild
               size="sm"
               variant="ghost"
-              className="rounded-full text-ink hover:bg-mauve/10 hover:text-[#b8925a]"
+              className="rounded-full text-ink hover:bg-mauve/10 hover:text-mauve"
             >
               <Link href={`/event/${slug}/upload`}>
                 <Camera className="h-4 w-4" />
@@ -471,14 +471,14 @@ export default function GuestGalleryPage({ params }: { params: Promise<{ slug: s
                 onClick={() => setSelectedGallery(gallery)}
                 className={`relative px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors ${
                   selectedGallery?.id === gallery.id
-                    ? "text-[#faf6ed]"
+                    ? "text-[#1a1410]"
                     : "text-ink-secondary hover:text-ink"
                 }`}
               >
                 {selectedGallery?.id === gallery.id && (
                   <motion.span
                     layoutId="gallery-tab-active-bg"
-                    className="absolute inset-0 rounded-full bg-[#b8925a]"
+                    className="absolute inset-0 rounded-full bg-mauve"
                     transition={
                       prefersReducedMotion
                         ? { duration: 0 }

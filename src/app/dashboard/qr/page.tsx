@@ -308,7 +308,7 @@ function CreateQRDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2 rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+        <Button className="gap-2 rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
           <Plus className="h-4 w-4" />
           Generate QR Code
         </Button>
@@ -377,7 +377,7 @@ function CreateQRDialog({
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !eventId} className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold">
+            <Button type="submit" disabled={loading || !eventId} className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold">
               {loading ? "Creating..." : "Generate Code"}
             </Button>
           </DialogFooter>

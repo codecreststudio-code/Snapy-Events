@@ -101,7 +101,7 @@ export function FeatureFlagsClient({ initialFlags }: { initialFlags: Partial<Fea
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold h-11 px-8 rounded-xl shadow-md"
+          className="bg-mauve hover:bg-mauve-strong text-[#1a1410] font-bold h-11 px-8 rounded-xl shadow-md"
         >
           <Save className="h-4.5 w-4.5 mr-1.5" />
           <span>{saving ? "Saving Changes..." : "Save Feature Flags"}</span>

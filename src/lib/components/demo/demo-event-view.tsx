@@ -158,7 +158,7 @@ export function DemoEventView() {
             <Button
               type="button"
               size="sm"
-              className="rounded-full bg-mauve px-4 text-xs font-bold text-[#faf6ed] hover:bg-mauve-strong shadow-sm"
+              className="rounded-full bg-mauve px-4 text-xs font-bold text-[#1a1410] hover:bg-mauve-strong shadow-sm"
             >
               Create My Event
             </Button>
@@ -188,7 +188,7 @@ export function DemoEventView() {
               <button
                 type="button"
                 onClick={() => handleDemoReadOnlyAction("Upload Photo")}
-                className="flex items-center gap-2 rounded-full bg-mauve px-5 py-2.5 text-xs font-bold text-[#faf6ed] shadow-lg shadow-mauve/20 transition-transform hover:scale-105"
+                className="flex items-center gap-2 rounded-full bg-mauve px-5 py-2.5 text-xs font-bold text-[#1a1410] shadow-lg shadow-mauve/20 transition-transform hover:scale-105"
               >
                 <Camera className="h-4 w-4" /> Upload Demo
               </button>
@@ -247,7 +247,7 @@ export function DemoEventView() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold whitespace-nowrap transition-all ${
                   isActive
-                    ? "bg-mauve text-[#faf6ed] shadow-md shadow-mauve/20"
+                    ? "bg-mauve text-[#1a1410] shadow-md shadow-mauve/20"
                     : "text-ink-secondary hover:bg-black/5 hover:text-ink"
                 }`}
               >
@@ -460,7 +460,7 @@ export function DemoEventView() {
               <Button
                 type="button"
                 onClick={() => setIsFaceSearchOpen(true)}
-                className="rounded-full bg-mauve px-6 text-xs font-bold text-[#faf6ed] hover:bg-mauve-strong shadow-md shadow-mauve/20"
+                className="rounded-full bg-mauve px-6 text-xs font-bold text-[#1a1410] hover:bg-mauve-strong shadow-md shadow-mauve/20"
               >
                 Launch Face Search Demo
               </Button>
@@ -639,7 +639,7 @@ export function DemoEventView() {
           <Link href="/dashboard/events/new">
             <Button
               type="button"
-              className="rounded-full bg-mauve px-8 py-3 text-sm font-bold text-[#faf6ed] hover:bg-mauve-strong shadow-lg shadow-mauve/25 transition-transform hover:scale-105"
+              className="rounded-full bg-mauve px-8 py-3 text-sm font-bold text-[#1a1410] hover:bg-mauve-strong shadow-lg shadow-mauve/25 transition-transform hover:scale-105"
             >
               Create My First Event ✨
             </Button>

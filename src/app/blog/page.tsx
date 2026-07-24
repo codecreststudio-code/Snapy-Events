@@ -110,7 +110,7 @@ function FeaturedCard({ post }: { post: BlogPost }) {
 
       <div className="p-8 md:p-12 flex flex-col justify-center">
         <div className="flex items-center gap-2 mb-4">
-          <span className="rounded-full bg-mauve px-3 py-1 text-[10px] font-bold text-[#faf6ed] uppercase tracking-widest">
+          <span className="rounded-full bg-mauve px-3 py-1 text-[10px] font-bold text-[#1a1410] uppercase tracking-widest">
             ✦ Featured
           </span>
           <span className="text-xs text-ink-secondary">{post.read_time_minutes} min read</span>
@@ -161,7 +161,7 @@ function FeaturedCard({ post }: { post: BlogPost }) {
         </div>
 
         <Link href={`/blog/${post.slug}`}>
-          <Button className="w-fit rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold transition-all px-6">
+          <Button className="w-fit rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold transition-all px-6">
             Read article <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>
@@ -235,7 +235,7 @@ function NewsletterSignup() {
       <Button
         type="submit"
         disabled={loading}
-        className="w-full rounded-xl bg-mauve hover:bg-mauve-strong text-[#faf6ed] transition-all py-3 text-sm font-semibold"
+        className="w-full rounded-xl bg-mauve hover:bg-mauve-strong text-[#1a1410] transition-all py-3 text-sm font-semibold"
       >
         {loading ? "Subscribing…" : "Subscribe Now →"}
       </Button>
@@ -344,7 +344,7 @@ export default function BlogPage() {
 
                 <div className="flex flex-wrap gap-4">
                   <Link href="#latest">
-                    <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-6 transition-all shadow-lg shadow-mauve/10">
+                    <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold px-6 transition-all shadow-lg shadow-mauve/10">
                       Explore Articles →
                     </Button>
                   </Link>
@@ -408,7 +408,7 @@ export default function BlogPage() {
                 whileTap={{ scale: 0.95 }}
                 className={`relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all duration-200 shrink-0 ${
                   activeCategory === "all"
-                    ? "bg-mauve text-[#faf6ed] shadow-lg shadow-mauve/20"
+                    ? "bg-mauve text-[#1a1410] shadow-lg shadow-mauve/20"
                     : "text-ink-secondary hover:text-ink hover:bg-mauve/5"
                 }`}
               >
@@ -663,7 +663,7 @@ export default function BlogPage() {
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link href="/signup">
-                  <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] px-6 font-semibold transition-all shadow-lg shadow-mauve/10">
+                  <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] px-6 font-semibold transition-all shadow-lg shadow-mauve/10">
                     Start Free Today →
                   </Button>
                 </Link>

@@ -247,7 +247,7 @@ export default function DownloadsPage() {
                 <Button
                   onClick={handleBulkDownload}
                   disabled={isDownloading}
-                  className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all"
+                  className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all"
                 >
                   {isDownloading ? (
                     <>

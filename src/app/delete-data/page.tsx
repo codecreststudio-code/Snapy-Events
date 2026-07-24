@@ -102,7 +102,7 @@ export default function DeleteDataPage() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold py-6 text-sm shadow-lg disabled:opacity-50"
+                    className="w-full rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold py-6 text-sm shadow-lg disabled:opacity-50"
                   >
                     {loading ? "Submitting Request..." : "Submit Permanent Deletion Request"}
                     <ArrowRight className="ml-2 h-4 w-4" />

@@ -40,7 +40,7 @@ export function AdminProfileDropdown({ user }: AdminProfileProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-mauve font-bold text-[#faf6ed] hover:bg-mauve-strong ring-2 ring-mauve/20 transition-colors">
+        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-mauve font-bold text-[#1a1410] hover:bg-mauve-strong ring-2 ring-mauve/20 transition-colors">
           {initial}
         </button>
       </DropdownMenuTrigger>

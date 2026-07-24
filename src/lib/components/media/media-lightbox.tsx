@@ -68,7 +68,7 @@ function VoiceCommentPlayer({ url, label }: { url: string; label: string }) {
           if (playing) el.pause()
           else el.play()
         }}
-        className="h-7 w-7 shrink-0 rounded-full bg-[#b8925a]/20 text-[#b8925a] flex items-center justify-center hover:bg-[#b8925a]/30 transition"
+        className="h-7 w-7 shrink-0 rounded-full bg-mauve/20 text-mauve flex items-center justify-center hover:bg-mauve/30 transition"
       >
         {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 ml-0.5" />}
       </button>
@@ -278,7 +278,7 @@ export function MediaLightbox({
 
         {/* Emoji Reactions Bar */}
         <div className="space-y-2">
-          <p className="text-[10px] uppercase tracking-widest text-[#b8925a] font-bold">Reactions</p>
+          <p className="text-[10px] uppercase tracking-widest text-mauve font-bold">Reactions</p>
           <div className="flex items-center justify-between bg-ink/5 border border-ink/10 rounded-xl p-2">
             {EMOJI_LIST.map((e) => {
               const count = reactions[e.key] || 0
@@ -290,7 +290,7 @@ export function MediaLightbox({
                   title={e.label}
                 >
                   <span className="text-xl">{e.symbol}</span>
-                  <span className="text-[10px] font-bold text-ink-secondary group-hover:text-[#b8925a]">{count > 0 ? count : ""}</span>
+                  <span className="text-[10px] font-bold text-ink-secondary group-hover:text-mauve">{count > 0 ? count : ""}</span>
                 </button>
               )
             })}
@@ -299,7 +299,7 @@ export function MediaLightbox({
 
         {/* Comments Feed */}
         <div className="flex-1 overflow-y-auto max-h-48 space-y-2.5 pr-1 no-scrollbar my-2">
-          <p className="text-[10px] uppercase tracking-widest text-[#b8925a] font-bold">Wishes & Comments ({comments.length})</p>
+          <p className="text-[10px] uppercase tracking-widest text-mauve font-bold">Wishes & Comments ({comments.length})</p>
           {comments.length === 0 ? (
             <p className="text-xs text-ink-tertiary italic">No comments yet. Be the first to leave a wish!</p>
           ) : (
@@ -322,16 +322,16 @@ export function MediaLightbox({
             placeholder="Your Name (optional)"
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
-            className="bg-[#faf6ed] border-[#e5dfd0] text-ink placeholder:text-ink-tertiary h-8 text-xs focus:border-[#b8925a]"
+            className="bg-[#faf6ed] border-[#e5dfd0] text-ink placeholder:text-ink-tertiary h-8 text-xs focus:border-mauve"
           />
           <div className="flex gap-2">
             <Input
               placeholder="Write a comment..."
               value={commentInput}
               onChange={(e) => setCommentInput(e.target.value)}
-              className="bg-[#faf6ed] border-[#e5dfd0] text-ink placeholder:text-ink-tertiary h-9 text-xs focus:border-[#b8925a] flex-1"
+              className="bg-[#faf6ed] border-[#e5dfd0] text-ink placeholder:text-ink-tertiary h-9 text-xs focus:border-mauve flex-1"
             />
-            <Button type="submit" size="icon" className="bg-[#b8925a] hover:bg-[#96723a] text-black h-9 w-9 shrink-0 rounded-lg">
+            <Button type="submit" size="icon" className="bg-mauve hover:bg-mauve-strong text-black h-9 w-9 shrink-0 rounded-lg">
               <Send className="h-4 w-4" />
             </Button>
             {onVoiceComment && (
@@ -340,7 +340,7 @@ export function MediaLightbox({
                 variant="outline"
                 size="icon"
                 onClick={() => setShowRecorder(true)}
-                className="h-9 w-9 shrink-0 rounded-lg border-[#e5dfd0] text-[#b8925a] hover:bg-mauve/10"
+                className="h-9 w-9 shrink-0 rounded-lg border-[#e5dfd0] text-mauve hover:bg-mauve/10"
                 title="Reply with a voice note"
               >
                 <Mic className="h-4 w-4" />

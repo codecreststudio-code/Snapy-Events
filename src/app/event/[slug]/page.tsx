@@ -289,7 +289,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                 className="animate-slide-up mx-auto mb-4 h-10"
               />
             )}
-            <p className="animate-slide-up text-sm uppercase tracking-widest text-[#b8925a]">
+            <p className="animate-slide-up text-sm uppercase tracking-widest text-mauve">
               {event.user?.name ?? "Event"}
             </p>
             <h1 className="animate-slide-up animate-delay-1 font-playfair mt-2 text-4xl font-medium tracking-tight text-ink sm:text-5xl">
@@ -319,7 +319,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
                 <Button
                   asChild
                   size="lg"
-                  className="rounded-full bg-[#b8925a] px-6 text-[#faf6ed] transition-transform hover:scale-[1.02] hover:bg-[#96723a] active:scale-[0.98]"
+                  className="rounded-full bg-mauve px-6 text-[#1a1410] transition-transform hover:scale-[1.02] hover:bg-mauve-strong active:scale-[0.98]"
                 >
                   <Link href={`/event/${event.slug}/upload`}>
                     <Camera className="mr-2 h-4 w-4" />
@@ -363,7 +363,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
           {!checkedIn ? (
             <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-[#e5dfd0] bg-[#ffffff] px-4 py-16 text-center">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-ink/5">
-                <Lock className="h-8 w-8 text-[#b8925a]" />
+                <Lock className="h-8 w-8 text-mauve" />
               </div>
               <h3 className="font-playfair mt-4 text-lg font-medium text-ink">Check In to Continue</h3>
               <p className="mt-2 max-w-md text-sm text-ink-secondary">
@@ -401,7 +401,7 @@ export default async function PublicEventPage({ params }: PageProps<"/event/[slu
           ) : (
             <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-[#e5dfd0] bg-[#ffffff] px-4 py-16 text-center">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-ink/5">
-                <Lock className="h-8 w-8 text-[#b8925a]" />
+                <Lock className="h-8 w-8 text-mauve" />
               </div>
               <h3 className="font-playfair mt-4 text-lg font-medium text-ink">Photos Coming Soon</h3>
               <p className="mt-2 max-w-md text-sm text-ink-secondary">

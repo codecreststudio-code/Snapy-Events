@@ -467,7 +467,7 @@ function CreateGalleryDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+        <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
           <Plus className="h-4 w-4" />
           New Gallery
         </Button>
@@ -639,7 +639,7 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
       <div className="flex flex-col items-center justify-center py-16">
         <Camera className="h-12 w-12 text-ink-tertiary mb-4" />
         <h2 className="text-lg font-medium text-ink">Event not found</h2>
-        <Button asChild className="mt-4 rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold">
+        <Button asChild className="mt-4 rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold">
           <Link href="/dashboard/events">Back to Events</Link>
         </Button>
       </div>

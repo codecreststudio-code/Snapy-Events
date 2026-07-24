@@ -294,7 +294,7 @@ export default function AdminSupportTicketsPage() {
                   <Button
                     type="submit"
                     disabled={actioningId === selectedTicket.id || !replyMessage.trim()}
-                    className="h-9 px-3 bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold rounded-lg shadow-sm"
+                    className="h-9 px-3 bg-mauve hover:bg-mauve-strong text-[#1a1410] font-bold rounded-lg shadow-sm"
                   >
                     <Send className="h-4 w-4" />
                   </Button>

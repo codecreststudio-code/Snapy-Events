@@ -15,22 +15,45 @@
   --card-foreground: 0 0% 96.1%;
   --popover: 0 0% 8.6%;
   --popover-foreground: 0 0% 96.1%;
-  --primary: 0 0% 100%;
-  --primary-foreground: 0 0% 0%;
+  /* --primary/--ring drive shadcn-style primitives (checkbox, switch, select,
+     tabs, input focus rings, dialog accents — see button.tsx's sibling
+     components) — previously pure white, same disconnect as --snapy-mauve
+     above. Matched to --accent's existing gold hue (40 48% 56% ≈ #c5a059)
+     so form controls and buttons land on the exact same gold. */
+  --primary: 40 48% 56%;
+  --primary-foreground: 20 30% 8%;
   --secondary: 0 0% 12%;
   --secondary-foreground: 0 0% 96.1%;
   --muted: 0 0% 12%;
   --muted-foreground: 0 0% 62%;
   --accent: 40 50% 56%;
-  --accent-foreground: 0 0% 96.1%;
+  --accent-foreground: 20 30% 8%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
   --border: 0 0% 100% / 0.08;
   --input: 0 0% 100% / 0.08;
-  --ring: 0 0% 100%;
+  --ring: 40 48% 56%;
   --radius: 12px;
 
-  /* ─── scenedisposable.com Exact Color Tokens ───────────────────────────── */
+  /* ─── Snapsy Events gold design system ──────────────────────────────────
+     Enterprise UI/UX redesign (brand audit round). Root cause of "the app
+     doesn't feel gold despite an earlier gold rebrand pass": 96 files across
+     the codebase drive their primary accent (buttons, active nav, focus
+     rings, links, badges) through the `mauve` / `mauve-strong` Tailwind
+     utilities, but --snapy-mauve was left at pure white (#ffffff) — a
+     leftover from this theme's scenedisposable.com white/silver reference —
+     while a *separate*, essentially unused --snapy-gold token sat next to it
+     (0 files referenced `gold-*` classes directly). Result: every primary
+     CTA in the app rendered white/black, not gold, no matter what the gold
+     tokens said.
+     Fix: retarget mauve/mauve-strong to real gold values sampled directly
+     from the new logo (public/Logo.png — the flat ribbon face samples to
+     ~#c5a060, the champagne highlight to ~#e5c178), so every one of those 96
+     files' worth of "primary accent" usages goes gold with a single token
+     change instead of a 96-file find/replace. --snapy-gold/-light are kept
+     as identical aliases so `gold-*` utilities (used by a handful of newer
+     components) and `mauve-*` utilities (used by the rest of the app) always
+     resolve to the exact same two gold tones — no drift between them. */
   --snapy-surface-dark: #080808;
   --snapy-surface-card: #121212;
   --snapy-surface-card-elevated: #161616;
@@ -38,10 +61,38 @@
   --snapy-ink: #f5f5f5;
   --snapy-ink-secondary: #9e9e9e;
   --snapy-ink-tertiary: #666666;
-  --snapy-gold: #c5a059;
-  --snapy-gold-light: #e5c178;
-  --snapy-mauve: #ffffff;
-  --snapy-mauve-strong: #f5f5f5;
+
+  /* Full gold scale — sampled/derived from the logo's ribbon gold. 500 is
+     the logo's true mid-tone; 300 is the champagne highlight used for hover/
+     emphasis (= mauve-strong); 700/800 are deep shadow-gold for pressed
+     states, gradients, and dark-on-gold borders. */
+  --snapy-gold-100: #f7ecd4;
+  --snapy-gold-200: #f0dcae;
+  --snapy-gold-300: #e5c178;
+  --snapy-gold-400: #d4af6b;
+  --snapy-gold-500: #c5a059;
+  --snapy-gold-600: #ab8748;
+  --snapy-gold-700: #8a6b38;
+  --snapy-gold-800: #664e29;
+  --snapy-gold-900: #40311a;
+
+  --snapy-gold: var(--snapy-gold-500);
+  --snapy-gold-light: var(--snapy-gold-300);
+  --snapy-mauve: var(--snapy-gold-500);
+  --snapy-mauve-strong: var(--snapy-gold-300);
+
+  /* Status colors chosen to sit comfortably alongside gold on a near-black
+     surface (same saturation/lightness family as the gold scale) instead of
+     the saturated primary red/green/blue that clash with a warm luxury
+     palette. */
+  --snapy-success: #6fae7c;
+  --snapy-success-bg: rgba(111, 174, 124, 0.12);
+  --snapy-warning: #d9a441;
+  --snapy-warning-bg: rgba(217, 164, 65, 0.12);
+  --snapy-error: #c9685a;
+  --snapy-error-bg: rgba(201, 104, 90, 0.12);
+  --snapy-info: #7fa3c9;
+  --snapy-info-bg: rgba(127, 163, 201, 0.12);
 }
 
 .dark {
@@ -51,19 +102,19 @@
   --card-foreground: 0 0% 96.1%;
   --popover: 0 0% 8.6%;
   --popover-foreground: 0 0% 96.1%;
-  --primary: 0 0% 100%;
-  --primary-foreground: 0 0% 0%;
+  --primary: 40 48% 56%;
+  --primary-foreground: 20 30% 8%;
   --secondary: 0 0% 12%;
   --secondary-foreground: 0 0% 96.1%;
   --muted: 0 0% 12%;
   --muted-foreground: 0 0% 62%;
   --accent: 40 50% 56%;
-  --accent-foreground: 0 0% 96.1%;
+  --accent-foreground: 20 30% 8%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
   --border: 0 0% 100% / 0.08;
   --input: 0 0% 100% / 0.08;
-  --ring: 0 0% 100%;
+  --ring: 40 48% 56%;
 }
 
 @theme {
@@ -76,33 +127,42 @@
   --color-popover: #161616;
   --color-popover-foreground: #f5f5f5;
   
-  --color-primary: #ffffff;
-  --color-primary-foreground: #000000;
-  
+  --color-primary: #c5a059;
+  --color-primary-foreground: #1a1410;
+
   --color-secondary: #181818;
   --color-secondary-foreground: #f5f5f5;
-  
+
   --color-muted: #141414;
   --color-muted-foreground: #9e9e9e;
-  
+
   --color-accent: #c5a059;
-  --color-accent-foreground: #f5f5f5;
-  
+  --color-accent-foreground: #1a1410;
+
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
-  
+
   --color-border: rgba(255, 255, 255, 0.08);
   --color-input: rgba(255, 255, 255, 0.08);
-  --color-ring: #ffffff;
-  
+  --color-ring: #c5a059;
+
   --radius-xs: 8px;
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 20px;
   --radius-xl: 9999px;
 
-  --color-gold: #c5a059;
-  --color-gold-light: #e5c178;
+  --color-gold: var(--snapy-gold);
+  --color-gold-light: var(--snapy-gold-light);
+  --color-gold-100: var(--snapy-gold-100);
+  --color-gold-200: var(--snapy-gold-200);
+  --color-gold-300: var(--snapy-gold-300);
+  --color-gold-400: var(--snapy-gold-400);
+  --color-gold-500: var(--snapy-gold-500);
+  --color-gold-600: var(--snapy-gold-600);
+  --color-gold-700: var(--snapy-gold-700);
+  --color-gold-800: var(--snapy-gold-800);
+  --color-gold-900: var(--snapy-gold-900);
   --color-mauve: var(--snapy-mauve);
   --color-mauve-strong: var(--snapy-mauve-strong);
   --color-surface-dark: var(--snapy-surface-dark);
@@ -112,6 +172,17 @@
   --color-ink: var(--snapy-ink);
   --color-ink-secondary: var(--snapy-ink-secondary);
   --color-ink-tertiary: var(--snapy-ink-tertiary);
+
+  /* Status colors — see :root comment above for why these hues (not
+     stock red/green/blue) were chosen to sit next to gold. */
+  --color-success: var(--snapy-success);
+  --color-success-bg: var(--snapy-success-bg);
+  --color-warning: var(--snapy-warning);
+  --color-warning-bg: var(--snapy-warning-bg);
+  --color-error: var(--snapy-error);
+  --color-error-bg: var(--snapy-error-bg);
+  --color-info: var(--snapy-info);
+  --color-info-bg: var(--snapy-info-bg);
 }
 
 * {
@@ -215,18 +286,19 @@ body {
 }
 
 .glow-mauve {
-  box-shadow: 0 0 30px -5px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 30px -5px rgba(197, 160, 89, 0.35);
 }
 
-.text-gradient-mauve {
-  background: linear-gradient(135deg, #ffffff 0%, #d4d4d4 50%, #999999 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
+/* Both classes previously rendered a plain white-to-gray gradient despite
+   their names — a leftover from the white/silver "mauve" reference theme
+   that never got updated when gold became the brand color. Now a genuine
+   champagne-to-deep-gold sweep sampled from the logo's gold scale, so any
+   heading/emphasis text using these utilities actually reads as gold. */
+.text-gradient-mauve,
 .text-gradient-gold {
-  background: linear-gradient(135deg, #ffffff 0%, #e5e5e5 50%, #a3a3a3 100%);
+  background: linear-gradient(135deg, #f0dcae 0%, #c5a059 50%, #8a6b38 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

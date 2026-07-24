@@ -157,7 +157,7 @@ export function DemoAiFaceSearchModal({
               type="button"
               size="sm"
               onClick={onClose}
-              className="rounded-full bg-mauve px-5 text-xs font-bold text-[#faf6ed]"
+              className="rounded-full bg-mauve px-5 text-xs font-bold text-[#1a1410]"
             >
               Close Demo
             </Button>

@@ -510,7 +510,7 @@ export function CameraCapture({
           <div className="relative flex items-center bg-black/60 border border-[#e5dfd0] rounded-full p-1 backdrop-blur-md">
             <button
               onClick={() => setCaptureMode("photo")}
-              className={`relative z-10 px-4 py-1 rounded-full text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none ${
+              className={`relative z-10 px-4 py-1 rounded-full text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-mauve focus-visible:outline-none ${
                 captureMode === "photo" ? "text-black" : "text-white/70 hover:text-white"
               }`}
             >
@@ -522,7 +522,7 @@ export function CameraCapture({
               {captureMode === "photo" && (
                 <motion.div
                   layoutId="camera-mode-pill"
-                  className="absolute inset-0 -z-10 rounded-full bg-[#b8925a] shadow-md"
+                  className="absolute inset-0 -z-10 rounded-full bg-mauve shadow-md"
                   transition={prefersReducedMotion ? { duration: 0 } : spring.snappy}
                 />
               )}
@@ -530,7 +530,7 @@ export function CameraCapture({
             </button>
             <button
               onClick={() => setCaptureMode("video")}
-              className={`relative z-10 px-4 py-1 rounded-full text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none ${
+              className={`relative z-10 px-4 py-1 rounded-full text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-mauve focus-visible:outline-none ${
                 captureMode === "video" ? "text-white" : "text-white/70 hover:text-white"
               }`}
             >
@@ -561,7 +561,7 @@ export function CameraCapture({
               aria-label="Toggle grid"
               aria-pressed={showGrid}
               whileTap={prefersReducedMotion ? undefined : tapScaleSubtle}
-              className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none ${showGrid ? "bg-[#b8925a]/30 text-[#b8925a]" : "text-white hover:bg-white/20"}`}
+              className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-mauve focus-visible:outline-none ${showGrid ? "bg-mauve/30 text-mauve" : "text-white hover:bg-white/20"}`}
             >
               <Grid3x3 className="h-5 w-5" />
             </motion.button>
@@ -572,7 +572,7 @@ export function CameraCapture({
               aria-label="Toggle flashlight"
               aria-pressed={torchOn}
               whileTap={prefersReducedMotion ? undefined : tapScaleSubtle}
-              className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none ${torchOn ? "bg-[#b8925a]/90 text-black" : "text-white hover:bg-white/20"}`}
+              className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-mauve focus-visible:outline-none ${torchOn ? "bg-mauve/90 text-black" : "text-white hover:bg-white/20"}`}
             >
               {torchOn ? <Zap className="h-5 w-5" /> : <ZapOff className="h-5 w-5" />}
             </motion.button>
@@ -612,7 +612,7 @@ export function CameraCapture({
             />
             <button
               onClick={toggleVideoPlayback}
-              className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none"
+              className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors focus-visible:ring-2 focus-visible:ring-mauve focus-visible:outline-none"
             >
               <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white">
                 {isVideoPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
@@ -657,7 +657,7 @@ export function CameraCapture({
                   <span>Shot captured</span>
                   <button
                     onClick={() => undoCapture(p.id)}
-                    className="rounded-full bg-white/10 hover:bg-white/20 px-2.5 py-1 text-[11px] font-bold text-[#b8925a] transition-colors focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none"
+                    className="rounded-full bg-white/10 hover:bg-white/20 px-2.5 py-1 text-[11px] font-bold text-mauve transition-colors focus-visible:ring-2 focus-visible:ring-mauve focus-visible:outline-none"
                   >
                     Undo
                   </button>
@@ -674,7 +674,7 @@ export function CameraCapture({
                   variants={fadeInDown}
                   className="pointer-events-auto flex items-center gap-2 bg-black/60 border border-[#e5dfd0] backdrop-blur-md rounded-full px-3 py-1.5 text-xs font-medium text-white shadow-lg"
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#b8925a] animate-pulse" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-mauve animate-pulse" />
                   {uploadingCount === 1 ? "Uploading…" : `${uploadingCount} uploading…`}
                 </motion.div>
               )}
@@ -693,14 +693,14 @@ export function CameraCapture({
                   <span>Upload failed</span>
                   <button
                     onClick={() => retryUpload(p.id)}
-                    className="rounded-full bg-red-500/30 hover:bg-red-500/50 px-2.5 py-1 text-[11px] font-bold text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none"
+                    className="rounded-full bg-red-500/30 hover:bg-red-500/50 px-2.5 py-1 text-[11px] font-bold text-white transition-colors focus-visible:ring-2 focus-visible:ring-mauve focus-visible:outline-none"
                   >
                     Retry
                   </button>
                   <button
                     onClick={() => dismissUpload(p.id)}
                     aria-label="Dismiss upload error"
-                    className="rounded-full p-1 hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none"
+                    className="rounded-full p-1 hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-mauve focus-visible:outline-none"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -733,7 +733,7 @@ export function CameraCapture({
               value={zoomLevel}
               onChange={(e) => handleZoomChange(Number(e.target.value))}
               aria-label="Camera zoom"
-              className="w-full accent-[#b8925a]"
+              className="w-full accent-mauve"
             />
             <span className="text-[10px] font-mono text-white/80 w-8 text-right shrink-0">{zoomLevel.toFixed(1)}x</span>
           </motion.div>
@@ -774,10 +774,10 @@ export function CameraCapture({
                     animate={{ scale: activeFilterId === filter.id ? 1.1 : 0.9 }}
                     transition={prefersReducedMotion ? { duration: 0 } : spring.soft}
                     whileTap={prefersReducedMotion ? undefined : tapScaleSubtle}
-                    className={`flex flex-col items-center gap-1 shrink-0 snap-center rounded-full focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none ${activeFilterId === filter.id ? "" : "opacity-60"}`}
+                    className={`flex flex-col items-center gap-1 shrink-0 snap-center rounded-full focus-visible:ring-2 focus-visible:ring-mauve focus-visible:outline-none ${activeFilterId === filter.id ? "" : "opacity-60"}`}
                   >
                     <div
-                      className={`w-14 h-14 rounded-full border-2 overflow-hidden bg-slate-800 ${activeFilterId === filter.id ? "border-[#b8925a]" : "border-ink/20"}`}
+                      className={`w-14 h-14 rounded-full border-2 overflow-hidden bg-slate-800 ${activeFilterId === filter.id ? "border-mauve" : "border-ink/20"}`}
                     >
                       <div
                         className="w-full h-full bg-[url('https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=200&h=200&fit=crop')] bg-cover bg-center"
@@ -797,7 +797,7 @@ export function CameraCapture({
                   <div className="flex flex-col items-center gap-0.5 rounded-full bg-black/40 border border-[#e5dfd0] px-3 py-1.5">
                     <span className="text-[9px] uppercase tracking-widest text-white/50 font-semibold">Shots</span>
                     <span
-                      className={`font-playfair text-base font-bold text-[#b8925a] leading-none transition-all duration-300 ${counterPulse ? "scale-125" : "scale-100"}`}
+                      className={`font-playfair text-base font-bold text-mauve leading-none transition-all duration-300 ${counterPulse ? "scale-125" : "scale-100"}`}
                     >
                       {shotCount}
                       {typeof maxShots === "number" && maxShots > 0 && (
@@ -816,7 +816,7 @@ export function CameraCapture({
                   onClick={takePhoto}
                   aria-label="Take photo"
                   whileTap={prefersReducedMotion ? undefined : { scale: 0.88, transition: spring.snappy }}
-                  className="w-16 h-16 rounded-full border-4 border-[#b8925a] p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer shadow-[0_0_16px_rgba(184,146,90,0.35)] focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none"
+                  className="w-16 h-16 rounded-full border-4 border-mauve p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer shadow-[0_0_16px_rgba(184,146,90,0.35)] focus-visible:ring-2 focus-visible:ring-mauve focus-visible:outline-none"
                 >
                   <div className="w-full h-full bg-white rounded-full" />
                 </motion.button>
@@ -826,7 +826,7 @@ export function CameraCapture({
                     onClick={startVideoRecording}
                     aria-label="Start video recording"
                     whileTap={prefersReducedMotion ? undefined : { scale: 0.92, transition: spring.snappy }}
-                    className="w-16 h-16 rounded-full border-4 border-red-500/80 p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none"
+                    className="w-16 h-16 rounded-full border-4 border-red-500/80 p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-mauve focus-visible:outline-none"
                   >
                     <div className="w-full h-full bg-red-600 rounded-full" />
                   </motion.button>
@@ -835,7 +835,7 @@ export function CameraCapture({
                     onClick={stopVideoRecording}
                     aria-label="Stop video recording"
                     whileTap={prefersReducedMotion ? undefined : { scale: 0.92, transition: spring.snappy }}
-                    className="w-16 h-16 rounded-full border-4 border-red-500/80 p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-[#b8925a] focus-visible:outline-none"
+                    className="w-16 h-16 rounded-full border-4 border-red-500/80 p-1 flex items-center justify-center hover:scale-95 transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-mauve focus-visible:outline-none"
                   >
                     <Square className="h-6 w-6 fill-red-600 text-red-600" />
                   </motion.button>
@@ -854,7 +854,7 @@ export function CameraCapture({
               <RefreshCw className="h-6 w-6" />
               <span className="text-xs">Retake</span>
             </Button>
-            <Button onClick={handleConfirm} className="bg-[#b8925a] hover:bg-[#96723a] text-black rounded-full w-16 h-16 shadow-lg shadow-[#b8925a]/20">
+            <Button onClick={handleConfirm} className="bg-mauve hover:bg-mauve-strong text-black rounded-full w-16 h-16 shadow-lg shadow-mauve/20">
               <Check className="h-8 w-8" />
             </Button>
           </div>

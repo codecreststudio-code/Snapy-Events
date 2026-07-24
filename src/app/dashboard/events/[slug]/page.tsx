@@ -1287,9 +1287,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   if (!event) {
     return (
       <div className="min-h-screen bg-[#faf6ed] flex flex-col items-center justify-center p-6 text-center space-y-4">
-        <Camera className="h-12 w-12 text-[#b8925a]" />
+        <Camera className="h-12 w-12 text-mauve" />
         <h2 className="font-playfair text-2xl font-light text-ink">Experience Capsule Not Found</h2>
-        <Button asChild className="rounded-full bg-[#b8925a] hover:bg-[#96723a] text-[#faf6ed] font-semibold">
+        <Button asChild className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold">
           <Link href="/dashboard/events">Return to Dashboard</Link>
         </Button>
       </div>
@@ -1333,11 +1333,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
     }
     return (
       <div className="min-h-screen bg-[#faf6ed] flex flex-col items-center justify-center p-6 text-center space-y-5">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#b8925a]/10">
-          <AlertCircle className="h-8 w-8 text-[#b8925a]" />
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-mauve/10">
+          <AlertCircle className="h-8 w-8 text-mauve" />
         </div>
         <div className="max-w-md space-y-2">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-[#b8925a]">Payment Required</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-mauve">Payment Required</span>
           <h2 className="font-playfair text-2xl sm:text-3xl font-light text-ink">
             Complete payment to activate "{event.name}"
           </h2>
@@ -1349,7 +1349,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
             onClick={resumeCheckout}
-            className="rounded-full bg-[#b8925a] hover:bg-[#96723a] text-[#faf6ed] font-semibold px-8 py-5"
+            className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold px-8 py-5"
           >
             Complete Payment
           </Button>
@@ -1569,7 +1569,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
   }
 
   return (
-    <div className="min-h-screen bg-[#faf6ed] text-ink flex flex-col font-sans selection:bg-[#b8925a]/30 pb-16">
+    <div className="min-h-screen bg-[#faf6ed] text-ink flex flex-col font-sans selection:bg-mauve/30 pb-16">
 
       {/* Top Banner Navigation */}
       <header className="pt-safe px-4 py-4 sm:px-6 bg-[#ffffff] border-b border-[#e5dfd0] sticky top-0 z-30">
@@ -1579,7 +1579,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               <ArrowLeft className="h-5 w-5 text-ink-secondary" />
             </Link>
             <div className="min-w-0">
-              <span className="text-[10px] uppercase tracking-widest text-[#b8925a] font-bold block">Memory Capsule</span>
+              <span className="text-[10px] uppercase tracking-widest text-mauve font-bold block">Memory Capsule</span>
               <h1 className="font-playfair text-xl md:text-2xl font-light text-ink truncate">{event.name}</h1>
             </div>
           </div>
@@ -1602,11 +1602,11 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 disabled
                 aria-disabled="true"
                 title={featureAccess?.print_ready_downloads?.reason || "Print-ready downloads require a paid plan"}
-                className="rounded-full border border-[#b8925a]/40 bg-[#b8925a]/10 text-[#b8925a]/70 text-xs flex items-center gap-1.5 cursor-not-allowed opacity-80 hover:bg-[#b8925a]/10 shrink-0 whitespace-nowrap"
+                className="rounded-full border border-mauve/40 bg-mauve/10 text-mauve/70 text-xs flex items-center gap-1.5 cursor-not-allowed opacity-80 hover:bg-mauve/10 shrink-0 whitespace-nowrap"
               >
                 <Download className="h-3.5 w-3.5" />
                 <span>Download All</span>
-                <span className="text-[9px] font-bold uppercase tracking-wide border border-[#b8925a]/40 bg-[#b8925a]/10 text-[#b8925a] rounded-full px-1.5 py-0.5 ml-0.5">
+                <span className="text-[9px] font-bold uppercase tracking-wide border border-mauve/40 bg-mauve/10 text-mauve rounded-full px-1.5 py-0.5 ml-0.5">
                   Upgrade
                 </span>
               </Button>
@@ -1619,7 +1619,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             </Button>
             <Button
               onClick={() => setIsDrawerOpen(true)}
-              className="rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a] text-xs font-semibold flex items-center gap-1 border-none cursor-pointer shrink-0 whitespace-nowrap"
+              className="rounded-full bg-mauve text-[#1a1410] hover:bg-mauve-strong text-xs font-semibold flex items-center gap-1 border-none cursor-pointer shrink-0 whitespace-nowrap"
             >
               <Settings className="h-4 w-4" />
               <span>Settings</span>
@@ -1642,12 +1642,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               { label: "Guests", value: totalGuestsCount, icon: Users },
               { label: "AI Matches", value: totalAiClusters, icon: Sparkles },
             ].map((stat, idx) => (
-              <div key={idx} className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-3 text-center space-y-1.5 hover:border-[#b8925a]/40 transition-all">
-                <div className="w-8 h-8 rounded-full bg-[#b8925a]/10 text-[#b8925a] flex items-center justify-center mx-auto">
+              <div key={idx} className="rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-3 text-center space-y-1.5 hover:border-mauve/40 transition-all">
+                <div className="w-8 h-8 rounded-full bg-mauve/10 text-mauve flex items-center justify-center mx-auto">
                   <stat.icon className="h-4 w-4" />
                 </div>
                 <div className="space-y-0.5">
-                  <p className="text-xl font-bold text-[#b8925a]">{stat.value}</p>
+                  <p className="text-xl font-bold text-mauve">{stat.value}</p>
                   <p className="text-[9px] uppercase tracking-wider text-ink-secondary font-medium">{stat.label}</p>
                 </div>
               </div>
@@ -1657,12 +1657,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           {/* Capsule countdown indicator circle */}
           <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 flex items-center justify-between relative overflow-hidden">
             <div className="space-y-1">
-              <span className="text-[9px] uppercase tracking-widest text-[#b8925a] font-bold">Unlocking Capsule</span>
+              <span className="text-[9px] uppercase tracking-widest text-mauve font-bold">Unlocking Capsule</span>
               <p className="font-playfair text-xl font-bold text-ink tabular-nums">{countdownText || "Calculating..."}</p>
               <p className="text-[10px] text-ink-secondary">Revealing memories automatically</p>
             </div>
-            <div className="w-12 h-12 rounded-full border-4 border-[#b8925a]/30 border-t-[#b8925a] flex items-center justify-center animate-spin shrink-0" style={{ animationDuration: "10s" }}>
-              <Clock className="h-5 w-5 text-[#b8925a] rotate-[-45deg]" />
+            <div className="w-12 h-12 rounded-full border-4 border-mauve/30 border-t-mauve flex items-center justify-center animate-spin shrink-0" style={{ animationDuration: "10s" }}>
+              <Clock className="h-5 w-5 text-mauve rotate-[-45deg]" />
             </div>
           </div>
 
@@ -1689,7 +1689,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 <button
                   key={tab.id}
                   onClick={() => setActiveMediaTab(tab.id as any)}
-                  className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${activeMediaTab === tab.id ? "bg-[#b8925a] text-[#faf6ed] font-bold" : "text-ink-secondary hover:text-ink"
+                  className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${activeMediaTab === tab.id ? "bg-mauve text-[#1a1410] font-bold" : "text-ink-secondary hover:text-ink"
                     }`}
                 >
                   {tab.label}
@@ -1725,7 +1725,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     </div>
                   </div>
 
-                  <div className="flex-1 rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-4 space-y-3 hover:border-[#b8925a]/30 transition-all">
+                  <div className="flex-1 rounded-2xl border border-[#e5dfd0] bg-[#ffffff] p-4 space-y-3 hover:border-mauve/30 transition-all">
                     <div className="flex justify-between items-center text-xs">
                       <span className="font-bold text-ink">{item.guest}</span>
                       <span className="text-ink-secondary">{item.time}</span>
@@ -1742,7 +1742,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                             return (
                               <div
                                 key={idx}
-                                className="aspect-square bg-ink/5 rounded-xl overflow-hidden relative group cursor-pointer border border-[#e5dfd0] hover:border-[#b8925a]/40 transition-all shadow-sm"
+                                className="aspect-square bg-ink/5 rounded-xl overflow-hidden relative group cursor-pointer border border-[#e5dfd0] hover:border-mauve/40 transition-all shadow-sm"
                                 onClick={() => setActiveLightboxMedia(toLightboxMedia(p))}
                                 title="View photo, add reactions & comments"
                               >
@@ -1772,7 +1772,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                             )
                           })}
                         </div>
-                        <p className="text-[10px] text-[#b8925a] font-semibold flex items-center gap-1">
+                        <p className="text-[10px] text-mauve font-semibold flex items-center gap-1">
                           <span>✨ Uploaded {item.photos?.length || 0} high-resolution prints to Capsule</span>
                         </p>
                       </div>
@@ -1813,7 +1813,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           </div>
                           <button
                             onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
-                            className="text-[10px] font-bold text-[#b8925a] hover:text-mauve-strong flex items-center gap-1.5 rounded-full bg-[#b8925a]/10 px-2.5 py-1 border border-[#b8925a]/20"
+                            className="text-[10px] font-bold text-mauve hover:text-mauve-strong flex items-center gap-1.5 rounded-full bg-mauve/10 px-2.5 py-1 border border-mauve/20"
                           >
                             <MessageSquare className="h-3 w-3" /> React & Comment
                           </button>
@@ -1824,12 +1824,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     {/* Voice audio card contribution */}
                     {item.type === "voice" && (
                       <div className="space-y-2.5">
-                        <div className="flex items-center gap-3 bg-gradient-to-r from-[#b8925a]/10 via-[#ffffff] to-[#b8925a]/5 border border-[#e5dfd0] p-3 rounded-2xl shadow-sm">
-                          <div className="h-9 w-9 rounded-full bg-[#b8925a] text-white flex items-center justify-center shrink-0 shadow-md">
+                        <div className="flex items-center gap-3 bg-gradient-to-r from-mauve/10 via-[#ffffff] to-mauve/5 border border-[#e5dfd0] p-3 rounded-2xl shadow-sm">
+                          <div className="h-9 w-9 rounded-full bg-mauve text-white flex items-center justify-center shrink-0 shadow-md">
                             <Mic className="h-4 w-4" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[10px] font-bold text-[#b8925a] uppercase tracking-wider block">Voice Note</span>
+                            <span className="text-[10px] font-bold text-mauve uppercase tracking-wider block">Voice Note</span>
                             <audio
                               src={item.audioUrl}
                               controls
@@ -1844,7 +1844,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           <span className="text-[10px] text-ink-tertiary">Audio recording</span>
                           <button
                             onClick={() => item.raw && setActiveLightboxMedia(toLightboxMedia(item.raw))}
-                            className="text-[10px] font-bold text-[#b8925a] hover:text-mauve-strong flex items-center gap-1.5 rounded-full bg-[#b8925a]/10 px-2.5 py-1 border border-[#b8925a]/20"
+                            className="text-[10px] font-bold text-mauve hover:text-mauve-strong flex items-center gap-1.5 rounded-full bg-mauve/10 px-2.5 py-1 border border-mauve/20"
                           >
                             <MessageSquare className="h-3 w-3" /> React & Comment
                           </button>
@@ -1867,7 +1867,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4 text-center relative overflow-hidden">
             <div className="flex items-center justify-between border-b border-hairline-dark pb-3">
               <div className="flex items-center gap-2">
-                <QrCode className="h-4.5 w-4.5 text-[#b8925a]" />
+                <QrCode className="h-4.5 w-4.5 text-mauve" />
                 <h3 className="text-sm font-bold text-ink">Event QR Code</h3>
               </div>
               <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
@@ -1911,7 +1911,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
             <div className="p-3 bg-ink/5 border border-hairline-dark rounded-2xl flex items-center justify-between gap-2">
               <div className="text-left">
                 <p className="text-[9px] font-bold uppercase tracking-wider text-ink-secondary">Or Join With Code</p>
-                <p className="inline-block mt-1 text-base font-bold tracking-[0.2em] text-[#b8925a] font-mono bg-[#faf6ed] border border-[#e5dfd0] rounded-full px-3 py-1">
+                <p className="inline-block mt-1 text-base font-bold tracking-[0.2em] text-mauve font-mono bg-[#faf6ed] border border-[#e5dfd0] rounded-full px-3 py-1">
                   {event.join_code || "——————"}
                 </p>
               </div>
@@ -1947,7 +1947,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               size="sm"
               onClick={handleShareInvitation}
               disabled={sharing !== null}
-              className="w-full text-xs bg-[#b8925a] hover:bg-[#96723a] text-[#faf6ed] font-semibold flex items-center justify-center gap-1.5 rounded-full"
+              className="w-full text-xs bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold flex items-center justify-center gap-1.5 rounded-full"
             >
               {sharing === "native" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />}
               <span>Share Invitation</span>
@@ -1995,12 +1995,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           {memoriesEnabled && (
             <>
               <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-3">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[#b8925a] font-bold">✨ Snapsy Memories</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-mauve font-bold">✨ Snapsy Memories</p>
               </div>
 
               {unviewedStory && (
-                <div className="rounded-3xl border border-[#b8925a]/30 bg-gradient-to-br from-[#b8925a]/10 to-transparent p-5 flex items-center gap-3">
-                  <Gift className="h-5 w-5 text-[#b8925a] shrink-0" />
+                <div className="rounded-3xl border border-mauve/30 bg-gradient-to-br from-mauve/10 to-transparent p-5 flex items-center gap-3">
+                  <Gift className="h-5 w-5 text-mauve shrink-0" />
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-ink truncate">{unviewedStory.title}</p>
                     <p className="text-[10px] text-ink-secondary">A memory story just unlocked for this event</p>
@@ -2011,7 +2011,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               {/* Guest Awards */}
               <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
                 <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
-                  <Trophy className="h-4.5 w-4.5 text-[#b8925a]" />
+                  <Trophy className="h-4.5 w-4.5 text-mauve" />
                   <h3 className="text-sm font-bold text-ink">Guest Awards</h3>
                 </div>
                 {memoriesAwards && memoriesAwards.awards.length > 0 ? (
@@ -2033,12 +2033,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
                 <div className="flex items-center justify-between gap-2 border-b border-hairline-dark pb-2">
                   <div className="flex items-center gap-2">
-                    <Images className="h-4.5 w-4.5 text-[#b8925a]" />
+                    <Images className="h-4.5 w-4.5 text-mauve" />
                     <h3 className="text-sm font-bold text-ink">Event Summary</h3>
                   </div>
                   <a
                     href={event?.id ? `/api/events/${event.id}/memories/summary/pdf` : "#"}
-                    className="text-[10px] font-semibold text-[#b8925a] hover:underline flex items-center gap-1"
+                    className="text-[10px] font-semibold text-mauve hover:underline flex items-center gap-1"
                   >
                     <FileDown className="h-3 w-3" /> PDF
                   </a>
@@ -2080,7 +2080,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               {/* Auto Collage */}
               <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
                 <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
-                  <LayoutGrid className="h-4.5 w-4.5 text-[#b8925a]" />
+                  <LayoutGrid className="h-4.5 w-4.5 text-mauve" />
                   <h3 className="text-sm font-bold text-ink">Auto Collage</h3>
                 </div>
                 <div className={`grid gap-1.5 ${customLayoutsEnabled ? "grid-cols-5" : "grid-cols-4"}`}>
@@ -2092,7 +2092,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       key={layout}
                       onClick={() => setCollageLayout(layout)}
                       className={`rounded-lg border py-2 text-[10px] font-semibold transition-colors ${collageLayout === layout
-                          ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                          ? "border-mauve bg-mauve/15 text-mauve"
                           : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                         }`}
                     >
@@ -2132,7 +2132,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               {smartAlbumsEnabled && (
                 <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
                   <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
-                    <FolderOpen className="h-4.5 w-4.5 text-[#b8925a]" />
+                    <FolderOpen className="h-4.5 w-4.5 text-mauve" />
                     <h3 className="text-sm font-bold text-ink">Smart Albums</h3>
                   </div>
                   {memoriesAlbums && memoriesAlbums.albums.length > 0 ? (
@@ -2170,7 +2170,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               {/* Slideshow — live in-browser player, no video export/encoding cost */}
               <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
                 <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
-                  <PlayCircle className="h-4.5 w-4.5 text-[#b8925a]" />
+                  <PlayCircle className="h-4.5 w-4.5 text-mauve" />
                   <h3 className="text-sm font-bold text-ink">Slideshow</h3>
                 </div>
                 <div className="grid grid-cols-3 gap-1.5">
@@ -2179,7 +2179,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       key={d}
                       onClick={() => setSlideshowDuration(d)}
                       className={`rounded-lg border py-2 text-[10px] font-semibold transition-colors ${slideshowDuration === d
-                          ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                          ? "border-mauve bg-mauve/15 text-mauve"
                           : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                         }`}
                     >
@@ -2193,7 +2193,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     <button
                       onClick={() => setSlideshowMusicTrack(null)}
                       className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left ${slideshowMusicTrack === null
-                          ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                          ? "border-mauve bg-mauve/15 text-mauve"
                           : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                         }`}
                     >
@@ -2205,7 +2205,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                         onClick={() => setSlideshowMusicTrack(track.id)}
                         title={track.mood}
                         className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left ${slideshowMusicTrack === track.id
-                            ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                            ? "border-mauve bg-mauve/15 text-mauve"
                             : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                           }`}
                       >
@@ -2270,7 +2270,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
               finished. No server-side ffmpeg — see movie-renderer.ts. */}
               <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
                 <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
-                  <Film className="h-4.5 w-4.5 text-[#b8925a]" />
+                  <Film className="h-4.5 w-4.5 text-mauve" />
                   <h3 className="text-sm font-bold text-ink">Movie</h3>
                 </div>
                 <div className="grid grid-cols-3 gap-1.5">
@@ -2280,7 +2280,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       onClick={() => setMovieDuration(d)}
                       disabled={movieRendering}
                       className={`rounded-lg border py-2 text-[10px] font-semibold transition-colors disabled:opacity-50 ${movieDuration === d
-                          ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                          ? "border-mauve bg-mauve/15 text-mauve"
                           : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                         }`}
                     >
@@ -2295,7 +2295,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       onClick={() => setMovieMusicTrack(null)}
                       disabled={movieRendering}
                       className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left disabled:opacity-50 ${movieMusicTrack === null
-                          ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                          ? "border-mauve bg-mauve/15 text-mauve"
                           : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                         }`}
                     >
@@ -2308,7 +2308,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                         title={track.mood}
                         disabled={movieRendering}
                         className={`rounded-lg border py-2 px-2 text-[10px] font-semibold transition-colors text-left disabled:opacity-50 ${movieMusicTrack === track.id
-                            ? "border-[#b8925a] bg-[#b8925a]/15 text-[#b8925a]"
+                            ? "border-mauve bg-mauve/15 text-mauve"
                             : "border-hairline-dark bg-ink/5 text-ink-secondary hover:border-mauve/30"
                           }`}
                       >
@@ -2329,7 +2329,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                 {movieRendering && (
                   <div className="space-y-1.5">
                     <div className="h-1.5 w-full rounded-full bg-ink/10 overflow-hidden">
-                      <div className="h-full bg-[#b8925a] transition-all duration-300" style={{ width: `${Math.round(movieProgress * 100)}%` }} />
+                      <div className="h-full bg-mauve transition-all duration-300" style={{ width: `${Math.round(movieProgress * 100)}%` }} />
                     </div>
                     <p className="text-[10px] text-ink-tertiary text-center">Keep this tab open — your movie is recording in real time.</p>
                   </div>
@@ -2351,7 +2351,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     </Button>
                     <Button
                       disabled={movieSharing}
-                      className="w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-[#b8925a] hover:bg-[#96723a] text-black text-xs font-semibold py-3 transition-colors disabled:opacity-60"
+                      className="w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-mauve hover:bg-mauve-strong text-black text-xs font-semibold py-3 transition-colors disabled:opacity-60"
                       onClick={handleShareMovieFile}
                     >
                       <Share2 className="h-3.5 w-3.5" /> {movieSharing ? "Preparing…" : "Share to Story"}
@@ -2368,7 +2368,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
           {/* Recent Activity waterfall feed */}
           <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-4">
             <div className="flex items-center gap-2 border-b border-hairline-dark pb-2">
-              <Activity className="h-4.5 w-4.5 text-[#b8925a]" />
+              <Activity className="h-4.5 w-4.5 text-mauve" />
               <h3 className="text-sm font-bold text-ink">Recent Guest Activity</h3>
             </div>
 
@@ -2388,15 +2388,15 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
           {/* Quick Actions Shortcuts */}
           <div className="rounded-3xl border border-[#e5dfd0] bg-[#ffffff] p-5 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#b8925a]">Host Quick Tools</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-mauve">Host Quick Tools</h3>
 
             <div className="grid grid-cols-2 gap-2.5">
-              <Link href={`/dashboard/events/${event.slug}/qr`} className="p-3 border border-hairline-dark rounded-xl text-center space-y-1 hover:border-[#b8925a]/50 transition-all bg-ink/5">
-                <QrCode className="h-4 w-4 text-[#b8925a] mx-auto" />
+              <Link href={`/dashboard/events/${event.slug}/qr`} className="p-3 border border-hairline-dark rounded-xl text-center space-y-1 hover:border-mauve/50 transition-all bg-ink/5">
+                <QrCode className="h-4 w-4 text-mauve mx-auto" />
                 <p className="text-[10px] font-bold text-ink">QR Manager</p>
               </Link>
-              <Link href={`/dashboard/events/${event.slug}/gallery`} className="p-3 border border-hairline-dark rounded-xl text-center space-y-1 hover:border-[#b8925a]/50 transition-all bg-ink/5">
-                <Images className="h-4 w-4 text-[#b8925a] mx-auto" />
+              <Link href={`/dashboard/events/${event.slug}/gallery`} className="p-3 border border-hairline-dark rounded-xl text-center space-y-1 hover:border-mauve/50 transition-all bg-ink/5">
+                <Images className="h-4 w-4 text-mauve mx-auto" />
                 <p className="text-[10px] font-bold text-ink">Gallery Toggles</p>
               </Link>
             </div>
@@ -2455,7 +2455,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       id="name"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="!bg-white border-hairline-dark !text-ink placeholder:!text-ink-tertiary focus-visible:!ring-[#b8925a] focus:border-[#b8925a]"
+                      className="!bg-white border-hairline-dark !text-ink placeholder:!text-ink-tertiary focus-visible:!ring-mauve focus:border-mauve"
                     />
                   </div>
 
@@ -2466,7 +2466,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       type="datetime-local"
                       value={editEndDate}
                       onChange={(e) => setEditEndDate(e.target.value)}
-                      className="!bg-white border-hairline-dark !text-ink placeholder:!text-ink-tertiary focus-visible:!ring-[#b8925a] focus:border-[#b8925a] [color-scheme:light]"
+                      className="!bg-white border-hairline-dark !text-ink placeholder:!text-ink-tertiary focus-visible:!ring-mauve focus:border-mauve [color-scheme:light]"
                     />
                   </div>
 
@@ -2476,7 +2476,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       id="status"
                       value={editStatus}
                       onChange={(e) => setEditStatus(e.target.value as EventStatus)}
-                      className="w-full h-10 rounded-xl border border-hairline-dark bg-white text-ink px-3 py-2 text-sm focus:border-[#b8925a] focus:ring-1 focus:ring-[#b8925a] outline-none cursor-pointer [color-scheme:light]"
+                      className="w-full h-10 rounded-xl border border-hairline-dark bg-white text-ink px-3 py-2 text-sm focus:border-mauve focus:ring-1 focus:ring-mauve outline-none cursor-pointer [color-scheme:light]"
                     >
                       <option value="draft" className="bg-white text-ink py-1.5 px-3">Draft</option>
                       <option value="published" className="bg-white text-ink py-1.5 px-3">Published (Live)</option>
@@ -2491,7 +2491,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       id="reveal"
                       value={editRevealExperience}
                       onChange={(e) => setEditRevealExperience(e.target.value)}
-                      className="w-full h-10 rounded-xl border border-hairline-dark bg-white text-ink px-3 py-2 text-sm focus:border-[#b8925a] focus:ring-1 focus:ring-[#b8925a] outline-none cursor-pointer [color-scheme:light]"
+                      className="w-full h-10 rounded-xl border border-hairline-dark bg-white text-ink px-3 py-2 text-sm focus:border-mauve focus:ring-1 focus:ring-mauve outline-none cursor-pointer [color-scheme:light]"
                     >
                       <option value="immediately" className="bg-white text-ink py-1.5 px-3">Immediately</option>
                       <option value="during" className="bg-white text-ink py-1.5 px-3">During Event</option>
@@ -2551,7 +2551,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                                 setEditAllowedFilters(prev => prev.filter(id => id !== filter.id))
                               }
                             }}
-                            className="rounded border-hairline-dark bg-white text-[#b8925a] focus:ring-[#b8925a]"
+                            className="rounded border-hairline-dark bg-white text-mauve focus:ring-mauve"
                           />
                           <Label htmlFor={`filter-${filter.id}`} className="text-xs text-ink-secondary">{filter.name}</Label>
                         </div>
@@ -2561,7 +2561,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
                   {/* Settings toggle display list */}
                   <div className="border border-hairline-dark rounded-xl p-4 bg-white space-y-4">
-                    <p className="text-[10px] uppercase tracking-wider text-[#b8925a] font-bold">Capsule Locks & Limits</p>
+                    <p className="text-[10px] uppercase tracking-wider text-mauve font-bold">Capsule Locks & Limits</p>
 
                     <div className="flex items-center justify-between text-xs text-ink-secondary">
                       <span>Auto face cluster indexing</span>
@@ -2573,7 +2573,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       <select
                         value={editVideoDuration}
                         onChange={(e) => setEditVideoDuration(Number(e.target.value))}
-                        className="rounded-lg border border-hairline-dark bg-white px-2.5 py-1 text-xs font-semibold text-ink focus:outline-none focus:ring-1 focus:ring-[#b8925a] cursor-pointer [color-scheme:light]"
+                        className="rounded-lg border border-hairline-dark bg-white px-2.5 py-1 text-xs font-semibold text-ink focus:outline-none focus:ring-1 focus:ring-mauve cursor-pointer [color-scheme:light]"
                       >
                         <option value={5} className="bg-white text-ink">5 seconds</option>
                         <option value={10} className="bg-white text-ink">10 seconds</option>
@@ -2589,7 +2589,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                       <select
                         value={editVoiceDuration}
                         onChange={(e) => setEditVoiceDuration(Number(e.target.value))}
-                        className="rounded-lg border border-hairline-dark bg-white px-2.5 py-1 text-xs font-semibold text-ink focus:outline-none focus:ring-1 focus:ring-[#b8925a] cursor-pointer [color-scheme:light]"
+                        className="rounded-lg border border-hairline-dark bg-white px-2.5 py-1 text-xs font-semibold text-ink focus:outline-none focus:ring-1 focus:ring-mauve cursor-pointer [color-scheme:light]"
                       >
                         <option value={5} className="bg-white text-ink">5 seconds</option>
                         <option value={10} className="bg-white text-ink">10 seconds</option>
@@ -2610,7 +2610,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           type="checkbox"
                           checked={editMemoriesEnabled}
                           onChange={(e) => setEditMemoriesEnabled(e.target.checked)}
-                          className="rounded border-hairline-dark bg-white text-[#b8925a] focus:ring-[#b8925a] h-4 w-4"
+                          className="rounded border-hairline-dark bg-white text-mauve focus:ring-mauve h-4 w-4"
                         />
                       </label>
                     </div>
@@ -2631,7 +2631,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           type="checkbox"
                           checked={editRequireJoinCode}
                           onChange={(e) => setEditRequireJoinCode(e.target.checked)}
-                          className="rounded border-hairline-dark bg-white text-[#b8925a] focus:ring-[#b8925a] h-4 w-4"
+                          className="rounded border-hairline-dark bg-white text-mauve focus:ring-mauve h-4 w-4"
                         />
                       </label>
                     </div>
@@ -2651,7 +2651,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                           type="checkbox"
                           checked={editRequirePhotoApproval}
                           onChange={(e) => setEditRequirePhotoApproval(e.target.checked)}
-                          className="rounded border-hairline-dark bg-white text-[#b8925a] focus:ring-[#b8925a] h-4 w-4"
+                          className="rounded border-hairline-dark bg-white text-mauve focus:ring-mauve h-4 w-4"
                         />
                       </label>
                     </div>
@@ -2661,7 +2661,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
                     <Button type="button" variant="outline" onClick={() => setIsDrawerOpen(false)} className="flex-1 rounded-full border border-hairline-dark bg-transparent text-ink hover:bg-mauve/5">
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={updateMutation.isPending} className="flex-1 bg-[#b8925a] text-[#faf6ed] font-semibold hover:bg-[#96723a] rounded-full border-none">
+                    <Button type="submit" disabled={updateMutation.isPending} className="flex-1 bg-mauve text-[#1a1410] font-semibold hover:bg-mauve-strong rounded-full border-none">
                       {updateMutation.isPending ? "Saving..." : "Save Settings"}
                     </Button>
                   </div>

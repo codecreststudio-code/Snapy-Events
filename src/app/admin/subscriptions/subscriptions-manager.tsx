@@ -239,7 +239,7 @@ export function SubscriptionsManager() {
                 )}
               </div>
               <div className="flex gap-3 pt-1">
-                <Button type="submit" disabled={subActioning} className="flex-1 bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold text-xs h-9">
+                <Button type="submit" disabled={subActioning} className="flex-1 bg-mauve hover:bg-mauve-strong text-[#1a1410] font-bold text-xs h-9">
                   <Save className="h-3.5 w-3.5 mr-1.5" />{subActioning ? "Saving…" : "Save Changes"}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => setEditingSub(null)} className="border-hairline-dark font-bold text-xs h-9">Cancel</Button>

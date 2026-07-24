@@ -14,8 +14,8 @@ export default function OfflinePage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#faf6ed] px-6 text-center text-ink">
       <Logo />
-      <div className="mt-8 flex h-16 w-16 items-center justify-center rounded-full bg-[#b8925a]/10">
-        <WifiOff className="h-8 w-8 text-[#b8925a]" />
+      <div className="mt-8 flex h-16 w-16 items-center justify-center rounded-full bg-mauve/10">
+        <WifiOff className="h-8 w-8 text-mauve" />
       </div>
       <h1 className="font-playfair mt-6 text-2xl font-medium text-ink">You&apos;re offline</h1>
       <p className="mt-2 max-w-sm text-sm text-ink-secondary">
@@ -24,7 +24,7 @@ export default function OfflinePage() {
       </p>
       <Link
         href="/"
-        className="mt-8 rounded-full bg-[#b8925a] px-6 py-3 text-sm font-bold text-[#faf6ed] transition-transform hover:scale-[1.02] hover:bg-[#96723a] active:scale-[0.98]"
+        className="mt-8 rounded-full bg-mauve px-6 py-3 text-sm font-bold text-[#1a1410] transition-transform hover:scale-[1.02] hover:bg-mauve-strong active:scale-[0.98]"
       >
         Back to Home
       </Link>

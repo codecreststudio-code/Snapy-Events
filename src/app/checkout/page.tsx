@@ -403,7 +403,7 @@ function CheckoutForm() {
             This checkout link is missing its event. Please start checkout from your event creation wizard or dashboard.
           </p>
           <Link href="/dashboard">
-            <Button className="mt-2 bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold rounded-xl border-none">
+            <Button className="mt-2 bg-mauve hover:bg-mauve-strong text-[#1a1410] font-bold rounded-xl border-none">
               Back to Dashboard
             </Button>
           </Link>
@@ -558,7 +558,7 @@ function CheckoutForm() {
               <Button
                 onClick={totalPrice > 0 ? handlePayment : handleFreeActivation}
                 disabled={initiating}
-                className="w-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold py-6 rounded-xl shadow-lg shadow-mauve/10 flex items-center justify-center gap-2 border-none hover:scale-[1.01] active:scale-[0.99] transition-all"
+                className="w-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-bold py-6 rounded-xl shadow-lg shadow-mauve/10 flex items-center justify-center gap-2 border-none hover:scale-[1.01] active:scale-[0.99] transition-all"
               >
                 {initiating ? (
                   <>

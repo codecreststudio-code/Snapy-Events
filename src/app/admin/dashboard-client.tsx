@@ -410,7 +410,7 @@ export default function DashboardClient() {
               <Button
                 onClick={handleCustomApply}
                 size="sm"
-                className="h-7 text-[10px] bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-bold px-2 rounded-md"
+                className="h-7 text-[10px] bg-mauve hover:bg-mauve-strong text-[#1a1410] font-bold px-2 rounded-md"
               >
                 Apply
               </Button>
@@ -428,7 +428,7 @@ export default function DashboardClient() {
             <Download className="h-4 w-4 text-ink-secondary" />
             <span>Export CSV</span>
           </Button>
-          <Button onClick={() => handleExport("pdf")} className="h-9 rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold gap-1.5">
+          <Button onClick={() => handleExport("pdf")} className="h-9 rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold gap-1.5">
             <Download className="h-4 w-4" />
             <span>Export PDF</span>
           </Button>

@@ -44,7 +44,7 @@ export function ContactForm() {
         <Textarea id="message" name="message" rows={5} required className="bg-mauve/5 border-hairline-dark text-ink placeholder:text-ink-tertiary focus:border-mauve focus:ring-mauve" />
       </div>
       {error && <p className="text-sm text-red-400">{error}</p>}
-      <Button type="submit" disabled={pending} className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+      <Button type="submit" disabled={pending} className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
         {pending ? "Sending…" : "Send message"}
       </Button>
     </form>

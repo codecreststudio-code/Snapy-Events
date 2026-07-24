@@ -271,7 +271,7 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
               </p>
 
               <div className="flex flex-wrap gap-4 pt-4">
-                <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-8 shadow-lg shadow-mauve/15">
+                <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold px-8 shadow-lg shadow-mauve/15">
                   <Link href="/signup">
                     Get Started Free with Snapsy Events
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -377,7 +377,7 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
               Start your free event gallery today or choose from flexible event pricing plans.
             </p>
             <div className="pt-2">
-              <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-9 py-6 text-sm">
+              <Button asChild size="lg" className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold px-9 py-6 text-sm">
                 <Link href="/signup">Create Event Now</Link>
               </Button>
             </div>

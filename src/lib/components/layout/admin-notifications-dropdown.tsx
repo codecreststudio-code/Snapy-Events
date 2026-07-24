@@ -73,7 +73,7 @@ export function AdminNotificationsDropdown() {
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-mauve text-[10px] font-bold text-[#faf6ed] ring-2 ring-surface-card">
+            <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-mauve text-[10px] font-bold text-[#1a1410] ring-2 ring-surface-card">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}

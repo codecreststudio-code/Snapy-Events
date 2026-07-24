@@ -184,7 +184,7 @@ function InlineNewsletter() {
         required
         className="flex-1 rounded-xl border border-hairline-dark bg-mauve/5 px-4 py-2.5 text-sm text-ink placeholder:text-ink-tertiary focus:outline-none focus-visible:ring-2 focus-visible:ring-mauve/50 min-w-0"
       />
-      <Button type="submit" className="rounded-xl bg-mauve hover:bg-mauve-strong text-[#faf6ed] font-semibold px-5 shrink-0 text-sm">
+      <Button type="submit" className="rounded-xl bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold px-5 shrink-0 text-sm">
         Subscribe
       </Button>
     </form>
@@ -428,7 +428,7 @@ export default function BlogPostClient({ post, related }: { post: BlogPost; rela
                   QR photo galleries, AI face search, and live photo walls — all in one platform.
                 </p>
                 <Link href="/signup">
-                  <Button className="w-full rounded-xl bg-mauve hover:bg-mauve-strong text-[#faf6ed] text-sm font-semibold transition-all">
+                  <Button className="w-full rounded-xl bg-mauve hover:bg-mauve-strong text-[#1a1410] text-sm font-semibold transition-all">
                     Get Started Free →
                   </Button>
                 </Link>

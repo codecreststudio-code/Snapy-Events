@@ -95,7 +95,7 @@ export default function EventsPage() {
             <h1 className="font-playfair text-3xl font-light text-ink">Events</h1>
             <p className="text-ink-secondary text-sm">Manage your event hubs</p>
           </div>
-          <Button disabled className="rounded-full bg-[#b8925a] text-[#faf6ed] font-semibold">
+          <Button disabled className="rounded-full bg-mauve text-[#1a1410] font-semibold">
             <Plus className="mr-2 h-4 w-4" /> Create Event
           </Button>
         </div>
@@ -121,7 +121,7 @@ export default function EventsPage() {
           </p>
         </div>
         <Link href="/dashboard/events/new">
-          <Button className="rounded-full bg-[#b8925a] hover:bg-[#96723a] text-[#faf6ed] font-semibold shadow-lg shadow-[#b8925a]/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+          <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
             <Plus className="mr-2 h-4 w-4" />
             Create Event
           </Button>
@@ -138,7 +138,7 @@ export default function EventsPage() {
             key={tab.id}
             onClick={() => setActiveFilter(tab.id)}
             className={`px-4 py-1.5 rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeFilter === tab.id ? "bg-[#b8925a] text-[#faf6ed] font-bold" : "text-ink-secondary hover:text-ink"
+              activeFilter === tab.id ? "bg-mauve text-[#1a1410] font-bold" : "text-ink-secondary hover:text-ink"
             }`}
           >
             {tab.label}
@@ -170,7 +170,7 @@ export default function EventsPage() {
             return (
             <Card
               key={event.id}
-              className={`overflow-hidden rounded-2xl border border-[#e5dfd0] bg-[#ffffff] hover:border-[#b8925a]/40 hover:shadow-xl hover:shadow-[#b8925a]/5 transition-all duration-300 group flex flex-col justify-between ${
+              className={`overflow-hidden rounded-2xl border border-[#e5dfd0] bg-[#ffffff] hover:border-mauve/40 hover:shadow-xl hover:shadow-mauve/5 transition-all duration-300 group flex flex-col justify-between ${
                 isArchived ? "opacity-70" : ""
               }`}
             >
@@ -187,8 +187,8 @@ export default function EventsPage() {
                       className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${isArchived ? "grayscale" : ""}`}
                     />
                   ) : coverGradient ? null : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#b8925a]/5 to-[#b8925a]/10 flex items-center justify-center">
-                      <Camera className="h-10 w-10 text-ink-tertiary group-hover:text-[#b8925a]/50 transition-colors" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-mauve/5 to-mauve/10 flex items-center justify-center">
+                      <Camera className="h-10 w-10 text-ink-tertiary group-hover:text-mauve/50 transition-colors" />
                     </div>
                   )}
 
@@ -244,7 +244,7 @@ export default function EventsPage() {
                 <div className="p-5 space-y-4">
                   <div className="space-y-1">
                     <Link href={`/dashboard/events/${event.slug}`}>
-                      <h3 className="font-semibold text-lg text-ink hover:text-[#b8925a] transition-colors line-clamp-1 leading-snug">
+                      <h3 className="font-semibold text-lg text-ink hover:text-mauve transition-colors line-clamp-1 leading-snug">
                         {event.name}
                       </h3>
                     </Link>
@@ -275,7 +275,7 @@ export default function EventsPage() {
                       ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
                       : event.status === "archived"
                         ? "bg-ink/5 border-ink/15 text-ink-secondary"
-                        : "bg-[#b8925a]/10 border-[#b8925a]/20 text-[#b8925a]"
+                        : "bg-mauve/10 border-mauve/20 text-mauve"
                   }`}
                 >
                   <span
@@ -284,7 +284,7 @@ export default function EventsPage() {
                         ? "bg-emerald-400 animate-pulse"
                         : event.status === "archived"
                           ? "bg-ink/30"
-                          : "bg-[#b8925a]"
+                          : "bg-mauve"
                     }`}
                   />
                   {event.status}
@@ -316,7 +316,7 @@ export default function EventsPage() {
             {activeFilter !== "archived" && (
               <div className="mt-6">
                 <Link href="/dashboard/events/new">
-                  <Button className="rounded-full bg-[#b8925a] hover:bg-[#96723a] text-[#faf6ed] font-semibold shadow-lg shadow-[#b8925a]/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+                  <Button className="rounded-full bg-mauve hover:bg-mauve-strong text-[#1a1410] font-semibold shadow-lg shadow-mauve/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
                     <Plus className="mr-2 h-4 w-4" />
                     Create Your First Event
                   </Button>

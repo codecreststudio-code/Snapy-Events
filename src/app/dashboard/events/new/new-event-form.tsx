@@ -745,7 +745,7 @@ export function NewEventForm() {
                           key={s}
                           onClick={() => setName(s)}
                           className={`px-4 py-2.5 text-xs rounded-full border transition-all cursor-pointer ${name === s
-                              ? "bg-mauve text-[#faf6ed] border-mauve font-semibold shadow-md"
+                              ? "bg-mauve text-[#1a1410] border-mauve font-semibold shadow-md"
                               : "border-hairline-dark bg-surface-card hover:border-mauve text-ink-secondary"
                             }`}
                         >
@@ -1159,7 +1159,7 @@ export function NewEventForm() {
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => setGuestsBoost(0)}
-                          className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${guestsBoost === 0 ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary hover:border-mauve"}`}
+                          className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${guestsBoost === 0 ? "bg-mauve text-[#1a1410] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary hover:border-mauve"}`}
                         >
                           None
                         </button>
@@ -1170,7 +1170,7 @@ export function NewEventForm() {
                           <button
                             key={boost.value}
                             onClick={() => setGuestsBoost(boost.value)}
-                            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer flex items-center gap-1 ${guestsBoost === boost.value ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary hover:border-mauve"}`}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer flex items-center gap-1 ${guestsBoost === boost.value ? "bg-mauve text-[#1a1410] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary hover:border-mauve"}`}
                           >
                             +{boost.value} guests
                             <span className={`font-bold ${guestsBoost === boost.value ? "text-white/80" : "text-mauve"}`}>₹{boost.price}</span>
@@ -1188,7 +1188,7 @@ export function NewEventForm() {
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => setShotsBoost(0)}
-                          className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${shotsBoost === 0 ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary hover:border-mauve"}`}
+                          className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${shotsBoost === 0 ? "bg-mauve text-[#1a1410] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary hover:border-mauve"}`}
                         >
                           None
                         </button>
@@ -1199,7 +1199,7 @@ export function NewEventForm() {
                           <button
                             key={boost.value}
                             onClick={() => setShotsBoost(boost.value)}
-                            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer flex items-center gap-1 ${shotsBoost === boost.value ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary hover:border-mauve"}`}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer flex items-center gap-1 ${shotsBoost === boost.value ? "bg-mauve text-[#1a1410] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary hover:border-mauve"}`}
                           >
                             +{boost.value} shots/guest
                             <span className={`font-bold ${shotsBoost === boost.value ? "text-white/80" : "text-mauve"}`}>₹{boost.price}</span>
@@ -1256,7 +1256,7 @@ export function NewEventForm() {
                                     }
                                     setPhotoLimit(val)
                                   }}
-                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${photoLimit === val ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary"
+                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${photoLimit === val ? "bg-mauve text-[#1a1410] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary"
                                     }`}
                                 >
                                   {val === -1 ? "Unlimited" : val}
@@ -1302,7 +1302,7 @@ export function NewEventForm() {
                               <button
                                 key={sec}
                                 onClick={() => setVideoDuration(sec)}
-                                className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${videoDuration === sec ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary"
+                                className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${videoDuration === sec ? "bg-mauve text-[#1a1410] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary"
                                   }`}
                               >
                                 {sec}s
@@ -1347,7 +1347,7 @@ export function NewEventForm() {
                                 <button
                                   key={sec}
                                   onClick={() => setVoiceDuration(sec)}
-                                  className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${voiceDuration === sec ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary"
+                                  className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${voiceDuration === sec ? "bg-mauve text-[#1a1410] border-mauve" : "bg-surface-card-elevated border-hairline-dark text-ink-secondary"
                                     }`}
                                 >
                                   {sec}s
@@ -1455,7 +1455,7 @@ export function NewEventForm() {
                             key={theme}
                             type="button"
                             onClick={() => setInvitationTheme(theme)}
-                            className={`px-3 py-1.5 rounded-full text-xs font-semibold capitalize border transition-all cursor-pointer ${invitationTheme === theme ? "bg-mauve text-[#faf6ed] border-mauve" : "bg-surface-card border-hairline-dark text-ink-secondary"
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold capitalize border transition-all cursor-pointer ${invitationTheme === theme ? "bg-mauve text-[#1a1410] border-mauve" : "bg-surface-card border-hairline-dark text-ink-secondary"
                               }`}
                           >
                             {theme}
@@ -1503,7 +1503,7 @@ export function NewEventForm() {
                 <Button
                   onClick={handleNext}
                   disabled={mutation.isPending}
-                  className="bg-mauve text-[#faf6ed] hover:bg-mauve-strong font-bold px-6 py-5 rounded-full flex items-center gap-2 border-none shadow-[0_4px_14px_rgba(184,146,90,0.25)] cursor-pointer"
+                  className="bg-mauve text-[#1a1410] hover:bg-mauve-strong font-bold px-6 py-5 rounded-full flex items-center gap-2 border-none shadow-[0_4px_14px_rgba(184,146,90,0.25)] cursor-pointer"
                 >
                   {mutation.isPending ? (
                     <span>Saving Capsule...</span>
@@ -1653,12 +1653,12 @@ export function NewEventForm() {
             >
 
               {/* Celebratory Badge */}
-              <div className="absolute -top-9 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-[#b8925a] flex items-center justify-center shadow-lg border-4 border-[#ffffff]">
-                <Sparkles className="h-8 w-8 text-[#faf6ed]" />
+              <div className="absolute -top-9 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-mauve flex items-center justify-center shadow-lg border-4 border-[#ffffff]">
+                <Sparkles className="h-8 w-8 text-[#1a1410]" />
               </div>
 
               <div className="text-center pt-8 space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#b8925a]">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-mauve">
                   {totalEventPrice > 0 ? "Almost There" : "Setup Complete"}
                 </span>
                 <h2 className={`font-playfair text-3xl sm:text-4xl font-medium text-ink`}>
@@ -1712,7 +1712,7 @@ export function NewEventForm() {
 
                   <div className="text-center space-y-0.5">
                     <p className="text-sm font-semibold text-ink">{name}</p>
-                    <p className="text-[10px] uppercase tracking-widest text-[#b8925a] font-bold">Plan: {(selectedPlan?.name || guestCountPlan).toUpperCase()}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-mauve font-bold">Plan: {(selectedPlan?.name || guestCountPlan).toUpperCase()}</p>
                   </div>
 
                   {/* Copyable join/invite pill */}
@@ -1721,7 +1721,7 @@ export function NewEventForm() {
                     className="w-full max-w-xs flex items-center justify-between gap-2 rounded-full border border-hairline-dark bg-transparent px-4 py-2 text-ink hover:bg-mauve/10 transition-all cursor-pointer"
                   >
                     <span className="truncate text-xs font-mono">{createdEvent?.slug}</span>
-                    <Copy className="h-3.5 w-3.5 shrink-0 text-[#b8925a]" />
+                    <Copy className="h-3.5 w-3.5 shrink-0 text-mauve" />
                   </button>
 
                   {/* Share/Download Actions */}
@@ -1757,7 +1757,7 @@ export function NewEventForm() {
 
               {totalEventPrice > 0 && (
                 <div className="border border-[#e5dfd0] rounded-2xl p-5 bg-[#faf6ed] text-center space-y-1">
-                  <p className="text-[10px] uppercase tracking-widest text-[#b8925a] font-bold">Amount Due</p>
+                  <p className="text-[10px] uppercase tracking-widest text-mauve font-bold">Amount Due</p>
                   <p className="text-2xl font-playfair text-ink">₹{totalEventPrice.toLocaleString("en-IN")}</p>
                   <p className="text-xs text-ink-secondary">Plan: {(selectedPlan?.name || guestCountPlan).toUpperCase()}</p>
                 </div>
@@ -1774,7 +1774,7 @@ export function NewEventForm() {
                 </Button>
                 <Button
                   onClick={handleLaunch}
-                  className="flex-1 rounded-full bg-[#b8925a] text-[#faf6ed] hover:bg-[#96723a] font-bold py-5 border-none shadow-[0_4px_14px_rgba(184,146,90,0.25)]"
+                  className="flex-1 rounded-full bg-mauve text-[#1a1410] hover:bg-mauve-strong font-bold py-5 border-none shadow-[0_4px_14px_rgba(184,146,90,0.25)]"
                 >
                   {totalEventPrice > 0 ? "Complete Payment" : "Launch Event"}
                 </Button>
