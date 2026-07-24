@@ -220,7 +220,7 @@ export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null;
     const activeSocials = Object.entries(siteBranding.social_links || {}).filter(([, url]) => url?.trim())
     const socialLinksHtml = activeSocials.length > 0
       ? `<div style="margin: 14px 0 10px; font-size: 11px;">
-          ${activeSocials.map(([platform, url]) => `<a href="${url}" target="_blank" style="color: #eab308; text-decoration: none; margin: 0 8px; font-weight: 600;">${platform.charAt(0).toUpperCase() + platform.slice(1)}</a>`).join(" • ")}
+          ${activeSocials.map(([platform, url]) => `<a href="${url}" target="_blank" style="color: #e5c178; text-decoration: none; margin: 0 8px; font-weight: 600;">${platform.charAt(0).toUpperCase() + platform.slice(1)}</a>`).join(" • ")}
         </div>`
       : `<div style="margin: 14px 0 10px; font-size: 11px;">
           <a href="https://wa.me/" target="_blank" style="color: #22c55e; text-decoration: none; margin: 0 8px; font-weight: 600;">WhatsApp</a> • 
@@ -235,10 +235,10 @@ export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null;
 
     const builtByCredit = siteBranding.footer_credits?.built_by
       ? `<div style="margin-top: 10px; font-size: 11px; color: #a1a1aa;">
-          Built with <span style="color: #ef4444;">❤️</span> by ${siteBranding.footer_credits.built_by_url ? `<a href="${siteBranding.footer_credits.built_by_url}" target="_blank" style="color: #eab308; text-decoration: underline; font-weight: 600;">${siteBranding.footer_credits.built_by}</a>` : `<span style="color: #eab308; font-weight: 600;">${siteBranding.footer_credits.built_by}</span>`}
+          Built with <span style="color: #ef4444;">❤️</span> by ${siteBranding.footer_credits.built_by_url ? `<a href="${siteBranding.footer_credits.built_by_url}" target="_blank" style="color: #e5c178; text-decoration: underline; font-weight: 600;">${siteBranding.footer_credits.built_by}</a>` : `<span style="color: #e5c178; font-weight: 600;">${siteBranding.footer_credits.built_by}</span>`}
         </div>`
       : `<div style="margin-top: 10px; font-size: 11px; color: #a1a1aa;">
-          Built with <span style="color: #ef4444;">❤️</span> by <a href="https://codecreststudio.vercel.app/" target="_blank" style="color: #eab308; text-decoration: underline; font-weight: 600;">CodeCrest Studio</a>
+          Built with <span style="color: #ef4444;">❤️</span> by <a href="https://codecreststudio.vercel.app/" target="_blank" style="color: #e5c178; text-decoration: underline; font-weight: 600;">CodeCrest Studio</a>
         </div>`
 
     const logoUrl = settings.logo_url || "https://snapsy-events.vercel.app/Logo.png"
@@ -248,7 +248,7 @@ export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null;
       <table style="width: 100%; max-width: 620px; margin: 0 auto 12px; font-size: 11px; color: #a1a1aa;">
         <tr>
           <td style="text-align: left;">Welcome to Snapsy Event! Let's get your account secure.</td>
-          <td style="text-align: right;">Having trouble viewing? <a href="${serverEnv.APP_URL}" style="color: #eab308; text-decoration: underline;">View in browser</a></td>
+          <td style="text-align: right;">Having trouble viewing? <a href="${serverEnv.APP_URL}" style="color: #e5c178; text-decoration: underline;">View in browser</a></td>
         </tr>
       </table>
 
@@ -256,7 +256,7 @@ export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null;
       <div style="max-width: 620px; margin: 0 auto; background-color: #08080a; border-radius: 20px; overflow: hidden; border: 1px solid #1f1f23; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
 
         <!-- Hero Header with Golden Wave Shimmer -->
-        <div style="background: radial-gradient(circle at 50% 0%, #2b2310 0%, #0c0b08 70%), linear-gradient(180deg, #16120b 0%, #08080a 100%); border-top: 3px solid #ca8a04; padding: 36px 24px 28px; text-align: center;">
+        <div style="background: radial-gradient(circle at 50% 0%, #29200f 0%, #0c0b08 70%), linear-gradient(180deg, #16120b 0%, #08080a 100%); border-top: 3px solid #c5a059; padding: 36px 24px 28px; text-align: center;">
           <div style="margin-bottom: 12px;">
             <img src="${logoUrl}" alt="${settings.sender_name}" style="height: 60px; width: auto; max-height: 60px; display: inline-block; vertical-align: middle;" />
           </div>
@@ -264,7 +264,7 @@ export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null;
             ${heroTitle}
           </div>
           <div style="font-size: 12px; font-weight: 600; color: #a1a1aa; margin-top: 8px; letter-spacing: 1px;">
-            <span style="color: #ca8a04;">——</span> ${heroSubtitle} <span style="color: #ca8a04;">——</span>
+            <span style="color: #8a6b38;">——</span> ${heroSubtitle} <span style="color: #8a6b38;">——</span>
           </div>
         </div>
 
@@ -280,22 +280,22 @@ export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null;
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="width: 25%; text-align: center; vertical-align: top; padding: 0 4px; border-right: 1px solid #27272a;">
-                  <div style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(234,179,8,0.3); background: rgba(234,179,8,0.08); margin: 0 auto 8px; line-height: 36px; font-size: 16px;">📷</div>
+                  <div style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(197,160,89,0.4); background: rgba(197,160,89,0.12); margin: 0 auto 8px; line-height: 36px; font-size: 16px;">📷</div>
                   <div style="font-size: 10px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px;">CAPTURE</div>
                   <div style="font-size: 9px; color: #a1a1aa; margin-top: 2px;">Every Moment</div>
                 </td>
                 <td style="width: 25%; text-align: center; vertical-align: top; padding: 0 4px; border-right: 1px solid #27272a;">
-                  <div style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(234,179,8,0.3); background: rgba(234,179,8,0.08); margin: 0 auto 8px; line-height: 36px; font-size: 16px;">👥</div>
+                  <div style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(197,160,89,0.4); background: rgba(197,160,89,0.12); margin: 0 auto 8px; line-height: 36px; font-size: 16px;">👥</div>
                   <div style="font-size: 10px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px;">SHARE</div>
                   <div style="font-size: 9px; color: #a1a1aa; margin-top: 2px;">With Guests</div>
                 </td>
                 <td style="width: 25%; text-align: center; vertical-align: top; padding: 0 4px; border-right: 1px solid #27272a;">
-                  <div style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(234,179,8,0.3); background: rgba(234,179,8,0.08); margin: 0 auto 8px; line-height: 36px; font-size: 16px;">☁️</div>
+                  <div style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(197,160,89,0.4); background: rgba(197,160,89,0.12); margin: 0 auto 8px; line-height: 36px; font-size: 16px;">☁️</div>
                   <div style="font-size: 10px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px;">PRESERVE</div>
                   <div style="font-size: 9px; color: #a1a1aa; margin-top: 2px;">Forever</div>
                 </td>
                 <td style="width: 25%; text-align: center; vertical-align: top; padding: 0 4px;">
-                  <div style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(234,179,8,0.3); background: rgba(234,179,8,0.08); margin: 0 auto 8px; line-height: 36px; font-size: 16px;">💛</div>
+                  <div style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(197,160,89,0.4); background: rgba(197,160,89,0.12); margin: 0 auto 8px; line-height: 36px; font-size: 16px;">💛</div>
                   <div style="font-size: 10px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px;">CHERISH</div>
                   <div style="font-size: 9px; color: #a1a1aa; margin-top: 2px;">Always</div>
                 </td>
@@ -306,7 +306,7 @@ export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null;
 
         <!-- Footer Section -->
         <div style="padding: 24px 20px 28px; text-align: center; background-color: #08080a; border-top: 1px solid #1a1a1e;">
-          <p style="font-size: 13px; font-weight: 500; color: #e4e4e7; margin: 0 0 10px;">Every Guest. Every Moment. <span style="color: #eab308; font-weight: 800;">One Shared Memory.</span></p>
+          <p style="font-size: 13px; font-weight: 500; color: #e4e4e7; margin: 0 0 10px;">Every Guest. Every Moment. <span style="color: #e5c178; font-weight: 800;">One Shared Memory.</span></p>
           ${socialLinksHtml}
           ${customTagsHtml}
           ${builtByCredit}
