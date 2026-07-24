@@ -166,15 +166,25 @@ export default function EmailDashboardClient({ initialTemplates, initialLogs, in
     if (!testTemplateId || !testRecipient) return showToast("Please select a template and enter a recipient", "err")
     setBusy(true)
     const result = await apiPost({ action: "test", template_id: testTemplateId, recipient: testRecipient })
-    // Every send writes a new email_logs row, so refetch logs regardless of
-    // outcome — otherwise the Sent/Failed header counts and the Logs tab
-    // stay stale until the user manually clicks Refresh or reloads the page.
     const r = await fetch("/api/admin/emails?resource=logs")
     const j = await r.json()
     setLogs(j.data ?? [])
     setBusy(false)
     if (result.error) return showToast("Test failed: " + result.error, "err")
     showToast(`Test email sent to ${testRecipient}`)
+  }
+
+  async function sendBroadcastEmail() {
+    if (!testTemplateId) return showToast("Please select a template to broadcast", "err")
+    if (!confirm("Send this template to ALL active newsletter subscribers now?")) return
+    setBusy(true)
+    const result = await apiPost({ action: "broadcast", template_id: testTemplateId })
+    const r = await fetch("/api/admin/emails?resource=logs")
+    const j = await r.json()
+    setLogs(j.data ?? [])
+    setBusy(false)
+    if (result.error) return showToast("Broadcast failed: " + result.error, "err")
+    showToast(result.message || "Newsletter broadcast completed successfully!")
   }
 
   // ── Settings actions ──
@@ -292,10 +302,18 @@ export default function EmailDashboardClient({ initialTemplates, initialLogs, in
                   <button
                     onClick={sendTestEmail}
                     disabled={busy}
-                    className="flex items-center gap-1.5 bg-mauve text-[#1a1410] px-4 py-2 rounded-lg text-sm font-bold hover:bg-mauve-strong disabled:opacity-50"
+                    className="flex items-center gap-1.5 bg-surface-dark border border-mauve/40 text-mauve px-4 py-2 rounded-lg text-sm font-bold hover:bg-mauve/10 disabled:opacity-50 transition-all shrink-0"
                   >
-                    {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    <Send className="h-4 w-4" />
                     Send Test
+                  </button>
+                  <button
+                    onClick={sendBroadcastEmail}
+                    disabled={busy}
+                    className="flex items-center gap-1.5 bg-mauve text-[#1a1410] px-4 py-2 rounded-lg text-sm font-bold hover:bg-mauve-strong disabled:opacity-50 transition-all shrink-0"
+                  >
+                    <Send className="h-4 w-4" />
+                    Broadcast to All
                   </button>
                 </div>
               </div>

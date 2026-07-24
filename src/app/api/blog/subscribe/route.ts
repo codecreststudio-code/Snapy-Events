@@ -2,6 +2,7 @@ import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createServiceClient } from "@/lib/supabase/server"
 import { API_RATE_LIMITS } from "@/lib/constants"
+import { sendEmail } from "@/lib/integrations/resend"
 
 const subscribeSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -50,7 +51,26 @@ export const POST = defineRoute({
       return fail("DB_ERROR", "Failed to subscribe", 500)
     }
 
-    return ok({ message: "Successfully subscribed", data })
+    // Automated Welcome Email: Trigger newsletter email automatically
+    try {
+      await sendEmail({
+        to: email.toLowerCase().trim(),
+        templateId: "newsletter",
+        variables: {
+          subscriber_name: name || "Valued Subscriber",
+          newsletter_title: "Welcome to Snapsy Events Newsletter!",
+          newsletter_content: "Thank you for subscribing to Snapsy Events! You are now on our exclusive list to receive the latest updates, AI photo sharing tips, live event features, and special host offers.",
+          cta_text: "Explore Snapsy Platform",
+          cta_url: "https://snapsy-events.vercel.app",
+          unsubscribe_url: "https://snapsy-events.vercel.app/delete-data",
+        },
+        tags: [{ name: "type", value: "newsletter_welcome" }],
+      })
+    } catch (emailErr) {
+      console.error("[blog/subscribe] Automated welcome email failed:", emailErr)
+    }
+
+    return ok({ message: "Successfully subscribed and welcome email sent", data })
   }
 }).POST
 

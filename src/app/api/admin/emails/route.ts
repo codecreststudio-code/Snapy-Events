@@ -170,5 +170,55 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true })
   }
 
+  if (action === "broadcast") {
+    const { template_id, subject, newsletter_title, newsletter_content, cta_text, cta_url } = body
+    if (!template_id) {
+      return NextResponse.json({ error: "template_id required for broadcast" }, { status: 400 })
+    }
+
+    // Fetch all active subscribers
+    const { data: subscribers, error: subError } = await sb
+      .from("blog_subscribers")
+      .select("email, name")
+      .eq("status", "active")
+
+    if (subError || !subscribers || subscribers.length === 0) {
+      return NextResponse.json({ error: subError?.message || "No active subscribers found" }, { status: 400 })
+    }
+
+    let successCount = 0
+    let failureCount = 0
+
+    // Dispatch email to all active subscribers
+    await Promise.all(
+      subscribers.map(async (sub) => {
+        const { error } = await sendEmail({
+          to: sub.email,
+          templateId: template_id,
+          subject: subject || undefined,
+          variables: {
+            subscriber_name: sub.name || "Valued Subscriber",
+            newsletter_title: newsletter_title || "Snapsy Events Newsletter",
+            newsletter_content: newsletter_content || "Check out our latest updates on Snapsy Events!",
+            cta_text: cta_text || "Explore Snapsy Features",
+            cta_url: cta_url || "https://snapsy-events.vercel.app/features",
+            unsubscribe_url: "https://snapsy-events.vercel.app/delete-data",
+          },
+          tags: [{ name: "type", value: "broadcast" }],
+        })
+        if (error) failureCount++
+        else successCount++
+      })
+    )
+
+    return NextResponse.json({
+      success: true,
+      message: `Broadcast completed: ${successCount} sent, ${failureCount} failed`,
+      total: subscribers.length,
+      successCount,
+      failureCount,
+    })
+  }
+
   return NextResponse.json({ error: "Unknown action" }, { status: 400 })
 }
