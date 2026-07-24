@@ -55,15 +55,19 @@ export function PublicNavbar() {
   return (
     <>
       <header className="pt-safe sticky top-0 z-50 w-full bg-surface-dark/85 backdrop-blur-xl border-b border-hairline-dark">
-        <div className="container relative mx-auto flex h-22 sm:h-24 items-center justify-between px-4 sm:px-6 lg:px-8 py-2">
+        <div className="container relative mx-auto grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center h-22 sm:h-24 px-4 sm:px-6 lg:px-8 py-2">
           {/* Left: Brand Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 justify-self-start">
             <Logo />
           </Link>
 
-          {/* Center: Nav Links */}
+          {/* Center: Nav Links — true page-center regardless of left/right
+              content width, since both flanking grid columns are equal
+              (minmax(0,1fr)); previously this used flex justify-between,
+              which centers the nav only in the *leftover* space, so it
+              skewed toward the logo since the actions cluster is wider. */}
           <nav
-            className="hidden md:flex items-center gap-1 rounded-full border border-hairline-dark bg-surface-card/60 p-1.5 backdrop-blur-md"
+            className="hidden md:flex items-center gap-1 rounded-full border border-hairline-dark bg-surface-card/60 p-1.5 backdrop-blur-md justify-self-center"
             onMouseLeave={() => setHoveredPath(null)}
           >
             {navLinks.map((item) => {
@@ -102,7 +106,7 @@ export function PublicNavbar() {
           </nav>
 
           {/* Right: Actions (Join Event + Sign In + Get Started) */}
-          <div className="hidden md:flex items-center gap-2.5 lg:gap-3.5 shrink-0 ml-auto">
+          <div className="hidden md:flex items-center gap-2.5 lg:gap-3.5 shrink-0 justify-self-end col-start-3">
             {/* 1. Join Event Button */}
             <button
               type="button"
@@ -123,7 +127,7 @@ export function PublicNavbar() {
 
             {/* 3. Get Started Button */}
             <Link href="/signup" className="shrink-0">
-              <Button className="rounded-full bg-white px-5 py-2 text-black text-xs font-semibold hover:bg-neutral-200 shadow-lg shadow-white/10 hover:scale-[1.01] active:scale-[0.99] transition-all">
+              <Button className="rounded-full bg-mauve px-5 py-2 text-[#1a1410] text-xs font-semibold hover:bg-mauve-strong shadow-lg shadow-mauve/20 hover:scale-[1.01] active:scale-[0.99] transition-all">
                 Get Started
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Button>
@@ -131,7 +135,7 @@ export function PublicNavbar() {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex md:hidden items-center gap-2 justify-self-end col-start-3">
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
