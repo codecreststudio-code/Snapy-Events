@@ -71,7 +71,7 @@ export default function EventsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["events"] })
       queryClient.invalidateQueries({ queryKey: ["events-list"] })
-      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-home"] })
       toast({ title: "Capsule restored", description: "Moved back to your active events." })
     },
     onError: (error: Error) => {

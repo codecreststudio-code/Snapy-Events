@@ -611,7 +611,7 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event-galleries", event?.id] })
       queryClient.invalidateQueries({ queryKey: ["galleries"] })
-      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-home"] })
       toast({ title: "Gallery deleted successfully" })
     },
     onError: (error: Error) => {
@@ -671,7 +671,7 @@ export default function EventGalleriesPage({ params }: { params: Promise<{ slug:
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ["event-galleries", event.id] })
             queryClient.invalidateQueries({ queryKey: ["galleries"] })
-            queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
+            queryClient.invalidateQueries({ queryKey: ["dashboard-home"] })
           }}
         />
       </div>

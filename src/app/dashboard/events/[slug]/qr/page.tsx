@@ -364,7 +364,7 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event-qrcodes", event?.id] })
       queryClient.invalidateQueries({ queryKey: ["all-qrcodes"] })
-      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-home"] })
       toast({ title: "QR code deleted" })
     },
     onError: (error: Error) => {
@@ -471,7 +471,7 @@ export default function QRManagementPage({ params }: { params: Promise<{ slug: s
             onSuccess={() => {
               queryClient.invalidateQueries({ queryKey: ["event-qrcodes", event.id] })
               queryClient.invalidateQueries({ queryKey: ["all-qrcodes"] })
-              queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
+              queryClient.invalidateQueries({ queryKey: ["dashboard-home"] })
             }}
           />
         )}

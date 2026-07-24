@@ -11,6 +11,7 @@ import { z } from "zod"
 import { defineRoute, ok, fail } from "@/lib/api/handler"
 import { createServiceClient } from "@/lib/supabase/server"
 import { hasGuestSessionFromRequest, isEventHost } from "@/lib/security/guest-session"
+import { API_RATE_LIMITS } from "@/lib/constants"
 
 const paramsSchema = z.object({ id: z.string().uuid() })
 const bodySchema = z.object({
@@ -21,6 +22,18 @@ export const POST = defineRoute<{ tags: string[] }, unknown, { id: string }>({
   method: "POST",
   body: bodySchema,
   requireAuth: false,
+  // NOTE on authorization: any checked-in guest for this event (not just the
+  // photo's uploader) can overwrite its tags — this mirrors the exact same
+  // event-level (not per-uploader) trust model already used by
+  // /api/photos/[id]/react (reactions/comments/voice replies), since there is
+  // no per-guest identity, only a per-event check-in cookie (see
+  // src/lib/security/guest-session.ts). Tightening this to "only the
+  // original uploader" would be a product decision (it would also require
+  // introducing guest identity, which doesn't exist today) and is out of
+  // scope here. What WAS a real gap — no rate limit at all on a
+  // requireAuth:false write endpoint, unlike every comparable guest-write
+  // route in this codebase — is fixed below.
+  rateLimit: { key: "photos:tag", limit: API_RATE_LIMITS.PHOTO_TAG, windowSeconds: 60 },
   handler: async ({ body, params, request }) => {
     const parsed = paramsSchema.safeParse(params)
     if (!parsed.success) return fail("VALIDATION_ERROR", "Invalid photo ID", 422)

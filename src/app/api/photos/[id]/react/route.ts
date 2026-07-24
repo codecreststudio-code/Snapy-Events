@@ -5,6 +5,7 @@ import { uploadFile } from "@/lib/integrations/storage"
 import { isDangerousExtension, isSvgContent, validateFile } from "@/lib/security/file-validation"
 import { MAX_FILE_SIZES, API_RATE_LIMITS } from "@/lib/constants"
 import { hasGuestSessionFromRequest, isEventHost } from "@/lib/security/guest-session"
+import { sendPushNotification } from "@/lib/integrations/push"
 
 // Public guest-facing engagement endpoint — emoji reactions, text comments,
 // and voice-note replies on a single photo/video/audio item. This route
@@ -35,7 +36,7 @@ async function loadPhoto(photoId: string) {
   const supabase = await createServiceClient()
   const { data: photo, error } = await supabase
     .from("photos")
-    .select("id, event_id, gallery_id, is_approved, event:events(host_id, settings)")
+    .select("id, event_id, gallery_id, is_approved, event:events(host_id, name, slug, settings)")
     .eq("id", photoId)
     .single()
   if (error || !photo) return null
@@ -44,7 +45,7 @@ async function loadPhoto(photoId: string) {
   const ev = Array.isArray(eventRel) ? eventRel[0] : eventRel
   const hostId = ev?.host_id as string | undefined
   const settings = (ev?.settings as Record<string, any>) || {}
-  return { ...photo, host_id: hostId, event_settings: settings }
+  return { ...photo, host_id: hostId, event_name: ev?.name as string | undefined, event_slug: ev?.slug as string | undefined, event_settings: settings }
 }
 
 async function isVisibleToGuest(photo: { is_approved: boolean | null; gallery_id: string }): Promise<boolean> {
@@ -146,6 +147,22 @@ export const POST = defineRoute<unknown, unknown, { id: string }>({
         p_comment: comment,
       })
       if (error) return fail("DB_ERROR", `Failed to save voice reply: ${error.message}`, 500)
+
+      // Notify the host — never when the host is the one replying (they can
+      // hit this same route from their own dashboard). Best-effort, mirrors
+      // the upload route's notification pattern (src/app/api/photos/upload/
+      // route.ts) — comment_received/photo_liked were defined in push.ts's
+      // NotificationType union but never actually triggered anywhere.
+      if (photo.host_id && !requesterIsHost) {
+        void sendPushNotification({
+          userId: photo.host_id,
+          type: "comment_received",
+          title: "New voice reply",
+          body: `${authorName} left a voice reply on ${photo.event_name || "your event"}.`,
+          data: photo.event_slug ? { url: `/dashboard/events/${photo.event_slug}` } : {},
+        })
+      }
+
       return ok({ comments })
     }
 
@@ -163,16 +180,33 @@ export const POST = defineRoute<unknown, unknown, { id: string }>({
         p_emoji: body.emoji,
       })
       if (error) return fail("DB_ERROR", `Failed to save reaction: ${error.message}`, 500)
+
+      // "heart" is treated as the canonical "like" for notification purposes
+      // (the other 4 emoji — fire/party/clap/adore — are also positive
+      // reactions, but heart is the one users conceptually mean by "liked").
+      // Notifying on every single emoji tap would be noisy for popular
+      // photos; this still closes the "never triggered" gap for photo_liked.
+      if (photo.host_id && !requesterIsHost && body.emoji === "heart") {
+        void sendPushNotification({
+          userId: photo.host_id,
+          type: "photo_liked",
+          title: "New like",
+          body: `Someone liked a photo in ${photo.event_name || "your event"}.`,
+          data: photo.event_slug ? { url: `/dashboard/events/${photo.event_slug}` } : {},
+        })
+      }
+
       return ok({ reactions })
     }
 
     if (typeof body.comment === "string") {
       const text = body.comment.trim().slice(0, MAX_COMMENT_LENGTH)
       if (!text) return fail("VALIDATION_ERROR", "Comment cannot be empty", 422)
+      const authorName = cleanAuthorName(body.author_name)
       const comment = {
         id: crypto.randomUUID(),
         type: "text",
-        author_name: cleanAuthorName(body.author_name),
+        author_name: authorName,
         comment: text,
         created_at: new Date().toISOString(),
       }
@@ -181,6 +215,17 @@ export const POST = defineRoute<unknown, unknown, { id: string }>({
         p_comment: comment,
       })
       if (error) return fail("DB_ERROR", `Failed to save comment: ${error.message}`, 500)
+
+      if (photo.host_id && !requesterIsHost) {
+        void sendPushNotification({
+          userId: photo.host_id,
+          type: "comment_received",
+          title: "New comment",
+          body: `${authorName} commented on a photo in ${photo.event_name || "your event"}.`,
+          data: photo.event_slug ? { url: `/dashboard/events/${photo.event_slug}` } : {},
+        })
+      }
+
       return ok({ comments })
     }
 

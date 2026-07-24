@@ -508,7 +508,7 @@ export function NewEventForm() {
       // once the cache's staleTime naturally expires.
       queryClient.invalidateQueries({ queryKey: ["events"] })
       queryClient.invalidateQueries({ queryKey: ["events-list"] })
-      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-home"] })
 
       // Move to Step 11
       setStep(11)

@@ -127,6 +127,10 @@ export const API_RATE_LIMITS = {
   // against brute-forcing a 6-char code, keyed by event+IP in guest.ts.
   GUEST_CHECKIN: Number(process.env.RATE_LIMIT_GUEST_CHECKIN) || 10, // 10 attempts per 10 min per event+IP
   PHOTO_REACT: Number(process.env.RATE_LIMIT_PHOTO_REACT) || 60, // 60 reactions/comments per min — generous since a live event can have bursts of guests reacting at once
+  // Auto Categorization tag writes (see /api/photos/[id]/tags) had no rate
+  // limit at all — an unauthenticated-adjacent surface (any checked-in guest
+  // in the event, requireAuth: false) that overwrites a photo's tags field.
+  PHOTO_TAG: Number(process.env.RATE_LIMIT_PHOTO_TAG) || 60, // 60 tag writes per min per IP
   NEWSLETTER_SUBSCRIBE: Number(process.env.RATE_LIMIT_NEWSLETTER_SUBSCRIBE) || 10, // 10 per min — public, unauthenticated upsert into blog_subscribers
 
   // 3. Authenticated User Routes

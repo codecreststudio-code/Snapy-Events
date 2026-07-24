@@ -18,7 +18,7 @@ import { fadeInUp, staggerContainer } from "@/lib/motion/tokens"
 // Supabase Realtime, search, type filters, date grouping, and pagination, and
 // renders as a dropdown on sm+ and a full-width bottom sheet below that,
 // following the same "two trees toggled by CSS breakpoint" split already used
-// by DashboardSidebar (desktop) vs MobileBottomNav (phone/tablet).
+// by DashboardSidebar (desktop) vs HomeBottomTabs (phone/tablet).
 
 export interface NotificationItem {
   id: string
@@ -509,7 +509,7 @@ export function NotificationCenter() {
         </DropdownMenu>
       </div>
 
-      {/* Phone/tablet: full-width bottom sheet, mirroring MobileBottomNav's overflow sheet */}
+      {/* Phone/tablet: full-width bottom sheet, mirroring HomeBottomTabs' overflow sheet */}
       <div className="sm:hidden">
         <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
           <DialogPrimitive.Trigger asChild>

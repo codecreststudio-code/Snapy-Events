@@ -33,9 +33,16 @@ export async function logGuestAccess(
   // reach directly. Read with the request-scoped client (not service-role):
   // events are already publicly SELECT-able via RLS (the public event page
   // reads this same row anonymously), so this doesn't need elevated access.
+  //
+  // NOTE: join_code is intentionally NOT selected here — see migration
+  // 0045_restrict_join_code_column.sql, which revoked column-level SELECT
+  // on join_code from anon/authenticated entirely (it was previously
+  // readable by anyone for any published event via a direct Supabase REST
+  // call, defeating this exact check). The comparison below now goes
+  // through the verify_event_join_code() SECURITY DEFINER RPC instead.
   const { data: eventRow, error: eventErr } = await supabase
     .from("events")
-    .select("join_code, settings, name, slug, host_id, status")
+    .select("settings, name, slug, host_id, status")
     .eq("id", eventId)
     .single()
 
@@ -75,10 +82,12 @@ export async function logGuestAccess(
       return { success: false, error: "Too many attempts. Please wait a few minutes and try again." }
     }
 
-    const storedCode = typeof eventRow.join_code === "string" ? normalizeCode(eventRow.join_code) : null
     const submittedCode = joinCode ? normalizeCode(joinCode) : null
+    const { data: codeMatches } = submittedCode
+      ? await supabase.rpc("verify_event_join_code", { p_event_id: eventId, p_code: submittedCode })
+      : { data: false }
 
-    if (!storedCode || !submittedCode || submittedCode !== storedCode) {
+    if (!submittedCode || !codeMatches) {
       return { success: false, error: "That event code doesn't match. Double-check it with your host and try again." }
     }
   }

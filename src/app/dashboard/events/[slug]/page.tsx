@@ -143,15 +143,31 @@ function forceDownloadUrl(url: string, filename: string): string {
 // Fetch event details
 async function getEvent(slug: string, orgId: string): Promise<Event> {
   const supabase = createClient()
+  // NOTE: explicit column list, NOT select("*") — join_code is intentionally
+  // excluded (see migration 0045_restrict_join_code_column.sql). Column-level
+  // SELECT on join_code was revoked from the authenticated role entirely
+  // (Postgres RLS can't restrict individual columns within a row-visibility
+  // policy, only whole rows — the old `select("*")` here relied on join_code
+  // being world-readable for any published event, which is exactly the leak
+  // 0045 closes). Fetched separately below via a SECURITY DEFINER RPC that
+  // re-verifies host ownership itself before returning it.
   const { data, error } = await supabase
     .from("events")
-    .select("*")
+    .select("id, host_id, name, slug, description, event_type, event_date, end_date, venue, timezone, cover_image_url, settings, status, view_count, upload_count, created_at, updated_at")
     .eq("slug", slug)
     .eq("host_id", orgId)
     .single()
 
   if (error) throw error
-  return data
+
+  const { data: joinCode } = await supabase.rpc("get_event_join_code", { p_event_id: data.id })
+
+  // user_id is a legacy field on the Event type from before the
+  // organizations->host_id migration (0007_remove_organizations.sql) — the
+  // events table itself has no such column anymore, and nothing in the
+  // codebase reads Event.user_id, so this is just satisfying the type with
+  // its host_id alias rather than fetching a real, separate value.
+  return { ...data, user_id: data.host_id, join_code: (joinCode as string | null) ?? null } as Event
 }
 
 // Fetch uploaded photos for event
@@ -690,7 +706,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       // keep showing the pre-edit values until a hard refresh.
       queryClient.invalidateQueries({ queryKey: ["events"] })
       queryClient.invalidateQueries({ queryKey: ["events-list"] })
-      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-home"] })
       toast({ title: "Memory settings saved" })
       setIsDrawerOpen(false)
     },
@@ -706,7 +722,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
       // render the just-deleted event from its stale cache after redirect.
       queryClient.invalidateQueries({ queryKey: ["events"] })
       queryClient.invalidateQueries({ queryKey: ["events-list"] })
-      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-home"] })
       queryClient.invalidateQueries({ queryKey: ["galleries"] })
       queryClient.invalidateQueries({ queryKey: ["all-qrcodes"] })
       toast({ title: "Capsule deleted successfully" })
