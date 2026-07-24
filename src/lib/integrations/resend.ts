@@ -107,6 +107,38 @@ export async function getEmailSettings(): Promise<EmailSettings> {
   }
 }
 
+// 1b. Fetch site branding from platform_settings (social links, footer credits, custom tags)
+export async function getSiteBranding(): Promise<{
+  social_links: Record<string, string>
+  footer_credits: { built_by: string; built_by_url: string; powered_by: string }
+  custom_tags: { label: string; url: string }[]
+}> {
+  const DEFAULTS = {
+    social_links: {},
+    footer_credits: { built_by: "CodeCrest_Studio", built_by_url: "https://codecreststudio.vercel.app/", powered_by: "Snapsy Events" },
+    custom_tags: [],
+  }
+  try {
+    const sb = await adminDb()
+    const { data } = await sb
+      .from("platform_settings")
+      .select("key, value")
+      .in("key", ["social_links", "footer_credits", "custom_tags"])
+    if (!data) return DEFAULTS
+    const map = data.reduce((acc, row) => {
+      acc[row.key] = row.value
+      return acc
+    }, {} as Record<string, any>)
+    return {
+      social_links: map.social_links ?? DEFAULTS.social_links,
+      footer_credits: map.footer_credits ?? DEFAULTS.footer_credits,
+      custom_tags: map.custom_tags ?? DEFAULTS.custom_tags,
+    }
+  } catch {
+    return DEFAULTS
+  }
+}
+
 // 2. Fetch Template from DB or return default fallback
 export async function getEmailTemplate(templateId: string) {
   try {
@@ -168,29 +200,51 @@ export async function sendEmail(msg: EmailMessage): Promise<{ id: string | null;
     }
   }
 
+
+
   // Inject the hero banner + footer if HTML contains placeholders or does not contain layout
   if (html && !html.includes("snapsy-wrapper")) {
-    // Per-template subtitle shown under the wordmark in the hero — mirrors
-    // the format the user liked from Supabase's own password-reset email
-    // (gradient banner, bold wordmark, short subtitle underneath). Falls
-    // back to a generic tagline for any custom/unknown template.
     const heroSubtitle = HERO_SUBTITLES[msg.templateId ?? ""] ?? "Event Photography Platform"
+    const siteBranding = await getSiteBranding()
 
-    // Deliberately a text wordmark, not the logo <img>: this session's own
-    // debugging showed remote images are the least reliable part of an
-    // email (blocked in spam, stripped by some clients, slow to fetch) —
-    // a bold text mark on the gradient always renders, everywhere, instantly.
+    const activeSocials = Object.entries(siteBranding.social_links || {}).filter(([, url]) => url?.trim())
+    const socialLinksHtml = activeSocials.length > 0
+      ? `<div style="margin: 12px 0 10px; font-size: 11px;">
+          ${activeSocials.map(([platform, url]) => `<a href="${url}" target="_blank" style="color: #b89252; text-decoration: none; margin: 0 6px; font-weight: 600;">${platform.charAt(0).toUpperCase() + platform.slice(1)}</a>`).join(" • ")}
+        </div>`
+      : ""
+
+    const customTagsHtml = (siteBranding.custom_tags || []).length > 0
+      ? `<div style="margin: 10px 0; font-size: 10px; color: #8c8275;">
+          ${siteBranding.custom_tags.map(t => `<span style="background-color: #f3e8d2; color: #645a4a; padding: 2px 8px; border-radius: 12px; margin: 0 3px; font-size: 10px;">${t.label}</span>`).join(" ")}
+        </div>`
+      : ""
+
+    const builtByCredit = siteBranding.footer_credits?.built_by
+      ? `<div style="margin-top: 10px; font-size: 11px; color: #8c8275;">
+          Built with <span style="color: #e11d48;">♥</span> by ${siteBranding.footer_credits.built_by_url ? `<a href="${siteBranding.footer_credits.built_by_url}" target="_blank" style="color: #c9a96e; text-decoration: underline; font-weight: 600;">${siteBranding.footer_credits.built_by}</a>` : `<span style="color: #c9a96e; font-weight: 600;">${siteBranding.footer_credits.built_by}</span>`}
+        </div>`
+      : ""
+
     const footerHtml = `<div style="padding: 24px 30px 28px; border-top: 1px solid #f3e8d2; text-align: center; background-color: #fdfcf9;">
       <p style="font-size: 13px; font-weight: 700; color: #b89252; margin: 0 0 8px;">Every Guest. Every Moment. One Shared Memory.</p>
-      ${settings.company_address ? `<p style="font-size: 11px; color: #8c8275; margin: 0 0 4px;">${settings.company_address}</p>` : ""}
-      <p style="font-size: 11px; color: #8c8275; margin: 0;">${settings.footer_text}</p>
+      ${socialLinksHtml}
+      ${customTagsHtml}
+      ${builtByCredit}
+      ${settings.company_address ? `<p style="font-size: 11px; color: #8c8275; margin: 6px 0 4px;">${settings.company_address}</p>` : ""}
+      <p style="font-size: 11px; color: #8c8275; margin: 6px 0 0;">${settings.footer_text}</p>
     </div>`
+
+    const logoUrl = settings.logo_url || "https://snapsy-events.vercel.app/logo-icon-transparent.png"
 
     html = `<div class="snapsy-wrapper" style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1c1a17; background-color: #f6f4f0; padding: 40px 15px;">
       <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e8e2d5; box-shadow: 0 10px 30px rgba(0,0,0,0.06);">
-        <div style="background: #141210; border-top: 4px solid #c9a96e; padding: 36px 30px; text-align: center;">
-          <div style="font-size: 22px; font-weight: 800; color: #c9a96e; letter-spacing: 1.5px; text-transform: uppercase;">${settings.sender_name}</div>
-          <div style="font-size: 11px; font-weight: 600; color: #dfc594; margin-top: 6px; text-transform: uppercase; letter-spacing: 1.5px;">${heroSubtitle}</div>
+        <div style="background: #141210; border-top: 4px solid #c9a96e; padding: 32px 30px; text-align: center;">
+          <div style="margin-bottom: 10px;">
+            <img src="${logoUrl}" alt="${settings.sender_name}" style="height: 48px; width: auto; max-height: 48px; display: inline-block; vertical-align: middle;" />
+          </div>
+          <div style="font-size: 20px; font-weight: 800; color: #c9a96e; letter-spacing: 1.5px; text-transform: uppercase;">${settings.sender_name}</div>
+          <div style="font-size: 11px; font-weight: 600; color: #dfc594; margin-top: 4px; text-transform: uppercase; letter-spacing: 1.5px;">${heroSubtitle}</div>
         </div>
         <div style="padding: 36px 32px; background-color: #ffffff;">
           ${html}
