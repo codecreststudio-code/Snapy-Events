@@ -124,8 +124,9 @@ export default function AdminBlogPage() {
       const res = await fetch(`/api/blog/posts?${params}`)
       if (!res.ok) throw new Error("Failed to load posts")
       const json = await res.json()
-      setPosts(json.posts ?? [])
-      setTotal(json.total ?? 0)
+      const data = json.data ?? json
+      setPosts(data.posts ?? [])
+      setTotal(data.total ?? 0)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Unknown error")
     } finally {
@@ -137,7 +138,8 @@ export default function AdminBlogPage() {
     try {
       const res = await fetch("/api/blog/categories")
       const json = await res.json()
-      setCategories(json.categories ?? [])
+      const data = json.data ?? json
+      setCategories(data.categories ?? [])
     } catch (_) {}
   }, [])
 
@@ -148,7 +150,8 @@ export default function AdminBlogPage() {
       const res = await fetch("/api/blog/subscribe")
       if (!res.ok) throw new Error("Failed to load subscribers")
       const json = await res.json()
-      setSubscribers(json.subscribers ?? [])
+      const data = json.data ?? json
+      setSubscribers(data.subscribers ?? [])
     } catch (e: unknown) {
       setSubscribersError(e instanceof Error ? e.message : "Unknown error")
     } finally {
